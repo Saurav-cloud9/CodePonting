@@ -1,5 +1,5 @@
 """
-MA BOUNCE BOT v0.2 - WITH ORDER PLACEMENT
+MA BOUNCE BOT v0.3 - WITH ORDER PLACEMENT
 ==========================================
 Scans watchlist for MA bounce signals and places automatic orders via Upstox API
 
