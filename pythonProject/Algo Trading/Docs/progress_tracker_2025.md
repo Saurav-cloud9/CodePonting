@@ -289,3 +289,47 @@
 - Understood time decay magic and breakeven calculations for credit spreads
 - Renamed portfolio to RKO_Bot (Roti Kapda Options / Randy Orton reference)
 - Confirmed Monday plan: Launch RKO at 9:30 AM, then resume MA Bounce Bot v0.6 Platinum
+
+### Mon, Dec 29, 2025
+- Tested MA Bounce Bot v0.6 live with 5 orders: PNB hit target (+₹3.15), manually exited 4 others
+- Fixed critical bugs: entry price API issues, missing exit monitoring function, SELL order display
+- Upgraded to Bot v0.7 - Game Changer with capital caps (₹1000 max), 3:15 PM EOD auto-exit, professional logging
+- Fixed datetime deprecation warning and updated all branding to v0.7 - Game Changer
+- Confirmed RKO Bot ready: 150 COALINDIA pledged, ₹64k total margin, ₹20k buffer for tomorrow's launch
+- Verified Indian market holidays: Dec 31 & Jan 1 are TRADING DAYS (not holidays)
+- Discovered NIFTY expiry is currently THURSDAY (Dec 2024), will change to TUESDAY later in 2025
+- Enhanced daily_report generator with 14 columns and target/SL status for all orders
+
+### Tue, Dec 30, 2025 - TODOS
+- [ ] Test Bot v0.7 EOD auto-exit at 3:15 PM live
+- [ ] Validate capital caps skip expensive stocks
+- [ ] Verify bot_activity.log file creation
+- [ ] Place RKO Bot first order (1 lot Bull Put Spread) - monitor & learn
+- [ ] Check VIX before RKO entry (ideal <15)
+- [ ] Run check_order_source_info.py to detect order source
+- [ ] Collect EOD analysis: Why PNB won vs other 4 trades
+- [ ] Confirm NIFTY expiry day for current week (Thursday or Tuesday?)
+
+### Tue, Dec 30, 2025
+- Started with RKO Bot prep, switched focus to MA Bounce Bot v0.7 testing
+- Bot v0.7 ran live: 8 trades, 50% win rate, ₹8.63 net profit (best day!)
+- Analyzed 8 contract notes (Dec 5-30): 23 total trades, 34.8% win rate, +₹7.30 cumulative
+- Decoded contract note sign convention: negative = profit received, positive = loss owed
+- Created master_trading_report.csv combining all historical trades with Qty column
+- Designed persistent logging strategy: date-based files, append mode survives bot restarts
+- Identified critical CSV columns for ML: Entry_Time_Category, MA20_Distance, Volume_Ratio, Sector, Target_Hit
+- Clarified file workflow: all logs generate in Downloads folder, copy to organized storage EOD
+- Setup extra usage billing: $5 credit purchased, auto-reload configured, unused credit carries forward
+- Optimized user preferences for 40-60% token savings via concise responses
+
+### Wed, Dec 31, 2025 - TODOS
+- [ ] 9:00 AM: Update ACCESS_TOKEN in bot
+- [ ] 9:15 AM: Launch Bot v0.7 with enhanced logging (Entry_Source, Exit_Source, Hold_Duration, MA20_Distance, Volume_Ratio, Sector)
+- [ ] Implement date-based log files: bot_activity_YYYYMMDD.log, trades_log_YYYYMMDD.csv, signal_log_YYYYMMDD.csv
+- [ ] Add dual logging: trades_log_YYYYMMDD.csv (daily) + trades_log_master.csv (cumulative)
+- [ ] Replace all print() with logging.info/warning/error for persistent logs
+- [ ] Test MCP datetime server integration (if needed for bot timezone issues)
+- [ ] 3:30 PM: Verify all log files created and populated correctly
+- [ ] EOD: Copy all files to D:/Trading/Algo_Bot_Data/2025/December/31/
+- [ ] Verify first row of trades_log created at first exit
+- [ ] Start 700-trade data collection journey (Day 2: target 8-10 trades)

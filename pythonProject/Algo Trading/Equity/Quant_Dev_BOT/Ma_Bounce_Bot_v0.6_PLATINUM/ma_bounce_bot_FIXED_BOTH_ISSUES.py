@@ -19,9 +19,9 @@ Two trading strategies based on time of day:
 """
 
 # ============================================
-# MONITOR-ONLY MODE FLAG
+# LIVE TRADING MODE
 # ============================================
-MONITOR_ONLY = True  # Set to False to enable actual trading
+MONITOR_ONLY = False  # LIVE TRADING ENABLED - Real orders will be placed!
 
 import requests
 import json
@@ -40,30 +40,27 @@ import csv  # For signal logging
 # Upstox API Credentials
 API_KEY = "18185106-6257-4a85-a84a-2ea314f91927"
 API_SECRET = "15m0va42ni"
-ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiJFRTY4MTkiLCJqdGkiOiI2OTRkY2ZmYzNlZDdhNDU2NmM3NGE0ODIiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc2NjcwNzE5NiwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzY2Nzg2NDAwfQ.gvlbJFWY94keKrs6AABK4EITgTQ7sFXx-PPiDnoBCio"
+ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiJFRTY4MTkiLCJqdGkiOiI2OTUyMDdhMjZhNjY4YjU1YTdmMWQzZjQiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc2Njk4MzU4NiwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzY3MDQ1NjAwfQ.RjiuurlPIdTNjuRP13brYxZwKbGUUWd-mkQbth3tJ_4"
 
-# Watchlist
+# Watchlist - Cleaned for intraday trading only (removed BE/ASM/suspended stocks)
+# REMOVED: IRFC (data discrepancy), IDFC (duplicate), JPASSOCIAT (BE segment), 
+#          PCJEWELLER (ASM surveillance), RCOM (trading suspended)
 WATCHLIST = {
     "YESBANK": "NSE_EQ|INE528G01035",
     "SUZLON": "NSE_EQ|INE040H01021",
     "RPOWER": "NSE_EQ|INE614G01033",
-    "IRFC": "NSE_EQ|INE053F01010",
-    "IDFC": "NSE_EQ|INE092T01019",
-    "IDFCFIRSTB": "NSE_EQ|INE092T01019",  # Same as IDFC (Upstox symbol)
+    "IDFCFIRSTB": "NSE_EQ|INE092T01019",
     "SAIL": "NSE_EQ|INE114A01011",
     "PNB": "NSE_EQ|INE160A01022",
     "NATIONALUM": "NSE_EQ|INE139A01034",
     "TATASTEEL": "NSE_EQ|INE081A01020",
     "IDEA": "NSE_EQ|INE669E01016",
     "ZEEL": "NSE_EQ|INE256A01028",
-    "JPASSOCIAT": "NSE_EQ|INE455F01025",
     "CANBK": "NSE_EQ|INE476A01022",
     "NMDC": "NSE_EQ|INE584A01023",
     "IOC": "NSE_EQ|INE242A01010",
     "MANAPPURAM": "NSE_EQ|INE522D01027",
     "SOUTHBANK": "NSE_EQ|INE683A01023",
-    "PCJEWELLER": "NSE_EQ|INE785M01013",
-    "RCOM": "NSE_EQ|INE330H01018",
 }
 
 # Bot parameters
@@ -254,7 +251,7 @@ def get_strategy_params(strategy):
         return {
             'target_pct': 2.0,
             'stoploss_pct': 1.0,
-            'order_type': 'LIMIT'
+            'order_type': 'MARKET'  # Changed from LIMIT - bounce needs immediate execution
         }
     elif strategy == "LATE_SCALP":
         return {
@@ -423,6 +420,12 @@ def get_historical_candles_from_date(instrument, from_date, num_candles):
         print(f"⚠️  Historical API error: {e}")
         return []
 
+def get_historical_candles(instrument, num_candles=10):
+    """Wrapper function to get recent historical candles"""
+    # Get candles from last 2 days to be safe
+    from_date = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
+    return get_historical_candles_from_date(instrument, from_date, num_candles)
+
 def get_candles_platinum(instrument, num_minutes=100):
     """
     🔷 PLATINUM CANDLE ENGINE 🔷
@@ -555,7 +558,11 @@ def get_ma20(instrument):
         last_20_closes = [c['close'] for c in candles_5min[-20:]]
         ma20 = round(sum(last_20_closes) / 20, 2)
         
-        print(f"   💎 MA20 = ₹{ma20:.2f}\n")
+        # Get timestamp of the latest candle for reference
+        latest_candle_time = candles_5min[-1]['timestamp']
+        candle_time_str = latest_candle_time.strftime("%I:%M %p") if isinstance(latest_candle_time, datetime) else str(latest_candle_time)
+        
+        print(f"   💎 MA20 @ {candle_time_str} = ₹{ma20:.2f}\n")
         
         return ma20
     except Exception as e:
@@ -634,8 +641,74 @@ def add_position_to_dashboard(symbol, qty, entry_price, target_pct, sl_pct, stra
     }
     dashboard_metrics["trades_today"] += 1
 
+def place_exit_order(symbol, instrument, quantity, current_price, exit_type):
+    """
+    Place SELL order to exit position
+    
+    Args:
+        symbol: Stock symbol
+        instrument: Upstox instrument key
+        quantity: Number of shares to sell
+        current_price: Current market price
+        exit_type: "TARGET" or "STOPLOSS"
+    
+    Returns:
+        Order response dict or None if failed
+    """
+    try:
+        url = f"{BASE_URL}/order/place"
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {ACCESS_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "quantity": quantity,
+            "product": "I",  # Intraday
+            "validity": "DAY",
+            "price": 0,  # Not used for MARKET orders
+            "tag": "exit_order",
+            "instrument_token": instrument,
+            "order_type": "MARKET",  # Always use MARKET for exits
+            "transaction_type": "SELL",
+            "disclosed_quantity": 0,
+            "trigger_price": 0,
+            "is_amo": False
+        }
+        
+        print(f"\n{'='*60}")
+        print(f"📤 PLACING EXIT ORDER ({exit_type}): {symbol}")
+        print(f"   Quantity: {quantity}")
+        print(f"   Price: ₹{current_price:.2f} (MARKET)")
+        print(f"   Type: SELL")
+        print(f"{'='*60}\n")
+        
+        response = requests.post(url, headers=headers, json=payload)
+        
+        if response.status_code == 200:
+            result = response.json()
+            order_id = result.get('data', {}).get('order_id', 'Unknown')
+            print(f"✅ EXIT ORDER PLACED SUCCESSFULLY!")
+            print(f"   Order ID: {order_id}")
+            print(f"   Symbol: {symbol}")
+            print(f"   Exit Type: {exit_type}\n")
+            return result
+        else:
+            print(f"❌ EXIT ORDER FAILED!")
+            print(f"   Status: {response.status_code}")
+            print(f"   Error: {response.text}\n")
+            return None
+            
+    except Exception as e:
+        print(f"❌ Exception placing exit order: {e}\n")
+        return None
+
 def update_position_prices():
-    """Update current prices for all tracked positions"""
+    """Update current prices for all tracked positions and auto-exit if needed"""
+    print("\n🔍 CHECKING EXIT CONDITIONS FOR ALL POSITIONS:")
+    print("-" * 60)
+    
     for symbol, pos in list(dashboard_metrics["positions"].items()):
         instrument = WATCHLIST.get(symbol)
         if instrument:
@@ -646,16 +719,60 @@ def update_position_prices():
 
                 # Check for target/SL hit
                 pnl_pct = ((current_price - pos["entry"]) / pos["entry"]) * 100
+                
+                # Calculate distance to target/SL
+                target_price = pos["entry"] * (1 + pos["target_pct"] / 100)
+                sl_price = pos["entry"] * (1 - pos["sl_pct"] / 100)
+                distance_to_target = ((target_price - current_price) / pos["entry"]) * 100
+                distance_to_sl = ((current_price - sl_price) / pos["entry"]) * 100
+                
+                # Print detailed status
+                print(f"\n📊 {symbol}:")
+                print(f"   Entry: ₹{pos['entry']:.2f} | Current: ₹{current_price:.2f} | P&L: {pnl_pct:+.2f}%")
+                print(f"   Target: ₹{target_price:.2f} ({pos['target_pct']}%) | Distance: {distance_to_target:.2f}%")
+                print(f"   Stop-Loss: ₹{sl_price:.2f} ({pos['sl_pct']}%) | Distance: {distance_to_sl:+.2f}%")
+                
+                # TARGET HIT - Place automatic SELL order
                 if pnl_pct >= pos["target_pct"]:
+                    print(f"   ✅ TARGET REACHED! Placing SELL order...")
                     log_with_color(f"🎯 TARGET HIT: {symbol} at ₹{current_price:.2f} (+{pnl_pct:.2f}%)", "SUCCESS")
-                    dashboard_metrics["wins"] += 1
-                    dashboard_metrics["pnl"] += pos["pnl"]
-                    del dashboard_metrics["positions"][symbol]
+                    
+                    # Place SELL order to exit position
+                    exit_result = place_exit_order(symbol, instrument, pos["qty"], current_price, "TARGET")
+                    
+                    if exit_result:
+                        dashboard_metrics["wins"] += 1
+                        dashboard_metrics["pnl"] += pos["pnl"]
+                        del dashboard_metrics["positions"][symbol]
+                        log_with_color(f"✅ Exit order placed for {symbol}", "SUCCESS")
+                    else:
+                        log_with_color(f"⚠️  Failed to place exit order for {symbol}", "WARNING")
+                
+                # STOP-LOSS HIT - Place automatic SELL order
                 elif pnl_pct <= -pos["sl_pct"]:
+                    print(f"   ❌ STOP-LOSS HIT! Placing SELL order...")
                     log_with_color(f"🛑 STOP-LOSS HIT: {symbol} at ₹{current_price:.2f} ({pnl_pct:.2f}%)", "ERROR")
-                    dashboard_metrics["losses"] += 1
-                    dashboard_metrics["pnl"] += pos["pnl"]
-                    del dashboard_metrics["positions"][symbol]
+                    
+                    # Place SELL order to exit position
+                    exit_result = place_exit_order(symbol, instrument, pos["qty"], current_price, "STOPLOSS")
+                    
+                    if exit_result:
+                        dashboard_metrics["losses"] += 1
+                        dashboard_metrics["pnl"] += pos["pnl"]
+                        del dashboard_metrics["positions"][symbol]
+                        log_with_color(f"✅ Exit order placed for {symbol}", "SUCCESS")
+                    else:
+                        log_with_color(f"⚠️  Failed to place exit order for {symbol}", "WARNING")
+                else:
+                    # Neither target nor SL hit
+                    if pnl_pct > 0:
+                        print(f"   ⏳ IN PROFIT - Holding for target...")
+                    elif pnl_pct < 0:
+                        print(f"   ⏳ IN LOSS - Monitoring stop-loss...")
+                    else:
+                        print(f"   ⏳ AT BREAKEVEN - Holding...")
+    
+    print("-" * 60)
 
 # ============================================
 # SIGNAL LOGGING
@@ -858,13 +975,18 @@ def get_existing_positions():
                             print(f"⚠️  {trading_symbol} not in watchlist, skipping dashboard tracking")
                             continue
 
-                        # Fetch current live price
-                        current_price = get_live_price(instrument)
-                        if not current_price:
-                            print(f"⚠️  Could not fetch price for {trading_symbol}")
-                            continue
+                        # Get ACTUAL buy price from position (not current price!)
+                        buy_price = position.get("buy_price") or position.get("day_buy_price") or position.get("average_price")
+                        
+                        if not buy_price or buy_price == 0:
+                            # Fallback to current price only if buy price not available
+                            current_price = get_live_price(instrument)
+                            if not current_price:
+                                print(f"⚠️  Could not fetch price for {trading_symbol}")
+                                continue
+                            buy_price = current_price
+                            print(f"⚠️  Using current price as entry for {trading_symbol} (buy_price not in API)")
 
-                        # Use current price as entry (since API returns 0)
                         # Determine strategy based on time
                         current_strategy = get_current_strategy()
                         if current_strategy in ["MORNING_BOUNCE", "LATE_SCALP"]:
@@ -873,12 +995,12 @@ def get_existing_positions():
                                 add_position_to_dashboard(
                                     trading_symbol,
                                     qty,
-                                    current_price,  # Use current as entry
+                                    buy_price,  # Use ACTUAL buy price
                                     params['target_pct'],
                                     params['stoploss_pct'],
                                     current_strategy
                                 )
-                                print(f"✅ Loaded {trading_symbol}: {qty}@₹{current_price:.2f}")
+                                print(f"✅ Loaded {trading_symbol}: {qty}@₹{buy_price:.2f}")
 
             return active_symbols
         return []
@@ -918,13 +1040,31 @@ def run_bot():
         print("✨ PLATINUM CANDLE ENGINE: 100% accurate signals")
     print("Strategies:")
     print("  🌅 MORNING BOUNCE (9:15 AM - 1:30 PM)")
-    print("     - MA bounce detection, LIMIT orders")
+    print("     - MA bounce detection, MARKET orders")
     print("     - 2% target, 1% stop-loss")
     print()
     print("  🌆 LATE SCALP (2:30 PM - 3:15 PM)")
     print("     - Volume/volatility scalping, MARKET orders")
     print("     - 0.5% target, 0.3% stop-loss")
     print("=" * 60 + "\n")
+
+    # TOKEN CHECK PROMPT
+    print("⚠️  CRITICAL: Access tokens expire at 3:30 PM daily!")
+    print()
+    token_check = input("Have you updated ACCESS_TOKEN for today? (yes/no): ").strip().lower()
+    
+    if token_check not in ['yes', 'y']:
+        print("\n" + "=" * 60)
+        print("❌ PLEASE UPDATE ACCESS_TOKEN FIRST!")
+        print("=" * 60)
+        print("1. Get new token from Upstox dashboard")
+        print("2. Update ACCESS_TOKEN variable (line 43)")
+        print("3. Restart bot")
+        print("=" * 60 + "\n")
+        input("Press Enter to exit...")
+        return
+    
+    print()
 
     print("🔍 Checking for existing positions...")
     active_positions = get_existing_positions()
@@ -946,8 +1086,15 @@ def run_bot():
                 break
 
             elif strategy == "NO_TRADE":
-                print("⏸️  Transition period (1:30 PM - 2:30 PM). Pausing...")
-                time.sleep(300)
+                print("⏸️  Transition period (1:30 PM - 2:30 PM). Pausing new signals...")
+                print("📊 Still monitoring existing positions for exits...")
+                
+                # CRITICAL: Still monitor positions during transition!
+                if dashboard_metrics["positions"]:
+                    update_position_prices()
+                    update_dashboard()
+                
+                time.sleep(60)  # Check every minute during transition
                 continue
 
             current_time = datetime.now().strftime("%H:%M:%S")
@@ -960,6 +1107,16 @@ def run_bot():
             if dashboard_metrics["positions"]:
                 update_position_prices()
                 update_dashboard()
+
+            # Check if we've hit max positions
+            current_position_count = len(dashboard_metrics["positions"])
+            MAX_POSITIONS = 5
+            
+            if current_position_count >= MAX_POSITIONS:
+                print(f"\n⚠️  MAX POSITIONS REACHED ({current_position_count}/{MAX_POSITIONS})")
+                print("   Skipping new signals, monitoring exits only...")
+                time.sleep(60)  # Check every minute
+                continue
 
             # Scan for new signals
             for symbol, instrument in WATCHLIST.items():
@@ -988,39 +1145,25 @@ def run_bot():
                             if order_result:
                                 print(f"✅ Signal logged successfully")
                     else:
-                        # Live trading mode - beep and confirm
+                        # Live trading mode - simple confirmation
                         dashboard_metrics["signals_today"] += 1
                         
-                        print("⚠️  Press ENTER to acknowledge and proceed with order")
-                        print("    (Auto-stops after 3 beeps / 15 seconds)")
+                        print("⚠️  SIGNAL DETECTED - Review and confirm:")
+                        print(f"    Symbol: {symbol}")
+                        print(f"    Strategy: {strategy}")
+                        print(f"    Press ENTER to place order (or type 'skip' to ignore)")
                         print("=" * 60 + "\n")
 
-                        max_beeps = 3
-                        acknowledged = False
-
-                        for beep_num in range(1, max_beeps + 1):
-                            winsound.Beep(800, 200)
-                            time.sleep(0.1)
-                            winsound.Beep(1000, 200)
-                            time.sleep(0.1)
-                            winsound.Beep(1200, 400)
-
-                            print(f"🔔 Alert #{beep_num}/3 - Press ENTER to stop beeping...")
-
-                            for _ in range(50):
-                                if msvcrt.kbhit():
-                                    key = msvcrt.getch()
-                                    if key in [b'\r', b'\n']:
-                                        print("\n✅ Alert acknowledged!\n")
-                                        acknowledged = True
-                                        break
-                                time.sleep(0.1)
-
-                            if acknowledged:
-                                break
-
-                        if not acknowledged:
-                            print("\n⏰ Auto-acknowledged after 15 seconds\n")
+                        # Wait for user input
+                        try:
+                            user_input = input().strip().lower()
+                            if user_input == 'skip':
+                                print("⏭️  Signal skipped by user\n")
+                                continue
+                            print("✅ Order confirmed, proceeding...\n")
+                        except KeyboardInterrupt:
+                            print("\n⏭️  Signal skipped (Ctrl+C)\n")
+                            continue
 
                         live_price = get_live_price(instrument)
                         if live_price:

@@ -1,0 +1,1072 @@
+2025-12-31 10:40:14,921 | INFO | ================================================================================
+2025-12-31 10:40:14,921 | INFO | BOT v0.8 STARTED - 2025-12-31 10:40:14
+2025-12-31 10:40:14,921 | INFO | ================================================================================
+2025-12-31 10:40:14,921 | INFO | Bot v0.8 starting...
+2025-12-31 10:40:14,921 | INFO | Strategy: MORNING BOUNCE ONLY (9:15 AM - 1:30 PM)
+2025-12-31 10:40:14,921 | INFO | Syncing positions from Upstox...
+2025-12-31 10:40:15,425 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:15,427 | WARNING | Could not fetch Upstox positions
+2025-12-31 10:40:15,448 | INFO | Scanning YESBANK...
+2025-12-31 10:40:16,212 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:16,213 | ERROR | Failed to fetch intraday data for NSE_EQ|INE528G01035
+2025-12-31 10:40:16,571 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:16,572 | ERROR | Failed to fetch LTP for NSE_EQ|INE528G01035
+2025-12-31 10:40:16,572 | INFO |   Could not fetch current price
+2025-12-31 10:40:16,572 | INFO | Scanning SUZLON...
+2025-12-31 10:40:17,341 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:17,343 | ERROR | Failed to fetch intraday data for NSE_EQ|INE040H01021
+2025-12-31 10:40:17,711 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:17,711 | ERROR | Failed to fetch LTP for NSE_EQ|INE040H01021
+2025-12-31 10:40:17,712 | INFO |   Could not fetch current price
+2025-12-31 10:40:17,712 | INFO | Scanning RPOWER...
+2025-12-31 10:40:19,201 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:19,202 | ERROR | Failed to fetch intraday data for NSE_EQ|INE614G01033
+2025-12-31 10:40:19,574 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:19,575 | ERROR | Failed to fetch LTP for NSE_EQ|INE614G01033
+2025-12-31 10:40:19,575 | INFO |   Could not fetch current price
+2025-12-31 10:40:19,575 | INFO | Scanning IDFCFIRSTB...
+2025-12-31 10:40:20,352 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:20,353 | ERROR | Failed to fetch intraday data for NSE_EQ|INE092T01019
+2025-12-31 10:40:20,741 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:20,742 | ERROR | Failed to fetch LTP for NSE_EQ|INE092T01019
+2025-12-31 10:40:20,742 | INFO |   Could not fetch current price
+2025-12-31 10:40:20,742 | INFO | Scanning SAIL...
+2025-12-31 10:40:21,489 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:21,490 | ERROR | Failed to fetch intraday data for NSE_EQ|INE114A01011
+2025-12-31 10:40:21,870 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:21,871 | ERROR | Failed to fetch LTP for NSE_EQ|INE114A01011
+2025-12-31 10:40:21,871 | INFO |   Could not fetch current price
+2025-12-31 10:40:21,871 | INFO | Scanning PNB...
+2025-12-31 10:40:22,666 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:22,667 | ERROR | Failed to fetch intraday data for NSE_EQ|INE160A01022
+2025-12-31 10:40:23,109 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:23,111 | ERROR | Failed to fetch LTP for NSE_EQ|INE160A01022
+2025-12-31 10:40:23,111 | INFO |   Could not fetch current price
+2025-12-31 10:40:23,111 | INFO | Scanning NATIONALUM...
+2025-12-31 10:40:23,841 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:23,842 | ERROR | Failed to fetch intraday data for NSE_EQ|INE139A01034
+2025-12-31 10:40:24,219 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:24,220 | ERROR | Failed to fetch LTP for NSE_EQ|INE139A01034
+2025-12-31 10:40:24,220 | INFO |   Could not fetch current price
+2025-12-31 10:40:24,220 | INFO | Scanning TATASTEEL...
+2025-12-31 10:40:24,973 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:24,974 | ERROR | Failed to fetch intraday data for NSE_EQ|INE081A01020
+2025-12-31 10:40:25,391 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:25,392 | ERROR | Failed to fetch LTP for NSE_EQ|INE081A01020
+2025-12-31 10:40:25,392 | INFO |   Could not fetch current price
+2025-12-31 10:40:25,392 | INFO | Scanning IDEA...
+2025-12-31 10:40:26,184 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:26,185 | ERROR | Failed to fetch intraday data for NSE_EQ|INE669E01016
+2025-12-31 10:40:26,581 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:26,582 | ERROR | Failed to fetch LTP for NSE_EQ|INE669E01016
+2025-12-31 10:40:26,583 | INFO |   Could not fetch current price
+2025-12-31 10:40:26,583 | INFO | Scanning ZEEL...
+2025-12-31 10:40:27,346 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:27,347 | ERROR | Failed to fetch intraday data for NSE_EQ|INE256A01028
+2025-12-31 10:40:27,728 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:27,729 | ERROR | Failed to fetch LTP for NSE_EQ|INE256A01028
+2025-12-31 10:40:27,729 | INFO |   Could not fetch current price
+2025-12-31 10:40:27,729 | INFO | Scanning CANBK...
+2025-12-31 10:40:28,494 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:28,495 | ERROR | Failed to fetch intraday data for NSE_EQ|INE476A01022
+2025-12-31 10:40:28,862 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:28,863 | ERROR | Failed to fetch LTP for NSE_EQ|INE476A01022
+2025-12-31 10:40:28,863 | INFO |   Could not fetch current price
+2025-12-31 10:40:28,863 | INFO | Scanning NMDC...
+2025-12-31 10:40:29,657 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:29,658 | ERROR | Failed to fetch intraday data for NSE_EQ|INE584A01023
+2025-12-31 10:40:30,029 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:30,031 | ERROR | Failed to fetch LTP for NSE_EQ|INE584A01023
+2025-12-31 10:40:30,031 | INFO |   Could not fetch current price
+2025-12-31 10:40:30,031 | INFO | Scanning IOC...
+2025-12-31 10:40:30,796 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:30,797 | ERROR | Failed to fetch intraday data for NSE_EQ|INE242A01010
+2025-12-31 10:40:31,169 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:31,170 | ERROR | Failed to fetch LTP for NSE_EQ|INE242A01010
+2025-12-31 10:40:31,170 | INFO |   Could not fetch current price
+2025-12-31 10:40:31,171 | INFO | Scanning MANAPPURAM...
+2025-12-31 10:40:32,125 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:32,126 | ERROR | Failed to fetch intraday data for NSE_EQ|INE522D01027
+2025-12-31 10:40:32,488 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:32,489 | ERROR | Failed to fetch LTP for NSE_EQ|INE522D01027
+2025-12-31 10:40:32,489 | INFO |   Could not fetch current price
+2025-12-31 10:40:32,489 | INFO | Scanning SOUTHBANK...
+2025-12-31 10:40:33,276 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:33,277 | ERROR | Failed to fetch intraday data for NSE_EQ|INE683A01023
+2025-12-31 10:40:33,691 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:40:33,692 | ERROR | Failed to fetch LTP for NSE_EQ|INE683A01023
+2025-12-31 10:40:33,692 | INFO |   Could not fetch current price
+2025-12-31 10:40:33,692 | INFO | Next scan at 10:45:00 (in 266s)
+2025-12-31 10:45:00,021 | INFO | Scanning YESBANK...
+2025-12-31 10:45:00,714 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:00,715 | ERROR | Failed to fetch intraday data for NSE_EQ|INE528G01035
+2025-12-31 10:45:01,079 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:01,080 | ERROR | Failed to fetch LTP for NSE_EQ|INE528G01035
+2025-12-31 10:45:01,080 | INFO |   Could not fetch current price
+2025-12-31 10:45:01,080 | INFO | Scanning SUZLON...
+2025-12-31 10:45:01,780 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:01,781 | ERROR | Failed to fetch intraday data for NSE_EQ|INE040H01021
+2025-12-31 10:45:02,167 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:02,168 | ERROR | Failed to fetch LTP for NSE_EQ|INE040H01021
+2025-12-31 10:45:02,168 | INFO |   Could not fetch current price
+2025-12-31 10:45:02,168 | INFO | Scanning RPOWER...
+2025-12-31 10:45:02,884 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:02,886 | ERROR | Failed to fetch intraday data for NSE_EQ|INE614G01033
+2025-12-31 10:45:03,260 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:03,262 | ERROR | Failed to fetch LTP for NSE_EQ|INE614G01033
+2025-12-31 10:45:03,262 | INFO |   Could not fetch current price
+2025-12-31 10:45:03,262 | INFO | Scanning IDFCFIRSTB...
+2025-12-31 10:45:04,019 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:04,021 | ERROR | Failed to fetch intraday data for NSE_EQ|INE092T01019
+2025-12-31 10:45:04,387 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:04,388 | ERROR | Failed to fetch LTP for NSE_EQ|INE092T01019
+2025-12-31 10:45:04,388 | INFO |   Could not fetch current price
+2025-12-31 10:45:04,388 | INFO | Scanning SAIL...
+2025-12-31 10:45:05,104 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:05,105 | ERROR | Failed to fetch intraday data for NSE_EQ|INE114A01011
+2025-12-31 10:45:05,470 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:05,471 | ERROR | Failed to fetch LTP for NSE_EQ|INE114A01011
+2025-12-31 10:45:05,471 | INFO |   Could not fetch current price
+2025-12-31 10:45:05,471 | INFO | Scanning PNB...
+2025-12-31 10:45:06,252 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:06,253 | ERROR | Failed to fetch intraday data for NSE_EQ|INE160A01022
+2025-12-31 10:45:06,627 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:06,628 | ERROR | Failed to fetch LTP for NSE_EQ|INE160A01022
+2025-12-31 10:45:06,628 | INFO |   Could not fetch current price
+2025-12-31 10:45:06,628 | INFO | Scanning NATIONALUM...
+2025-12-31 10:45:07,396 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:07,397 | ERROR | Failed to fetch intraday data for NSE_EQ|INE139A01034
+2025-12-31 10:45:07,759 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:07,760 | ERROR | Failed to fetch LTP for NSE_EQ|INE139A01034
+2025-12-31 10:45:07,760 | INFO |   Could not fetch current price
+2025-12-31 10:45:07,760 | INFO | Scanning TATASTEEL...
+2025-12-31 10:45:08,463 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:08,464 | ERROR | Failed to fetch intraday data for NSE_EQ|INE081A01020
+2025-12-31 10:45:08,860 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:08,862 | ERROR | Failed to fetch LTP for NSE_EQ|INE081A01020
+2025-12-31 10:45:08,862 | INFO |   Could not fetch current price
+2025-12-31 10:45:08,862 | INFO | Scanning IDEA...
+2025-12-31 10:45:09,673 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:09,674 | ERROR | Failed to fetch intraday data for NSE_EQ|INE669E01016
+2025-12-31 10:45:10,222 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:10,224 | ERROR | Failed to fetch LTP for NSE_EQ|INE669E01016
+2025-12-31 10:45:10,224 | INFO |   Could not fetch current price
+2025-12-31 10:45:10,224 | INFO | Scanning ZEEL...
+2025-12-31 10:45:11,042 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:11,044 | ERROR | Failed to fetch intraday data for NSE_EQ|INE256A01028
+2025-12-31 10:45:11,401 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:11,402 | ERROR | Failed to fetch LTP for NSE_EQ|INE256A01028
+2025-12-31 10:45:11,402 | INFO |   Could not fetch current price
+2025-12-31 10:45:11,402 | INFO | Scanning CANBK...
+2025-12-31 10:45:12,104 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:12,105 | ERROR | Failed to fetch intraday data for NSE_EQ|INE476A01022
+2025-12-31 10:45:12,495 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:12,496 | ERROR | Failed to fetch LTP for NSE_EQ|INE476A01022
+2025-12-31 10:45:12,496 | INFO |   Could not fetch current price
+2025-12-31 10:45:12,497 | INFO | Scanning NMDC...
+2025-12-31 10:45:13,201 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:13,202 | ERROR | Failed to fetch intraday data for NSE_EQ|INE584A01023
+2025-12-31 10:45:13,586 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:13,587 | ERROR | Failed to fetch LTP for NSE_EQ|INE584A01023
+2025-12-31 10:45:13,587 | INFO |   Could not fetch current price
+2025-12-31 10:45:13,587 | INFO | Scanning IOC...
+2025-12-31 10:45:14,304 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:14,305 | ERROR | Failed to fetch intraday data for NSE_EQ|INE242A01010
+2025-12-31 10:45:14,815 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:14,816 | ERROR | Failed to fetch LTP for NSE_EQ|INE242A01010
+2025-12-31 10:45:14,816 | INFO |   Could not fetch current price
+2025-12-31 10:45:14,816 | INFO | Scanning MANAPPURAM...
+2025-12-31 10:45:15,519 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:15,520 | ERROR | Failed to fetch intraday data for NSE_EQ|INE522D01027
+2025-12-31 10:45:15,874 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:15,875 | ERROR | Failed to fetch LTP for NSE_EQ|INE522D01027
+2025-12-31 10:45:15,875 | INFO |   Could not fetch current price
+2025-12-31 10:45:15,875 | INFO | Scanning SOUTHBANK...
+2025-12-31 10:45:16,624 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:16,626 | ERROR | Failed to fetch intraday data for NSE_EQ|INE683A01023
+2025-12-31 10:45:16,989 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:45:16,990 | ERROR | Failed to fetch LTP for NSE_EQ|INE683A01023
+2025-12-31 10:45:16,990 | INFO |   Could not fetch current price
+2025-12-31 10:45:16,990 | INFO | Next scan at 10:50:00 (in 283s)
+2025-12-31 10:50:00,021 | INFO | Scanning YESBANK...
+2025-12-31 10:50:01,278 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:01,279 | ERROR | Failed to fetch intraday data for NSE_EQ|INE528G01035
+2025-12-31 10:50:01,697 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:01,698 | ERROR | Failed to fetch LTP for NSE_EQ|INE528G01035
+2025-12-31 10:50:01,698 | INFO |   Could not fetch current price
+2025-12-31 10:50:01,698 | INFO | Scanning SUZLON...
+2025-12-31 10:50:02,537 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:02,538 | ERROR | Failed to fetch intraday data for NSE_EQ|INE040H01021
+2025-12-31 10:50:02,960 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:02,962 | ERROR | Failed to fetch LTP for NSE_EQ|INE040H01021
+2025-12-31 10:50:02,962 | INFO |   Could not fetch current price
+2025-12-31 10:50:02,962 | INFO | Scanning RPOWER...
+2025-12-31 10:50:03,747 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:03,748 | ERROR | Failed to fetch intraday data for NSE_EQ|INE614G01033
+2025-12-31 10:50:04,118 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:04,119 | ERROR | Failed to fetch LTP for NSE_EQ|INE614G01033
+2025-12-31 10:50:04,119 | INFO |   Could not fetch current price
+2025-12-31 10:50:04,120 | INFO | Scanning IDFCFIRSTB...
+2025-12-31 10:50:04,876 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:04,877 | ERROR | Failed to fetch intraday data for NSE_EQ|INE092T01019
+2025-12-31 10:50:05,462 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:05,463 | ERROR | Failed to fetch LTP for NSE_EQ|INE092T01019
+2025-12-31 10:50:05,463 | INFO |   Could not fetch current price
+2025-12-31 10:50:05,463 | INFO | Scanning SAIL...
+2025-12-31 10:50:06,237 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:06,238 | ERROR | Failed to fetch intraday data for NSE_EQ|INE114A01011
+2025-12-31 10:50:06,630 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:06,632 | ERROR | Failed to fetch LTP for NSE_EQ|INE114A01011
+2025-12-31 10:50:06,632 | INFO |   Could not fetch current price
+2025-12-31 10:50:06,632 | INFO | Scanning PNB...
+2025-12-31 10:50:07,414 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:07,416 | ERROR | Failed to fetch intraday data for NSE_EQ|INE160A01022
+2025-12-31 10:50:07,779 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:07,781 | ERROR | Failed to fetch LTP for NSE_EQ|INE160A01022
+2025-12-31 10:50:07,781 | INFO |   Could not fetch current price
+2025-12-31 10:50:07,781 | INFO | Scanning NATIONALUM...
+2025-12-31 10:50:08,584 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:08,586 | ERROR | Failed to fetch intraday data for NSE_EQ|INE139A01034
+2025-12-31 10:50:08,997 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:08,998 | ERROR | Failed to fetch LTP for NSE_EQ|INE139A01034
+2025-12-31 10:50:08,998 | INFO |   Could not fetch current price
+2025-12-31 10:50:08,998 | INFO | Scanning TATASTEEL...
+2025-12-31 10:50:09,768 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:09,769 | ERROR | Failed to fetch intraday data for NSE_EQ|INE081A01020
+2025-12-31 10:50:10,162 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:10,163 | ERROR | Failed to fetch LTP for NSE_EQ|INE081A01020
+2025-12-31 10:50:10,163 | INFO |   Could not fetch current price
+2025-12-31 10:50:10,163 | INFO | Scanning IDEA...
+2025-12-31 10:50:10,886 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:10,887 | ERROR | Failed to fetch intraday data for NSE_EQ|INE669E01016
+2025-12-31 10:50:11,298 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:11,300 | ERROR | Failed to fetch LTP for NSE_EQ|INE669E01016
+2025-12-31 10:50:11,300 | INFO |   Could not fetch current price
+2025-12-31 10:50:11,300 | INFO | Scanning ZEEL...
+2025-12-31 10:50:12,062 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:12,063 | ERROR | Failed to fetch intraday data for NSE_EQ|INE256A01028
+2025-12-31 10:50:12,469 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:12,471 | ERROR | Failed to fetch LTP for NSE_EQ|INE256A01028
+2025-12-31 10:50:12,471 | INFO |   Could not fetch current price
+2025-12-31 10:50:12,471 | INFO | Scanning CANBK...
+2025-12-31 10:50:13,247 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:13,248 | ERROR | Failed to fetch intraday data for NSE_EQ|INE476A01022
+2025-12-31 10:50:13,640 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:13,641 | ERROR | Failed to fetch LTP for NSE_EQ|INE476A01022
+2025-12-31 10:50:13,641 | INFO |   Could not fetch current price
+2025-12-31 10:50:13,641 | INFO | Scanning NMDC...
+2025-12-31 10:50:14,407 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:14,408 | ERROR | Failed to fetch intraday data for NSE_EQ|INE584A01023
+2025-12-31 10:50:14,924 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:14,925 | ERROR | Failed to fetch LTP for NSE_EQ|INE584A01023
+2025-12-31 10:50:14,925 | INFO |   Could not fetch current price
+2025-12-31 10:50:14,925 | INFO | Scanning IOC...
+2025-12-31 10:50:15,699 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:15,700 | ERROR | Failed to fetch intraday data for NSE_EQ|INE242A01010
+2025-12-31 10:50:16,127 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:16,128 | ERROR | Failed to fetch LTP for NSE_EQ|INE242A01010
+2025-12-31 10:50:16,128 | INFO |   Could not fetch current price
+2025-12-31 10:50:16,128 | INFO | Scanning MANAPPURAM...
+2025-12-31 10:50:16,882 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:16,884 | ERROR | Failed to fetch intraday data for NSE_EQ|INE522D01027
+2025-12-31 10:50:17,265 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:17,267 | ERROR | Failed to fetch LTP for NSE_EQ|INE522D01027
+2025-12-31 10:50:17,267 | INFO |   Could not fetch current price
+2025-12-31 10:50:17,267 | INFO | Scanning SOUTHBANK...
+2025-12-31 10:50:18,032 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:18,033 | ERROR | Failed to fetch intraday data for NSE_EQ|INE683A01023
+2025-12-31 10:50:18,446 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:50:18,447 | ERROR | Failed to fetch LTP for NSE_EQ|INE683A01023
+2025-12-31 10:50:18,447 | INFO |   Could not fetch current price
+2025-12-31 10:50:18,447 | INFO | Next scan at 10:55:00 (in 281s)
+2025-12-31 10:55:00,022 | INFO | Scanning YESBANK...
+2025-12-31 10:55:00,792 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:00,793 | ERROR | Failed to fetch intraday data for NSE_EQ|INE528G01035
+2025-12-31 10:55:01,169 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:01,170 | ERROR | Failed to fetch LTP for NSE_EQ|INE528G01035
+2025-12-31 10:55:01,170 | INFO |   Could not fetch current price
+2025-12-31 10:55:01,171 | INFO | Scanning SUZLON...
+2025-12-31 10:55:01,940 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:01,942 | ERROR | Failed to fetch intraday data for NSE_EQ|INE040H01021
+2025-12-31 10:55:02,348 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:02,349 | ERROR | Failed to fetch LTP for NSE_EQ|INE040H01021
+2025-12-31 10:55:02,349 | INFO |   Could not fetch current price
+2025-12-31 10:55:02,349 | INFO | Scanning RPOWER...
+2025-12-31 10:55:03,082 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:03,083 | ERROR | Failed to fetch intraday data for NSE_EQ|INE614G01033
+2025-12-31 10:55:03,485 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:03,486 | ERROR | Failed to fetch LTP for NSE_EQ|INE614G01033
+2025-12-31 10:55:03,486 | INFO |   Could not fetch current price
+2025-12-31 10:55:03,486 | INFO | Scanning IDFCFIRSTB...
+2025-12-31 10:55:04,207 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:04,207 | ERROR | Failed to fetch intraday data for NSE_EQ|INE092T01019
+2025-12-31 10:55:04,595 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:04,596 | ERROR | Failed to fetch LTP for NSE_EQ|INE092T01019
+2025-12-31 10:55:04,596 | INFO |   Could not fetch current price
+2025-12-31 10:55:04,596 | INFO | Scanning SAIL...
+2025-12-31 10:55:05,402 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:05,403 | ERROR | Failed to fetch intraday data for NSE_EQ|INE114A01011
+2025-12-31 10:55:05,771 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:05,772 | ERROR | Failed to fetch LTP for NSE_EQ|INE114A01011
+2025-12-31 10:55:05,772 | INFO |   Could not fetch current price
+2025-12-31 10:55:05,772 | INFO | Scanning PNB...
+2025-12-31 10:55:06,502 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:06,503 | ERROR | Failed to fetch intraday data for NSE_EQ|INE160A01022
+2025-12-31 10:55:06,875 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:06,876 | ERROR | Failed to fetch LTP for NSE_EQ|INE160A01022
+2025-12-31 10:55:06,876 | INFO |   Could not fetch current price
+2025-12-31 10:55:06,876 | INFO | Scanning NATIONALUM...
+2025-12-31 10:55:07,621 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:07,622 | ERROR | Failed to fetch intraday data for NSE_EQ|INE139A01034
+2025-12-31 10:55:07,999 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:08,000 | ERROR | Failed to fetch LTP for NSE_EQ|INE139A01034
+2025-12-31 10:55:08,000 | INFO |   Could not fetch current price
+2025-12-31 10:55:08,000 | INFO | Scanning TATASTEEL...
+2025-12-31 10:55:08,720 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:08,721 | ERROR | Failed to fetch intraday data for NSE_EQ|INE081A01020
+2025-12-31 10:55:09,132 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:09,133 | ERROR | Failed to fetch LTP for NSE_EQ|INE081A01020
+2025-12-31 10:55:09,133 | INFO |   Could not fetch current price
+2025-12-31 10:55:09,133 | INFO | Scanning IDEA...
+2025-12-31 10:55:09,865 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:09,866 | ERROR | Failed to fetch intraday data for NSE_EQ|INE669E01016
+2025-12-31 10:55:10,248 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:10,249 | ERROR | Failed to fetch LTP for NSE_EQ|INE669E01016
+2025-12-31 10:55:10,249 | INFO |   Could not fetch current price
+2025-12-31 10:55:10,249 | INFO | Scanning ZEEL...
+2025-12-31 10:55:10,984 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:10,985 | ERROR | Failed to fetch intraday data for NSE_EQ|INE256A01028
+2025-12-31 10:55:11,366 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:11,367 | ERROR | Failed to fetch LTP for NSE_EQ|INE256A01028
+2025-12-31 10:55:11,367 | INFO |   Could not fetch current price
+2025-12-31 10:55:11,367 | INFO | Scanning CANBK...
+2025-12-31 10:55:12,072 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:12,073 | ERROR | Failed to fetch intraday data for NSE_EQ|INE476A01022
+2025-12-31 10:55:12,452 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:12,453 | ERROR | Failed to fetch LTP for NSE_EQ|INE476A01022
+2025-12-31 10:55:12,453 | INFO |   Could not fetch current price
+2025-12-31 10:55:12,453 | INFO | Scanning NMDC...
+2025-12-31 10:55:13,245 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:13,247 | ERROR | Failed to fetch intraday data for NSE_EQ|INE584A01023
+2025-12-31 10:55:13,731 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:13,732 | ERROR | Failed to fetch LTP for NSE_EQ|INE584A01023
+2025-12-31 10:55:13,732 | INFO |   Could not fetch current price
+2025-12-31 10:55:13,732 | INFO | Scanning IOC...
+2025-12-31 10:55:14,469 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:14,470 | ERROR | Failed to fetch intraday data for NSE_EQ|INE242A01010
+2025-12-31 10:55:14,912 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:14,913 | ERROR | Failed to fetch LTP for NSE_EQ|INE242A01010
+2025-12-31 10:55:14,913 | INFO |   Could not fetch current price
+2025-12-31 10:55:14,913 | INFO | Scanning MANAPPURAM...
+2025-12-31 10:55:15,704 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:15,705 | ERROR | Failed to fetch intraday data for NSE_EQ|INE522D01027
+2025-12-31 10:55:16,112 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:16,113 | ERROR | Failed to fetch LTP for NSE_EQ|INE522D01027
+2025-12-31 10:55:16,113 | INFO |   Could not fetch current price
+2025-12-31 10:55:16,114 | INFO | Scanning SOUTHBANK...
+2025-12-31 10:55:16,859 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:16,860 | ERROR | Failed to fetch intraday data for NSE_EQ|INE683A01023
+2025-12-31 10:55:17,249 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 10:55:17,250 | ERROR | Failed to fetch LTP for NSE_EQ|INE683A01023
+2025-12-31 10:55:17,251 | INFO |   Could not fetch current price
+2025-12-31 10:55:17,251 | INFO | Next scan at 11:00:00 (in 282s)
+2025-12-31 11:00:00,022 | INFO | Scanning YESBANK...
+2025-12-31 11:00:00,823 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:00,825 | ERROR | Failed to fetch intraday data for NSE_EQ|INE528G01035
+2025-12-31 11:00:01,196 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:01,198 | ERROR | Failed to fetch LTP for NSE_EQ|INE528G01035
+2025-12-31 11:00:01,198 | INFO |   Could not fetch current price
+2025-12-31 11:00:01,198 | INFO | Scanning SUZLON...
+2025-12-31 11:00:02,026 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:02,027 | ERROR | Failed to fetch intraday data for NSE_EQ|INE040H01021
+2025-12-31 11:00:02,410 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:02,412 | ERROR | Failed to fetch LTP for NSE_EQ|INE040H01021
+2025-12-31 11:00:02,412 | INFO |   Could not fetch current price
+2025-12-31 11:00:02,412 | INFO | Scanning RPOWER...
+2025-12-31 11:00:03,288 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:03,290 | ERROR | Failed to fetch intraday data for NSE_EQ|INE614G01033
+2025-12-31 11:00:03,692 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:03,693 | ERROR | Failed to fetch LTP for NSE_EQ|INE614G01033
+2025-12-31 11:00:03,693 | INFO |   Could not fetch current price
+2025-12-31 11:00:03,693 | INFO | Scanning IDFCFIRSTB...
+2025-12-31 11:00:04,497 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:04,498 | ERROR | Failed to fetch intraday data for NSE_EQ|INE092T01019
+2025-12-31 11:00:04,892 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:04,893 | ERROR | Failed to fetch LTP for NSE_EQ|INE092T01019
+2025-12-31 11:00:04,894 | INFO |   Could not fetch current price
+2025-12-31 11:00:04,894 | INFO | Scanning SAIL...
+2025-12-31 11:00:05,758 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:05,759 | ERROR | Failed to fetch intraday data for NSE_EQ|INE114A01011
+2025-12-31 11:00:06,167 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:06,168 | ERROR | Failed to fetch LTP for NSE_EQ|INE114A01011
+2025-12-31 11:00:06,168 | INFO |   Could not fetch current price
+2025-12-31 11:00:06,168 | INFO | Scanning PNB...
+2025-12-31 11:00:06,926 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:06,927 | ERROR | Failed to fetch intraday data for NSE_EQ|INE160A01022
+2025-12-31 11:00:07,320 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:07,321 | ERROR | Failed to fetch LTP for NSE_EQ|INE160A01022
+2025-12-31 11:00:07,322 | INFO |   Could not fetch current price
+2025-12-31 11:00:07,322 | INFO | Scanning NATIONALUM...
+2025-12-31 11:00:08,064 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:08,065 | ERROR | Failed to fetch intraday data for NSE_EQ|INE139A01034
+2025-12-31 11:00:08,498 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:08,499 | ERROR | Failed to fetch LTP for NSE_EQ|INE139A01034
+2025-12-31 11:00:08,499 | INFO |   Could not fetch current price
+2025-12-31 11:00:08,499 | INFO | Scanning TATASTEEL...
+2025-12-31 11:00:09,283 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:09,284 | ERROR | Failed to fetch intraday data for NSE_EQ|INE081A01020
+2025-12-31 11:00:09,672 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:09,673 | ERROR | Failed to fetch LTP for NSE_EQ|INE081A01020
+2025-12-31 11:00:09,673 | INFO |   Could not fetch current price
+2025-12-31 11:00:09,673 | INFO | Scanning IDEA...
+2025-12-31 11:00:10,415 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:10,416 | ERROR | Failed to fetch intraday data for NSE_EQ|INE669E01016
+2025-12-31 11:00:10,796 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:10,797 | ERROR | Failed to fetch LTP for NSE_EQ|INE669E01016
+2025-12-31 11:00:10,798 | INFO |   Could not fetch current price
+2025-12-31 11:00:10,798 | INFO | Scanning ZEEL...
+2025-12-31 11:00:11,556 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:11,557 | ERROR | Failed to fetch intraday data for NSE_EQ|INE256A01028
+2025-12-31 11:00:11,941 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:11,941 | ERROR | Failed to fetch LTP for NSE_EQ|INE256A01028
+2025-12-31 11:00:11,942 | INFO |   Could not fetch current price
+2025-12-31 11:00:11,942 | INFO | Scanning CANBK...
+2025-12-31 11:00:12,685 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:12,686 | ERROR | Failed to fetch intraday data for NSE_EQ|INE476A01022
+2025-12-31 11:00:13,455 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:13,456 | ERROR | Failed to fetch LTP for NSE_EQ|INE476A01022
+2025-12-31 11:00:13,456 | INFO |   Could not fetch current price
+2025-12-31 11:00:13,456 | INFO | Scanning NMDC...
+2025-12-31 11:00:14,190 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:14,191 | ERROR | Failed to fetch intraday data for NSE_EQ|INE584A01023
+2025-12-31 11:00:14,617 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:14,619 | ERROR | Failed to fetch LTP for NSE_EQ|INE584A01023
+2025-12-31 11:00:14,619 | INFO |   Could not fetch current price
+2025-12-31 11:00:14,619 | INFO | Scanning IOC...
+2025-12-31 11:00:15,357 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:15,358 | ERROR | Failed to fetch intraday data for NSE_EQ|INE242A01010
+2025-12-31 11:00:15,776 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:15,777 | ERROR | Failed to fetch LTP for NSE_EQ|INE242A01010
+2025-12-31 11:00:15,777 | INFO |   Could not fetch current price
+2025-12-31 11:00:15,777 | INFO | Scanning MANAPPURAM...
+2025-12-31 11:00:16,574 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:16,575 | ERROR | Failed to fetch intraday data for NSE_EQ|INE522D01027
+2025-12-31 11:00:16,957 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:16,958 | ERROR | Failed to fetch LTP for NSE_EQ|INE522D01027
+2025-12-31 11:00:16,958 | INFO |   Could not fetch current price
+2025-12-31 11:00:16,958 | INFO | Scanning SOUTHBANK...
+2025-12-31 11:00:17,663 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:17,664 | ERROR | Failed to fetch intraday data for NSE_EQ|INE683A01023
+2025-12-31 11:00:18,086 | ERROR | API Error 401: {"status":"error","errors":[{"errorCode":"UDAPI100050","message":"Invalid token used to access API","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100050","property_path":null,"invalid_value":null}]}
+2025-12-31 11:00:18,087 | ERROR | Failed to fetch LTP for NSE_EQ|INE683A01023
+2025-12-31 11:00:18,087 | INFO |   Could not fetch current price
+2025-12-31 11:00:18,087 | INFO | Next scan at 11:05:00 (in 281s)
+2025-12-31 11:02:09,913 | INFO | Bot stopped by user
+2025-12-31 11:02:09,913 | INFO | ================================================================================
+2025-12-31 11:02:09,913 | INFO | Bot execution completed
+2025-12-31 11:02:09,913 | INFO | ================================================================================
+2025-12-31 11:02:10,178 | INFO | ================================================================================
+2025-12-31 11:02:10,179 | INFO | BOT v0.8 STARTED - 2025-12-31 11:02:10
+2025-12-31 11:02:10,179 | INFO | ================================================================================
+2025-12-31 11:02:10,179 | INFO | Bot v0.8 starting...
+2025-12-31 11:02:10,179 | INFO | Strategy: MORNING BOUNCE ONLY (9:15 AM - 1:30 PM)
+2025-12-31 11:02:10,179 | INFO | Syncing positions from Upstox...
+2025-12-31 11:02:10,593 | INFO | Position sync complete: 0 positions loaded
+2025-12-31 11:02:10,614 | INFO | Scanning YESBANK...
+2025-12-31 11:02:11,357 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:11,359 | ERROR | Failed to fetch intraday data for NSE_EQ|INE528G01035
+2025-12-31 11:02:11,760 | WARNING | No LTP found for NSE_EQ|INE528G01035
+2025-12-31 11:02:11,760 | INFO |   Could not fetch current price
+2025-12-31 11:02:11,760 | INFO | Scanning SUZLON...
+2025-12-31 11:02:12,574 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:12,575 | ERROR | Failed to fetch intraday data for NSE_EQ|INE040H01021
+2025-12-31 11:02:12,995 | WARNING | No LTP found for NSE_EQ|INE040H01021
+2025-12-31 11:02:12,995 | INFO |   Could not fetch current price
+2025-12-31 11:02:12,995 | INFO | Scanning RPOWER...
+2025-12-31 11:02:13,824 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:13,825 | ERROR | Failed to fetch intraday data for NSE_EQ|INE614G01033
+2025-12-31 11:02:14,203 | WARNING | No LTP found for NSE_EQ|INE614G01033
+2025-12-31 11:02:14,203 | INFO |   Could not fetch current price
+2025-12-31 11:02:14,203 | INFO | Scanning IDFCFIRSTB...
+2025-12-31 11:02:14,916 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:14,917 | ERROR | Failed to fetch intraday data for NSE_EQ|INE092T01019
+2025-12-31 11:02:15,323 | WARNING | No LTP found for NSE_EQ|INE092T01019
+2025-12-31 11:02:15,323 | INFO |   Could not fetch current price
+2025-12-31 11:02:15,323 | INFO | Scanning SAIL...
+2025-12-31 11:02:16,044 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:16,045 | ERROR | Failed to fetch intraday data for NSE_EQ|INE114A01011
+2025-12-31 11:02:16,439 | WARNING | No LTP found for NSE_EQ|INE114A01011
+2025-12-31 11:02:16,439 | INFO |   Could not fetch current price
+2025-12-31 11:02:16,439 | INFO | Scanning PNB...
+2025-12-31 11:02:17,179 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:17,181 | ERROR | Failed to fetch intraday data for NSE_EQ|INE160A01022
+2025-12-31 11:02:17,571 | WARNING | No LTP found for NSE_EQ|INE160A01022
+2025-12-31 11:02:17,571 | INFO |   Could not fetch current price
+2025-12-31 11:02:17,571 | INFO | Scanning NATIONALUM...
+2025-12-31 11:02:18,327 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:18,328 | ERROR | Failed to fetch intraday data for NSE_EQ|INE139A01034
+2025-12-31 11:02:18,729 | WARNING | No LTP found for NSE_EQ|INE139A01034
+2025-12-31 11:02:18,729 | INFO |   Could not fetch current price
+2025-12-31 11:02:18,729 | INFO | Scanning TATASTEEL...
+2025-12-31 11:02:19,488 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:19,489 | ERROR | Failed to fetch intraday data for NSE_EQ|INE081A01020
+2025-12-31 11:02:19,883 | WARNING | No LTP found for NSE_EQ|INE081A01020
+2025-12-31 11:02:19,883 | INFO |   Could not fetch current price
+2025-12-31 11:02:19,883 | INFO | Scanning IDEA...
+2025-12-31 11:02:20,617 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:20,618 | ERROR | Failed to fetch intraday data for NSE_EQ|INE669E01016
+2025-12-31 11:02:21,581 | WARNING | No LTP found for NSE_EQ|INE669E01016
+2025-12-31 11:02:21,582 | INFO |   Could not fetch current price
+2025-12-31 11:02:21,582 | INFO | Scanning ZEEL...
+2025-12-31 11:02:22,316 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:22,317 | ERROR | Failed to fetch intraday data for NSE_EQ|INE256A01028
+2025-12-31 11:02:22,718 | WARNING | No LTP found for NSE_EQ|INE256A01028
+2025-12-31 11:02:22,718 | INFO |   Could not fetch current price
+2025-12-31 11:02:22,718 | INFO | Scanning CANBK...
+2025-12-31 11:02:23,456 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:23,457 | ERROR | Failed to fetch intraday data for NSE_EQ|INE476A01022
+2025-12-31 11:02:23,852 | WARNING | No LTP found for NSE_EQ|INE476A01022
+2025-12-31 11:02:23,853 | INFO |   Could not fetch current price
+2025-12-31 11:02:23,853 | INFO | Scanning NMDC...
+2025-12-31 11:02:24,567 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:24,568 | ERROR | Failed to fetch intraday data for NSE_EQ|INE584A01023
+2025-12-31 11:02:24,952 | WARNING | No LTP found for NSE_EQ|INE584A01023
+2025-12-31 11:02:24,953 | INFO |   Could not fetch current price
+2025-12-31 11:02:24,953 | INFO | Scanning IOC...
+2025-12-31 11:02:25,744 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:25,745 | ERROR | Failed to fetch intraday data for NSE_EQ|INE242A01010
+2025-12-31 11:02:26,535 | WARNING | No LTP found for NSE_EQ|INE242A01010
+2025-12-31 11:02:26,535 | INFO |   Could not fetch current price
+2025-12-31 11:02:26,535 | INFO | Scanning MANAPPURAM...
+2025-12-31 11:02:27,275 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:27,276 | ERROR | Failed to fetch intraday data for NSE_EQ|INE522D01027
+2025-12-31 11:02:27,653 | WARNING | No LTP found for NSE_EQ|INE522D01027
+2025-12-31 11:02:27,653 | INFO |   Could not fetch current price
+2025-12-31 11:02:27,653 | INFO | Scanning SOUTHBANK...
+2025-12-31 11:02:28,379 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:28,380 | ERROR | Failed to fetch intraday data for NSE_EQ|INE683A01023
+2025-12-31 11:02:28,895 | WARNING | No LTP found for NSE_EQ|INE683A01023
+2025-12-31 11:02:28,895 | INFO |   Could not fetch current price
+2025-12-31 11:02:28,896 | INFO | Next scan at 11:05:00 (in 151s)
+2025-12-31 11:02:51,052 | INFO | Bot stopped by user
+2025-12-31 11:02:51,052 | INFO | ================================================================================
+2025-12-31 11:02:51,052 | INFO | Bot execution completed
+2025-12-31 11:02:51,052 | INFO | ================================================================================
+2025-12-31 11:02:51,281 | INFO | ================================================================================
+2025-12-31 11:02:51,281 | INFO | BOT v0.8 STARTED - 2025-12-31 11:02:51
+2025-12-31 11:02:51,281 | INFO | ================================================================================
+2025-12-31 11:02:51,281 | INFO | Bot v0.8 starting...
+2025-12-31 11:02:51,281 | INFO | Strategy: MORNING BOUNCE ONLY (9:15 AM - 1:30 PM)
+2025-12-31 11:02:51,281 | INFO | Syncing positions from Upstox...
+2025-12-31 11:02:51,702 | INFO | Position sync complete: 0 positions loaded
+2025-12-31 11:02:51,724 | INFO | Scanning YESBANK...
+2025-12-31 11:02:52,479 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:52,480 | ERROR | Failed to fetch intraday data for NSE_EQ|INE528G01035
+2025-12-31 11:02:52,870 | WARNING | No LTP found for NSE_EQ|INE528G01035
+2025-12-31 11:02:52,870 | INFO |   Could not fetch current price
+2025-12-31 11:02:52,870 | INFO | Scanning SUZLON...
+2025-12-31 11:02:53,651 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:53,652 | ERROR | Failed to fetch intraday data for NSE_EQ|INE040H01021
+2025-12-31 11:02:54,046 | WARNING | No LTP found for NSE_EQ|INE040H01021
+2025-12-31 11:02:54,046 | INFO |   Could not fetch current price
+2025-12-31 11:02:54,046 | INFO | Scanning RPOWER...
+2025-12-31 11:02:54,798 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:54,799 | ERROR | Failed to fetch intraday data for NSE_EQ|INE614G01033
+2025-12-31 11:02:55,197 | WARNING | No LTP found for NSE_EQ|INE614G01033
+2025-12-31 11:02:55,197 | INFO |   Could not fetch current price
+2025-12-31 11:02:55,197 | INFO | Scanning IDFCFIRSTB...
+2025-12-31 11:02:55,983 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:55,985 | ERROR | Failed to fetch intraday data for NSE_EQ|INE092T01019
+2025-12-31 11:02:56,366 | WARNING | No LTP found for NSE_EQ|INE092T01019
+2025-12-31 11:02:56,366 | INFO |   Could not fetch current price
+2025-12-31 11:02:56,366 | INFO | Scanning SAIL...
+2025-12-31 11:02:57,109 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:57,110 | ERROR | Failed to fetch intraday data for NSE_EQ|INE114A01011
+2025-12-31 11:02:57,496 | WARNING | No LTP found for NSE_EQ|INE114A01011
+2025-12-31 11:02:57,496 | INFO |   Could not fetch current price
+2025-12-31 11:02:57,496 | INFO | Scanning PNB...
+2025-12-31 11:02:58,218 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:58,220 | ERROR | Failed to fetch intraday data for NSE_EQ|INE160A01022
+2025-12-31 11:02:58,672 | WARNING | No LTP found for NSE_EQ|INE160A01022
+2025-12-31 11:02:58,672 | INFO |   Could not fetch current price
+2025-12-31 11:02:58,672 | INFO | Scanning NATIONALUM...
+2025-12-31 11:02:59,502 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:02:59,504 | ERROR | Failed to fetch intraday data for NSE_EQ|INE139A01034
+2025-12-31 11:02:59,919 | WARNING | No LTP found for NSE_EQ|INE139A01034
+2025-12-31 11:02:59,919 | INFO |   Could not fetch current price
+2025-12-31 11:02:59,919 | INFO | Scanning TATASTEEL...
+2025-12-31 11:03:00,654 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:03:00,656 | ERROR | Failed to fetch intraday data for NSE_EQ|INE081A01020
+2025-12-31 11:03:01,050 | WARNING | No LTP found for NSE_EQ|INE081A01020
+2025-12-31 11:03:01,050 | INFO |   Could not fetch current price
+2025-12-31 11:03:01,050 | INFO | Scanning IDEA...
+2025-12-31 11:03:01,792 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:03:01,794 | ERROR | Failed to fetch intraday data for NSE_EQ|INE669E01016
+2025-12-31 11:03:03,128 | WARNING | No LTP found for NSE_EQ|INE669E01016
+2025-12-31 11:03:03,128 | INFO |   Could not fetch current price
+2025-12-31 11:03:03,128 | INFO | Scanning ZEEL...
+2025-12-31 11:03:04,164 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:03:04,166 | ERROR | Failed to fetch intraday data for NSE_EQ|INE256A01028
+2025-12-31 11:03:05,489 | WARNING | No LTP found for NSE_EQ|INE256A01028
+2025-12-31 11:03:05,489 | INFO |   Could not fetch current price
+2025-12-31 11:03:05,489 | INFO | Scanning CANBK...
+2025-12-31 11:03:06,231 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:03:06,233 | ERROR | Failed to fetch intraday data for NSE_EQ|INE476A01022
+2025-12-31 11:03:06,623 | WARNING | No LTP found for NSE_EQ|INE476A01022
+2025-12-31 11:03:06,623 | INFO |   Could not fetch current price
+2025-12-31 11:03:06,623 | INFO | Scanning NMDC...
+2025-12-31 11:03:07,359 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:03:07,361 | ERROR | Failed to fetch intraday data for NSE_EQ|INE584A01023
+2025-12-31 11:03:07,768 | WARNING | No LTP found for NSE_EQ|INE584A01023
+2025-12-31 11:03:07,768 | INFO |   Could not fetch current price
+2025-12-31 11:03:07,768 | INFO | Scanning IOC...
+2025-12-31 11:03:08,540 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:03:08,542 | ERROR | Failed to fetch intraday data for NSE_EQ|INE242A01010
+2025-12-31 11:03:08,912 | WARNING | No LTP found for NSE_EQ|INE242A01010
+2025-12-31 11:03:08,912 | INFO |   Could not fetch current price
+2025-12-31 11:03:08,912 | INFO | Scanning MANAPPURAM...
+2025-12-31 11:03:09,647 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:03:09,648 | ERROR | Failed to fetch intraday data for NSE_EQ|INE522D01027
+2025-12-31 11:03:10,034 | WARNING | No LTP found for NSE_EQ|INE522D01027
+2025-12-31 11:03:10,034 | INFO |   Could not fetch current price
+2025-12-31 11:03:10,034 | INFO | Scanning SOUTHBANK...
+2025-12-31 11:03:10,845 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:03:10,847 | ERROR | Failed to fetch intraday data for NSE_EQ|INE683A01023
+2025-12-31 11:03:11,230 | WARNING | No LTP found for NSE_EQ|INE683A01023
+2025-12-31 11:03:11,230 | INFO |   Could not fetch current price
+2025-12-31 11:03:11,230 | INFO | Next scan at 11:05:00 (in 108s)
+2025-12-31 11:05:00,021 | INFO | Scanning YESBANK...
+2025-12-31 11:05:00,818 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:00,819 | ERROR | Failed to fetch intraday data for NSE_EQ|INE528G01035
+2025-12-31 11:05:01,233 | WARNING | No LTP found for NSE_EQ|INE528G01035
+2025-12-31 11:05:01,233 | INFO |   Could not fetch current price
+2025-12-31 11:05:01,234 | INFO | Scanning SUZLON...
+2025-12-31 11:05:02,024 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:02,026 | ERROR | Failed to fetch intraday data for NSE_EQ|INE040H01021
+2025-12-31 11:05:02,488 | WARNING | No LTP found for NSE_EQ|INE040H01021
+2025-12-31 11:05:02,488 | INFO |   Could not fetch current price
+2025-12-31 11:05:02,488 | INFO | Scanning RPOWER...
+2025-12-31 11:05:03,253 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:03,255 | ERROR | Failed to fetch intraday data for NSE_EQ|INE614G01033
+2025-12-31 11:05:03,652 | WARNING | No LTP found for NSE_EQ|INE614G01033
+2025-12-31 11:05:03,652 | INFO |   Could not fetch current price
+2025-12-31 11:05:03,652 | INFO | Scanning IDFCFIRSTB...
+2025-12-31 11:05:04,512 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:04,513 | ERROR | Failed to fetch intraday data for NSE_EQ|INE092T01019
+2025-12-31 11:05:04,976 | WARNING | No LTP found for NSE_EQ|INE092T01019
+2025-12-31 11:05:04,976 | INFO |   Could not fetch current price
+2025-12-31 11:05:04,976 | INFO | Scanning SAIL...
+2025-12-31 11:05:05,745 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:05,746 | ERROR | Failed to fetch intraday data for NSE_EQ|INE114A01011
+2025-12-31 11:05:06,151 | WARNING | No LTP found for NSE_EQ|INE114A01011
+2025-12-31 11:05:06,151 | INFO |   Could not fetch current price
+2025-12-31 11:05:06,151 | INFO | Scanning PNB...
+2025-12-31 11:05:06,888 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:06,889 | ERROR | Failed to fetch intraday data for NSE_EQ|INE160A01022
+2025-12-31 11:05:07,271 | WARNING | No LTP found for NSE_EQ|INE160A01022
+2025-12-31 11:05:07,272 | INFO |   Could not fetch current price
+2025-12-31 11:05:07,272 | INFO | Scanning NATIONALUM...
+2025-12-31 11:05:08,072 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:08,073 | ERROR | Failed to fetch intraday data for NSE_EQ|INE139A01034
+2025-12-31 11:05:08,459 | WARNING | No LTP found for NSE_EQ|INE139A01034
+2025-12-31 11:05:08,460 | INFO |   Could not fetch current price
+2025-12-31 11:05:08,460 | INFO | Scanning TATASTEEL...
+2025-12-31 11:05:09,272 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:09,273 | ERROR | Failed to fetch intraday data for NSE_EQ|INE081A01020
+2025-12-31 11:05:09,667 | WARNING | No LTP found for NSE_EQ|INE081A01020
+2025-12-31 11:05:09,667 | INFO |   Could not fetch current price
+2025-12-31 11:05:09,667 | INFO | Scanning IDEA...
+2025-12-31 11:05:10,431 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:10,433 | ERROR | Failed to fetch intraday data for NSE_EQ|INE669E01016
+2025-12-31 11:05:10,832 | WARNING | No LTP found for NSE_EQ|INE669E01016
+2025-12-31 11:05:10,833 | INFO |   Could not fetch current price
+2025-12-31 11:05:10,833 | INFO | Scanning ZEEL...
+2025-12-31 11:05:11,706 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:11,708 | ERROR | Failed to fetch intraday data for NSE_EQ|INE256A01028
+2025-12-31 11:05:13,721 | WARNING | No LTP found for NSE_EQ|INE256A01028
+2025-12-31 11:05:13,721 | INFO |   Could not fetch current price
+2025-12-31 11:05:13,721 | INFO | Scanning CANBK...
+2025-12-31 11:05:14,497 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:14,497 | ERROR | Failed to fetch intraday data for NSE_EQ|INE476A01022
+2025-12-31 11:05:14,895 | WARNING | No LTP found for NSE_EQ|INE476A01022
+2025-12-31 11:05:14,895 | INFO |   Could not fetch current price
+2025-12-31 11:05:14,895 | INFO | Scanning NMDC...
+2025-12-31 11:05:15,720 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:15,721 | ERROR | Failed to fetch intraday data for NSE_EQ|INE584A01023
+2025-12-31 11:05:16,115 | WARNING | No LTP found for NSE_EQ|INE584A01023
+2025-12-31 11:05:16,116 | INFO |   Could not fetch current price
+2025-12-31 11:05:16,116 | INFO | Scanning IOC...
+2025-12-31 11:05:17,183 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:17,184 | ERROR | Failed to fetch intraday data for NSE_EQ|INE242A01010
+2025-12-31 11:05:17,587 | WARNING | No LTP found for NSE_EQ|INE242A01010
+2025-12-31 11:05:17,587 | INFO |   Could not fetch current price
+2025-12-31 11:05:17,587 | INFO | Scanning MANAPPURAM...
+2025-12-31 11:05:18,346 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:18,348 | ERROR | Failed to fetch intraday data for NSE_EQ|INE522D01027
+2025-12-31 11:05:18,771 | WARNING | No LTP found for NSE_EQ|INE522D01027
+2025-12-31 11:05:18,771 | INFO |   Could not fetch current price
+2025-12-31 11:05:18,771 | INFO | Scanning SOUTHBANK...
+2025-12-31 11:05:19,526 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:05:19,527 | ERROR | Failed to fetch intraday data for NSE_EQ|INE683A01023
+2025-12-31 11:05:19,916 | WARNING | No LTP found for NSE_EQ|INE683A01023
+2025-12-31 11:05:19,916 | INFO |   Could not fetch current price
+2025-12-31 11:05:19,916 | INFO | Next scan at 11:10:00 (in 280s)
+2025-12-31 11:07:45,319 | INFO | Bot stopped by user
+2025-12-31 11:07:45,320 | INFO | ================================================================================
+2025-12-31 11:07:45,320 | INFO | Bot execution completed
+2025-12-31 11:07:45,320 | INFO | ================================================================================
+2025-12-31 11:19:27,706 | INFO | ================================================================================
+2025-12-31 11:19:27,706 | INFO | BOT v0.8 STARTED - 2025-12-31 11:19:27
+2025-12-31 11:19:27,706 | INFO | ================================================================================
+2025-12-31 11:19:27,706 | INFO | Bot v0.8 starting...
+2025-12-31 11:19:27,706 | INFO | Strategy: MORNING BOUNCE ONLY (9:15 AM - 1:30 PM)
+2025-12-31 11:19:27,706 | INFO | Syncing positions from Upstox...
+2025-12-31 11:19:28,153 | INFO | Position sync complete: 0 positions loaded
+2025-12-31 11:19:28,174 | INFO | Scanning YESBANK...
+2025-12-31 11:19:28,918 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:28,919 | ERROR | Failed to fetch intraday data for NSE_EQ|INE528G01035
+2025-12-31 11:19:29,289 | INFO |   No signal (MA20: Rs22.20, LTP: Rs21.61, Distance: -2.65%)
+2025-12-31 11:19:29,289 | INFO | Scanning SUZLON...
+2025-12-31 11:19:30,004 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:30,005 | ERROR | Failed to fetch intraday data for NSE_EQ|INE040H01021
+2025-12-31 11:19:30,389 | INFO |   No signal (MA20: Rs52.93, LTP: Rs52.72, Distance: -0.41%)
+2025-12-31 11:19:30,390 | INFO | Scanning RPOWER...
+2025-12-31 11:19:31,100 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:31,101 | ERROR | Failed to fetch intraday data for NSE_EQ|INE614G01033
+2025-12-31 11:19:31,476 | INFO |   No signal (MA20: Rs37.00, LTP: Rs34.66, Distance: -6.33%)
+2025-12-31 11:19:31,476 | INFO | Scanning IDFCFIRSTB...
+2025-12-31 11:19:32,207 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:32,208 | ERROR | Failed to fetch intraday data for NSE_EQ|INE092T01019
+2025-12-31 11:19:32,617 | INFO |   No signal (MA20: Rs81.27, LTP: Rs85.62, Distance: 5.36%)
+2025-12-31 11:19:32,617 | INFO | Scanning SAIL...
+2025-12-31 11:19:33,399 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:33,400 | ERROR | Failed to fetch intraday data for NSE_EQ|INE114A01011
+2025-12-31 11:19:33,793 | INFO |   No signal (MA20: Rs131.54, LTP: Rs144.27, Distance: 9.68%)
+2025-12-31 11:19:33,793 | INFO | Scanning PNB...
+2025-12-31 11:19:34,519 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:34,520 | ERROR | Failed to fetch intraday data for NSE_EQ|INE160A01022
+2025-12-31 11:19:34,901 | INFO |   No signal (MA20: Rs120.55, LTP: Rs124.73, Distance: 3.46%)
+2025-12-31 11:19:34,901 | INFO | Scanning NATIONALUM...
+2025-12-31 11:19:35,655 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:35,656 | ERROR | Failed to fetch intraday data for NSE_EQ|INE139A01034
+2025-12-31 11:19:36,099 | INFO |   No signal (MA20: Rs267.73, LTP: Rs316.65, Distance: 18.27%)
+2025-12-31 11:19:36,099 | INFO | Scanning TATASTEEL...
+2025-12-31 11:19:36,868 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:36,869 | ERROR | Failed to fetch intraday data for NSE_EQ|INE081A01020
+2025-12-31 11:19:37,245 | INFO |   No signal (MA20: Rs167.46, LTP: Rs180.01, Distance: 7.50%)
+2025-12-31 11:19:37,245 | INFO | Scanning IDEA...
+2025-12-31 11:19:37,955 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:37,956 | ERROR | Failed to fetch intraday data for NSE_EQ|INE669E01016
+2025-12-31 11:19:38,319 | INFO |   No signal (MA20: Rs10.70, LTP: Rs12.27, Distance: 14.73%)
+2025-12-31 11:19:38,319 | INFO | Scanning ZEEL...
+2025-12-31 11:19:39,054 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:39,055 | ERROR | Failed to fetch intraday data for NSE_EQ|INE256A01028
+2025-12-31 11:19:39,419 | INFO |   No signal (MA20: Rs95.67, LTP: Rs89.97, Distance: -5.96%)
+2025-12-31 11:19:39,419 | INFO | Scanning CANBK...
+2025-12-31 11:19:40,158 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:40,159 | ERROR | Failed to fetch intraday data for NSE_EQ|INE476A01022
+2025-12-31 11:19:40,525 | INFO |   No signal (MA20: Rs148.28, LTP: Rs157.36, Distance: 6.12%)
+2025-12-31 11:19:40,525 | INFO | Scanning NMDC...
+2025-12-31 11:19:41,259 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:41,261 | ERROR | Failed to fetch intraday data for NSE_EQ|INE584A01023
+2025-12-31 11:19:41,640 | INFO |   No signal (MA20: Rs75.53, LTP: Rs83.66, Distance: 10.77%)
+2025-12-31 11:19:41,640 | INFO | Scanning IOC...
+2025-12-31 11:19:42,402 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:42,403 | ERROR | Failed to fetch intraday data for NSE_EQ|INE242A01010
+2025-12-31 11:19:42,773 | INFO |   No signal (MA20: Rs163.96, LTP: Rs165.44, Distance: 0.90%)
+2025-12-31 11:19:42,773 | INFO | Scanning MANAPPURAM...
+2025-12-31 11:19:43,483 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:43,484 | ERROR | Failed to fetch intraday data for NSE_EQ|INE522D01027
+2025-12-31 11:19:43,849 | INFO |   No signal (MA20: Rs281.69, LTP: Rs310.10, Distance: 10.08%)
+2025-12-31 11:19:43,849 | INFO | Scanning SOUTHBANK...
+2025-12-31 11:19:44,560 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:19:44,561 | ERROR | Failed to fetch intraday data for NSE_EQ|INE683A01023
+2025-12-31 11:19:45,036 | INFO |   No signal (MA20: Rs39.50, LTP: Rs38.58, Distance: -2.32%)
+2025-12-31 11:19:45,036 | INFO | Next scan at 11:20:00 (in 14s)
+2025-12-31 11:20:00,020 | INFO | Scanning YESBANK...
+2025-12-31 11:20:00,775 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:00,776 | ERROR | Failed to fetch intraday data for NSE_EQ|INE528G01035
+2025-12-31 11:20:01,160 | INFO |   No signal (MA20: Rs22.20, LTP: Rs21.60, Distance: -2.70%)
+2025-12-31 11:20:01,160 | INFO | Scanning SUZLON...
+2025-12-31 11:20:01,885 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:01,886 | ERROR | Failed to fetch intraday data for NSE_EQ|INE040H01021
+2025-12-31 11:20:02,291 | INFO |   No signal (MA20: Rs52.93, LTP: Rs52.71, Distance: -0.42%)
+2025-12-31 11:20:02,291 | INFO | Scanning RPOWER...
+2025-12-31 11:20:03,036 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:03,037 | ERROR | Failed to fetch intraday data for NSE_EQ|INE614G01033
+2025-12-31 11:20:03,412 | INFO |   No signal (MA20: Rs37.00, LTP: Rs34.68, Distance: -6.27%)
+2025-12-31 11:20:03,412 | INFO | Scanning IDFCFIRSTB...
+2025-12-31 11:20:04,166 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:04,167 | ERROR | Failed to fetch intraday data for NSE_EQ|INE092T01019
+2025-12-31 11:20:04,549 | INFO |   No signal (MA20: Rs81.27, LTP: Rs85.60, Distance: 5.33%)
+2025-12-31 11:20:04,550 | INFO | Scanning SAIL...
+2025-12-31 11:20:05,351 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:05,352 | ERROR | Failed to fetch intraday data for NSE_EQ|INE114A01011
+2025-12-31 11:20:05,765 | INFO |   No signal (MA20: Rs131.54, LTP: Rs144.30, Distance: 9.70%)
+2025-12-31 11:20:05,765 | INFO | Scanning PNB...
+2025-12-31 11:20:06,498 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:06,499 | ERROR | Failed to fetch intraday data for NSE_EQ|INE160A01022
+2025-12-31 11:20:06,884 | INFO |   No signal (MA20: Rs120.55, LTP: Rs124.66, Distance: 3.41%)
+2025-12-31 11:20:06,885 | INFO | Scanning NATIONALUM...
+2025-12-31 11:20:07,628 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:07,629 | ERROR | Failed to fetch intraday data for NSE_EQ|INE139A01034
+2025-12-31 11:20:09,484 | INFO |   No signal (MA20: Rs267.73, LTP: Rs316.60, Distance: 18.25%)
+2025-12-31 11:20:09,484 | INFO | Scanning TATASTEEL...
+2025-12-31 11:20:10,232 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:10,233 | ERROR | Failed to fetch intraday data for NSE_EQ|INE081A01020
+2025-12-31 11:20:10,658 | INFO |   No signal (MA20: Rs167.46, LTP: Rs180.01, Distance: 7.50%)
+2025-12-31 11:20:10,658 | INFO | Scanning IDEA...
+2025-12-31 11:20:11,370 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:11,371 | ERROR | Failed to fetch intraday data for NSE_EQ|INE669E01016
+2025-12-31 11:20:11,756 | INFO |   No signal (MA20: Rs10.70, LTP: Rs12.29, Distance: 14.91%)
+2025-12-31 11:20:11,756 | INFO | Scanning ZEEL...
+2025-12-31 11:20:12,501 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:12,502 | ERROR | Failed to fetch intraday data for NSE_EQ|INE256A01028
+2025-12-31 11:20:12,874 | INFO |   No signal (MA20: Rs95.67, LTP: Rs89.95, Distance: -5.98%)
+2025-12-31 11:20:12,874 | INFO | Scanning CANBK...
+2025-12-31 11:20:13,587 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:13,589 | ERROR | Failed to fetch intraday data for NSE_EQ|INE476A01022
+2025-12-31 11:20:13,996 | INFO |   No signal (MA20: Rs148.28, LTP: Rs157.40, Distance: 6.15%)
+2025-12-31 11:20:13,997 | INFO | Scanning NMDC...
+2025-12-31 11:20:14,711 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:14,712 | ERROR | Failed to fetch intraday data for NSE_EQ|INE584A01023
+2025-12-31 11:20:15,090 | INFO |   No signal (MA20: Rs75.53, LTP: Rs83.67, Distance: 10.78%)
+2025-12-31 11:20:15,090 | INFO | Scanning IOC...
+2025-12-31 11:20:15,866 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:15,867 | ERROR | Failed to fetch intraday data for NSE_EQ|INE242A01010
+2025-12-31 11:20:16,286 | INFO |   No signal (MA20: Rs163.96, LTP: Rs165.41, Distance: 0.88%)
+2025-12-31 11:20:16,286 | INFO | Scanning MANAPPURAM...
+2025-12-31 11:20:17,075 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:17,076 | ERROR | Failed to fetch intraday data for NSE_EQ|INE522D01027
+2025-12-31 11:20:17,461 | INFO |   No signal (MA20: Rs281.69, LTP: Rs309.25, Distance: 9.78%)
+2025-12-31 11:20:17,462 | INFO | Scanning SOUTHBANK...
+2025-12-31 11:20:18,219 | ERROR | API Error 400: {"status":"error","errors":[{"errorCode":"UDAPI100012","message":"Invalid Endpoint","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100012","property_path":null,"invalid_value":null}]}
+2025-12-31 11:20:18,220 | ERROR | Failed to fetch intraday data for NSE_EQ|INE683A01023
+2025-12-31 11:20:18,607 | INFO |   No signal (MA20: Rs39.50, LTP: Rs38.51, Distance: -2.50%)
+2025-12-31 11:20:18,608 | INFO | Next scan at 11:25:00 (in 281s)
+2025-12-31 11:21:11,716 | INFO | Bot stopped by user
+2025-12-31 11:21:11,716 | INFO | ================================================================================
+2025-12-31 11:21:11,716 | INFO | Bot execution completed
+2025-12-31 11:21:11,716 | INFO | ================================================================================
+2025-12-31 11:21:11,943 | INFO | ================================================================================
+2025-12-31 11:21:11,944 | INFO | BOT v0.8 STARTED - 2025-12-31 11:21:11
+2025-12-31 11:21:11,944 | INFO | ================================================================================
+2025-12-31 11:21:11,944 | INFO | Bot v0.8 starting...
+2025-12-31 11:21:11,944 | INFO | Strategy: MORNING BOUNCE ONLY (9:15 AM - 1:30 PM)
+2025-12-31 11:21:11,944 | INFO | Syncing positions from Upstox...
+2025-12-31 11:21:13,559 | INFO | Position sync complete: 0 positions loaded
+2025-12-31 11:21:13,581 | INFO | Scanning YESBANK...
+2025-12-31 11:21:13,944 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:13,944 | INFO |   Insufficient candle data
+2025-12-31 11:21:13,944 | INFO | Scanning SUZLON...
+2025-12-31 11:21:14,279 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:14,279 | INFO |   Insufficient candle data
+2025-12-31 11:21:14,279 | INFO | Scanning RPOWER...
+2025-12-31 11:21:14,657 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:14,657 | INFO |   Insufficient candle data
+2025-12-31 11:21:14,657 | INFO | Scanning IDFCFIRSTB...
+2025-12-31 11:21:14,993 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:14,993 | INFO |   Insufficient candle data
+2025-12-31 11:21:14,994 | INFO | Scanning SAIL...
+2025-12-31 11:21:15,351 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:15,351 | INFO |   Insufficient candle data
+2025-12-31 11:21:15,351 | INFO | Scanning PNB...
+2025-12-31 11:21:15,722 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:15,722 | INFO |   Insufficient candle data
+2025-12-31 11:21:15,722 | INFO | Scanning NATIONALUM...
+2025-12-31 11:21:16,063 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:16,063 | INFO |   Insufficient candle data
+2025-12-31 11:21:16,063 | INFO | Scanning TATASTEEL...
+2025-12-31 11:21:16,408 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:16,408 | INFO |   Insufficient candle data
+2025-12-31 11:21:16,408 | INFO | Scanning IDEA...
+2025-12-31 11:21:16,825 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:16,826 | INFO |   Insufficient candle data
+2025-12-31 11:21:16,826 | INFO | Scanning ZEEL...
+2025-12-31 11:21:17,227 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:17,227 | INFO |   Insufficient candle data
+2025-12-31 11:21:17,227 | INFO | Scanning CANBK...
+2025-12-31 11:21:17,588 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:17,589 | INFO |   Insufficient candle data
+2025-12-31 11:21:17,589 | INFO | Scanning NMDC...
+2025-12-31 11:21:17,934 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:17,934 | INFO |   Insufficient candle data
+2025-12-31 11:21:17,934 | INFO | Scanning IOC...
+2025-12-31 11:21:18,274 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:18,274 | INFO |   Insufficient candle data
+2025-12-31 11:21:18,274 | INFO | Scanning MANAPPURAM...
+2025-12-31 11:21:18,624 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:18,624 | INFO |   Insufficient candle data
+2025-12-31 11:21:18,624 | INFO | Scanning SOUTHBANK...
+2025-12-31 11:21:18,965 | ERROR | Error building candles: name 'get_intraday_data' is not defined
+2025-12-31 11:21:18,965 | INFO |   Insufficient candle data
+2025-12-31 11:21:18,965 | INFO | Next scan at 11:25:00 (in 221s)
+2025-12-31 11:21:58,697 | INFO | Bot stopped by user
+2025-12-31 11:21:58,698 | INFO | ================================================================================
+2025-12-31 11:21:58,698 | INFO | Bot execution completed
+2025-12-31 11:21:58,698 | INFO | ================================================================================
+2025-12-31 11:21:58,959 | INFO | ================================================================================
+2025-12-31 11:21:58,959 | INFO | BOT v0.8 STARTED - 2025-12-31 11:21:58
+2025-12-31 11:21:58,959 | INFO | ================================================================================
+2025-12-31 11:21:58,959 | INFO | Bot v0.8 starting...
+2025-12-31 11:21:58,959 | INFO | Strategy: MORNING BOUNCE ONLY (9:15 AM - 1:30 PM)
+2025-12-31 11:21:58,959 | INFO | Syncing positions from Upstox...
+2025-12-31 11:21:59,389 | INFO | Position sync complete: 0 positions loaded
+2025-12-31 11:21:59,410 | INFO | Scanning YESBANK...
+2025-12-31 11:21:59,757 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:21:59,757 | INFO |   Insufficient candle data
+2025-12-31 11:21:59,757 | INFO | Scanning SUZLON...
+2025-12-31 11:22:00,104 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:22:00,105 | INFO |   Insufficient candle data
+2025-12-31 11:22:00,105 | INFO | Scanning RPOWER...
+2025-12-31 11:22:00,482 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:22:00,482 | INFO |   Insufficient candle data
+2025-12-31 11:22:00,483 | INFO | Scanning IDFCFIRSTB...
+2025-12-31 11:22:00,843 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:22:00,843 | INFO |   Insufficient candle data
+2025-12-31 11:22:00,843 | INFO | Scanning SAIL...
+2025-12-31 11:22:01,216 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:22:01,216 | INFO |   Insufficient candle data
+2025-12-31 11:22:01,217 | INFO | Scanning PNB...
+2025-12-31 11:22:01,559 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:22:01,559 | INFO |   Insufficient candle data
+2025-12-31 11:22:01,559 | INFO | Scanning NATIONALUM...
+2025-12-31 11:22:01,924 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:22:01,924 | INFO |   Insufficient candle data
+2025-12-31 11:22:01,924 | INFO | Scanning TATASTEEL...
+2025-12-31 11:22:02,282 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:22:02,282 | INFO |   Insufficient candle data
+2025-12-31 11:22:02,282 | INFO | Scanning IDEA...
+2025-12-31 11:22:02,658 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:22:02,658 | INFO |   Insufficient candle data
+2025-12-31 11:22:02,658 | INFO | Scanning ZEEL...
+2025-12-31 11:22:03,018 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:22:03,018 | INFO |   Insufficient candle data
+2025-12-31 11:22:03,018 | INFO | Scanning CANBK...
+2025-12-31 11:22:03,372 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:22:03,372 | INFO |   Insufficient candle data
+2025-12-31 11:22:03,372 | INFO | Scanning NMDC...
+2025-12-31 11:22:03,738 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:22:03,738 | INFO |   Insufficient candle data
+2025-12-31 11:22:03,738 | INFO | Scanning IOC...
+2025-12-31 11:22:04,093 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:22:04,093 | INFO |   Insufficient candle data
+2025-12-31 11:22:04,094 | INFO | Scanning MANAPPURAM...
+2025-12-31 11:22:04,458 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:22:04,459 | INFO |   Insufficient candle data
+2025-12-31 11:22:04,459 | INFO | Scanning SOUTHBANK...
+2025-12-31 11:22:04,818 | ERROR | Error building candles: get_intraday_candles() got an unexpected keyword argument 'interval'
+2025-12-31 11:22:04,818 | INFO |   Insufficient candle data
+2025-12-31 11:22:04,819 | INFO | Next scan at 11:25:00 (in 175s)
+2025-12-31 11:24:54,894 | INFO | Bot stopped by user
+2025-12-31 11:24:54,894 | INFO | ================================================================================
+2025-12-31 11:24:54,894 | INFO | Bot execution completed
+2025-12-31 11:24:54,894 | INFO | ================================================================================
+2025-12-31 11:33:20,274 | INFO | ================================================================================
+2025-12-31 11:33:20,274 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 11:33:20
+2025-12-31 11:33:20,274 | INFO | ================================================================================
+2025-12-31 11:33:36,164 | INFO | Placing BUY order: YESBANK @ Rs21.61, Qty: 5, Strategy: MORNING_BOUNCE
+2025-12-31 11:33:53,532 | INFO | ================================================================================
+2025-12-31 11:33:53,532 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 11:33:53
+2025-12-31 11:33:53,532 | INFO | ================================================================================
+2025-12-31 11:34:00,456 | INFO | Placing BUY order: YESBANK @ Rs21.60, Qty: 5, Strategy: MORNING_BOUNCE
+2025-12-31 11:34:06,784 | INFO | Placing BUY order: SUZLON @ Rs52.68, Qty: 5, Strategy: MORNING_BOUNCE
+2025-12-31 11:34:15,226 | INFO | Placing BUY order: IDFCFIRSTB @ Rs85.59, Qty: 5, Strategy: MORNING_BOUNCE
+2025-12-31 11:34:23,718 | INFO | Placing BUY order: PNB @ Rs124.67, Qty: 5, Strategy: MORNING_BOUNCE
+2025-12-31 11:34:34,836 | INFO | Placing BUY order: TATASTEEL @ Rs180.28, Qty: 5, Strategy: MORNING_BOUNCE
+2025-12-31 11:34:57,295 | INFO | Placing BUY order: ZEEL @ Rs90.02, Qty: 5, Strategy: MORNING_BOUNCE
+2025-12-31 11:35:01,352 | INFO | Placing BUY order: CANBK @ Rs157.52, Qty: 5, Strategy: MORNING_BOUNCE
+2025-12-31 11:35:13,640 | INFO | Placing BUY order: NMDC @ Rs83.62, Qty: 5, Strategy: MORNING_BOUNCE
+2025-12-31 11:35:19,687 | INFO | Placing BUY order: IOC @ Rs165.40, Qty: 5, Strategy: MORNING_BOUNCE
+2025-12-31 11:40:22,223 | INFO | Placing BUY order: IDEA @ Rs12.24, Qty: 5, Strategy: MORNING_BOUNCE
+2025-12-31 11:40:42,360 | INFO | Placing BUY order: ZEEL @ Rs90.05, Qty: 5, Strategy: MORNING_BOUNCE
+2025-12-31 11:41:40,679 | INFO | ================================================================================
+2025-12-31 11:41:40,680 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 11:41:40
+2025-12-31 11:41:40,680 | INFO | ================================================================================
+2025-12-31 11:41:59,047 | INFO | ================================================================================
+2025-12-31 11:41:59,047 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 11:41:59
+2025-12-31 11:41:59,047 | INFO | ================================================================================
+2025-12-31 11:42:06,766 | INFO | ================================================================================
+2025-12-31 11:42:06,767 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 11:42:06
+2025-12-31 11:42:06,767 | INFO | ================================================================================
+2025-12-31 11:42:20,426 | INFO | ================================================================================
+2025-12-31 11:42:20,426 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 11:42:20
+2025-12-31 11:42:20,426 | INFO | ================================================================================
+2025-12-31 11:42:29,211 | INFO | ================================================================================
+2025-12-31 11:42:29,211 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 11:42:29
+2025-12-31 11:42:29,211 | INFO | ================================================================================
+2025-12-31 11:42:35,053 | INFO | ================================================================================
+2025-12-31 11:42:35,053 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 11:42:35
+2025-12-31 11:42:35,053 | INFO | ================================================================================
+2025-12-31 11:42:43,056 | INFO | ================================================================================
+2025-12-31 11:42:43,056 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 11:42:43
+2025-12-31 11:42:43,056 | INFO | ================================================================================
+2025-12-31 11:42:49,950 | INFO | ================================================================================
+2025-12-31 11:42:49,950 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 11:42:49
+2025-12-31 11:42:49,950 | INFO | ================================================================================
+2025-12-31 11:42:56,558 | INFO | ================================================================================
+2025-12-31 11:42:56,558 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 11:42:56
+2025-12-31 11:42:56,558 | INFO | ================================================================================
+2025-12-31 11:43:03,400 | INFO | ================================================================================
+2025-12-31 11:43:03,400 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 11:43:03
+2025-12-31 11:43:03,400 | INFO | ================================================================================
+2025-12-31 11:49:26,711 | INFO | ================================================================================
+2025-12-31 11:49:26,711 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 11:49:26
+2025-12-31 11:49:26,711 | INFO | ================================================================================
+2025-12-31 11:57:52,659 | INFO | ================================================================================
+2025-12-31 11:57:52,659 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 11:57:52
+2025-12-31 11:57:52,661 | INFO | ================================================================================
+2025-12-31 12:20:05,996 | INFO | ================================================================================
+2025-12-31 12:20:05,996 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 12:20:05
+2025-12-31 12:20:05,996 | INFO | ================================================================================
+2025-12-31 12:25:37,016 | INFO | ================================================================================
+2025-12-31 12:25:37,016 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 12:25:37
+2025-12-31 12:25:37,017 | INFO | ================================================================================
+2025-12-31 12:41:53,570 | INFO | ================================================================================
+2025-12-31 12:41:53,570 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 12:41:53
+2025-12-31 12:41:53,570 | INFO | ================================================================================
+2025-12-31 12:44:09,980 | INFO | ================================================================================
+2025-12-31 12:44:09,980 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 12:44:09
+2025-12-31 12:44:09,980 | INFO | ================================================================================
+2025-12-31 12:53:20,185 | INFO | ================================================================================
+2025-12-31 12:53:20,185 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 12:53:20
+2025-12-31 12:53:20,185 | INFO | ================================================================================
+2025-12-31 13:04:53,571 | INFO | ================================================================================
+2025-12-31 13:04:53,571 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 13:04:53
+2025-12-31 13:04:53,571 | INFO | ================================================================================
+2025-12-31 13:09:03,040 | INFO | ================================================================================
+2025-12-31 13:09:03,040 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 13:09:03
+2025-12-31 13:09:03,040 | INFO | ================================================================================
+2025-12-31 13:09:39,257 | INFO | ================================================================================
+2025-12-31 13:09:39,257 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 13:09:39
+2025-12-31 13:09:39,257 | INFO | ================================================================================
+2025-12-31 13:10:22,760 | INFO | ================================================================================
+2025-12-31 13:10:22,760 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 13:10:22
+2025-12-31 13:10:22,761 | INFO | ================================================================================
+2025-12-31 13:15:26,942 | INFO | ================================================================================
+2025-12-31 13:15:26,942 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 13:15:26
+2025-12-31 13:15:26,943 | INFO | ================================================================================
+2025-12-31 13:16:00,097 | INFO | ================================================================================
+2025-12-31 13:16:00,097 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 13:16:00
+2025-12-31 13:16:00,097 | INFO | ================================================================================
+2025-12-31 13:22:38,732 | INFO | Placing exit order: IDEA @ Rs12.50, Reason: TARGET
+2025-12-31 13:22:39,458 | INFO | Created daily trades log: trades_log_20251231.csv
+2025-12-31 13:22:39,459 | INFO | Created master trades log: trades_log_master.csv
+2025-12-31 13:22:39,459 | INFO | CSV logged: IDEA | P&L: Rs1.25 | Exit: Bot_Target
+2025-12-31 13:22:39,459 | INFO | Exit TARGET: IDEA @ Rs12.50, P&L: Rs+1.25
+2025-12-31 13:22:39,460 | INFO | TARGET HIT: IDEA at Rs12.50
+2025-12-31 13:42:08,584 | INFO | Placing exit order: CANBK @ Rs155.70, Reason: STOPLOSS
+2025-12-31 13:42:09,109 | INFO | CSV logged: CANBK | P&L: Rs-9.14 | Exit: Bot_SL
+2025-12-31 13:42:09,109 | INFO | Exit STOPLOSS: CANBK @ Rs155.70, P&L: Rs-9.14
+2025-12-31 13:42:09,110 | INFO | STOP-LOSS HIT: CANBK at Rs155.70
+2025-12-31 15:07:55,074 | INFO | ================================================================================
+2025-12-31 15:07:55,074 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 15:07:55
+2025-12-31 15:07:55,074 | INFO | ================================================================================
+2025-12-31 15:07:58,321 | INFO | ================================================================================
+2025-12-31 15:07:58,321 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 15:07:58
+2025-12-31 15:07:58,321 | INFO | ================================================================================
+2025-12-31 15:14:24,573 | INFO | ================================================================================
+2025-12-31 15:14:24,573 | INFO | MA BOUNCE BOT v0.8 STARTED - 2025-12-31 15:14:24
+2025-12-31 15:14:24,573 | INFO | ================================================================================
+2025-12-31 15:15:28,417 | INFO | EOD Exit triggered at 3:15 PM
+2025-12-31 15:15:28,417 | INFO | EOD Exit: No positions to close
