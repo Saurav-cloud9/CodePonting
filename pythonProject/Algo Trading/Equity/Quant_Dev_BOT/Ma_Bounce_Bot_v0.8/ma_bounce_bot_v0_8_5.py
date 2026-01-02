@@ -98,7 +98,7 @@ ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.e
 # ============================================
 MAX_CAPITAL_PER_ORDER = 1000  # Skip orders > ₹1000 (prevents expensive stocks)
 MAX_POSITIONS = 10  # ML Optimizer: 10 stocks = faster pattern recognition (v6)
-EOD_EXIT_TIME = "15:05"  # Exit ALL positions at 3:15 PM (CRITICAL: avoid ₹50/scrip charges!)
+EOD_EXIT_TIME = "15:00"  # Exit ALL positions at 3:15 PM (CRITICAL: avoid ₹50/scrip charges!)
 
 # Watchlist - Cleaned for intraday trading only (removed BE/ASM/suspended stocks)
 # REMOVED: IRFC (data discrepancy), IDFC (duplicate), JPASSOCIAT (BE segment),
@@ -352,7 +352,7 @@ def get_current_strategy():
     now = datetime.now().time()
     morning_end = datetime.strptime("13:30", "%H:%M").time()
     late_start = datetime.strptime("14:30", "%H:%M").time()
-    market_close = datetime.strptime("15:05", "%H:%M").time()
+    market_close = datetime.strptime("15:00", "%H:%M").time()
 
     if now < morning_end:
         return "MORNING_BOUNCE"
