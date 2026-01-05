@@ -447,3 +447,120 @@
 
 ### NEXT SESSION TRIGGER:
 "Ready to analyze historical data" OR "Upstox script working, CSVs generated" OR "Let's dive into MA Bounce definition"
+
+### Fri, Jan 2, 2026 - PROGRESS
+- Applied "golden hour thinking" to trading strategy - focus entries 9:15-10:15 AM, avoid 11 AM-2 PM chop
+- **MAJOR BREAKTHROUGH**: Discovered v0.8 wasn't detecting bounces - was buying on MA20 touch, not actual bounce!
+- Clarified bounce definition: (1) Low touches/dips below MA20, (2) Next candle closes 1% above MA20 = confirmed bounce
+- Confirmed Daily MAs are STATIC per trading day - same MA50/100/200 values used for ALL 5-min candles that day
+- Retrieved YESBANK Daily MAs for last 10 trading days (Dec 19, 2025 → Jan 2, 2026) via Kite API
+- Current YESBANK status (Jan 2): Price ₹22.34, MA50=22.32, MA100=21.57, MA200=20.44 → UPTREND CONFIRMED ✅
+- Fetched complete 5-min candle data: ~750 candles across 10 trading days from Kite API
+- Defined bounce detection logic: `if low <= MA20 and close > MA20 × 1.01` with 15-min bounce window (3 candles max)
+- Established 7 MVP filter combinations to test: No filter, MA50, MA100, MA200, MA50+100, MA50+200, MA50+100+200
+- Decided on multiple profit target testing: 1%, 2%, 3% to find optimal risk:reward balance
+- Test structure: 7 filters × 3 targets = 21 scenarios, rank by Score (Profit × #Trades)
+- Ran quick sanity check on Jan 2 data: Detected 6 MA20 touches, 0 valid bounces (consolidation day, not trending)
+- Pro trader wisdom: 15-min bounce window = 3x candle interval, prevents false signals from extended consolidation
+- Confirmed need to test across ALL 5 stocks: YESBANK, SUZLON, PNB, TATASTEEL, IDEA
+- Token efficiency: Deferred full backtest computation to tomorrow for clean implementation
+- Setup complete: Daily MAs calculated ✅, 5-min data fetched ✅, bounce logic defined ✅, 7 MVPs ready ✅
+- Next session: Build comprehensive backtest script → Process all 750 candles → Generate results table → Find winning MVP + target → Expand to 4 more stocks
+
+### Sat, Jan 3, 2026 - BACKTEST BREAKTHROUGH & REALITY CHECK
+
+**THRESHOLD RESEARCH & STRATEGY REFINEMENT:**
+- Questioned 1% bounce threshold - researched TradingView, Zerodha Varsity, pro trader sources
+- **KEY FINDING**: Pros DON'T use fixed % thresholds! Use simple crossover: close > MA20 (no buffer)
+- Grok confirmed: MA treated as "area not line", bounce = candle close above MA after touch, volume confirmation critical
+- Decided on 3 threshold options to test: (1) No threshold (close > MA20), (2) 0.5% threshold, (3) 1% threshold
+- **FINAL DECISION**: Use Option 3 (simple close > MA20) - industry standard, matches pro logic
+- Updated targets to realistic levels: 0.5%, 1%, 1.5% (from 1%, 2%, 3%) - better for 5-min timeframe
+- Aligned stop loss with targets: 0.5% SL (from 1%) for better risk management
+
+**CODE STRUCTURE OVERHAUL:**
+- **CRITICAL FIX #1**: Filter check BEFORE bounce detection (efficiency - skip downtrending candles immediately)
+- **CRITICAL FIX #2**: Added current candle bounce check (was only checking next 3 candles - missed intracandle bounces!)
+- **CRITICAL FIX #3**: Added volume confirmation (bounce_volume > avg_volume × 1.5) - separates institutional vs retail
+- **DISCOVERED MISSING FILTER**: Added MA100+200 filter → Total filters = 8 (not 7)
+- Final test matrix: 8 filters × 3 targets = 24 scenarios (not 21!)
+- Borrowed v0.8 candle fetching mechanism - proven Platinum Engine with holiday/weekend handling
+- Clarified "track next 75 candles" = from entry point, not all daily candles (75 × 5min = 6.25 hours = rest of trading day)
+
+**FIRST BACKTEST RUN - SHOCKING RESULTS:**
+- Successfully fetched 3750 1-min candles → resampled to 750 5-min candles ✅
+- Detected 476 bounce touches, 52 volume-confirmed bounces ✅
+- **BRUTAL REALITY**: ALL 24 scenarios showed LOSSES! Best: -₹0.44, Worst: -₹3.26
+- Win rates dismal: 44% (0.5% target), 25% (1% target), 17% (1.5% target)
+- **ROOT CAUSE IDENTIFIED**: MA50 filters = 0 trades! Stock was BELOW MA50 entire period
+- YESBANK Dec 19-Jan 2 period = DOWNTREND (₹21.50 price vs ₹22.32-22.58 MA50)
+- Backtest confirmed strategy logic works but tested WRONG market condition (needed uptrend, got downtrend)
+
+**DATA GOLDMINE DISCOVERED:**
+- Received historical CSVs: SUZLON, PNB, TATASTEEL, IDEA with pre-calculated MAs ✅
+- CSV features: 1-min OHLCV, MA20/50/100/200, price position flags, distance metrics
+- **PROBLEM**: CSVs are from Dec 20-31, 2024 (wrong year!) - need Dec 2025/Jan 2026 data
+- PNB showed promise: 51.6% of candles above MA50 (better uptrend candidate than YESBANK)
+- **PLAN**: Test backtest logic with 2024 CSVs tomorrow, then fetch proper 2025 data for real results
+
+**KEY LEARNINGS:**
+- Pro bounce traders use: (1) Simple crossover not % thresholds, (2) Volume confirmation, (3) MA as area not line
+- Strategy works but requires UPTRENDING stocks - filters eliminated all trades on downtrending YESBANK
+- Need to test multiple stocks to find which were in uptrend during Dec 19-Jan 2 period
+- 2024 data useful for logic testing but 2025 data needed for actual backtest results
+- Net profit formula correct in code: (wins × profit_per_share) - (losses × loss_per_share), not percentages
+
+**ACHIEVEMENTS:**
+✅ Built complete corrected backtest v1.0 with 70-line structure summary
+✅ Fixed 3 critical bounce detection bugs (filter order, current candle, volume)
+✅ Validated backtest runs successfully (750 candles, 24 scenarios)
+✅ Identified why YESBANK failed (downtrend) - strategy logic proven sound
+✅ Discovered multi-stock CSV data source for comprehensive testing
+✅ Established realistic targets (0.5-1.5%) and volume confirmation (1.5× avg)
+
+**NEXT SESSION:**
+- Test backtest with 2024 CSVs to verify logic on all 4 stocks
+- Identify which stocks were in best uptrend Dec 2024
+- Fetch proper Dec 2025/Jan 2026 data for SUZLON, PNB, TATASTEEL, IDEA
+- Run comprehensive 4-stock backtest with corrected logic
+- Find optimal stock + filter + target combination for production
+
+
+### Sun, Jan 4, 2026 - OPTIONS VISION BUILDING & EQUITY BOT BUG FIXES
+
+**EQUITY BOT - CRITICAL BUG DISCOVERIES:**
+- **BUG #1 (Duplicate Trade Risk)**: Current candle bounce → code still checked next 3 candles → potential duplicate entries
+  - Fix: Add `else` clause - check next candles ONLY if current didn't bounce
+- **BUG #2 (Filter at Wrong Time - GENIUS CATCH!)**: Filter checked at TOUCH candle (i) but entry at BOUNCE candle (j)
+  - Example: Touch at ₹20.95 < MA50 (filter fail) → bounce at ₹22.50 > MA50 (should pass!)
+  - Filtering out winning trades! 🚨
+  - Fix: Move filter check AFTER bounce confirmation, check at entry_index not touch_index
+- Built multi-stock backtest v1.1: 8 filters × 3 targets × 4 stocks = 96 scenarios
+- Ready to test 2024 CSVs (SUZLON, PNB, TATASTEEL, IDEA) - pure CSV processing, no API/tokens
+- GitHub Copilot assisting with bug identification
+- Status: Code ready, waiting to apply 2 critical fixes → run 4-stock backtest
+
+**BSC BOT STRATEGY (Brief):**
+- Dad's account: ₹5L full deployment (4:1 ratio, 93% POP, ₹8K/week = ₹32K/month)
+- My account: ₹1.2L test tomorrow, scale on 70%+ win rate
+- Sweet spot: 428-528 points OTM, 100-point spreads (75% more premium than wide spreads)
+- Weekly expiries safer (91% POP) than monthly (86% POP) despite worse R/R ratio
+- Black swan risk = 9% (gap downs bypass circuit breakers, no exit time)
+- Streak app discovered: Pre-built scanners → saves tokens + faster workflow
+- Priority: RKO manual (9:15-10 AM) → equity bot development rest of day
+
+**KEY LEARNINGS:**
+- Filter timing critical: Check at entry point, not touch point
+- 2024 data valid for logic testing (market psychology consistent)
+- Bounce detection: Current candle first, then next 3 (avoid duplicates)
+- Volume confirmation separates institutional (1.5× avg) from retail moves
+
+**ACHIEVEMENTS:**
+✅ Identified 2 game-changing bugs in bounce detection logic
+✅ Built 96-scenario multi-stock backtest framework
+✅ Designed complete BSC BOT with historical volatility validation
+✅ Established token-saving workflow (Streak for scans, Sensibull for paper trading)
+
+**MONDAY PLAN:**
+- Fix 2 critical bugs → run 4-stock 2024 backtest → identify winning combinations
+- Deploy BSC BOT: My account ₹1.2L test, Dad's ₹5L full (trend check 9:15 AM)
