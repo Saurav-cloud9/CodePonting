@@ -564,3 +564,168 @@
 **MONDAY PLAN:**
 - Fix 2 critical bugs → run 4-stock 2024 backtest → identify winning combinations
 - Deploy BSC BOT: My account ₹1.2L test, Dad's ₹5L full (trend check 9:15 AM)
+
+### Mon, Jan 5, 2026 - RKO DEPLOYMENT & OPTIONS GREEKS MASTERY
+
+**RKO BOT - FIRST LIVE DEPLOYMENT:**
+- **Position Entered**: 13th Jan expiry Bull Put Spread (8 DTE → 5 trading days)
+  - SELL: 25900 PE @ ₹20.55 (3 lots = 195 qty)
+  - BUY: 25800 PE @ ₹14.60 (3 lots = 195 qty)
+  - Net Credit: ₹5.95/lot, Max Profit: ₹1,170, Max Loss: ₹18,340
+  - Breakeven: 25,894 (420-point cushion from entry NIFTY 26,315)
+- **Current Status (EOD)**: -₹761 loss (NIFTY down to 26,250, 90% POP intact)
+- **Risk Management**: 26,100 stop loss = 200-point buffer above breakeven
+- **Strategy Validated**: 405-505 OTM strikes (within 428-528 sweet spot ✅)
+- **Exit Plan**: Hold to expiry for max theta burn (Days 3-0 = ₹200-400/day decay)
+- Decision: Skip early exit at 50% profit - maximize theta acceleration in last 3 days
+
+**GREEKS EDUCATION (Sensibull Deep Dive):**
+- **Theta = +1/day** (grows to +50-100/day by Day 3-0): Time decay is our profit engine
+- **Delta = 0.05** (stable): 100-pt NIFTY move = only ₹975 position impact (low volatility ✅)
+- **Vega = -2.1**: VIX spike = ₹2.10 loss per point (minimal risk at VIX 10.07)
+- **Gamma = -0.0002**: Near-zero = Delta stability confirmed
+- **Key Insight**: Options selling = casino owner model (time + probability edge)
+- **Decay Timeline**: Days 5→3 slow (₹50-100/day) → Days 3→0 fast (₹200-400/day) 🔥
+
+**WORKFLOW OPTIMIZATION:**
+- **Data Source**: Upstox API confirmed for 5-min OHLC (historical from Jan 2022)
+- **Trend Detection**: Streak (equity scanners) + Sensibull (options analysis)
+- **Tool Allocation**:
+  - Equity Bot: Upstox download + Streak scanners
+  - RKO Bot: Sensibull (order placement) + Streak (NIFTY trend alerts)
+  - Opstra: Later for advanced OI analysis
+- **Dark Mode Victory**: Dark Reader extension solved Streak visibility 🎉
+
+**MARKET ANALYSIS:**
+- Morning weakness: NIFTY opened 26,334 → reversed to 26,290 → closed 26,250
+- India VIX: 10.07 (+6.5% from Friday) = slight uncertainty but still safe zone
+- Decision: Skipped entry on weak open, entered mid-morning after consolidation
+- Avoided 6th Jan expiry (1 DTE death trap) → chose 13th Jan (5 trading days)
+
+**KEY LEARNINGS:**
+- M2M = Mark-to-Market (unrealized P&L, not realized until exit)
+- Theta compounds exponentially in final 3 days (not linear decay)
+- Bull Put Spreads lose on VIX spikes BUT theta eventually overcomes Vega
+- Low Gamma = predictable risk (Delta stays stable regardless of market moves)
+- Professional "roll strategy": Exit at 70% profit + redeploy (NOT applicable here - only 5 days total)
+
+**ACHIEVEMENTS:**
+✅ Deployed second live RKO position (₹1.2L capital, 90% POP)
+✅ Mastered Greeks dashboard (Theta, Delta, Vega, Gamma, Decay)
+✅ Established Upstox + Streak + Sensibull workflow
+✅ Set up Dark Reader for optimal trading interface
+✅ Validated 5-day hold strategy (max theta vs roll efficiency)
+
+**TUESDAY PLAN:**
+- Morning 9:15 AM: Check NIFTY trend (if > 26,300 = hold, if < 26,100 = exit)
+- Monitor theta burn progress (expect +₹50-150 gain if NIFTY stable)
+- Begin equity bot bug fixes (offline work)
+- Explore Streak scanners for MA bounce pattern detection
+- Set up GTT alerts for 26,100 stop loss in Kite
+
+### Tue, Jan 6, 2026
+- CLAUDE
+- **2nd LIVE RKO DEPLOYMENT**: Entered 13th Jan Bull Put Spread (3 lots, 25800/25900 PE)
+- Day 2 P&L: -₹1,063 (market weakness, NIFTY dropped to 26,156)
+- **THETA MASTERY**: Learned Greeks deeply - Theta printing ₹200+/day despite losses
+- **STREAK SCANNER BUILT**: Created MA trend health checker, confirmed NIFTY below MA20 (bearish signal)
+- Discovered NIFTY lot size = 65 (revised Jan 2026)
+- Decision: Hold overnight, evaluate 9:15-10:15 AM tomorrow (multi-MA analysis pending)
+- Strategy validated: Options selling = casino model, theta working even in downtrend
+
+- GITHUB COPILOT HELPER: Used Copilot to draft Streak scanner logic (saves tokens + time)
+- **STREAK MASTERY BEGINS**: Deep-dive into Zerodha Streak for weekly options trend analysis
+- **VIX CHECK**: India VIX at 10. 02 (low volatility = compressed premiums for short straddle)
+- **CCI SCANNER EXPLORED**: Analyzed "Bullish CCI Crossover On Nifty Weekly Options" default scanner
+- **CCI DECODED**: CCI(20) crossing above -100 = exit from oversold → momentum shift signal
+- Learned CCI application for monitoring live spreads (directional bias + adjustment strike identification)
+- **POSITION MONITORING**: Checked 25900 PE - CCI at -57.23 (neutral zone, no threat), premium ₹83.05
+- **KEY INSIGHT**: CCI scans help anticipate premium momentum shifts before they become losses
+- **CHALLENGE IDENTIFIED**: 6th Jan expiry shown in scans, need 13th Jan strikes (await rollover or use custom watchlist)
+- Next:  Build custom range-bound scanner for bull put spread entries
+
+### **Wed, Jan 7, 2026**
+- **CLAUDE**
+- **POSITION RECOVERY**: Account 1 improved from -₹1,024 → -₹663 (+₹361 gain) as NIFTY held 26,100+ support ✅
+- **CHART ANALYSIS WIN**: Spotted bearish trendline break on 5m chart → bullish reversal confirmed, recovery to 26,140 EOD
+- **ACCOUNT 2 DEPLOYED**: Entered 25,900/25,800 spread (2 lots) @ 3:30 PM (5 DTE optimal timing vs Monday's 8 DTE mistake)
+- **GREEKS MASTERY UNLOCKED**: Combined theta ₹464/day (accelerating to ₹650+ tomorrow) - learned theta = daily decay (cumulative), exponential growth near expiry
+- **LOT SIZE DISCOVERY**: NIFTY lot size = **65** (not 50) effective Jan 6 - NSE reduced from 75 to align contract values
+- **STRIKE DEBATE RESOLVED**: Chose 25,900/25,800 for both accounts (premium over diversification) despite 100% correlation risk
+- **SPREAD CLARITY**: Confirmed both accounts have defined-risk spreads (NOT naked) - max loss capped, AI confusion corrected
+- **COMBINED PORTFOLIO**: -₹767 total P&L, both 200+ points OTM, theta gang strategy active (theta > vega if flat/range-bound)
+- **RISK MANAGEMENT**: 26,000 critical support watch - exit if breaks 25,950 | Profit target: 50% or Monday 2-3 PM (avoid gamma)
+- **TOOL ALLOCATION**: GitHub Copilot for RKO tactical work, Claude for MA Bot strategic R&D ✅
+
+- **MA BOUNCE v0.8 - BUG FIXES COMPLETED**:
+  - ✅ FIX #1: Skip Day 1 (clean MA20 data from previous day)
+  - ✅ FIX #2: Filter timing corrected (check at entry_index, NOT touch_index) - **CRITICAL BUG**
+  - ✅ FIX #3: Duplicate trade protection verified (ELSE structure)
+- **BACKTEST RESULTS (2024 Data - Dec 20-31)**:
+  - TATASTEEL: 57.1% WR, ₹10.48 profit (9 days) 🏆
+  - PNB: 42.9% WR, ₹5.07 profit
+  - SUZLON: 73.7% WR, ₹2.90 profit (high conviction!)
+  - IDEA: 7.7% WR, -₹0.42 loss
+- **IDEA DEBUG SESSION**: 7.7% win rate investigation
+  - Initial hypothesis: Data quality (99 rows missing MAs)
+  - Compared with PNB (same missing pattern, but 42.9% WR)
+  - **ROOT CAUSE FOUND**: IDEA in downtrend (price below MA50/100/200 during Dec 23-31)
+  - Bounces failing because close < MA filters → Strategy correctly rejected bad setups
+  - **Conclusion**: Code working perfectly, IDEA just had unfavorable market conditions
+- **CODE VALIDATION**: 3/4 stocks profitable, 1 correctly filtered downtrend → v0.8 logic confirmed ✅
+- **2025 DATA PREP**: Processed fresh XLSX files (Dec 18, 2025 - Jan 7, 2026)
+  - All 5 stocks including YESBANK (finally!)
+  - Converted to CSV, calculated MA20/50/100/200
+  - 14 days, ~1000 5-min candles each
+  - Volume data cleaned from "K/M" format
+- **VOLUME FILTER ISSUE DISCOVERED**: 1.5x multiplier too strict for 2025 data (0 trades on all stocks!)
+  - Sample analysis: Only 3/10 bounces pass 1.5x threshold
+  - Most legitimate bounces have 0.6-1.4x volume ratios
+- **CLAUDE PRICING SORTED**: Extra usage enabled, $40-50 budget cap, linear API rates confirmed
+- **Next**: Rerun 2025 backtest with adjusted/removed volume filter to validate strategy on recent data
+
+### **Thu, Jan 8, 2026**
+- **CLAUDE**
+- **MA BOUNCE v0.8 VALIDATION**: Tested 2024 data (Dec 20-31) - TATASTEEL 57.1% WR (₹10.48), SUZLON 73.7% WR (₹2.90), PNB 42.9% WR (₹5.07), IDEA 7.7% WR (downtrend, filters working correctly)
+- **IDEA DEBUG WIN**: 7.7% WR not a bug - stock in downtrend (price < MA50/100/200), filters correctly rejected bad setups ✅
+- **2025 DATA PIPELINE BUILT**: Yahoo Finance to the rescue! Downloaded daily MA50/100/200 data (FREE, no API key), merged with 5-min intraday OHLC for all 5 stocks
+- **VOLUME FILTER ISSUE DISCOVERED**: 1.5x multiplier too strict (0 trades!), adjusted to 1.2x - most bounces have 0.6-1.4x volume ratios
+- **CRITICAL BUG FOUND**: Filter check happening at entry candle (after dip) instead of BEFORE dip - uptrend confirmation logic broken! This is why SUZLON had 0 MA filter trades
+- **v0.9 FILTER FIX DEPLOYED**: Moved filter check BEFORE bounce detection - check uptrend FIRST, then look for bounce (correct trader logic)
+- **GITHUB COLLAB**: Caught redundant skip logic (`if not any(filters_passed.values())` never True since "No Filter" always passes) - deleted 3 lines
+- **v0.9 FINAL RESULTS (All 5 stocks)**:
+  - 🏆 **TATASTEEL**: ₹36.58 (13 days), **₹61.91/month** potential, 53.7% WR @ 1.0% target - ABSOLUTE WINNER
+  - PNB: ₹8.58, ₹14.51/month, 38% WR
+  - SUZLON: ₹2.65, ₹4.49/month, 55.8% WR (still below MAs, 0 MA filter trades)
+  - IDEA: ₹0.54, ₹0.91/month, 56% WR (above all MAs, all filters identical)
+  - YESBANK: ₹2.22, ₹3.76/month, 31% WR (MA50 filter: 84.6% WR but only 13 trades!)
+- **STRATEGY VALIDATION**: Filter logic working correctly - different stocks show different filter performance based on price vs MAs
+- **LOGIC CONFIRMED**: One bounce CAN count for multiple filters if stock passes multiple MA conditions - this is CORRECT behavior (testing "does uptrend help bounce success?")
+- **KEY LEARNING**: Strategy works best in stocks with moderate volatility around MAs (TATASTEEL), struggles when consistently below/above all MAs
+- **NEXT STEPS**: TATASTEEL ready for live deployment consideration, test tighter SL (0.3%), consider lower volume filter (1.1x) for more trades
+
+- **GITHUB COPILOT**
+- **EXECUTION ORDER OPTIMIZATION**: Discovered backtest was checking bounce confirmation (expensive 3-candle loop) BEFORE volume - fixed to check volume FIRST, then bounce (more efficient!)
+- **PANDAS DEEP DIVE**: Explained `df.at[i, 'low']` vs `.loc` vs `.iloc` - user debugging volume filter issue, confirmed `.at` is fastest for single value access
+- **VOLUME MULTIPLIER TUNING**: Tested 1.2 → 1.1 → 1.05 → 1.02, still 0 volume-confirmed trades! Root cause: MA columns missing/NaN in CSV - volume filter working, but data issue upstream
+- **FILTER LOGIC VALIDATION SESSION**: User questioned why all filters showing identical results - walked through logic step-by-step, confirmed CORRECT behavior: same bounce counts for multiple filters when stock passes multiple MA conditions (not a bug, it's the design!)
+- **IDEA vs SUZLON COMPARISON**: 
+  - IDEA: Price WAY above all MAs (₹11.35 vs MA50=₹10.02, MA100=₹8.71, MA200=₹7.94) → All 8 filters pass, identical 75 trades
+  - SUZLON: Price BELOW all MAs → Only "No Filter" gets 86 trades, all MA filters: 0 trades
+  - Proof filters are working correctly! ✅
+- **ALL 5 STOCKS TESTED**: Ran comprehensive validation across SUZLON, PNB, TATASTEEL, IDEA, YESBANK - confirmed different filter performance based on price vs daily MAs
+- **FLOW CONFIRMATION DEBATE**: User asked "does uptrend check happen FIRST before bounce?" - traced through code line-by-line, confirmed YES:
+  1. Uptrend filter check (STEP 2)
+  2. Volume check at touch candle (STEP 3) 
+  3. Bounce detection (STEP 4)
+  4. Outcome tracking (STEP 5)
+- **FINAL EXECUTION ORDER FIX**: Moved volume confirmation from AFTER bounce detection to BEFORE - now skip weak-volume touches immediately without wasting compute on bounce confirmation
+- **STAT COUNTER BUG DISCOVERED**: `volume_confirmed` counter was AFTER `if not bounce_confirmed: continue`, so only counting bounces that confirmed (misleading stats). Fix prepared but not applied yet.
+- **PENDING FIX (When User Returns)**: Move `filter_stats[filter_name]['volume_confirmed']` increment to line 264 (right after volume check passes), BEFORE bounce confirmation loop. This makes stats accurate: volume_confirmed = touches with good volume, bounces = confirmed bounces only.
+- **SESSION SUMMARY CREATED**: Documented all fixes completed + pending fix for tomorrow - user has full context to resume
+
+**RKO UPDATE** (Parallel work):
+- Both accounts holding 25,900/25,800 spreads (5 DTE on Friday)
+- Combined theta accelerating toward ₹650+/day
+- 26,000 support holding, positions 200+ OTM
+- Strategy: Hold to Monday 2-3 PM for 50% profit or theta decay
