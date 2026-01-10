@@ -34,7 +34,7 @@ START_DATE_DT = pd.to_datetime(START_DATE).date()
 END_DATE_DT = pd.to_datetime(END_DATE).date()
 
 # Output directory
-OUTPUT_DIR = os.path.expanduser(r"C:\Users\saurav\CodePonting\pythonProject\Algo Trading\Equity\Strategy Developer\MA Bounce Strategy")
+OUTPUT_DIR = os.path.expanduser(r"/pythonProject/Algo Trading/Equity/Strategy Developer/MA Bounce Strategy")
 
 
 # ============================================
