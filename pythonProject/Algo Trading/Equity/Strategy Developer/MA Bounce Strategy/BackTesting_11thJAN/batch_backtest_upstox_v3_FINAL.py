@@ -296,7 +296,7 @@ def detect_bounce(df, filter_mas):
         # Volume confirmation
         if pd.notna(row['avg_volume']) and row['volume'] < row['avg_volume'] * VOLUME_MULTIPLIER:
             continue
-        
+
         # Bounce detection: Close within 0.5% of MA20
         distance = abs(row['close'] - row['ma20']) / row['ma20']
         
