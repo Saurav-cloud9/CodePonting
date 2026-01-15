@@ -30,7 +30,7 @@ Proceed? (yes/no/custom qty):
 
 ---
 
-## **TODO #1: ADD VOLUME FILTER** 🔇
+~~## **TODO #1: ADD VOLUME FILTER** 🔇~~ 
 **File:** `ma_bounce_bot_v1_2_PRODUCTION.py`
 **Location:** Line 381 (inside touch check)
 **Code to add:**
@@ -44,7 +44,7 @@ if touch_candle['volume'] < avg_volume * 1.2:
 
 ---
 
-## **TODO #2: CAPTURE SIGNAL DETAILS** 📊
+~~## **TODO #2: CAPTURE SIGNAL DETAILS** 📊~~
 **File:** `ma_bounce_bot_v1_2_PRODUCTION.py`
 **Location:** Line 388 (when bounce confirmed)
 **Code to modify:**
