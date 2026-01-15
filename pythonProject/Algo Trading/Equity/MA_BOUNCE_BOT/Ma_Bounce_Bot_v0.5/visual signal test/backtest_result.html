@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MA Bounce Bot - Visual Backtest Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #0e1117;
+            color: #fafafa;
+        }
+        .header {
+            background: #1a1d29;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        h1 {
+            margin: 0;
+            color: #4CAF50;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #1a1d29;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .stat-value.positive { color: #4CAF50; }
+        .stat-value.negative { color: #f44336; }
+        .stat-value.neutral { color: #2196F3; }
+        #chart {
+            background: #1a1d29;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            height: 600px;
+        }
+        .signals-table {
+            background: #1a1d29;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: #262b3d;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #4CAF50;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #333;
+        }
+        tr:hover {
+            background: #262b3d;
+        }
+        .signal-valid { color: #4CAF50; font-weight: bold; }
+        .signal-invalid { color: #f44336; }
+        .controls {
+            background: #1a1d29;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        input, select {
+            background: #262b3d;
+            color: white;
+            border: 1px solid #444;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 MA Bounce Bot - Visual Backtest Dashboard</h1>
+        <p>Real Upstox data replay with signal validation</p>
+    </div>
+
+    <div class="controls">
+        <label>Stock:</label>
+        <select id="stockSelect">
+            <option value="YESBANK">YESBANK</option>
+            <option value="SUZLON">SUZLON</option>
+            <option value="TATASTEEL">TATASTEEL</option>
+        </select>
+        
+        <label>Date:</label>
+        <input type="date" id="dateInput" value="2025-12-24">
+        
+        <label>Start Time:</label>
+        <input type="time" id="startTime" value="09:15">
+        
+        <label>End Time:</label>
+        <input type="time" id="endTime" value="15:30">
+        
+        <button onclick="runBacktest()">▶ Run Backtest</button>
+    </div>
+
+    <div class="stats" id="stats">
+        <!-- Stats will be populated here -->
+    </div>
+
+    <div id="chart">
+        <div class="loading">Select parameters and click "Run Backtest" to start...</div>
+    </div>
+
+    <div class="signals-table" id="signalsTable" style="display:none;">
+        <h2>📊 Trading Signals</h2>
+        <table id="signalsTableContent">
+            <!-- Table will be populated here -->
+        </table>
+    </div>
+
+    <script>
+        // This would normally connect to your Python backend
+        // For now, we'll simulate with example data
+        
+        function runBacktest() {
+            const stock = document.getElementById('stockSelect').value;
+            const date = document.getElementById('dateInput').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            
+            // Show loading
+            document.getElementById('chart').innerHTML = '<div class="loading">Loading data and running backtest...</div>';
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                displayResults(generateExampleData(stock, date));
+            }, 1000);
+        }
+        
+        function generateExampleData(stock, date) {
+            // This simulates what your Python script would return
+            // In production, this data comes from running the bot on real Upstox data
+            
+            const candles = [];
+            const signals = [];
+            let price = 21.70;
+            let ma20 = 21.65;
+            
+            // Generate candles for the day
+            for (let hour = 9; hour < 16; hour++) {
+                for (let min = (hour === 9 ? 15 : 0); min < 60; min += 5) {
+                    if (hour === 15 && min > 30) break;
+                    
+                    const timestamp = `2025-12-24 ${hour.toString().padStart(2,'0')}:${min.toString().padStart(2,'0')}`;
+                    
+                    // Simulate price movement
+                    price += (Math.random() - 0.5) * 0.10;
+                    ma20 += (Math.random() - 0.5) * 0.05;
+                    
+                    const open = price;
+                    const high = price + Math.random() * 0.05;
+                    const low = price - Math.random() * 0.05;
+                    const close = price + (Math.random() - 0.5) * 0.03;
+                    
+                    candles.push({
+                        timestamp: timestamp,
+                        open: open,
+                        high: high,
+                        low: low,
+                        close: close,
+                        ma20: ma20
+                    });
+                    
+                    // Simulate signals (price crossing above MA20)
+                    if (close > ma20 && Math.abs(close - ma20) < 0.15 && Math.random() > 0.7) {
+                        signals.push({
+                            timestamp: timestamp,
+                            price: close,
+                            ma20: ma20,
+                            distance: close - ma20,
+                            valid: Math.abs(close - ma20) <= 0.30 && close > ma20
+                        });
+                    }
+                }
+            }
+            
+            return { candles, signals, stock, date };
+        }
+        
+        function displayResults(data) {
+            // Update stats
+            const validSignals = data.signals.filter(s => s.valid).length;
+            const invalidSignals = data.signals.filter(s => !s.valid).length;
+            const accuracy = data.signals.length > 0 ? (validSignals / data.signals.length * 100).toFixed(1) : 0;
+            
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">Stock</div>
+                    <div class="stat-value neutral">${data.stock}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Signals</div>
+                    <div class="stat-value neutral">${data.signals.length}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Valid Signals</div>
+                    <div class="stat-value positive">${validSignals}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Invalid Signals</div>
+                    <div class="stat-value negative">${invalidSignals}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Accuracy</div>
+                    <div class="stat-value ${accuracy >= 80 ? 'positive' : accuracy >= 50 ? 'neutral' : 'negative'}">${accuracy}%</div>
+                </div>
+            `;
+            
+            // Create candlestick chart
+            const timestamps = data.candles.map(c => c.timestamp);
+            
+            const candlestickTrace = {
+                x: timestamps,
+                open: data.candles.map(c => c.open),
+                high: data.candles.map(c => c.high),
+                low: data.candles.map(c => c.low),
+                close: data.candles.map(c => c.close),
+                type: 'candlestick',
+                name: data.stock,
+                increasing: {line: {color: '#26a69a'}},
+                decreasing: {line: {color: '#ef5350'}}
+            };
+            
+            const ma20Trace = {
+                x: timestamps,
+                y: data.candles.map(c => c.ma20),
+                type: 'scatter',
+                mode: 'lines',
+                name: 'MA20',
+                line: {color: '#2196F3', width: 2}
+            };
+            
+            // Add signal markers
+            const validSignalTrace = {
+                x: data.signals.filter(s => s.valid).map(s => s.timestamp),
+                y: data.signals.filter(s => s.valid).map(s => s.price),
+                type: 'scatter',
+                mode: 'markers',
+                name: 'Valid Signals',
+                marker: {
+                    color: '#4CAF50',
+                    size: 12,
+                    symbol: 'triangle-up'
+                }
+            };
+            
+            const invalidSignalTrace = {
+                x: data.signals.filter(s => !s.valid).map(s => s.timestamp),
+                y: data.signals.filter(s => !s.valid).map(s => s.price),
+                type: 'scatter',
+                mode: 'markers',
+                name: 'Invalid Signals',
+                marker: {
+                    color: '#f44336',
+                    size: 12,
+                    symbol: 'x'
+                }
+            };
+            
+            const layout = {
+                title: {
+                    text: `${data.stock} - ${data.date} - MA Bounce Backtest`,
+                    font: {color: '#fafafa', size: 18}
+                },
+                xaxis: {
+                    title: 'Time',
+                    gridcolor: '#333',
+                    color: '#888'
+                },
+                yaxis: {
+                    title: 'Price (₹)',
+                    gridcolor: '#333',
+                    color: '#888'
+                },
+                paper_bgcolor: '#1a1d29',
+                plot_bgcolor: '#1a1d29',
+                font: {color: '#fafafa'},
+                showlegend: true,
+                legend: {
+                    bgcolor: '#262b3d',
+                    bordercolor: '#444',
+                    borderwidth: 1
+                },
+                height: 550
+            };
+            
+            Plotly.newPlot('chart', [candlestickTrace, ma20Trace, validSignalTrace, invalidSignalTrace], layout, {responsive: true});
+            
+            // Display signals table
+            let tableHTML = `
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Price</th>
+                        <th>MA20</th>
+                        <th>Distance</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+            
+            data.signals.forEach(signal => {
+                const statusClass = signal.valid ? 'signal-valid' : 'signal-invalid';
+                const statusText = signal.valid ? '✅ Valid' : '❌ Invalid';
+                tableHTML += `
+                    <tr>
+                        <td>${signal.timestamp.split(' ')[1]}</td>
+                        <td>₹${signal.price.toFixed(2)}</td>
+                        <td>₹${signal.ma20.toFixed(2)}</td>
+                        <td>₹${signal.distance.toFixed(2)}</td>
+                        <td class="${statusClass}">${statusText}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += '</tbody>';
+            document.getElementById('signalsTableContent').innerHTML = tableHTML;
+            document.getElementById('signalsTable').style.display = 'block';
+        }
+        
+        // Auto-load example on page load
+        
+        const backtestData = {"stock": "YESBANK", "date": "2025-12-24", "candles": [{"timestamp": "2025-12-24 15:29", "open": 21.68, "high": 21.68, "low": 21.66, "close": 21.68, "ma20": 21.71}, {"timestamp": "2025-12-24 15:28", "open": 21.66, "high": 21.68, "low": 21.66, "close": 21.67, "ma20": 21.71}, {"timestamp": "2025-12-24 15:27", "open": 21.67, "high": 21.68, "low": 21.66, "close": 21.67, "ma20": 21.71}, {"timestamp": "2025-12-24 15:26", "open": 21.67, "high": 21.68, "low": 21.67, "close": 21.67, "ma20": 21.72}, {"timestamp": "2025-12-24 15:25", "open": 21.68, "high": 21.68, "low": 21.67, "close": 21.68, "ma20": 21.72}, {"timestamp": "2025-12-24 15:24", "open": 21.68, "high": 21.68, "low": 21.67, "close": 21.67, "ma20": 21.72}, {"timestamp": "2025-12-24 15:23", "open": 21.68, "high": 21.69, "low": 21.67, "close": 21.68, "ma20": 21.72}, {"timestamp": "2025-12-24 15:22", "open": 21.69, "high": 21.69, "low": 21.68, "close": 21.68, "ma20": 21.72}, {"timestamp": "2025-12-24 15:21", "open": 21.68, "high": 21.7, "low": 21.68, "close": 21.69, "ma20": 21.72}, {"timestamp": "2025-12-24 15:20", "open": 21.68, "high": 21.69, "low": 21.68, "close": 21.69, "ma20": 21.72}, {"timestamp": "2025-12-24 15:19", "open": 21.68, "high": 21.69, "low": 21.68, "close": 21.68, "ma20": 21.72}, {"timestamp": "2025-12-24 15:18", "open": 21.68, "high": 21.69, "low": 21.67, "close": 21.69, "ma20": 21.72}, {"timestamp": "2025-12-24 15:17", "open": 21.68, "high": 21.69, "low": 21.68, "close": 21.68, "ma20": 21.72}, {"timestamp": "2025-12-24 15:16", "open": 21.68, "high": 21.69, "low": 21.67, "close": 21.68, "ma20": 21.73}, {"timestamp": "2025-12-24 15:15", "open": 21.69, "high": 21.69, "low": 21.68, "close": 21.68, "ma20": 21.73}, {"timestamp": "2025-12-24 15:14", "open": 21.68, "high": 21.69, "low": 21.67, "close": 21.68, "ma20": 21.73}, {"timestamp": "2025-12-24 15:13", "open": 21.69, "high": 21.69, "low": 21.67, "close": 21.68, "ma20": 21.73}, {"timestamp": "2025-12-24 15:12", "open": 21.67, "high": 21.69, "low": 21.67, "close": 21.68, "ma20": 21.73}, {"timestamp": "2025-12-24 15:11", "open": 21.67, "high": 21.68, "low": 21.67, "close": 21.67, "ma20": 21.73}, {"timestamp": "2025-12-24 15:10", "open": 21.69, "high": 21.7, "low": 21.67, "close": 21.67, "ma20": 21.73}, {"timestamp": "2025-12-24 15:09", "open": 21.69, "high": 21.7, "low": 21.69, "close": 21.69, "ma20": 21.73}, {"timestamp": "2025-12-24 15:08", "open": 21.7, "high": 21.71, "low": 21.69, "close": 21.7, "ma20": 21.73}, {"timestamp": "2025-12-24 15:07", "open": 21.7, "high": 21.71, "low": 21.69, "close": 21.7, "ma20": 21.73}, {"timestamp": "2025-12-24 15:06", "open": 21.7, "high": 21.71, "low": 21.69, "close": 21.71, "ma20": 21.73}, {"timestamp": "2025-12-24 15:05", "open": 21.7, "high": 21.72, "low": 21.69, "close": 21.7, "ma20": 21.73}, {"timestamp": "2025-12-24 15:04", "open": 21.71, "high": 21.72, "low": 21.7, "close": 21.72, "ma20": 21.73}, {"timestamp": "2025-12-24 15:03", "open": 21.71, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.73}, {"timestamp": "2025-12-24 15:02", "open": 21.72, "high": 21.73, "low": 21.71, "close": 21.72, "ma20": 21.73}, {"timestamp": "2025-12-24 15:01", "open": 21.72, "high": 21.74, "low": 21.72, "close": 21.72, "ma20": 21.74}, {"timestamp": "2025-12-24 15:00", "open": 21.72, "high": 21.76, "low": 21.72, "close": 21.73, "ma20": 21.74}, {"timestamp": "2025-12-24 14:59", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.71, "ma20": 21.74}, {"timestamp": "2025-12-24 14:58", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.74}, {"timestamp": "2025-12-24 14:57", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.74}, {"timestamp": "2025-12-24 14:56", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.74}, {"timestamp": "2025-12-24 14:55", "open": 21.71, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.74}, {"timestamp": "2025-12-24 14:54", "open": 21.71, "high": 21.72, "low": 21.71, "close": 21.71, "ma20": 21.74}, {"timestamp": "2025-12-24 14:53", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.71, "ma20": 21.74}, {"timestamp": "2025-12-24 14:52", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.74}, {"timestamp": "2025-12-24 14:51", "open": 21.73, "high": 21.73, "low": 21.71, "close": 21.72, "ma20": 21.74}, {"timestamp": "2025-12-24 14:50", "open": 21.72, "high": 21.73, "low": 21.72, "close": 21.73, "ma20": 21.74}, {"timestamp": "2025-12-24 14:49", "open": 21.72, "high": 21.73, "low": 21.71, "close": 21.72, "ma20": 21.74}, {"timestamp": "2025-12-24 14:48", "open": 21.72, "high": 21.73, "low": 21.71, "close": 21.72, "ma20": 21.74}, {"timestamp": "2025-12-24 14:47", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.71, "ma20": 21.74}, {"timestamp": "2025-12-24 14:46", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.75}, {"timestamp": "2025-12-24 14:45", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.74}, {"timestamp": "2025-12-24 14:44", "open": 21.71, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.75}, {"timestamp": "2025-12-24 14:43", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.74}, {"timestamp": "2025-12-24 14:42", "open": 21.71, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.75}, {"timestamp": "2025-12-24 14:41", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.75}, {"timestamp": "2025-12-24 14:40", "open": 21.71, "high": 21.72, "low": 21.71, "close": 21.71, "ma20": 21.75}, {"timestamp": "2025-12-24 14:39", "open": 21.71, "high": 21.72, "low": 21.71, "close": 21.71, "ma20": 21.75}, {"timestamp": "2025-12-24 14:38", "open": 21.71, "high": 21.72, "low": 21.71, "close": 21.71, "ma20": 21.75}, {"timestamp": "2025-12-24 14:37", "open": 21.71, "high": 21.72, "low": 21.7, "close": 21.71, "ma20": 21.75}, {"timestamp": "2025-12-24 14:36", "open": 21.72, "high": 21.72, "low": 21.7, "close": 21.71, "ma20": 21.75}, {"timestamp": "2025-12-24 14:35", "open": 21.71, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.75}, {"timestamp": "2025-12-24 14:34", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.76}, {"timestamp": "2025-12-24 14:33", "open": 21.71, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.75}, {"timestamp": "2025-12-24 14:32", "open": 21.71, "high": 21.72, "low": 21.71, "close": 21.71, "ma20": 21.75}, {"timestamp": "2025-12-24 14:31", "open": 21.71, "high": 21.72, "low": 21.71, "close": 21.71, "ma20": 21.76}, {"timestamp": "2025-12-24 14:30", "open": 21.71, "high": 21.72, "low": 21.71, "close": 21.71, "ma20": 21.76}, {"timestamp": "2025-12-24 14:29", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.76}, {"timestamp": "2025-12-24 14:28", "open": 21.71, "high": 21.72, "low": 21.71, "close": 21.71, "ma20": 21.76}, {"timestamp": "2025-12-24 14:27", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.76}, {"timestamp": "2025-12-24 14:26", "open": 21.72, "high": 21.72, "low": 21.71, "close": 21.72, "ma20": 21.76}, {"timestamp": "2025-12-24 14:25", "open": 21.72, "high": 21.73, "low": 21.71, "close": 21.71, "ma20": 21.76}, {"timestamp": "2025-12-24 14:24", "open": 21.72, "high": 21.73, "low": 21.72, "close": 21.73, "ma20": 21.77}, {"timestamp": "2025-12-24 14:23", "open": 21.72, "high": 21.73, "low": 21.72, "close": 21.72, "ma20": 21.77}, {"timestamp": "2025-12-24 14:22", "open": 21.73, "high": 21.73, "low": 21.72, "close": 21.73, "ma20": 21.76}, {"timestamp": "2025-12-24 14:21", "open": 21.73, "high": 21.73, "low": 21.72, "close": 21.73, "ma20": 21.77}, {"timestamp": "2025-12-24 14:20", "open": 21.74, "high": 21.74, "low": 21.72, "close": 21.73, "ma20": 21.77}, {"timestamp": "2025-12-24 14:19", "open": 21.73, "high": 21.74, "low": 21.72, "close": 21.72, "ma20": 21.77}, {"timestamp": "2025-12-24 14:18", "open": 21.73, "high": 21.74, "low": 21.72, "close": 21.73, "ma20": 21.77}, {"timestamp": "2025-12-24 14:17", "open": 21.73, "high": 21.73, "low": 21.72, "close": 21.72, "ma20": 21.77}, {"timestamp": "2025-12-24 14:16", "open": 21.73, "high": 21.73, "low": 21.72, "close": 21.73, "ma20": 21.77}, {"timestamp": "2025-12-24 14:15", "open": 21.72, "high": 21.73, "low": 21.72, "close": 21.73, "ma20": 21.77}, {"timestamp": "2025-12-24 14:14", "open": 21.72, "high": 21.73, "low": 21.72, "close": 21.72, "ma20": 21.78}, {"timestamp": "2025-12-24 14:13", "open": 21.72, "high": 21.73, "low": 21.71, "close": 21.72, "ma20": 21.77}, {"timestamp": "2025-12-24 14:12", "open": 21.73, "high": 21.73, "low": 21.71, "close": 21.71, "ma20": 21.77}, {"timestamp": "2025-12-24 14:11", "open": 21.72, "high": 21.73, "low": 21.72, "close": 21.73, "ma20": 21.78}, {"timestamp": "2025-12-24 14:10", "open": 21.72, "high": 21.73, "low": 21.71, "close": 21.71, "ma20": 21.78}, {"timestamp": "2025-12-24 14:09", "open": 21.73, "high": 21.73, "low": 21.71, "close": 21.72, "ma20": 21.78}, {"timestamp": "2025-12-24 14:08", "open": 21.72, "high": 21.73, "low": 21.71, "close": 21.72, "ma20": 21.78}, {"timestamp": "2025-12-24 14:07", "open": 21.72, "high": 21.73, "low": 21.71, "close": 21.71, "ma20": 21.78}, {"timestamp": "2025-12-24 14:06", "open": 21.73, "high": 21.73, "low": 21.71, "close": 21.73, "ma20": 21.79}, {"timestamp": "2025-12-24 14:05", "open": 21.73, "high": 21.73, "low": 21.71, "close": 21.73, "ma20": 21.79}, {"timestamp": "2025-12-24 14:04", "open": 21.72, "high": 21.73, "low": 21.71, "close": 21.72, "ma20": 21.79}, {"timestamp": "2025-12-24 14:03", "open": 21.73, "high": 21.74, "low": 21.72, "close": 21.72, "ma20": 21.79}, {"timestamp": "2025-12-24 14:02", "open": 21.73, "high": 21.74, "low": 21.72, "close": 21.74, "ma20": 21.79}, {"timestamp": "2025-12-24 14:01", "open": 21.75, "high": 21.75, "low": 21.73, "close": 21.73, "ma20": 21.79}, {"timestamp": "2025-12-24 14:00", "open": 21.75, "high": 21.76, "low": 21.74, "close": 21.76, "ma20": 21.79}, {"timestamp": "2025-12-24 13:59", "open": 21.75, "high": 21.75, "low": 21.74, "close": 21.75, "ma20": 21.8}, {"timestamp": "2025-12-24 13:58", "open": 21.75, "high": 21.75, "low": 21.74, "close": 21.75, "ma20": 21.79}, {"timestamp": "2025-12-24 13:57", "open": 21.76, "high": 21.76, "low": 21.74, "close": 21.75, "ma20": 21.79}, {"timestamp": "2025-12-24 13:56", "open": 21.77, "high": 21.77, "low": 21.75, "close": 21.76, "ma20": 21.8}, {"timestamp": "2025-12-24 13:55", "open": 21.77, "high": 21.77, "low": 21.76, "close": 21.77, "ma20": 21.8}, {"timestamp": "2025-12-24 13:54", "open": 21.77, "high": 21.77, "low": 21.76, "close": 21.77, "ma20": 21.8}, {"timestamp": "2025-12-24 13:53", "open": 21.78, "high": 21.78, "low": 21.76, "close": 21.77, "ma20": 21.8}, {"timestamp": "2025-12-24 13:52", "open": 21.77, "high": 21.78, "low": 21.76, "close": 21.78, "ma20": 21.8}, {"timestamp": "2025-12-24 13:51", "open": 21.75, "high": 21.78, "low": 21.75, "close": 21.77, "ma20": 21.8}, {"timestamp": "2025-12-24 13:50", "open": 21.77, "high": 21.77, "low": 21.75, "close": 21.76, "ma20": 21.8}, {"timestamp": "2025-12-24 13:49", "open": 21.76, "high": 21.77, "low": 21.75, "close": 21.77, "ma20": 21.81}, {"timestamp": "2025-12-24 13:48", "open": 21.76, "high": 21.77, "low": 21.75, "close": 21.76, "ma20": 21.81}, {"timestamp": "2025-12-24 13:47", "open": 21.78, "high": 21.78, "low": 21.76, "close": 21.76, "ma20": 21.8}, {"timestamp": "2025-12-24 13:46", "open": 21.77, "high": 21.78, "low": 21.76, "close": 21.78, "ma20": 21.81}, {"timestamp": "2025-12-24 13:45", "open": 21.77, "high": 21.78, "low": 21.76, "close": 21.76, "ma20": 21.81}, {"timestamp": "2025-12-24 13:44", "open": 21.76, "high": 21.77, "low": 21.76, "close": 21.76, "ma20": 21.81}, {"timestamp": "2025-12-24 13:43", "open": 21.76, "high": 21.77, "low": 21.76, "close": 21.77, "ma20": 21.81}, {"timestamp": "2025-12-24 13:42", "open": 21.77, "high": 21.77, "low": 21.76, "close": 21.76, "ma20": 21.81}, {"timestamp": "2025-12-24 13:41", "open": 21.75, "high": 21.77, "low": 21.75, "close": 21.76, "ma20": 21.81}, {"timestamp": "2025-12-24 13:40", "open": 21.75, "high": 21.77, "low": 21.75, "close": 21.76, "ma20": 21.81}, {"timestamp": "2025-12-24 13:39", "open": 21.76, "high": 21.77, "low": 21.75, "close": 21.77, "ma20": 21.82}, {"timestamp": "2025-12-24 13:38", "open": 21.76, "high": 21.77, "low": 21.75, "close": 21.77, "ma20": 21.82}, {"timestamp": "2025-12-24 13:37", "open": 21.75, "high": 21.77, "low": 21.75, "close": 21.77, "ma20": 21.82}, {"timestamp": "2025-12-24 13:36", "open": 21.77, "high": 21.77, "low": 21.75, "close": 21.76, "ma20": 21.82}, {"timestamp": "2025-12-24 13:35", "open": 21.77, "high": 21.77, "low": 21.76, "close": 21.77, "ma20": 21.82}, {"timestamp": "2025-12-24 13:34", "open": 21.76, "high": 21.77, "low": 21.75, "close": 21.75, "ma20": 21.82}, {"timestamp": "2025-12-24 13:33", "open": 21.76, "high": 21.76, "low": 21.75, "close": 21.75, "ma20": 21.82}, {"timestamp": "2025-12-24 13:32", "open": 21.77, "high": 21.77, "low": 21.73, "close": 21.75, "ma20": 21.82}, {"timestamp": "2025-12-24 13:31", "open": 21.76, "high": 21.77, "low": 21.76, "close": 21.76, "ma20": 21.82}, {"timestamp": "2025-12-24 13:30", "open": 21.78, "high": 21.78, "low": 21.76, "close": 21.77, "ma20": 21.82}, {"timestamp": "2025-12-24 13:29", "open": 21.75, "high": 21.78, "low": 21.75, "close": 21.78, "ma20": 21.83}, {"timestamp": "2025-12-24 13:28", "open": 21.76, "high": 21.77, "low": 21.75, "close": 21.76, "ma20": 21.82}, {"timestamp": "2025-12-24 13:27", "open": 21.76, "high": 21.76, "low": 21.75, "close": 21.76, "ma20": 21.82}, {"timestamp": "2025-12-24 13:26", "open": 21.75, "high": 21.76, "low": 21.75, "close": 21.76, "ma20": 21.83}, {"timestamp": "2025-12-24 13:25", "open": 21.76, "high": 21.78, "low": 21.75, "close": 21.75, "ma20": 21.83}, {"timestamp": "2025-12-24 13:24", "open": 21.77, "high": 21.78, "low": 21.76, "close": 21.78, "ma20": 21.83}, {"timestamp": "2025-12-24 13:23", "open": 21.77, "high": 21.78, "low": 21.76, "close": 21.76, "ma20": 21.83}, {"timestamp": "2025-12-24 13:22", "open": 21.77, "high": 21.78, "low": 21.76, "close": 21.77, "ma20": 21.83}, {"timestamp": "2025-12-24 13:21", "open": 21.77, "high": 21.78, "low": 21.76, "close": 21.78, "ma20": 21.83}, {"timestamp": "2025-12-24 13:20", "open": 21.77, "high": 21.77, "low": 21.76, "close": 21.77, "ma20": 21.83}, {"timestamp": "2025-12-24 13:19", "open": 21.78, "high": 21.78, "low": 21.76, "close": 21.76, "ma20": 21.83}, {"timestamp": "2025-12-24 13:18", "open": 21.78, "high": 21.78, "low": 21.77, "close": 21.78, "ma20": 21.84}, {"timestamp": "2025-12-24 13:17", "open": 21.78, "high": 21.78, "low": 21.77, "close": 21.77, "ma20": 21.83}, {"timestamp": "2025-12-24 13:16", "open": 21.77, "high": 21.79, "low": 21.77, "close": 21.77, "ma20": 21.84}, {"timestamp": "2025-12-24 13:15", "open": 21.8, "high": 21.8, "low": 21.77, "close": 21.77, "ma20": 21.84}, {"timestamp": "2025-12-24 13:14", "open": 21.79, "high": 21.8, "low": 21.78, "close": 21.8, "ma20": 21.84}, {"timestamp": "2025-12-24 13:13", "open": 21.77, "high": 21.8, "low": 21.77, "close": 21.79, "ma20": 21.84}, {"timestamp": "2025-12-24 13:12", "open": 21.78, "high": 21.8, "low": 21.77, "close": 21.77, "ma20": 21.84}, {"timestamp": "2025-12-24 13:11", "open": 21.78, "high": 21.79, "low": 21.78, "close": 21.79, "ma20": 21.84}, {"timestamp": "2025-12-24 13:10", "open": 21.77, "high": 21.8, "low": 21.77, "close": 21.79, "ma20": 21.84}, {"timestamp": "2025-12-24 13:09", "open": 21.78, "high": 21.79, "low": 21.77, "close": 21.78, "ma20": 21.85}, {"timestamp": "2025-12-24 13:08", "open": 21.78, "high": 21.8, "low": 21.77, "close": 21.77, "ma20": 21.85}, {"timestamp": "2025-12-24 13:07", "open": 21.79, "high": 21.8, "low": 21.78, "close": 21.8, "ma20": 21.85}, {"timestamp": "2025-12-24 13:06", "open": 21.81, "high": 21.81, "low": 21.78, "close": 21.8, "ma20": 21.85}, {"timestamp": "2025-12-24 13:05", "open": 21.8, "high": 21.81, "low": 21.8, "close": 21.8, "ma20": 21.85}, {"timestamp": "2025-12-24 13:04", "open": 21.8, "high": 21.82, "low": 21.8, "close": 21.8, "ma20": 21.85}, {"timestamp": "2025-12-24 13:03", "open": 21.81, "high": 21.81, "low": 21.8, "close": 21.8, "ma20": 21.85}, {"timestamp": "2025-12-24 13:02", "open": 21.8, "high": 21.81, "low": 21.8, "close": 21.8, "ma20": 21.85}, {"timestamp": "2025-12-24 13:01", "open": 21.8, "high": 21.82, "low": 21.8, "close": 21.8, "ma20": 21.86}, {"timestamp": "2025-12-24 13:00", "open": 21.82, "high": 21.82, "low": 21.8, "close": 21.81, "ma20": 21.86}, {"timestamp": "2025-12-24 12:59", "open": 21.82, "high": 21.82, "low": 21.8, "close": 21.81, "ma20": 21.86}, {"timestamp": "2025-12-24 12:58", "open": 21.8, "high": 21.82, "low": 21.8, "close": 21.82, "ma20": 21.86}, {"timestamp": "2025-12-24 12:57", "open": 21.8, "high": 21.81, "low": 21.8, "close": 21.81, "ma20": 21.86}, {"timestamp": "2025-12-24 12:56", "open": 21.82, "high": 21.82, "low": 21.8, "close": 21.8, "ma20": 21.86}, {"timestamp": "2025-12-24 12:55", "open": 21.8, "high": 21.82, "low": 21.8, "close": 21.81, "ma20": 21.86}, {"timestamp": "2025-12-24 12:54", "open": 21.82, "high": 21.82, "low": 21.8, "close": 21.81, "ma20": 21.86}, {"timestamp": "2025-12-24 12:53", "open": 21.81, "high": 21.82, "low": 21.8, "close": 21.81, "ma20": 21.86}, {"timestamp": "2025-12-24 12:52", "open": 21.81, "high": 21.82, "low": 21.8, "close": 21.8, "ma20": 21.86}, {"timestamp": "2025-12-24 12:51", "open": 21.82, "high": 21.82, "low": 21.81, "close": 21.81, "ma20": 21.87}, {"timestamp": "2025-12-24 12:50", "open": 21.82, "high": 21.83, "low": 21.8, "close": 21.81, "ma20": 21.87}, {"timestamp": "2025-12-24 12:49", "open": 21.83, "high": 21.83, "low": 21.81, "close": 21.82, "ma20": 21.87}, {"timestamp": "2025-12-24 12:48", "open": 21.82, "high": 21.83, "low": 21.81, "close": 21.83, "ma20": 21.87}, {"timestamp": "2025-12-24 12:47", "open": 21.82, "high": 21.83, "low": 21.81, "close": 21.82, "ma20": 21.87}, {"timestamp": "2025-12-24 12:46", "open": 21.83, "high": 21.84, "low": 21.82, "close": 21.83, "ma20": 21.87}, {"timestamp": "2025-12-24 12:45", "open": 21.81, "high": 21.83, "low": 21.81, "close": 21.83, "ma20": 21.87}, {"timestamp": "2025-12-24 12:44", "open": 21.82, "high": 21.82, "low": 21.81, "close": 21.82, "ma20": 21.87}, {"timestamp": "2025-12-24 12:43", "open": 21.82, "high": 21.82, "low": 21.81, "close": 21.82, "ma20": 21.87}, {"timestamp": "2025-12-24 12:42", "open": 21.8, "high": 21.82, "low": 21.8, "close": 21.81, "ma20": 21.87}, {"timestamp": "2025-12-24 12:41", "open": 21.82, "high": 21.83, "low": 21.8, "close": 21.81, "ma20": 21.87}, {"timestamp": "2025-12-24 12:40", "open": 21.82, "high": 21.83, "low": 21.82, "close": 21.83, "ma20": 21.87}, {"timestamp": "2025-12-24 12:39", "open": 21.83, "high": 21.83, "low": 21.82, "close": 21.82, "ma20": 21.87}, {"timestamp": "2025-12-24 12:38", "open": 21.84, "high": 21.85, "low": 21.81, "close": 21.83, "ma20": 21.87}, {"timestamp": "2025-12-24 12:37", "open": 21.84, "high": 21.85, "low": 21.84, "close": 21.85, "ma20": 21.87}, {"timestamp": "2025-12-24 12:36", "open": 21.85, "high": 21.86, "low": 21.84, "close": 21.85, "ma20": 21.88}, {"timestamp": "2025-12-24 12:35", "open": 21.86, "high": 21.86, "low": 21.85, "close": 21.86, "ma20": 21.88}, {"timestamp": "2025-12-24 12:34", "open": 21.84, "high": 21.86, "low": 21.84, "close": 21.86, "ma20": 21.88}, {"timestamp": "2025-12-24 12:33", "open": 21.86, "high": 21.86, "low": 21.84, "close": 21.85, "ma20": 21.88}, {"timestamp": "2025-12-24 12:32", "open": 21.85, "high": 21.86, "low": 21.84, "close": 21.85, "ma20": 21.88}, {"timestamp": "2025-12-24 12:31", "open": 21.84, "high": 21.85, "low": 21.84, "close": 21.85, "ma20": 21.88}, {"timestamp": "2025-12-24 12:30", "open": 21.86, "high": 21.86, "low": 21.84, "close": 21.85, "ma20": 21.88}, {"timestamp": "2025-12-24 12:29", "open": 21.86, "high": 21.86, "low": 21.84, "close": 21.86, "ma20": 21.88}, {"timestamp": "2025-12-24 12:28", "open": 21.84, "high": 21.86, "low": 21.84, "close": 21.86, "ma20": 21.88}, {"timestamp": "2025-12-24 12:27", "open": 21.86, "high": 21.86, "low": 21.85, "close": 21.85, "ma20": 21.88}, {"timestamp": "2025-12-24 12:26", "open": 21.86, "high": 21.86, "low": 21.85, "close": 21.86, "ma20": 21.88}, {"timestamp": "2025-12-24 12:25", "open": 21.85, "high": 21.86, "low": 21.84, "close": 21.85, "ma20": 21.88}, {"timestamp": "2025-12-24 12:24", "open": 21.85, "high": 21.85, "low": 21.83, "close": 21.85, "ma20": 21.88}, {"timestamp": "2025-12-24 12:23", "open": 21.85, "high": 21.86, "low": 21.85, "close": 21.85, "ma20": 21.88}, {"timestamp": "2025-12-24 12:22", "open": 21.85, "high": 21.87, "low": 21.85, "close": 21.85, "ma20": 21.88}, {"timestamp": "2025-12-24 12:21", "open": 21.85, "high": 21.87, "low": 21.85, "close": 21.86, "ma20": 21.88}, {"timestamp": "2025-12-24 12:20", "open": 21.86, "high": 21.87, "low": 21.85, "close": 21.86, "ma20": 21.88}, {"timestamp": "2025-12-24 12:19", "open": 21.87, "high": 21.87, "low": 21.85, "close": 21.85, "ma20": 21.88}, {"timestamp": "2025-12-24 12:18", "open": 21.86, "high": 21.87, "low": 21.85, "close": 21.87, "ma20": 21.88}, {"timestamp": "2025-12-24 12:17", "open": 21.86, "high": 21.87, "low": 21.86, "close": 21.87, "ma20": 21.88}, {"timestamp": "2025-12-24 12:16", "open": 21.86, "high": 21.87, "low": 21.85, "close": 21.86, "ma20": 21.88}, {"timestamp": "2025-12-24 12:15", "open": 21.85, "high": 21.87, "low": 21.85, "close": 21.85, "ma20": 21.88}, {"timestamp": "2025-12-24 12:14", "open": 21.85, "high": 21.87, "low": 21.85, "close": 21.86, "ma20": 21.88}, {"timestamp": "2025-12-24 12:13", "open": 21.86, "high": 21.86, "low": 21.85, "close": 21.86, "ma20": 21.88}, {"timestamp": "2025-12-24 12:12", "open": 21.86, "high": 21.87, "low": 21.85, "close": 21.86, "ma20": 21.88}, {"timestamp": "2025-12-24 12:11", "open": 21.86, "high": 21.87, "low": 21.85, "close": 21.86, "ma20": 21.89}, {"timestamp": "2025-12-24 12:10", "open": 21.85, "high": 21.87, "low": 21.85, "close": 21.87, "ma20": 21.89}, {"timestamp": "2025-12-24 12:09", "open": 21.86, "high": 21.87, "low": 21.85, "close": 21.87, "ma20": 21.89}, {"timestamp": "2025-12-24 12:08", "open": 21.87, "high": 21.87, "low": 21.85, "close": 21.86, "ma20": 21.89}, {"timestamp": "2025-12-24 12:07", "open": 21.87, "high": 21.88, "low": 21.86, "close": 21.88, "ma20": 21.89}, {"timestamp": "2025-12-24 12:06", "open": 21.87, "high": 21.88, "low": 21.86, "close": 21.87, "ma20": 21.89}, {"timestamp": "2025-12-24 12:05", "open": 21.87, "high": 21.88, "low": 21.87, "close": 21.88, "ma20": 21.89}, {"timestamp": "2025-12-24 12:04", "open": 21.88, "high": 21.88, "low": 21.87, "close": 21.88, "ma20": 21.89}, {"timestamp": "2025-12-24 12:03", "open": 21.87, "high": 21.88, "low": 21.86, "close": 21.87, "ma20": 21.89}, {"timestamp": "2025-12-24 12:02", "open": 21.87, "high": 21.87, "low": 21.86, "close": 21.87, "ma20": 21.89}, {"timestamp": "2025-12-24 12:01", "open": 21.87, "high": 21.87, "low": 21.86, "close": 21.87, "ma20": 21.89}, {"timestamp": "2025-12-24 12:00", "open": 21.87, "high": 21.87, "low": 21.86, "close": 21.87, "ma20": 21.89}, {"timestamp": "2025-12-24 11:59", "open": 21.87, "high": 21.87, "low": 21.86, "close": 21.87, "ma20": 21.89}, {"timestamp": "2025-12-24 11:58", "open": 21.86, "high": 21.87, "low": 21.86, "close": 21.87, "ma20": 21.89}, {"timestamp": "2025-12-24 11:57", "open": 21.87, "high": 21.87, "low": 21.85, "close": 21.85, "ma20": 21.89}, {"timestamp": "2025-12-24 11:56", "open": 21.87, "high": 21.87, "low": 21.84, "close": 21.87, "ma20": 21.9}, {"timestamp": "2025-12-24 11:55", "open": 21.84, "high": 21.87, "low": 21.83, "close": 21.86, "ma20": 21.9}, {"timestamp": "2025-12-24 11:54", "open": 21.83, "high": 21.84, "low": 21.83, "close": 21.83, "ma20": 21.9}, {"timestamp": "2025-12-24 11:53", "open": 21.84, "high": 21.85, "low": 21.83, "close": 21.84, "ma20": 21.9}, {"timestamp": "2025-12-24 11:52", "open": 21.85, "high": 21.85, "low": 21.83, "close": 21.84, "ma20": 21.89}, {"timestamp": "2025-12-24 11:51", "open": 21.84, "high": 21.85, "low": 21.83, "close": 21.84, "ma20": 21.9}, {"timestamp": "2025-12-24 11:50", "open": 21.85, "high": 21.86, "low": 21.84, "close": 21.84, "ma20": 21.9}, {"timestamp": "2025-12-24 11:49", "open": 21.84, "high": 21.86, "low": 21.84, "close": 21.85, "ma20": 21.9}, {"timestamp": "2025-12-24 11:48", "open": 21.86, "high": 21.86, "low": 21.84, "close": 21.84, "ma20": 21.9}, {"timestamp": "2025-12-24 11:47", "open": 21.85, "high": 21.86, "low": 21.84, "close": 21.85, "ma20": 21.9}, {"timestamp": "2025-12-24 11:46", "open": 21.84, "high": 21.86, "low": 21.84, "close": 21.84, "ma20": 21.9}, {"timestamp": "2025-12-24 11:45", "open": 21.87, "high": 21.87, "low": 21.84, "close": 21.84, "ma20": 21.9}, {"timestamp": "2025-12-24 11:44", "open": 21.88, "high": 21.89, "low": 21.85, "close": 21.87, "ma20": 21.9}, {"timestamp": "2025-12-24 11:43", "open": 21.88, "high": 21.9, "low": 21.88, "close": 21.88, "ma20": 21.9}, {"timestamp": "2025-12-24 11:42", "open": 21.9, "high": 21.9, "low": 21.88, "close": 21.89, "ma20": 21.9}, {"timestamp": "2025-12-24 11:41", "open": 21.9, "high": 21.91, "low": 21.89, "close": 21.9, "ma20": 21.9}, {"timestamp": "2025-12-24 11:40", "open": 21.91, "high": 21.91, "low": 21.89, "close": 21.89, "ma20": 21.9}, {"timestamp": "2025-12-24 11:39", "open": 21.9, "high": 21.91, "low": 21.89, "close": 21.91, "ma20": 21.9}, {"timestamp": "2025-12-24 11:38", "open": 21.9, "high": 21.91, "low": 21.89, "close": 21.89, "ma20": 21.89}, {"timestamp": "2025-12-24 11:37", "open": 21.91, "high": 21.91, "low": 21.9, "close": 21.9, "ma20": 21.89}, {"timestamp": "2025-12-24 11:36", "open": 21.9, "high": 21.91, "low": 21.9, "close": 21.9, "ma20": 21.9}, {"timestamp": "2025-12-24 11:35", "open": 21.91, "high": 21.91, "low": 21.9, "close": 21.9, "ma20": 21.9}, {"timestamp": "2025-12-24 11:34", "open": 21.91, "high": 21.91, "low": 21.9, "close": 21.9, "ma20": 21.9}, {"timestamp": "2025-12-24 11:33", "open": 21.91, "high": 21.91, "low": 21.9, "close": 21.9, "ma20": 21.89}, {"timestamp": "2025-12-24 11:32", "open": 21.91, "high": 21.91, "low": 21.9, "close": 21.9, "ma20": 21.89}, {"timestamp": "2025-12-24 11:31", "open": 21.91, "high": 21.91, "low": 21.9, "close": 21.91, "ma20": 21.89}, {"timestamp": "2025-12-24 11:30", "open": 21.9, "high": 21.91, "low": 21.9, "close": 21.9, "ma20": 21.9}, {"timestamp": "2025-12-24 11:29", "open": 21.9, "high": 21.92, "low": 21.9, "close": 21.9, "ma20": 21.89}, {"timestamp": "2025-12-24 11:28", "open": 21.9, "high": 21.91, "low": 21.9, "close": 21.9, "ma20": 21.89}, {"timestamp": "2025-12-24 11:27", "open": 21.91, "high": 21.91, "low": 21.9, "close": 21.9, "ma20": 21.89}, {"timestamp": "2025-12-24 11:26", "open": 21.92, "high": 21.92, "low": 21.9, "close": 21.91, "ma20": 21.89}, {"timestamp": "2025-12-24 11:25", "open": 21.92, "high": 21.92, "low": 21.9, "close": 21.91, "ma20": 21.9}, {"timestamp": "2025-12-24 11:24", "open": 21.92, "high": 21.93, "low": 21.9, "close": 21.9, "ma20": 21.89}, {"timestamp": "2025-12-24 11:23", "open": 21.92, "high": 21.92, "low": 21.91, "close": 21.91, "ma20": 21.89}, {"timestamp": "2025-12-24 11:22", "open": 21.91, "high": 21.92, "low": 21.9, "close": 21.91, "ma20": 21.89}, {"timestamp": "2025-12-24 11:21", "open": 21.91, "high": 21.92, "low": 21.9, "close": 21.91, "ma20": 21.89}, {"timestamp": "2025-12-24 11:20", "open": 21.9, "high": 21.92, "low": 21.9, "close": 21.91, "ma20": 21.89}, {"timestamp": "2025-12-24 11:19", "open": 21.9, "high": 21.92, "low": 21.89, "close": 21.91, "ma20": 21.89}, {"timestamp": "2025-12-24 11:18", "open": 21.9, "high": 21.9, "low": 21.89, "close": 21.89, "ma20": 21.88}, {"timestamp": "2025-12-24 11:17", "open": 21.91, "high": 21.91, "low": 21.89, "close": 21.9, "ma20": 21.88}, {"timestamp": "2025-12-24 11:16", "open": 21.89, "high": 21.91, "low": 21.88, "close": 21.91, "ma20": 21.88}, {"timestamp": "2025-12-24 11:15", "open": 21.89, "high": 21.9, "low": 21.89, "close": 21.89, "ma20": 21.89}, {"timestamp": "2025-12-24 11:14", "open": 21.88, "high": 21.9, "low": 21.88, "close": 21.89, "ma20": 21.88}, {"timestamp": "2025-12-24 11:13", "open": 21.89, "high": 21.89, "low": 21.88, "close": 21.88, "ma20": 21.88}, {"timestamp": "2025-12-24 11:12", "open": 21.91, "high": 21.91, "low": 21.88, "close": 21.88, "ma20": 21.88}, {"timestamp": "2025-12-24 11:11", "open": 21.91, "high": 21.91, "low": 21.89, "close": 21.91, "ma20": 21.88}, {"timestamp": "2025-12-24 11:10", "open": 21.9, "high": 21.91, "low": 21.89, "close": 21.91, "ma20": 21.88}, {"timestamp": "2025-12-24 11:09", "open": 21.9, "high": 21.9, "low": 21.89, "close": 21.89, "ma20": 21.88}, {"timestamp": "2025-12-24 11:08", "open": 21.9, "high": 21.9, "low": 21.89, "close": 21.89, "ma20": 21.88}, {"timestamp": "2025-12-24 11:07", "open": 21.9, "high": 21.91, "low": 21.89, "close": 21.9, "ma20": 21.88}, {"timestamp": "2025-12-24 11:06", "open": 21.9, "high": 21.9, "low": 21.89, "close": 21.89, "ma20": 21.88}, {"timestamp": "2025-12-24 11:05", "open": 21.89, "high": 21.9, "low": 21.89, "close": 21.9, "ma20": 21.88}, {"timestamp": "2025-12-24 11:04", "open": 21.89, "high": 21.9, "low": 21.88, "close": 21.9, "ma20": 21.88}, {"timestamp": "2025-12-24 11:03", "open": 21.89, "high": 21.89, "low": 21.88, "close": 21.89, "ma20": 21.88}, {"timestamp": "2025-12-24 11:02", "open": 21.9, "high": 21.91, "low": 21.88, "close": 21.88, "ma20": 21.87}, {"timestamp": "2025-12-24 11:01", "open": 21.9, "high": 21.91, "low": 21.9, "close": 21.91, "ma20": 21.87}, {"timestamp": "2025-12-24 11:00", "open": 21.9, "high": 21.91, "low": 21.89, "close": 21.91, "ma20": 21.88}, {"timestamp": "2025-12-24 10:59", "open": 21.9, "high": 21.92, "low": 21.89, "close": 21.89, "ma20": 21.87}, {"timestamp": "2025-12-24 10:58", "open": 21.88, "high": 21.91, "low": 21.88, "close": 21.9, "ma20": 21.87}, {"timestamp": "2025-12-24 10:57", "open": 21.9, "high": 21.9, "low": 21.87, "close": 21.89, "ma20": 21.87}, {"timestamp": "2025-12-24 10:56", "open": 21.87, "high": 21.9, "low": 21.86, "close": 21.9, "ma20": 21.87}, {"timestamp": "2025-12-24 10:55", "open": 21.87, "high": 21.88, "low": 21.86, "close": 21.87, "ma20": 21.87}, {"timestamp": "2025-12-24 10:54", "open": 21.87, "high": 21.88, "low": 21.86, "close": 21.87, "ma20": 21.87}, {"timestamp": "2025-12-24 10:53", "open": 21.86, "high": 21.88, "low": 21.86, "close": 21.86, "ma20": 21.87}, {"timestamp": "2025-12-24 10:52", "open": 21.85, "high": 21.87, "low": 21.85, "close": 21.86, "ma20": 21.86}, {"timestamp": "2025-12-24 10:51", "open": 21.88, "high": 21.88, "low": 21.85, "close": 21.85, "ma20": 21.86}, {"timestamp": "2025-12-24 10:50", "open": 21.87, "high": 21.88, "low": 21.86, "close": 21.88, "ma20": 21.87}, {"timestamp": "2025-12-24 10:49", "open": 21.89, "high": 21.89, "low": 21.87, "close": 21.89, "ma20": 21.86}, {"timestamp": "2025-12-24 10:48", "open": 21.89, "high": 21.9, "low": 21.87, "close": 21.88, "ma20": 21.86}, {"timestamp": "2025-12-24 10:47", "open": 21.88, "high": 21.89, "low": 21.87, "close": 21.87, "ma20": 21.86}, {"timestamp": "2025-12-24 10:46", "open": 21.88, "high": 21.9, "low": 21.88, "close": 21.89, "ma20": 21.86}, {"timestamp": "2025-12-24 10:45", "open": 21.88, "high": 21.89, "low": 21.87, "close": 21.89, "ma20": 21.86}, {"timestamp": "2025-12-24 10:44", "open": 21.9, "high": 21.91, "low": 21.88, "close": 21.89, "ma20": 21.85}, {"timestamp": "2025-12-24 10:43", "open": 21.91, "high": 21.91, "low": 21.9, "close": 21.91, "ma20": 21.85}, {"timestamp": "2025-12-24 10:42", "open": 21.9, "high": 21.91, "low": 21.9, "close": 21.91, "ma20": 21.85}, {"timestamp": "2025-12-24 10:41", "open": 21.92, "high": 21.92, "low": 21.9, "close": 21.9, "ma20": 21.85}, {"timestamp": "2025-12-24 10:40", "open": 21.93, "high": 21.93, "low": 21.91, "close": 21.92, "ma20": 21.85}, {"timestamp": "2025-12-24 10:39", "open": 21.93, "high": 21.93, "low": 21.92, "close": 21.93, "ma20": 21.85}, {"timestamp": "2025-12-24 10:38", "open": 21.94, "high": 21.95, "low": 21.92, "close": 21.93, "ma20": 21.84}, {"timestamp": "2025-12-24 10:37", "open": 21.95, "high": 21.95, "low": 21.94, "close": 21.94, "ma20": 21.84}, {"timestamp": "2025-12-24 10:36", "open": 21.94, "high": 21.95, "low": 21.93, "close": 21.94, "ma20": 21.84}, {"timestamp": "2025-12-24 10:35", "open": 21.94, "high": 21.94, "low": 21.93, "close": 21.94, "ma20": 21.84}, {"timestamp": "2025-12-24 10:34", "open": 21.93, "high": 21.94, "low": 21.93, "close": 21.93, "ma20": 21.84}, {"timestamp": "2025-12-24 10:33", "open": 21.93, "high": 21.94, "low": 21.93, "close": 21.94, "ma20": 21.84}, {"timestamp": "2025-12-24 10:32", "open": 21.93, "high": 21.94, "low": 21.92, "close": 21.92, "ma20": 21.83}, {"timestamp": "2025-12-24 10:31", "open": 21.94, "high": 21.94, "low": 21.92, "close": 21.92, "ma20": 21.83}, {"timestamp": "2025-12-24 10:30", "open": 21.94, "high": 21.94, "low": 21.92, "close": 21.94, "ma20": 21.83}, {"timestamp": "2025-12-24 10:29", "open": 21.94, "high": 21.94, "low": 21.92, "close": 21.94, "ma20": 21.83}, {"timestamp": "2025-12-24 10:28", "open": 21.93, "high": 21.94, "low": 21.93, "close": 21.94, "ma20": 21.83}, {"timestamp": "2025-12-24 10:27", "open": 21.94, "high": 21.94, "low": 21.93, "close": 21.93, "ma20": 21.83}, {"timestamp": "2025-12-24 10:26", "open": 21.91, "high": 21.94, "low": 21.91, "close": 21.93, "ma20": 21.83}, {"timestamp": "2025-12-24 10:25", "open": 21.92, "high": 21.93, "low": 21.91, "close": 21.92, "ma20": 21.82}, {"timestamp": "2025-12-24 10:24", "open": 21.92, "high": 21.93, "low": 21.91, "close": 21.93, "ma20": 21.82}, {"timestamp": "2025-12-24 10:23", "open": 21.92, "high": 21.94, "low": 21.91, "close": 21.92, "ma20": 21.82}, {"timestamp": "2025-12-24 10:22", "open": 21.92, "high": 21.94, "low": 21.91, "close": 21.93, "ma20": 21.82}, {"timestamp": "2025-12-24 10:21", "open": 21.93, "high": 21.93, "low": 21.91, "close": 21.93, "ma20": 21.82}, {"timestamp": "2025-12-24 10:20", "open": 21.92, "high": 21.93, "low": 21.91, "close": 21.93, "ma20": 21.82}, {"timestamp": "2025-12-24 10:19", "open": 21.92, "high": 21.93, "low": 21.91, "close": 21.93, "ma20": 21.81}, {"timestamp": "2025-12-24 10:18", "open": 21.9, "high": 21.93, "low": 21.9, "close": 21.93, "ma20": 21.81}, {"timestamp": "2025-12-24 10:17", "open": 21.9, "high": 21.92, "low": 21.9, "close": 21.9, "ma20": 21.81}, {"timestamp": "2025-12-24 10:16", "open": 21.88, "high": 21.91, "low": 21.88, "close": 21.9, "ma20": 21.81}, {"timestamp": "2025-12-24 10:15", "open": 21.89, "high": 21.89, "low": 21.88, "close": 21.89, "ma20": 21.81}, {"timestamp": "2025-12-24 10:14", "open": 21.88, "high": 21.89, "low": 21.87, "close": 21.88, "ma20": 21.8}, {"timestamp": "2025-12-24 10:13", "open": 21.88, "high": 21.89, "low": 21.87, "close": 21.87, "ma20": 21.8}, {"timestamp": "2025-12-24 10:12", "open": 21.87, "high": 21.89, "low": 21.87, "close": 21.88, "ma20": 21.8}, {"timestamp": "2025-12-24 10:11", "open": 21.87, "high": 21.89, "low": 21.87, "close": 21.89, "ma20": 21.8}, {"timestamp": "2025-12-24 10:10", "open": 21.87, "high": 21.89, "low": 21.86, "close": 21.89, "ma20": 21.8}, {"timestamp": "2025-12-24 10:09", "open": 21.84, "high": 21.87, "low": 21.83, "close": 21.87, "ma20": 21.79}, {"timestamp": "2025-12-24 10:08", "open": 21.84, "high": 21.85, "low": 21.83, "close": 21.84, "ma20": 21.79}, {"timestamp": "2025-12-24 10:07", "open": 21.84, "high": 21.85, "low": 21.83, "close": 21.85, "ma20": 21.79}, {"timestamp": "2025-12-24 10:06", "open": 21.85, "high": 21.85, "low": 21.83, "close": 21.83, "ma20": 21.79}, {"timestamp": "2025-12-24 10:05", "open": 21.85, "high": 21.85, "low": 21.83, "close": 21.85, "ma20": 21.79}, {"timestamp": "2025-12-24 10:04", "open": 21.83, "high": 21.85, "low": 21.83, "close": 21.85, "ma20": 21.79}, {"timestamp": "2025-12-24 10:03", "open": 21.84, "high": 21.85, "low": 21.83, "close": 21.83, "ma20": 21.79}, {"timestamp": "2025-12-24 10:02", "open": 21.84, "high": 21.84, "low": 21.83, "close": 21.83, "ma20": 21.79}, {"timestamp": "2025-12-24 10:01", "open": 21.84, "high": 21.84, "low": 21.82, "close": 21.83, "ma20": 21.79}, {"timestamp": "2025-12-24 10:00", "open": 21.83, "high": 21.84, "low": 21.82, "close": 21.84, "ma20": 21.79}, {"timestamp": "2025-12-24 09:59", "open": 21.82, "high": 21.83, "low": 21.82, "close": 21.83, "ma20": 21.78}, {"timestamp": "2025-12-24 09:58", "open": 21.84, "high": 21.84, "low": 21.82, "close": 21.82, "ma20": 21.78}, {"timestamp": "2025-12-24 09:57", "open": 21.83, "high": 21.84, "low": 21.82, "close": 21.83, "ma20": 21.79}, {"timestamp": "2025-12-24 09:56", "open": 21.86, "high": 21.86, "low": 21.83, "close": 21.83, "ma20": 21.79}, {"timestamp": "2025-12-24 09:55", "open": 21.85, "high": 21.86, "low": 21.84, "close": 21.85, "ma20": 21.79}, {"timestamp": "2025-12-24 09:54", "open": 21.85, "high": 21.87, "low": 21.85, "close": 21.85, "ma20": 21.78}, {"timestamp": "2025-12-24 09:53", "open": 21.86, "high": 21.86, "low": 21.85, "close": 21.86, "ma20": 21.78}, {"timestamp": "2025-12-24 09:52", "open": 21.86, "high": 21.87, "low": 21.85, "close": 21.85, "ma20": 21.78}, {"timestamp": "2025-12-24 09:51", "open": 21.86, "high": 21.87, "low": 21.85, "close": 21.86, "ma20": 21.78}, {"timestamp": "2025-12-24 09:50", "open": 21.86, "high": 21.87, "low": 21.85, "close": 21.86, "ma20": 21.78}, {"timestamp": "2025-12-24 09:49", "open": 21.85, "high": 21.86, "low": 21.85, "close": 21.85, "ma20": 21.78}, {"timestamp": "2025-12-24 09:48", "open": 21.84, "high": 21.86, "low": 21.84, "close": 21.86, "ma20": 21.78}, {"timestamp": "2025-12-24 09:47", "open": 21.85, "high": 21.87, "low": 21.84, "close": 21.85, "ma20": 21.78}, {"timestamp": "2025-12-24 09:46", "open": 21.86, "high": 21.86, "low": 21.84, "close": 21.86, "ma20": 21.78}, {"timestamp": "2025-12-24 09:45", "open": 21.87, "high": 21.87, "low": 21.84, "close": 21.85, "ma20": 21.78}, {"timestamp": "2025-12-24 09:44", "open": 21.85, "high": 21.86, "low": 21.83, "close": 21.86, "ma20": 21.78}, {"timestamp": "2025-12-24 09:43", "open": 21.85, "high": 21.85, "low": 21.83, "close": 21.84, "ma20": 21.78}, {"timestamp": "2025-12-24 09:42", "open": 21.82, "high": 21.86, "low": 21.81, "close": 21.85, "ma20": 21.78}, {"timestamp": "2025-12-24 09:41", "open": 21.82, "high": 21.83, "low": 21.81, "close": 21.82, "ma20": 21.78}, {"timestamp": "2025-12-24 09:40", "open": 21.81, "high": 21.83, "low": 21.78, "close": 21.81, "ma20": 21.78}, {"timestamp": "2025-12-24 09:39", "open": 21.83, "high": 21.83, "low": 21.8, "close": 21.81, "ma20": 21.77}, {"timestamp": "2025-12-24 09:38", "open": 21.83, "high": 21.84, "low": 21.82, "close": 21.83, "ma20": 21.78}, {"timestamp": "2025-12-24 09:37", "open": 21.82, "high": 21.84, "low": 21.82, "close": 21.83, "ma20": 21.78}, {"timestamp": "2025-12-24 09:36", "open": 21.84, "high": 21.85, "low": 21.82, "close": 21.83, "ma20": 21.78}, {"timestamp": "2025-12-24 09:35", "open": 21.85, "high": 21.85, "low": 21.84, "close": 21.84, "ma20": 21.78}, {"timestamp": "2025-12-24 09:34", "open": 21.85, "high": 21.86, "low": 21.84, "close": 21.85, "ma20": 21.77}, {"timestamp": "2025-12-24 09:33", "open": 21.86, "high": 21.86, "low": 21.85, "close": 21.85, "ma20": 21.78}, {"timestamp": "2025-12-24 09:32", "open": 21.83, "high": 21.88, "low": 21.83, "close": 21.87, "ma20": 21.78}, {"timestamp": "2025-12-24 09:31", "open": 21.83, "high": 21.85, "low": 21.82, "close": 21.83, "ma20": 21.78}, {"timestamp": "2025-12-24 09:30", "open": 21.84, "high": 21.85, "low": 21.82, "close": 21.83, "ma20": 21.78}, {"timestamp": "2025-12-24 09:29", "open": 21.82, "high": 21.85, "low": 21.82, "close": 21.84, "ma20": 21.77}, {"timestamp": "2025-12-24 09:28", "open": 21.81, "high": 21.83, "low": 21.81, "close": 21.82, "ma20": 21.78}, {"timestamp": "2025-12-24 09:27", "open": 21.82, "high": 21.82, "low": 21.8, "close": 21.8, "ma20": 21.78}, {"timestamp": "2025-12-24 09:26", "open": 21.79, "high": 21.82, "low": 21.79, "close": 21.82, "ma20": 21.78}, {"timestamp": "2025-12-24 09:25", "open": 21.78, "high": 21.81, "low": 21.77, "close": 21.8, "ma20": 21.78}, {"timestamp": "2025-12-24 09:24", "open": 21.8, "high": 21.82, "low": 21.78, "close": 21.78, "ma20": 21.77}, {"timestamp": "2025-12-24 09:23", "open": 21.81, "high": 21.82, "low": 21.79, "close": 21.8, "ma20": 21.78}, {"timestamp": "2025-12-24 09:22", "open": 21.81, "high": 21.82, "low": 21.8, "close": 21.8, "ma20": 21.78}, {"timestamp": "2025-12-24 09:21", "open": 21.83, "high": 21.83, "low": 21.81, "close": 21.82, "ma20": 21.78}, {"timestamp": "2025-12-24 09:20", "open": 21.8, "high": 21.83, "low": 21.79, "close": 21.82, "ma20": 21.78}, {"timestamp": "2025-12-24 09:19", "open": 21.79, "high": 21.81, "low": 21.78, "close": 21.78, "ma20": 21.78}, {"timestamp": "2025-12-24 09:18", "open": 21.79, "high": 21.8, "low": 21.78, "close": 21.79, "ma20": 21.78}, {"timestamp": "2025-12-24 09:17", "open": 21.8, "high": 21.8, "low": 21.78, "close": 21.79, "ma20": 21.78}, {"timestamp": "2025-12-24 09:16", "open": 21.79, "high": 21.8, "low": 21.74, "close": 21.8, "ma20": 21.78}, {"timestamp": "2025-12-24 09:15", "open": 21.73, "high": 21.8, "low": 21.72, "close": 21.78, "ma20": 21.78}], "signals": [{"timestamp": "2025-12-24 11:41", "price": 21.9, "ma20": 21.9, "distance": 0.0, "valid": true}, {"timestamp": "2025-12-24 11:39", "price": 21.91, "ma20": 21.9, "distance": 0.010000000000001563, "valid": true}, {"timestamp": "2025-12-24 11:38", "price": 21.89, "ma20": 21.89, "distance": 0.0, "valid": true}, {"timestamp": "2025-12-24 11:37", "price": 21.9, "ma20": 21.89, "distance": 0.00999999999999801, "valid": true}, {"timestamp": "2025-12-24 11:36", "price": 21.9, "ma20": 21.9, "distance": 0.0, "valid": true}, {"timestamp": "2025-12-24 11:35", "price": 21.9, "ma20": 21.9, "distance": 0.0, "valid": true}, {"timestamp": "2025-12-24 11:34", "price": 21.9, "ma20": 21.9, "distance": 0.0, "valid": true}, {"timestamp": "2025-12-24 11:33", "price": 21.9, "ma20": 21.89, "distance": 0.00999999999999801, "valid": true}, {"timestamp": "2025-12-24 11:32", "price": 21.9, "ma20": 21.89, "distance": 0.00999999999999801, "valid": true}, {"timestamp": "2025-12-24 11:31", "price": 21.91, "ma20": 21.89, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 11:30", "price": 21.9, "ma20": 21.9, "distance": 0.0, "valid": true}, {"timestamp": "2025-12-24 11:29", "price": 21.9, "ma20": 21.89, "distance": 0.00999999999999801, "valid": true}, {"timestamp": "2025-12-24 11:28", "price": 21.9, "ma20": 21.89, "distance": 0.00999999999999801, "valid": true}, {"timestamp": "2025-12-24 11:27", "price": 21.9, "ma20": 21.89, "distance": 0.00999999999999801, "valid": true}, {"timestamp": "2025-12-24 11:26", "price": 21.91, "ma20": 21.89, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 11:25", "price": 21.91, "ma20": 21.9, "distance": 0.010000000000001563, "valid": true}, {"timestamp": "2025-12-24 11:24", "price": 21.9, "ma20": 21.89, "distance": 0.00999999999999801, "valid": true}, {"timestamp": "2025-12-24 11:23", "price": 21.91, "ma20": 21.89, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 11:22", "price": 21.91, "ma20": 21.89, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 11:21", "price": 21.91, "ma20": 21.89, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 11:20", "price": 21.91, "ma20": 21.89, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 11:19", "price": 21.91, "ma20": 21.89, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 11:18", "price": 21.89, "ma20": 21.88, "distance": 0.010000000000001563, "valid": true}, {"timestamp": "2025-12-24 11:17", "price": 21.9, "ma20": 21.88, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 11:16", "price": 21.91, "ma20": 21.88, "distance": 0.030000000000001137, "valid": true}, {"timestamp": "2025-12-24 11:15", "price": 21.89, "ma20": 21.89, "distance": 0.0, "valid": true}, {"timestamp": "2025-12-24 11:14", "price": 21.89, "ma20": 21.88, "distance": 0.010000000000001563, "valid": true}, {"timestamp": "2025-12-24 11:13", "price": 21.88, "ma20": 21.88, "distance": 0.0, "valid": true}, {"timestamp": "2025-12-24 11:12", "price": 21.88, "ma20": 21.88, "distance": 0.0, "valid": true}, {"timestamp": "2025-12-24 11:11", "price": 21.91, "ma20": 21.88, "distance": 0.030000000000001137, "valid": true}, {"timestamp": "2025-12-24 11:10", "price": 21.91, "ma20": 21.88, "distance": 0.030000000000001137, "valid": true}, {"timestamp": "2025-12-24 11:09", "price": 21.89, "ma20": 21.88, "distance": 0.010000000000001563, "valid": true}, {"timestamp": "2025-12-24 11:08", "price": 21.89, "ma20": 21.88, "distance": 0.010000000000001563, "valid": true}, {"timestamp": "2025-12-24 11:07", "price": 21.9, "ma20": 21.88, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 11:06", "price": 21.89, "ma20": 21.88, "distance": 0.010000000000001563, "valid": true}, {"timestamp": "2025-12-24 11:05", "price": 21.9, "ma20": 21.88, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 11:04", "price": 21.9, "ma20": 21.88, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 11:03", "price": 21.89, "ma20": 21.88, "distance": 0.010000000000001563, "valid": true}, {"timestamp": "2025-12-24 11:02", "price": 21.88, "ma20": 21.87, "distance": 0.00999999999999801, "valid": true}, {"timestamp": "2025-12-24 11:01", "price": 21.91, "ma20": 21.87, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 11:00", "price": 21.91, "ma20": 21.88, "distance": 0.030000000000001137, "valid": true}, {"timestamp": "2025-12-24 10:59", "price": 21.89, "ma20": 21.87, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 10:58", "price": 21.9, "ma20": 21.87, "distance": 0.029999999999997584, "valid": true}, {"timestamp": "2025-12-24 10:57", "price": 21.89, "ma20": 21.87, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 10:56", "price": 21.9, "ma20": 21.87, "distance": 0.029999999999997584, "valid": true}, {"timestamp": "2025-12-24 10:55", "price": 21.87, "ma20": 21.87, "distance": 0.0, "valid": true}, {"timestamp": "2025-12-24 10:54", "price": 21.87, "ma20": 21.87, "distance": 0.0, "valid": true}, {"timestamp": "2025-12-24 10:52", "price": 21.86, "ma20": 21.86, "distance": 0.0, "valid": true}, {"timestamp": "2025-12-24 10:50", "price": 21.88, "ma20": 21.87, "distance": 0.00999999999999801, "valid": true}, {"timestamp": "2025-12-24 10:49", "price": 21.89, "ma20": 21.86, "distance": 0.030000000000001137, "valid": true}, {"timestamp": "2025-12-24 10:48", "price": 21.88, "ma20": 21.86, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 10:47", "price": 21.87, "ma20": 21.86, "distance": 0.010000000000001563, "valid": true}, {"timestamp": "2025-12-24 10:46", "price": 21.89, "ma20": 21.86, "distance": 0.030000000000001137, "valid": true}, {"timestamp": "2025-12-24 10:45", "price": 21.89, "ma20": 21.86, "distance": 0.030000000000001137, "valid": true}, {"timestamp": "2025-12-24 10:44", "price": 21.89, "ma20": 21.85, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 10:43", "price": 21.91, "ma20": 21.85, "distance": 0.05999999999999872, "valid": true}, {"timestamp": "2025-12-24 10:42", "price": 21.91, "ma20": 21.85, "distance": 0.05999999999999872, "valid": true}, {"timestamp": "2025-12-24 10:41", "price": 21.9, "ma20": 21.85, "distance": 0.04999999999999716, "valid": true}, {"timestamp": "2025-12-24 10:40", "price": 21.92, "ma20": 21.85, "distance": 0.07000000000000028, "valid": true}, {"timestamp": "2025-12-24 10:39", "price": 21.93, "ma20": 21.85, "distance": 0.0799999999999983, "valid": true}, {"timestamp": "2025-12-24 10:38", "price": 21.93, "ma20": 21.84, "distance": 0.08999999999999986, "valid": true}, {"timestamp": "2025-12-24 10:37", "price": 21.94, "ma20": 21.84, "distance": 0.10000000000000142, "valid": true}, {"timestamp": "2025-12-24 10:36", "price": 21.94, "ma20": 21.84, "distance": 0.10000000000000142, "valid": true}, {"timestamp": "2025-12-24 10:35", "price": 21.94, "ma20": 21.84, "distance": 0.10000000000000142, "valid": true}, {"timestamp": "2025-12-24 10:34", "price": 21.93, "ma20": 21.84, "distance": 0.08999999999999986, "valid": true}, {"timestamp": "2025-12-24 10:33", "price": 21.94, "ma20": 21.84, "distance": 0.10000000000000142, "valid": true}, {"timestamp": "2025-12-24 10:32", "price": 21.92, "ma20": 21.83, "distance": 0.09000000000000341, "valid": true}, {"timestamp": "2025-12-24 10:31", "price": 21.92, "ma20": 21.83, "distance": 0.09000000000000341, "valid": true}, {"timestamp": "2025-12-24 10:27", "price": 21.93, "ma20": 21.83, "distance": 0.10000000000000142, "valid": true}, {"timestamp": "2025-12-24 10:26", "price": 21.93, "ma20": 21.83, "distance": 0.10000000000000142, "valid": true}, {"timestamp": "2025-12-24 10:25", "price": 21.92, "ma20": 21.82, "distance": 0.10000000000000142, "valid": true}, {"timestamp": "2025-12-24 10:23", "price": 21.92, "ma20": 21.82, "distance": 0.10000000000000142, "valid": true}, {"timestamp": "2025-12-24 10:17", "price": 21.9, "ma20": 21.81, "distance": 0.08999999999999986, "valid": true}, {"timestamp": "2025-12-24 10:16", "price": 21.9, "ma20": 21.81, "distance": 0.08999999999999986, "valid": true}, {"timestamp": "2025-12-24 10:15", "price": 21.89, "ma20": 21.81, "distance": 0.08000000000000185, "valid": true}, {"timestamp": "2025-12-24 10:14", "price": 21.88, "ma20": 21.8, "distance": 0.0799999999999983, "valid": true}, {"timestamp": "2025-12-24 10:13", "price": 21.87, "ma20": 21.8, "distance": 0.07000000000000028, "valid": true}, {"timestamp": "2025-12-24 10:12", "price": 21.88, "ma20": 21.8, "distance": 0.0799999999999983, "valid": true}, {"timestamp": "2025-12-24 10:11", "price": 21.89, "ma20": 21.8, "distance": 0.08999999999999986, "valid": true}, {"timestamp": "2025-12-24 10:10", "price": 21.89, "ma20": 21.8, "distance": 0.08999999999999986, "valid": true}, {"timestamp": "2025-12-24 10:09", "price": 21.87, "ma20": 21.79, "distance": 0.08000000000000185, "valid": true}, {"timestamp": "2025-12-24 10:08", "price": 21.84, "ma20": 21.79, "distance": 0.05000000000000071, "valid": true}, {"timestamp": "2025-12-24 10:07", "price": 21.85, "ma20": 21.79, "distance": 0.060000000000002274, "valid": true}, {"timestamp": "2025-12-24 10:06", "price": 21.83, "ma20": 21.79, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 10:05", "price": 21.85, "ma20": 21.79, "distance": 0.060000000000002274, "valid": true}, {"timestamp": "2025-12-24 10:04", "price": 21.85, "ma20": 21.79, "distance": 0.060000000000002274, "valid": true}, {"timestamp": "2025-12-24 10:03", "price": 21.83, "ma20": 21.79, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 10:02", "price": 21.83, "ma20": 21.79, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 10:01", "price": 21.83, "ma20": 21.79, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 10:00", "price": 21.84, "ma20": 21.79, "distance": 0.05000000000000071, "valid": true}, {"timestamp": "2025-12-24 09:59", "price": 21.83, "ma20": 21.78, "distance": 0.04999999999999716, "valid": true}, {"timestamp": "2025-12-24 09:58", "price": 21.82, "ma20": 21.78, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 09:57", "price": 21.83, "ma20": 21.79, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 09:56", "price": 21.83, "ma20": 21.79, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 09:55", "price": 21.85, "ma20": 21.79, "distance": 0.060000000000002274, "valid": true}, {"timestamp": "2025-12-24 09:54", "price": 21.85, "ma20": 21.78, "distance": 0.07000000000000028, "valid": true}, {"timestamp": "2025-12-24 09:53", "price": 21.86, "ma20": 21.78, "distance": 0.0799999999999983, "valid": true}, {"timestamp": "2025-12-24 09:52", "price": 21.85, "ma20": 21.78, "distance": 0.07000000000000028, "valid": true}, {"timestamp": "2025-12-24 09:51", "price": 21.86, "ma20": 21.78, "distance": 0.0799999999999983, "valid": true}, {"timestamp": "2025-12-24 09:50", "price": 21.86, "ma20": 21.78, "distance": 0.0799999999999983, "valid": true}, {"timestamp": "2025-12-24 09:49", "price": 21.85, "ma20": 21.78, "distance": 0.07000000000000028, "valid": true}, {"timestamp": "2025-12-24 09:48", "price": 21.86, "ma20": 21.78, "distance": 0.0799999999999983, "valid": true}, {"timestamp": "2025-12-24 09:47", "price": 21.85, "ma20": 21.78, "distance": 0.07000000000000028, "valid": true}, {"timestamp": "2025-12-24 09:46", "price": 21.86, "ma20": 21.78, "distance": 0.0799999999999983, "valid": true}, {"timestamp": "2025-12-24 09:45", "price": 21.85, "ma20": 21.78, "distance": 0.07000000000000028, "valid": true}, {"timestamp": "2025-12-24 09:44", "price": 21.86, "ma20": 21.78, "distance": 0.0799999999999983, "valid": true}, {"timestamp": "2025-12-24 09:43", "price": 21.84, "ma20": 21.78, "distance": 0.05999999999999872, "valid": true}, {"timestamp": "2025-12-24 09:42", "price": 21.85, "ma20": 21.78, "distance": 0.07000000000000028, "valid": true}, {"timestamp": "2025-12-24 09:41", "price": 21.82, "ma20": 21.78, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 09:40", "price": 21.81, "ma20": 21.78, "distance": 0.029999999999997584, "valid": true}, {"timestamp": "2025-12-24 09:39", "price": 21.81, "ma20": 21.77, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 09:38", "price": 21.83, "ma20": 21.78, "distance": 0.04999999999999716, "valid": true}, {"timestamp": "2025-12-24 09:37", "price": 21.83, "ma20": 21.78, "distance": 0.04999999999999716, "valid": true}, {"timestamp": "2025-12-24 09:36", "price": 21.83, "ma20": 21.78, "distance": 0.04999999999999716, "valid": true}, {"timestamp": "2025-12-24 09:35", "price": 21.84, "ma20": 21.78, "distance": 0.05999999999999872, "valid": true}, {"timestamp": "2025-12-24 09:34", "price": 21.85, "ma20": 21.77, "distance": 0.08000000000000185, "valid": true}, {"timestamp": "2025-12-24 09:33", "price": 21.85, "ma20": 21.78, "distance": 0.07000000000000028, "valid": true}, {"timestamp": "2025-12-24 09:32", "price": 21.87, "ma20": 21.78, "distance": 0.08999999999999986, "valid": true}, {"timestamp": "2025-12-24 09:31", "price": 21.83, "ma20": 21.78, "distance": 0.04999999999999716, "valid": true}, {"timestamp": "2025-12-24 09:30", "price": 21.83, "ma20": 21.78, "distance": 0.04999999999999716, "valid": true}, {"timestamp": "2025-12-24 09:29", "price": 21.84, "ma20": 21.77, "distance": 0.07000000000000028, "valid": true}, {"timestamp": "2025-12-24 09:28", "price": 21.82, "ma20": 21.78, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 09:27", "price": 21.8, "ma20": 21.78, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 09:26", "price": 21.82, "ma20": 21.78, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 09:25", "price": 21.8, "ma20": 21.78, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 09:24", "price": 21.78, "ma20": 21.77, "distance": 0.010000000000001563, "valid": true}, {"timestamp": "2025-12-24 09:23", "price": 21.8, "ma20": 21.78, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 09:22", "price": 21.8, "ma20": 21.78, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 09:21", "price": 21.82, "ma20": 21.78, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 09:20", "price": 21.82, "ma20": 21.78, "distance": 0.03999999999999915, "valid": true}, {"timestamp": "2025-12-24 09:19", "price": 21.78, "ma20": 21.78, "distance": 0.0, "valid": true}, {"timestamp": "2025-12-24 09:18", "price": 21.79, "ma20": 21.78, "distance": 0.00999999999999801, "valid": true}, {"timestamp": "2025-12-24 09:17", "price": 21.79, "ma20": 21.78, "distance": 0.00999999999999801, "valid": true}, {"timestamp": "2025-12-24 09:16", "price": 21.8, "ma20": 21.78, "distance": 0.019999999999999574, "valid": true}, {"timestamp": "2025-12-24 09:15", "price": 21.78, "ma20": 21.78, "distance": 0.0, "valid": true}]};
+        
+        window.onload = function() {
+            displayResults(backtestData);
+        };
+        
+    </script>
+</body>
+</html>
