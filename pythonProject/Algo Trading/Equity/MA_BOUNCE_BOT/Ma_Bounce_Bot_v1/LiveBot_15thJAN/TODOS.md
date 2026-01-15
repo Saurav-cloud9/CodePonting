@@ -73,7 +73,7 @@ return True, f"✅ BOUNCE! ...", distance_pct, signal_details
 
 ---
 
-## **TODO #3: UPDATE CSV COLUMNS** 📝
+~~## **TODO #3: UPDATE CSV COLUMNS** 📝~~
 **File:** `ma_bounce_bot_v1_2_PRODUCTION.py`
 **Function:** `log_trade_to_csv()`
 **Add columns:**
@@ -87,6 +87,10 @@ fieldnames = [
     'avg_vol', 'vol_ratio', 'candles_gap', 'ma20'
 ]
 ```
+Want to add verification logging to confirm each step? Like:
+pythonlogger.info(f"✅ CSV created: {TRADES_LOG_FILE}")
+logger.info(f"✅ Trade written: {symbol} with {len(fieldnames)} columns")
+logger.info(f"✅ Loaded {buy_count} trades from CSV")
 
 ---
 

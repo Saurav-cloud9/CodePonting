@@ -910,6 +910,39 @@
 10. **Afternoon: Backtest analysis** 📊
    - Fix Win% vs ProTrades% bug + Run Jan 2022 test + Create regime comparison tables
 
+**KEY TAKEAWAY:** Volume filter absence = Main failure cause. Fix urgent for v1.3! 🚨
+
 ---
 
-**KEY TAKEAWAY:** Volume filter absence = Main failure cause. Fix urgent for v1.3! 🚨
+### Thu, Jan 15, 2026 - V1.3 ENHANCED LOGGING & F-STRING MASTERY
+
+**BOT ENHANCEMENT - SIGNAL DETAILS CAPTURE:**
+- Implemented TODO #2: Enhanced signal logging with 10 new metrics
+- Added signal_details dict: touch/bounce candles (time, price, volume), volume ratio, candles gap, MA20
+- Updated check_signal() to return 4 values: has_signal, message, distance_pct, signal_details
+- Modified log_trade_to_csv() to accept signal_details parameter - now logs 22 columns total
+- Updated place_order() signature and both monitor/live mode calls to pass signal_details
+
+**CSV STRUCTURE & DATA FLOW UNDERSTANDING:**
+- Implemented TODO #3: Updated CSV with new columns (Touch_Time, Touch_Low, Touch_Vol, Bounce_Time, Bounce_Close, Bounce_Vol, Avg_Vol, Vol_Ratio, Candles_Gap, MA20)
+- Deep-dived CSV creation flow: TRADES_LOG_FILE (daily) vs TRADES_MASTER_FILE (permanent)
+- Understood load_today_metrics_from_csv() extracts data for dashboard state recovery after restarts
+- Verified volume filter already present in v1.2 (lines 383-386) - avg_volume * 1.2 threshold working
+
+**PYTHON FUNDAMENTALS BREAKTHROUGH:**
+- Mastered f-strings: variable insertion, formatting (.2f, :,), alignment (>10), calculations inside
+- Understood strftime() date formatting: %Y%m%d for filenames vs %Y-%m-%d for CSV matching
+- Learned tuple unpacking: 4 variables = 4 return values pattern
+- Clarified string literals ("BUY"/"SELL") vs variables in function calls
+- Comprehended csv.DictWriter() explicit CSV format creation vs manual string formatting
+
+**LEARNING PATH DECISION:**
+- Confirmed focus shift from CodeCombat to algo trading - better ROI on 60L portfolio
+- CodeCombat achieved goal: Python basics, logic, syntax (training wheels off ✅)
+- Real trading code = 10x faster learning with immediate market feedback
+- Optional: 15-min daily warmup with LeetCode/Pandas exercises (trading-adjacent skills)
+
+**NEXT SESSION (JAN 16):**
+- Add verification logging for CSV creation/writing/loading
+- Implement Bounce Quality Score (0-100 system)
+- Add Time Window Filter (avoid late-day entries after 2:00 PM)
