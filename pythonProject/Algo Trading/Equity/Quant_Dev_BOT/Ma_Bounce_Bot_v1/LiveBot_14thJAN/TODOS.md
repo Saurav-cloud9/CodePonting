@@ -158,6 +158,9 @@ Problem: Price changed from ₹353.35 → ₹349.85 during delay
 
 ## **TODO #9:Text map + Visual flowchart = Documentation block🕐**
 
+## **TODO #10: Nifty regime filter to v1.3🕐**
+
+
 ---
 
 ## **TESTING CHECKLIST** ✅
