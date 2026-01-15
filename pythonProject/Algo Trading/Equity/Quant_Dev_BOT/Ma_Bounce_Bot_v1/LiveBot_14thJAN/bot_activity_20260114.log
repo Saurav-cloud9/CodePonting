@@ -1,0 +1,170 @@
+2026-01-14 11:20:09,534 | INFO | ================================================================================
+2026-01-14 11:20:09,534 | INFO | MA BOUNCE BOT v1.1 PRODUCTION STARTED - 2026-01-14 11:20:09
+2026-01-14 11:20:09,534 | INFO | ================================================================================
+2026-01-14 11:20:09,534 | INFO | TOP 5 STOCKS: TATAMOTORS, POWERGRID, VEDL, ONGC, BHARTIARTL
+2026-01-14 11:20:09,534 | INFO | CONFIG: TRUE Bounce + No Filter + 1.5% Target + 0.5% SL
+2026-01-14 11:20:09,534 | INFO | ================================================================================
+2026-01-14 11:20:09,537 | INFO | No trades CSV found - starting fresh
+2026-01-14 11:20:12,345 | INFO | ⏳ Next scan at 11:25:00 (in 287s)
+2026-01-14 11:25:02,809 | INFO | ⏳ Next scan at 11:30:00 (in 297s)
+2026-01-14 11:25:55,344 | INFO | ================================================================================
+2026-01-14 11:25:55,345 | INFO | MA BOUNCE BOT v1.1 PRODUCTION STARTED - 2026-01-14 11:25:55
+2026-01-14 11:25:55,345 | INFO | ================================================================================
+2026-01-14 11:25:55,345 | INFO | TOP 5 STOCKS: TATAMOTORS, POWERGRID, VEDL, ONGC, BHARTIARTL
+2026-01-14 11:25:55,345 | INFO | CONFIG: TRUE Bounce + No Filter + 1.5% Target + 0.5% SL
+2026-01-14 11:25:55,345 | INFO | ================================================================================
+2026-01-14 11:25:55,345 | INFO | No trades CSV found - starting fresh
+2026-01-14 11:25:57,720 | INFO | ⏳ Next scan at 11:30:00 (in 242s)
+2026-01-14 11:26:01,390 | INFO | ================================================================================
+2026-01-14 11:26:01,390 | INFO | MA BOUNCE BOT v1.1 PRODUCTION STARTED - 2026-01-14 11:26:01
+2026-01-14 11:26:01,391 | INFO | ================================================================================
+2026-01-14 11:26:01,391 | INFO | TOP 5 STOCKS: TATAMOTORS, POWERGRID, VEDL, ONGC, BHARTIARTL
+2026-01-14 11:26:01,391 | INFO | CONFIG: TRUE Bounce + No Filter + 1.5% Target + 0.5% SL
+2026-01-14 11:26:01,391 | INFO | ================================================================================
+2026-01-14 11:26:01,391 | INFO | No trades CSV found - starting fresh
+2026-01-14 11:26:03,611 | INFO | ⏳ Next scan at 11:30:00 (in 236s)
+2026-01-14 11:29:10,534 | INFO | ================================================================================
+2026-01-14 11:29:10,534 | INFO | MA BOUNCE BOT v1.1 PRODUCTION STARTED - 2026-01-14 11:29:10
+2026-01-14 11:29:10,534 | INFO | ================================================================================
+2026-01-14 11:29:10,534 | INFO | TOP 5 STOCKS: TATAMOTORS, POWERGRID, VEDL, ONGC, BHARTIARTL
+2026-01-14 11:29:10,534 | INFO | CONFIG: TRUE Bounce + No Filter + 1.5% Target + 0.5% SL
+2026-01-14 11:29:10,534 | INFO | ================================================================================
+2026-01-14 11:29:10,534 | INFO | No trades CSV found - starting fresh
+2026-01-14 11:29:31,636 | INFO | Placing order: TATAMOTORS @ ₹353.25 x 4 shares
+2026-01-14 11:29:31,636 | INFO | Target: ₹358.55 (+1.5%), SL: ₹351.48 (-0.5%)
+2026-01-14 11:29:32,177 | ERROR | Order placement error: 'order_id'
+2026-01-14 11:29:50,808 | INFO | Placing order: BHARTIARTL @ ₹2017.80 x 1 shares
+2026-01-14 11:29:50,808 | INFO | Target: ₹2048.07 (+1.5%), SL: ₹2007.71 (-0.5%)
+2026-01-14 11:29:51,217 | ERROR | Order placement error: 'order_id'
+2026-01-14 11:29:51,220 | INFO | ⏳ Next scan at 11:30:00 (in 8s)
+2026-01-14 11:30:14,261 | INFO | ⏳ Next scan at 11:35:00 (in 285s)
+2026-01-14 11:39:15,409 | INFO | ⏳ Next scan at 11:40:00 (in 44s)
+2026-01-14 11:45:21,763 | INFO | ⏳ Next scan at 11:50:00 (in 278s)
+2026-01-14 11:50:16,840 | INFO | ⏳ Next scan at 11:55:00 (in 283s)
+2026-01-14 11:55:16,287 | INFO | ⏳ Next scan at 12:00:00 (in 283s)
+2026-01-14 12:03:01,731 | INFO | ⏳ Next scan at 12:05:00 (in 118s)
+2026-01-14 12:03:06,124 | INFO | ================================================================================
+2026-01-14 12:03:06,125 | INFO | MA BOUNCE BOT v1.1 PRODUCTION STARTED - 2026-01-14 12:03:06
+2026-01-14 12:03:06,125 | INFO | ================================================================================
+2026-01-14 12:03:06,125 | INFO | TOP 5 STOCKS: TATAMOTORS, POWERGRID, VEDL, ONGC, BHARTIARTL
+2026-01-14 12:03:06,125 | INFO | CONFIG: TRUE Bounce + No Filter + 1.5% Target + 0.5% SL
+2026-01-14 12:03:06,125 | INFO | ================================================================================
+2026-01-14 12:03:06,125 | INFO | No trades CSV found - starting fresh
+2026-01-14 12:04:07,393 | INFO | ⏳ Next scan at 12:05:00 (in 52s)
+2026-01-14 12:05:46,907 | INFO | ⏳ Next scan at 12:10:00 (in 253s)
+2026-01-14 12:17:32,893 | INFO | ⏳ Next scan at 12:20:00 (in 147s)
+2026-01-14 12:19:18,850 | INFO | ================================================================================
+2026-01-14 12:19:18,850 | INFO | MA BOUNCE BOT v1.1 PRODUCTION STARTED - 2026-01-14 12:19:18
+2026-01-14 12:19:18,850 | INFO | ================================================================================
+2026-01-14 12:19:18,850 | INFO | TOP 5 STOCKS: TATAMOTORS, POWERGRID, VEDL, ONGC, BHARTIARTL
+2026-01-14 12:19:18,850 | INFO | CONFIG: TRUE Bounce + No Filter + 1.5% Target + 0.5% SL
+2026-01-14 12:19:18,851 | INFO | ================================================================================
+2026-01-14 12:19:18,851 | INFO | No trades CSV found - starting fresh
+2026-01-14 12:21:17,925 | INFO | Placing order: TATAMOTORS @ ₹353.35 x 2 shares
+2026-01-14 12:21:17,925 | INFO | Target: ₹358.65 (+1.5%), SL: ₹351.58 (-0.5%)
+2026-01-14 12:21:18,733 | INFO | Added TATAMOTORS to dashboard
+2026-01-14 12:21:25,006 | INFO | ⏳ Next scan at 12:25:00 (in 214s)
+2026-01-14 12:39:06,715 | INFO | ⏳ Next scan at 12:40:00 (in 53s)
+2026-01-14 12:39:18,299 | INFO | ================================================================================
+2026-01-14 12:39:18,300 | INFO | MA BOUNCE BOT v1.1 PRODUCTION STARTED - 2026-01-14 12:39:18
+2026-01-14 12:39:18,300 | INFO | ================================================================================
+2026-01-14 12:39:18,300 | INFO | TOP 5 STOCKS: TATAMOTORS, POWERGRID, VEDL, ONGC, BHARTIARTL
+2026-01-14 12:39:18,300 | INFO | CONFIG: TRUE Bounce + No Filter + 1.5% Target + 0.5% SL
+2026-01-14 12:39:18,300 | INFO | ================================================================================
+2026-01-14 12:39:18,300 | INFO | 📊 Loaded from CSV: 1 trades today | Symbols: {'TATAMOTORS'}
+2026-01-14 12:39:23,323 | INFO | ⏳ Next scan at 12:40:00 (in 36s)
+2026-01-14 12:39:29,394 | INFO | ================================================================================
+2026-01-14 12:39:29,394 | INFO | MA BOUNCE BOT v1.1 PRODUCTION STARTED - 2026-01-14 12:39:29
+2026-01-14 12:39:29,394 | INFO | ================================================================================
+2026-01-14 12:39:29,394 | INFO | TOP 5 STOCKS: TATAMOTORS, POWERGRID, VEDL, ONGC, BHARTIARTL
+2026-01-14 12:39:29,394 | INFO | CONFIG: TRUE Bounce + No Filter + 1.5% Target + 0.5% SL
+2026-01-14 12:39:29,394 | INFO | ================================================================================
+2026-01-14 12:39:29,394 | INFO | 📊 Loaded from CSV: 1 trades today | Symbols: {'TATAMOTORS'}
+2026-01-14 12:39:42,719 | INFO | Placing order: BHARTIARTL @ ₹2030.20 x 1 shares
+2026-01-14 12:39:42,719 | INFO | Target: ₹2060.65 (+1.5%), SL: ₹2020.05 (-0.5%)
+2026-01-14 12:39:43,245 | INFO | Added BHARTIARTL to dashboard
+2026-01-14 12:39:43,245 | ERROR | Order placement error: [Errno 13] Permission denied: 'trades_log_master.csv'
+2026-01-14 12:39:43,258 | INFO | ⏳ Next scan at 12:40:00 (in 16s)
+2026-01-14 12:40:03,958 | INFO | ⏳ Next scan at 12:45:00 (in 296s)
+2026-01-14 12:41:02,819 | INFO | ================================================================================
+2026-01-14 12:41:02,819 | INFO | MA BOUNCE BOT v1.1 PRODUCTION STARTED - 2026-01-14 12:41:02
+2026-01-14 12:41:02,819 | INFO | ================================================================================
+2026-01-14 12:41:02,819 | INFO | TOP 5 STOCKS: TATAMOTORS, POWERGRID, VEDL, ONGC, BHARTIARTL
+2026-01-14 12:41:02,819 | INFO | CONFIG: TRUE Bounce + No Filter + 1.5% Target + 0.5% SL
+2026-01-14 12:41:02,819 | INFO | ================================================================================
+2026-01-14 12:41:02,819 | INFO | 📊 Loaded from CSV: 2 trades today | Symbols: {'TATAMOTORS', 'BHARTIARTL'}
+2026-01-14 12:41:23,386 | INFO | Placing order: TATAMOTORS @ ₹352.35 x 6 shares
+2026-01-14 12:41:23,386 | INFO | Target: ₹357.64 (+1.5%), SL: ₹350.59 (-0.5%)
+2026-01-14 12:41:23,879 | INFO | Added TATAMOTORS to dashboard
+2026-01-14 12:41:23,879 | ERROR | Order placement error: [Errno 13] Permission denied: 'trades_log_master.csv'
+2026-01-14 12:44:02,179 | INFO | ⏳ Next scan at 12:45:00 (in 57s)
+2026-01-14 12:44:29,450 | INFO | ================================================================================
+2026-01-14 12:44:29,450 | INFO | MA BOUNCE BOT v1.1 PRODUCTION STARTED - 2026-01-14 12:44:29
+2026-01-14 12:44:29,450 | INFO | ================================================================================
+2026-01-14 12:44:29,450 | INFO | TOP 5 STOCKS: TATAMOTORS, POWERGRID, VEDL, ONGC, BHARTIARTL
+2026-01-14 12:44:29,450 | INFO | CONFIG: TRUE Bounce + No Filter + 1.5% Target + 0.5% SL
+2026-01-14 12:44:29,450 | INFO | ================================================================================
+2026-01-14 12:44:29,450 | INFO | 📊 Loaded from CSV: 3 trades today | Symbols: {'TATAMOTORS', 'BHARTIARTL'}
+2026-01-14 12:44:32,303 | INFO | ⏳ Next scan at 12:45:00 (in 27s)
+2026-01-14 12:45:02,067 | INFO | ⏳ Next scan at 12:50:00 (in 297s)
+2026-01-14 12:48:15,987 | INFO | ================================================================================
+2026-01-14 12:48:15,987 | INFO | MA BOUNCE BOT v1.1 PRODUCTION STARTED - 2026-01-14 12:48:15
+2026-01-14 12:48:15,987 | INFO | ================================================================================
+2026-01-14 12:48:15,987 | INFO | TOP 5 STOCKS: TATAMOTORS, POWERGRID, VEDL, ONGC, BHARTIARTL
+2026-01-14 12:48:15,987 | INFO | CONFIG: TRUE Bounce + No Filter + 1.5% Target + 0.5% SL
+2026-01-14 12:48:15,987 | INFO | ================================================================================
+2026-01-14 12:48:15,988 | INFO | 📊 Loaded from CSV: 3 trades today | Symbols: {'BHARTIARTL', 'TATAMOTORS'}
+2026-01-14 12:48:31,341 | INFO | Placing order: BHARTIARTL @ ₹2030.70 x 1 shares
+2026-01-14 12:48:31,341 | INFO | Target: ₹2061.16 (+1.5%), SL: ₹2020.55 (-0.5%)
+2026-01-14 12:48:31,986 | INFO | Added BHARTIARTL to dashboard
+2026-01-14 12:48:31,987 | ERROR | Order placement error: [Errno 13] Permission denied: 'trades_log_20260114.csv'
+2026-01-14 12:48:31,998 | INFO | ⏳ Next scan at 12:50:00 (in 88s)
+2026-01-14 12:48:41,216 | INFO | ================================================================================
+2026-01-14 12:48:41,216 | INFO | MA BOUNCE BOT v1.1 PRODUCTION STARTED - 2026-01-14 12:48:41
+2026-01-14 12:48:41,216 | INFO | ================================================================================
+2026-01-14 12:48:41,216 | INFO | TOP 5 STOCKS: TATAMOTORS, POWERGRID, VEDL, ONGC, BHARTIARTL
+2026-01-14 12:48:41,216 | INFO | CONFIG: TRUE Bounce + No Filter + 1.5% Target + 0.5% SL
+2026-01-14 12:48:41,216 | INFO | ================================================================================
+2026-01-14 12:48:41,216 | INFO | 📊 Loaded from CSV: 3 trades today | Symbols: {'BHARTIARTL', 'TATAMOTORS'}
+2026-01-14 12:48:43,408 | INFO | ⏳ Next scan at 12:50:00 (in 76s)
+2026-01-14 12:50:03,129 | INFO | ⏳ Next scan at 12:55:00 (in 296s)
+2026-01-14 12:55:02,888 | INFO | ⏳ Next scan at 13:00:00 (in 297s)
+2026-01-14 13:00:04,065 | INFO | ⏳ Next scan at 13:05:00 (in 295s)
+2026-01-14 13:05:02,186 | INFO | ⏳ Next scan at 13:10:00 (in 297s)
+2026-01-14 13:10:04,775 | INFO | ⏳ Next scan at 13:15:00 (in 295s)
+2026-01-14 13:15:02,917 | INFO | ⏳ Next scan at 13:20:00 (in 297s)
+2026-01-14 13:20:03,593 | INFO | ⏳ Next scan at 13:25:00 (in 296s)
+2026-01-14 13:25:02,952 | INFO | ⏳ Next scan at 13:30:00 (in 297s)
+2026-01-14 13:30:03,088 | INFO | ⏳ Next scan at 13:35:00 (in 296s)
+2026-01-14 13:35:03,102 | INFO | ⏳ Next scan at 13:40:00 (in 296s)
+2026-01-14 13:40:03,716 | INFO | ⏳ Next scan at 13:45:00 (in 296s)
+2026-01-14 13:45:02,810 | INFO | ⏳ Next scan at 13:50:00 (in 297s)
+2026-01-14 13:50:05,679 | INFO | ⏳ Next scan at 13:55:00 (in 294s)
+2026-01-14 13:54:42,537 | INFO | ================================================================================
+2026-01-14 13:54:42,537 | INFO | MA BOUNCE BOT v1.1 PRODUCTION STARTED - 2026-01-14 13:54:42
+2026-01-14 13:54:42,537 | INFO | ================================================================================
+2026-01-14 13:54:42,537 | INFO | TOP 5 STOCKS: TATAMOTORS, POWERGRID, VEDL, ONGC, BHARTIARTL
+2026-01-14 13:54:42,537 | INFO | CONFIG: TRUE Bounce + No Filter + 1.5% Target + 0.5% SL
+2026-01-14 13:54:42,537 | INFO | ================================================================================
+2026-01-14 13:54:42,538 | INFO | 📊 Loaded from CSV: 3 trades today | Symbols: {'BHARTIARTL', 'TATAMOTORS'}
+2026-01-14 13:55:16,584 | INFO | Placing order: TATAMOTORS @ ₹349.80 x 2 shares
+2026-01-14 13:55:16,584 | INFO | Target: ₹355.05 (+1.5%), SL: ₹348.05 (-0.5%)
+2026-01-14 13:55:17,199 | INFO | Added TATAMOTORS to dashboard
+2026-01-14 13:55:17,200 | ERROR | Order placement error: [Errno 13] Permission denied: 'trades_log_20260114.csv'
+2026-01-14 13:56:05,697 | INFO | Placing order: BHARTIARTL @ ₹2022.70 x 1 shares
+2026-01-14 13:56:05,697 | INFO | Target: ₹2053.04 (+1.5%), SL: ₹2012.59 (-0.5%)
+2026-01-14 13:56:06,129 | INFO | Added BHARTIARTL to dashboard
+2026-01-14 13:56:06,129 | ERROR | Order placement error: [Errno 13] Permission denied: 'trades_log_20260114.csv'
+2026-01-14 13:56:06,134 | INFO | ⏳ Next scan at 14:00:00 (in 233s)
+2026-01-14 14:07:24,549 | INFO | ================================================================================
+2026-01-14 14:07:24,549 | INFO | MA BOUNCE BOT v1.1 PRODUCTION STARTED - 2026-01-14 14:07:24
+2026-01-14 14:07:24,550 | INFO | ================================================================================
+2026-01-14 14:07:24,550 | INFO | TOP 5 STOCKS: TATAMOTORS, POWERGRID, VEDL, ONGC, BHARTIARTL
+2026-01-14 14:07:24,550 | INFO | CONFIG: TRUE Bounce + No Filter + 1.5% Target + 0.5% SL
+2026-01-14 14:07:24,550 | INFO | ================================================================================
+2026-01-14 14:07:24,550 | INFO | 📊 Loaded from CSV: 3 trades today | Symbols: {'BHARTIARTL', 'TATAMOTORS'}
+2026-01-14 14:07:28,156 | INFO | ⏳ Next scan at 14:10:00 (in 151s)
+2026-01-14 14:10:03,968 | INFO | ⏳ Next scan at 14:15:00 (in 296s)
+2026-01-14 14:15:06,446 | INFO | ⏳ Next scan at 14:20:00 (in 293s)
+2026-01-14 14:20:04,614 | INFO | ⏳ Next scan at 14:25:00 (in 295s)
+2026-01-14 14:25:05,872 | INFO | ⏳ Next scan at 14:30:00 (in 294s)

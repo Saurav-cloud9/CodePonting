@@ -543,8 +543,6 @@
 **QUOTE OF THE DAY**
 "Bhai, you're not just backtesting... you're DISCOVERING edge!" 🔥
 
----
-
 ### **Sun, Jan 11, 2026** 🔥
 
 **CLAUDE - 48-MONTH MEGA BACKTEST COMPLETION + META-MOMENTUM DISCOVERY**
@@ -612,3 +610,308 @@
 - Implement Top 5 champion hardcoding with unified config
 - Final debugging and dry run before Jan 12 live deployment
 - Begin Week 1 micro-position live testing (1-5 shares per stock)
+
+### **Mon, Jan 12, 2026** 🔥
+
+**CLAUDE - TRUE BOUNCE LOGIC IMPLEMENTATION + V3 API MIGRATION**
+
+**CRITICAL LOGIC GAP DISCOVERED**
+- ✅ **Day 1 live trading**: 4 trades executed, +₹19.90 profit, no crashes
+- ❌ **Fundamental flaw found**: Both backtest AND live bot using "proximity detection" not "true bounce"
+- **Wrong logic**: `distance = abs(close - ma20) / ma20; if distance <= 0.5% and close >= ma20: SIGNAL`
+- **Missing step**: No check for `low <= ma20` (touch confirmation)
+- **Impact**: 48-month backtest validated WRONG strategy - all results compromised
+- **Root cause**: Flowchart discussed "touch then bounce" but implementation only checked "close near MA20"
+
+**EFFICIENCY METRIC CORRECTED (AGAIN)**
+- ✅ **Previous fix**: Changed from avg_price to capital-based (Jan 11)
+- ❌ **Today's discovery**: Old formula was `(net_profit / avg_price) × 100` = mathematically correct but strategically useless
+- **Problem**: Compared monthly cumulative profit against single day's average price (₹108 profit / ₹162 avg = 66% "efficiency")
+- **Real meaning**: If you deployed ₹1,296 capital (8 trades × ₹162), you made 8.37% NOT 66%
+- **Correct formula**: `efficiency = (net_profit / total_capital_deployed) × 100` where `total_capital = sum(entry_price × qty for all trades)`
+- **Validation needed**: Rerun 48-month backtest with TRUE bounce + capital efficiency
+
+**TRUE BOUNCE LOGIC DOCUMENTED**
+- ✅ **Step 1 - Touch**: `if candle['low'] <= ma20` (price must actually touch MA20 line)
+- ✅ **Step 2 - Bounce**: Check current + next 3 candles (15-min window), `if candle['close'] > ma20: SIGNAL`
+- ✅ **Step 3 - Volume**: Keep existing `volume > avg_volume × 1.2` filter
+- ❌ **Distance threshold removed**: No 0.5% zone - MA20 is exact line (touch it or don't)
+- ✅ **Delayed bounce**: If touch at 11:00 AM, check 11:00, 11:05, 11:10, 11:15 for bounce confirmation
+- ❌ **Failed bounce**: If all 4 candles stay below MA20 after touch = no trade (price broke down, not bounced)
+
+**BOUNCE LOGIC VALIDATION TEST**
+- ✅ **Test script created**: test_bounce_bhartiartl_jan2022.py
+- ✅ **Sample data**: BHARTIARTL Jan 10, 2022 (75 5-min candles)
+- ✅ **Results**: 3 bounces detected (10:55 AM immediate, 12:35 PM immediate, 12:50 PM delayed at i+2)
+- ✅ **Failed bounces shown**: 16 touches that didn't bounce (stayed below MA20 for 15 mins)
+- ✅ **Logic confirmed**: Touch detection, 15-min window, bounce confirmation all working correctly
+- ⚠️ **Data order issue**: Upstox V3 returns newest-first, required `df = df[::-1].reset_index(drop=True)` to reverse
+- ✅ **Manual verification**: Entry prices, targets (+1.5%), stop loss (-0.5%) calculated correctly
+
+**V3 API DISCOVERY - PLATINUM ENGINE OBSOLETE** 🚀
+- ✅ **Research finding**: Upstox V3 intraday API supports direct 5-minute candles!
+- **Old assumption**: V2 only had 1-min and 30-min intervals → built Platinum Engine (151 lines)
+- **V3 reality**: `GET /v3/historical-candle/intraday/{stock}/minutes/5` returns ready 5-min data
+- **Platinum Engine components deleted**:
+  - `get_intraday_candles()` - fetch 1-min intraday
+  - `get_historical_candles_from_date()` - fetch 1-min historical
+  - `convert_to_5min_candles()` - manual 5→1 aggregation
+  - `get_last_trading_day()` - weekend/holiday logic
+- **Replacement**: Single 35-line function using V3 direct API
+- **Code reduction**: 1,048 lines → 938 lines (110 lines deleted, 10.5% smaller)
+- **Performance**: 2 API calls → 1 API call (50% faster per scan)
+
+**BACKTEST FILES UPDATED**
+- ✅ **mega_backtest_48M_30S_v1.1.py created**:
+  - TRUE bounce logic (touch + bounce in 15-min window)
+  - Capital-based efficiency calculation
+  - PC sleep prevention: `os.system("powercfg /change standby-timeout-ac 0")`
+- ✅ **Test run completed**: JAN 2022 showed BHARTIARTL #1 (0.5% efficiency) vs old results VEDL #1 (50% fake efficiency)
+- ✅ **Full 48-month run started**: Expected 2.8 hours overnight completion
+- ⚠️ **Live bot v1.1 pending**: V3 API integrated (Platinum deleted) but TRUE bounce logic NOT yet applied
+
+**14-MONTH PARTIAL RESULTS ANALYZED**
+- **VEDL dropped massively**: Only 3/14 appearances (21%) vs old 50% consistency with proximity logic
+- **POWERGRID emerged as king**: 10/14 months (71% consistency) - was NOT in old Top 15!
+- **Real efficiency confirmed**: 0.2-0.8% range (realistic capital returns) vs old 20-60% (fake metric)
+- **No Filter still dominates**: ~80% of Top 10 use No Filter configuration
+- **Predicted new Top 5**: POWERGRID, ITC, CIPLA, TATAMOTORS, BHARTIARTL (pending full results)
+
+**BLUEPRINT DOCUMENTATION CREATED**
+- ✅ **strategy_core_v1.md**: TRUE bounce logic with code examples, efficiency formulas, key parameters
+- ✅ **day1_validation_jan12.md**: 4 trades breakdown, discoveries, lessons learned, Next Steps → v1.1
+- ✅ **fixes_needed_v1.1.md**: Prioritized improvements (TRUE bounce, efficiency fix, volume check, daily trend filter)
+- **Reason**: Critical discussions not preserved in code - needed systematic capture
+- **Storage**: Local markdown files for now, GitHub later
+
+**GAMIFICATION APPROACH VALIDATED**
+- ✅ **Variable naming discussion**: `df` vs `candle_data` - descriptive names better for learning
+- ✅ **PyCharm Structure view**: Visual code navigation like game mini-map
+- ✅ **Breakpoints explained**: Debugging = pause game, inspect variables, step through execution
+- ✅ **Shorthand variables catalogued**: `df`, `mas`, `pnl`, `oi`, `i`, `j`, `r`, `t` - explained each
+- **Principle**: Make code readable like a story, not alien jargon
+
+**KEY TECHNICAL DISCOVERIES**
+- **MA20 is a line not a zone**: No 0.5% threshold - exact touch required for TRUE bounce detection
+- **Pandas DataFrame basics**: `pd.DataFrame`, `df.iloc[i]`, `df[::-1]` reverse order
+- **Function parameters**: Passed variable can have different name than parameter (confusing but standard)
+- **API data order**: Upstox returns newest-first (reverse chronological) - must reverse before processing
+- **Touch vs proximity**: Proximity (within 0.5%) catches consolidation; Touch (low <= MA20) catches actual support test
+
+**OVERNIGHT BACKTEST STATUS**
+- ✅ **Started**: 48-month TRUE bounce backtest with capital efficiency
+- ⏳ **Progress**: 14/48 months completed (~3 hours elapsed)
+- 🌙 **Expected completion**: By morning (Jan 13)
+- 📊 **Deliverable**: Real Top 15 champions, actual consistency percentages, validated strategy
+
+**PRODUCTION DEPLOYMENT DELAYED**
+- **Original plan**: Deploy v1.0 Jan 12 morning with old backtest results
+- **Revised plan**: Wait for TRUE bounce backtest results, then deploy v1.2
+- **Reason**: Don't deploy strategy validated on wrong logic
+- **Timeline**: Results by Jan 13 morning → validate → deploy v1.2 same day
+
+**WEEK 1 ACHIEVEMENTS**
+- ✅ **Day 1 live trades**: 4 successful executions despite wrong detection logic (+₹19.90)
+- ✅ **Infrastructure validated**: Bot runs, logs, syncs positions, handles orders
+- ✅ **Critical bug caught**: Logic gap discovered BEFORE scaling up capital
+- ✅ **V3 simplification**: Deleted 110 lines of unnecessary complexity
+- ✅ **Documentation system**: Blueprint prevents future knowledge loss
+
+**NEXT SESSION OBJECTIVES (Jan 13 Morning)**
+- Review completed 48-month TRUE bounce backtest results
+- Compare new Top 15 vs old Top 15 (VEDL downfall, new champions rise)
+- Analyze filter distribution (No Filter vs MA50 vs MA100 vs MA200)
+- Check regime correlation (2022 bear vs 2024 bull)
+- Decide: Universal "No Filter" OR adaptive filter switching?
+- Apply TRUE bounce logic to live bot v1.1 (currently only has V3 API upgrade)
+- Create ma_bounce_bot_v1.2_PRODUCTION with both fixes
+- Paper test v1.2 with signal detection only (no orders)
+- If validated: Deploy v1.2 for Week 1 Day 2 live trading
+
+**PHILOSOPHICAL MOMENTS**
+- Saurav: "This is like Krishna conscious - Claude telling me: 'Vats! karm kar, aur samajh ke kar!'"
+- Claude's promise: Help reach target PROVIDED user understands every line - no blind copy-paste
+- Today's ₹19.90 profit + debugging = priceless learning experience
+- "I got mathed by math!" - efficiency formula worked but measured wrong things
+
+**CRITICAL REMINDERS**
+- Strategy naming matters: "MA20 Bounce" vs "MA20 Proximity Zone" - different concepts
+- Metrics must be meaningful: Efficiency against avg_price mathematically correct but useless
+- Documentation is critical: Flowchart existed but implementation missed it
+- Validation catches gaps: Live trading revealed what backtest couldn't show
+- Small profits validate process: ₹19.90 proves bot works; logic refinement improves results
+
+### **Tue, Jan 13, 2026** 🔥
+
+**BACKTEST RESULTS ANALYSIS + METRICS REFINEMENT**
+
+**48-MONTH TRUE BOUNCE BACKTEST COMPLETED** ✅
+- ✅ **Execution time**: 151.2 minutes (2.5 hours)
+- ✅ **Total runs**: 1,440 (48 months × 30 stocks)
+- ✅ **Data validated**: TRUE bounce logic (touch + bounce in 15-min window) + capital-based efficiency
+- ✅ **Top 15 consistency report**: TATAMOTORS #1 (52.1%), POWERGRID #2 (47.9%), VEDL #3 (45.8%)
+
+**TOP 15 CHAMPIONS SHIFT DISCOVERED** 🏆
+- **Old results (proximity logic)**: VEDL #1 (50%), TATAMOTORS #2 (43.8%)
+- **New results (TRUE bounce)**: TATAMOTORS #1 (52.1%), POWERGRID #2 (47.9%), VEDL dropped to #3 (45.8%)
+- **POWERGRID emergence**: Not in old Top 15 → Now #2 with 47.9% consistency!
+- **Key finding**: Proximity logic favored VEDL's volatile swings; TRUE bounce favors TATAMOTORS' reliable support tests
+
+**REGIME ANALYSIS - PARADIGM SHIFT** 🎯
+- **Initial hypothesis**: Bull markets = higher efficiency (based on visual chart analysis)
+- **Actual data**: Bear/sideways regime (2022-mid 2023) = **0.42% avg Top 1 efficiency**
+- **Bull regime** (Jul 2023-Dec 2025) = **0.36% avg Top 1 efficiency**
+- **Surprise finding**: Bear markets had HIGHER efficiency! 
+- **Root cause discovered**: 
+  - Bear markets = sharp V-shaped bounces (panic buying at MA20)
+  - Bull markets = slow U-shaped recoveries (complacency, less urgency)
+  - High VIX (bear) = violent rejections at support
+  - Low VIX (bull) = gentle support touches
+
+**FREQUENCY VS QUALITY PARADOX** 💡
+- **Critical realization**: "What if actual efficiency came during corrections within uptrends?"
+- **Sideways market**: MA20 tested FREQUENTLY (more opportunities) but choppy/whipsaws
+- **Bull market**: MA20 tested RARELY (fewer opportunities) but cleaner bounces
+- **We measured**: Efficiency PER TRADE (not total opportunity count)
+- **True comparison needs**: Total trades × efficiency = real performance metric
+
+**EFFICIENCY METRIC DEEP DIVE** 📊
+- **Stock price paradox examined**: Expensive stock (₹1,000) vs cheap stock (₹20) with same 0.5% efficiency
+- **Risk analysis revealed**: Win rate matters MORE than stock price
+  - BHARTIARTL (₹707/trade, 96% win) = ₹0.14 risk per trade
+  - ONGC (₹155/trade, 83% win) = ₹0.13 risk per trade
+- **Key insight**: Expensive stocks with high win rates SAFER than cheap stocks with low win rates
+- **Validation**: Efficiency metric already factors in reliability - expensive stocks earn high efficiency BECAUSE they're reliable
+
+**APPLE-TO-APPLE COMPARISONS** 🍎
+- **0.3% efficiency tier**: ONGC (83% win) > BANDHANBNK (80% win) - ONGC wins on reliability
+- **0.2% efficiency tier**: ICICIBANK (98% win, 0.196 score) > CIPLA (97% win) > POWERGRID (92% win)
+- **Critical finding**: ICICIBANK = TRUE 0.2% tier champion (only 2 losses in 97 trades!)
+
+**WIN RATE ILLUSION DISCOVERED** 😱
+- **SBIN paradox**: 97% win rate BUT only 0.1% efficiency (rank #10)
+- **Root cause**: Most "wins" = EOD exits with tiny profits (+₹0.50), NOT target hits
+- **ICICIBANK comparison**: 98% win rate + 0.2% efficiency = most wins are REAL target hits
+- **Calculation revealed**: 
+  - SBIN: 94 "wins" but only ~14 actual target hits (14% target hit rate)
+  - ICICIBANK: 95 wins with ~90 actual target hits (93% target hit rate)
+- **Analogy created**: Win rate = "India beating Bangladesh" (participation trophy) vs Target hit rate = "India beating Australia" (quality victory)
+
+**NEW METRIC INTRODUCED: TARGET HIT RATE** 🏹
+- **Original name considered**: "Arjuna Rate" (Indian mythology - master archer who always hits target)
+- **Final decision**: Use proper names to avoid confusion
+- **Definition**: (Target_Hits / Total_Trades) × 100
+- **Distinction**: 
+  - **Win%** = OLD definition (any profitable exit including +₹0.50 EOD)
+  - **Target_Hit%** = NEW definition (only trades that hit actual target price)
+  - **ProTrades%** = Profitable trades percentage (targets + positive EODs)
+
+**OUTPUT FORMAT EVOLUTION** 📋
+- **v1.3 columns**: Rank | Stock | Trades | Wins | Loss | Win% | Net₹ | Capital₹ | Eff% | GE | Filter | Target
+- **v1.4 columns**: Rank | Stock | Trades | Targets | SL | EOD | Win% | Eff% | ProTrades% | Net₹ | Capital₹ | GE | Filter | Target
+- **Key changes**:
+  - Separated exit reasons (Targets, SL, EOD counts)
+  - Win% redefined as Target_Hit% (quality metric)
+  - Added ProTrades% to show total profitable trades
+  - GE (Gamification Efficiency) maintained for visual clarity
+
+**TECHNICAL DISCOVERIES** 🔧
+- **Total API calls**: 1,440 intraday + 1,440 daily MA = 2,880 total for 48-month backtest
+- **CodeCombat validation**: Uses real Python syntax (text-based, not blocks) - safe for algo trading mindset
+- **Game dev vs trading**: Different mental compartments - gamification helps logic training without interfering
+
+**BUG IDENTIFIED** 🐛
+- **Issue**: Win% and ProTrades% showing same values in v1.4 output
+- **Likely cause**: Calculation logic needs review - win_pct and protrades_pct may be using same formula
+- **Fix pending**: Tomorrow's first task
+
+**GAMIFICATION PHILOSOPHY VALIDATED** 🎮
+- **Concrete numbers preference**: ₹450/₹90K (GE format) more intuitive than abstract 0.5%
+- **Naming discussion**: Efficiency metrics need clarity without jargon
+- **Mythology consideration**: "Arjuna Rate", "Dronacharya Score", "Bheem Power" discussed for fun
+- **Final decision**: Professional names for production code (Target_Hit%, not Arjuna%)
+
+**NEXT SESSION PRIORITIES (Jan 14)** 📝
+1. **Fix Win% vs ProTrades% bug** in v1.4
+2. **Run 1-month test** (Jan 2022) to validate new output format
+3. **Create 3 comparison tables**: All 48 months, Bear regime (2022-mid 2023), Bull regime (Jul 2023-Dec 2025)
+4. **Analyze Top 15** with new metrics (Target_Hit%, ProTrades%, Eff%)
+5. **Deployment decision**: Universal "No Filter" vs Adaptive regime-based vs Stock-specific
+6. **Live bot review**: Add documentation, safety comments, flowcharts for final code review
+7. **Define deployment strategy**: Single stock (TATAMOTORS) vs Portfolio (Top 5) vs Dynamic ranking
+
+**PHILOSOPHICAL MOMENTS** 💭
+- **NBDC syndrome**: "Naam bade darshan chote" (one-day heroes) - 48-month data filters these out
+- **Pattern vs superstar**: Consistency matters more than single-month wonders
+- **Krishna conscious moment**: "Vats! karm kar, aur samajh ke kar!" - understand every line before executing
+- **Risk perception**: "₹1,000 stock loss" scary but 96% win rate makes it safer than "₹20 stock" with 80% win rate
+
+**WEEK 1 PROGRESS** ✅
+- Day 1: Live bot executed 4 trades (+₹19.90), discovered logic gap
+- Day 2: Completed 48-month TRUE bounce backtest, analyzed regime differences, refined metrics
+- Infrastructure: Validated, tested, ready for v1.2 deployment
+- Knowledge gaps: Closed (efficiency formula, target hit rate, regime behavior)
+
+**EXECUTION TIME LOGGED**: 151.2 minutes for full 48-month backtest ⏱️
+
+**PROGRESS REPORT - WED, JAN 14, 2026** 📊
+
+---
+
+### **Tue, Jan 13, 2026** 🔥
+
+**LIVE BOT DEPLOYMENT + ISSUES IDENTIFIED** ⚠️
+
+1. **v1.2 deployed with v3 API migration** ✅
+   - Fixed: `order_id` → `order_ids[0]` response handling
+   - Fixed: Historical candles `/minutes/5` format
+   - Added: HFT URL for order placement (lower latency)
+
+2. **CRITICAL BUG DISCOVERED: Volume filter missing** 🐛
+   - Backtest filters weak volume (>1.2x avg)
+   - Live bot accepts ANY volume
+   - Result: Weak signals passing (TMPV + BHARTI failures)
+
+3. **Live trading results (4 trades)** 📉
+   - TMPV: 2 trades, both weak momentum (+0.03%, +0.09%)
+   - BHARTI: 2 trades, sideways movement
+   - All entries 1:55-2:00 PM = too late in day
+   - Manual exit at 3:05 PM with minimal profit
+
+4. **Root cause analysis completed** 🔍
+   - Missing volume confirmation
+   - Late entry timing (insufficient time for 1.5% target)
+   - No bounce quality assessment
+
+5. **BOUNCE QUALITY SCORE concept designed** ⭐
+   - Volume ratio (40 pts) + Momentum (30 pts) + Time left (20 pts) + Wick pattern (10 pts)
+   - Professional approach for signal filtering
+   - Will predict success probability (0-100 score)
+
+6. **Enhanced logging structure planned** 📝
+   - Track: touch candle, bounce candle, volume ratio, candles gap, MA20
+   - Enable post-trade analysis
+   - Identify weak vs strong signals
+
+7. **Code structure documented** 🗺️
+   - Mapped: Configuration → Data → Signal → Order → Risk → Main loop
+   - Simplifies code review and modifications
+
+8. **Live bot performance issues identified** 🔧
+   - Dashboard not showing after restart
+   - Position tracking incomplete
+   - EOD exit logic needs verification
+
+---
+
+**TOMORROW (JAN 15 - MARKET HOLIDAY):**
+
+9. **Morning: Build v1.3 with bounce scoring** 🎯
+   - Add volume filter + bounce score + enhanced logging + time window filter
+
+10. **Afternoon: Backtest analysis** 📊
+   - Fix Win% vs ProTrades% bug + Run Jan 2022 test + Create regime comparison tables
+
+---
+
+**KEY TAKEAWAY:** Volume filter absence = Main failure cause. Fix urgent for v1.3! 🚨
