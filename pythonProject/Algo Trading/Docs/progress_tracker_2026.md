@@ -902,9 +902,7 @@
    - Position tracking incomplete
    - EOD exit logic needs verification
 
----
-
-**TOMORROW (JAN 15 - MARKET HOLIDAY):**
+   **TOMORROW (JAN 15 - MARKET HOLIDAY):**
 
 9. **Morning: Build v1.3 with bounce scoring** 🎯
    - Add volume filter + bounce score + enhanced logging + time window filter
