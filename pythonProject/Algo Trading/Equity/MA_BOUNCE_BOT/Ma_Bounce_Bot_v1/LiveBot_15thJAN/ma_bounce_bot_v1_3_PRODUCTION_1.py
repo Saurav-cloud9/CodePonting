@@ -55,6 +55,9 @@ from rich.console import Console
 from rich.table import Table
 from rich.live import Live
 from rich.text import Text
+# NEW
+import os
+from dotenv import load_dotenv
 
 # Optional environment variable support
 try:
@@ -93,14 +96,12 @@ def play_signal_alert():
         except Exception:
             pass
 
-# ============================================
-# CONFIGURATION - v1.0 PRODUCTION
-# ============================================
+# Load environment variables
+load_dotenv()
 
-# Upstox API Credentials
-API_KEY = "18185106-6257-4a85-a84a-2ea314f91927"
-API_SECRET = "15m0va42ni"
-ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiJFRTY4MTkiLCJqdGkiOiI2OTY3MjY3MDIyYWY3YTI3NTRkNWM2MjEiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc2ODM2NzcyOCwiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzY4NDI4MDAwfQ.CkpHXVH-KTy4wKeYP04M0-VfhOAsK3yDCONA1-KbNLs"
+API_KEY = os.getenv('UPSTOX_API_KEY')
+API_SECRET = os.getenv('UPSTOX_API_SECRET')
+ACCESS_TOKEN = os.getenv('UPSTOX_ACCESS_TOKEN')
 
 # ============================================
 # v1.1: TOP 5 STOCKS (TRUE BOUNCE 48-MONTH VALIDATED)

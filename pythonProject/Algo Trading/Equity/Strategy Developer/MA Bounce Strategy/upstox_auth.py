@@ -2,9 +2,15 @@ import requests
 import webbrowser
 import urllib.parse
 
-# Your Upstox API credentials
-API_KEY = '18185106-6257-4a85-a84a-2ea314f91927'
-API_SECRET = '15m0va42ni'  # Put your full secret here
+# NEW
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+API_KEY = os.getenv('UPSTOX_API_KEY')
+API_SECRET = os.getenv('UPSTOX_API_SECRET')
 REDIRECT_URI = 'http://127.0.0.1:8000'
 
 
