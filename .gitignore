@@ -1,0 +1,41 @@
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Environment variables
+.env
+*.env
+venv/
+env/
+ENV/
+
+# API Keys & Secrets
+*_keys.py
+*_secret.py
+config.py
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs (optional - uncomment if you want to ignore logs)
+# *.log
+# logs/
