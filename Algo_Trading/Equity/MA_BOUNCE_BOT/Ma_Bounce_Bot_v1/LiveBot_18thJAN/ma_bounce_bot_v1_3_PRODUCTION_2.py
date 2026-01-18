@@ -41,8 +41,8 @@ import io
 
 # Fix Windows console Unicode issues
 if sys.platform == 'win32':
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace', line_buffering=True)
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace', line_buffering=True)
 
 
 import requests
@@ -130,7 +130,7 @@ MA_PERIOD = 20  # MA20 only (no MA50/100/200 filters)
 # Risk Management
 MAX_CAPITAL_PER_ORDER = 10000  # ₹10k max per order
 MAX_POSITIONS = 5  # Max 5 positions (Top 5 stocks)
-MAX_TRADES_PER_DAY = 5  # One trade per stock per day
+#MAX_TRADES_PER_DAY = 5  # One trade per stock per day
 EOD_EXIT_TIME = "15:00"  # 3:00 PM square-off
 
 # API Base
@@ -774,7 +774,7 @@ def run_bot():
         current_time = datetime.now().strftime("%H:%M")
         if current_time >= EOD_EXIT_TIME:
             log_with_color("\n⏰ 3:00 PM - EOD EXIT TIME", "WARNING")
-            
+
             if dashboard_metrics["positions"]:
                 log_with_color("📤 Squaring off all positions...", "INFO")
                 
@@ -797,18 +797,7 @@ def run_bot():
             if strategy == "MARKET_CLOSED":
                 print("⏰ Market closed. Bot stopping.")
                 break
-            
-            elif strategy == "NO_TRADE":
-                print("⏸️  After 2:30 PM - Monitor only mode...")
-                
-                if dashboard_metrics["positions"]:
-                    update_position_prices()
-                    console = Console()
-                    console.print(update_dashboard_rich())
 
-                time.sleep(60)
-                continue
-            
             current_time_str = datetime.now().strftime("%H:%M:%S")
             print(f"\n[{current_time_str}] Strategy: {strategy}")
             print("-" * 60)
@@ -822,21 +811,21 @@ def run_bot():
                 console.print(update_dashboard_rich())
 
                 # Check max trades limit
-                if dashboard_metrics["trades_today"] >= MAX_TRADES_PER_DAY:
-                    print(f"\n{CYAN}{'=' * 70}{RESET}")
-                    print("🏁 MAX TRADES REACHED FOR TODAY!")
-                    print(f"📊 TRADES: {dashboard_metrics['trades_today']}/{MAX_TRADES_PER_DAY}")
-                    print(f"⏸️  NO MORE NEW TRADES - Monitoring exits only...")
-                    print(f"{CYAN}{'=' * 70}{RESET}\n")
+                #if dashboard_metrics["trades_today"] >= MAX_TRADES_PER_DAY:
+                #    print(f"\n{CYAN}{'=' * 70}{RESET}")
+                #    print("🏁 MAX TRADES REACHED FOR TODAY!")
+                #    print(f"📊 TRADES: {dashboard_metrics['trades_today']}/{MAX_TRADES_PER_DAY}")
+                #   print(f"⏸️  NO MORE NEW TRADES - Monitoring exits only...")
+                #    print(f"{CYAN}{'=' * 70}{RESET}\n")
                     
-                    time.sleep(60)
-                    continue
+                #    time.sleep(60)
+                #    continue
                 
                 # Check max positions
                 if len(dashboard_metrics["positions"]) >= MAX_POSITIONS:
                     print(f"\n⚠️  MAX POSITIONS ({len(dashboard_metrics['positions'])}/{MAX_POSITIONS})")
                     print("   Waiting for exits before new trades...")
-                    time.sleep(60)
+                    time.sleep(10)
                     continue
 
             # Get current time
@@ -847,7 +836,7 @@ def run_bot():
             if current_time >= "14:30":
                 print("⏸️  NO MORE SIGNALS - Too late in day")
                 # Continue loop to monitor exits only
-                time.sleep(30)
+                time.sleep(10)
                 continue
 
             # Scan for new signals
@@ -864,9 +853,9 @@ def run_bot():
                         continue
                     
                     # Check if already traded today
-                    if symbol in dashboard_metrics["traded_symbols_today"]:
-                        print(f"⏭️  SKIP - {symbol} already traded today")
-                        continue
+                    #if symbol in dashboard_metrics["traded_symbols_today"]:
+                    #    print(f"⏭️  SKIP - {symbol} already traded today")
+                    #    continue
                     
                     # Increment signals counter
                     dashboard_metrics["signals_today"] += 1
@@ -994,7 +983,10 @@ def run_bot():
             else:
                 next_scan_time = now.replace(minute=next_interval, second=0, microsecond=0)
 
-            sleep_seconds = (next_scan_time - now).total_seconds()
+            if current_time >= "14:55":
+                sleep_seconds = 5  # Fast checks near EOD
+            else:
+                sleep_seconds = (next_scan_time - now).total_seconds()  # Sync to candles
 
             logger.info(f"⏳ Next scan at {next_scan_time.strftime('%H:%M:%S')} (in {int(sleep_seconds)}s)")
 
@@ -1032,7 +1024,7 @@ def run_bot():
         except Exception as e:
             print(f"\n❌ Error: {e}")
             logger.error(f"Main loop error: {e}")
-            time.sleep(60)
+            time.sleep(10)
     
     print("\n" + "=" * 60)
     print("Bot execution completed.")

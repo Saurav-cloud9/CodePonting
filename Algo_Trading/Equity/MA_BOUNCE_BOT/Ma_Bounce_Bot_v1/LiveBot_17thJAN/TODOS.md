@@ -121,7 +121,7 @@ if current_time >= "14:30":
 
 ---
 
-## **TODO #6: POSITION RELOAD ON RESTART** 🔄
+~~## **TODO #6: POSITION RELOAD ON RESTART** 🔄~~
 **File:** `ma_bounce_bot_v1_2_PRODUCTION.py`
 **Location:** After CSV load (Line ~200)
 **Code to add:**
