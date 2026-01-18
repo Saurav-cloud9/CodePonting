@@ -1057,4 +1057,53 @@ Perfect day of learning! Rest up for testing tomorrow! 🚀
 
 ---
 
+### Sun, Jan 18, 2026 - README CREATION + BOUNCE SCORE FRAMEWORK + STD DEVIATION MASTERY
+
+**REPOSITORY DOCUMENTATION:**
+- Created comprehensive README.md for CodePonting GitHub repo with strategy overview, installation, 48-month validation results
+- Added Top 5 performing stocks table (TATAMOTORS 52.1%, POWERGRID 47.9%, VEDL 45.8%)
+- Documented v1.4 roadmap (Bounce Quality Score) and v1.5 plans (Nifty regime filter, time window optimization)
+- Established project structure, backtest results summary, risk disclosure
+
+**BOUNCE QUALITY SCORE ARCHITECTURE:**
+- Designed 0-100 scoring system: Volume Ratio (40 pts) + Bounce Strength (20 pts) + Candle Color (10 pts) + Wick Pattern (10 pts) + Time Left (20 pts)
+- **CRITICAL INSIGHT**: Discovered red/bearish candles CAN be valid bounce signals (close > MA20 despite red color)
+- Refined scoring to prioritize bounce strength + wick rejection over candle color
+- Decided data-driven approach: Record raw metrics first, analyze correlations, build scoring from actual patterns (not assumptions)
+
+**BACKTEST PARAMETERS EXPANSION:**
+- Finalized 7 new bounce metrics: Volume_Ratio, Bounce_Strength_Pct, Wick_Ratio, Candle_Color, Hours_Until_Close, Touch_Candle_Index, Bounce_Candle_Index
+- Added 5 regime columns: NIFTY_Price, NIFTY_MA20/50/200, NIFTY_Regime (UPTREND/DOWNTREND/SIDEWAYS)
+- Total backtest output: 28 columns (16 existing + 12 new) for comprehensive pattern analysis
+
+**STATISTICAL ANALYSIS FUNDAMENTALS:**
+- Mastered mean, median, percentiles for threshold discovery (winner median vs loser median = cutoff points)
+- **BREAKTHROUGH**: Understood standard deviation as consistency/reliability metric (low std = predictable patterns, high std = random)
+- Learned 68-95-99.7 rule: Normal distribution ranges for identifying exceptional vs typical signals
+- Grasped z-score calculation: (value - mean) / std = "how many standard deviations away" = confidence indicator
+- **GOLD INSIGHT**: Compare two winning stocks by std - lower std = more reliable, deploy more capital (TATAMOTORS std=0.3 > VEDL std=1.1)
+
+**METHODOLOGY VALIDATION:**
+- Confirmed MA Bounce = Mean Reversion strategy (price reverts to MA20 average)
+- Established research validation approach: Volume/time/strength are proven factors, exact scoring is original research for NSE F&O
+- Planned homework: Cross-reference factors with academic papers (SSRN), quant resources (Quantpedia), other AIs (Grok/ChatGPT)
+
+**KEY LEARNINGS:**
+- Touch candle = Bounce candle possible (same candle scenario) - both wick and color measured on one candle
+- Indices reset daily (candle 0 = 09:15 each trading day), used for bounce delay analysis and pattern debugging
+- Bearish touch → Bearish bounce combinations valid across same/different candles
+- Red bounces with strong metrics likely perform SAME as green bounces (backtest will prove)
+- Standard deviation = THE metric for comparing stock reliability/predictability
+
+**PENDING TASKS (Jan 19):**
+- Review std deviation calculations thoroughly (saved in file for study)
+- Fix Win% vs ProTrades% bug in backtest
+- Add 12 new columns (bounce metrics + regime data) to backtest script
+- Run 48-month backtest overnight with enhanced metrics
+- Analyze correlations to discover data-driven thresholds
+
+**PHILOSOPHICAL MOMENTS:**
+- "Not Shutter Island'ing you!" - Math legitimacy confirmed, institutional quants use these exact methods
+- Statistical analysis = Pattern discovery tool, not math games
+- Original research excitement: Building proprietary edge for NSE F&O (thresholds Renaissance/Two Sigma keep secret)
 
