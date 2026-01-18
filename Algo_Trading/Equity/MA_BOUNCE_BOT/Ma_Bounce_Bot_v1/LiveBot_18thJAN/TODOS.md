@@ -1,9 +1,9 @@
     **v1.3 LIVE BOT - TODO LIST** 📋
 
 ~~- [ ] **PRIORITY: HIGH** - Test EOD exit with test file (set time to current + 2 mins) to confirm 15:00 trigger~~
-- [ ] **PRIORITY: MEDIUM-HIGH** - Add README.md to GitHub repo with bot overview, setup instructions, features
+~~- [ ] **PRIORITY: MEDIUM-HIGH** - Add README.md to GitHub repo with bot overview, setup instructions, features~~
 ~~- [ ] **PRIORITY: VERY LOW** - TODO #9: Create text map + visual flowchart documentation~~
-- [ ] **PRIORITY: LOW** - TODO #10: Research and plan Nifty regime filter implementation
+~~- [ ] **PRIORITY: LOW** - TODO #10: Research and plan Nifty regime filter implementation~~
 - [ ] **PRIORITY: MEDIUM-HIGH** - TODO #11: Design bounce quality score system with manual approval workflow
 
 ---
@@ -26,7 +26,7 @@ Problem: Price changed from ₹353.35 → ₹349.85 during delay
 
 ~~## **TODO #9:Text map + Visual flowchart = Documentation block🕐**~~
     
-## **TODO #10: Nifty regime filter to v1.3🕐**
+~~## **TODO #10: Nifty regime filter to v1.3🕐**~~
     
 ## **TODO #11: EXAMPLE BOUNCE SCORE USAGE ---> HIGHLY RECOMMENDED ⭐
 
