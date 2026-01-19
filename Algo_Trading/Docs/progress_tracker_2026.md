@@ -1107,3 +1107,35 @@ Perfect day of learning! Rest up for testing tomorrow! 🚀
 - Statistical analysis = Pattern discovery tool, not math games
 - Original research excitement: Building proprietary edge for NSE F&O (thresholds Renaissance/Two Sigma keep secret)
 
+---
+
+### Mon, Jan 19, 2026 - PYCHARM TODO MASTERY + WIN% BUG DEEP DIVE
+
+**PYCHARM PRODUCTIVITY:**
+- Mastered PyCharm TODO tracking system (sidebar indicators, TODO panel, click-to-jump navigation)
+- Learned TODO best practices: placement strategies, DONE marking, custom tags for prioritization
+- Cleaned up project structure (removed unused pythonProject folder)
+- Verified .gitignore sync between local and GitHub repo
+
+**BUG INVESTIGATION - WIN% vs PROTRADES%:**
+- Discovered Win% and ProTrades% showing identical values across all backtests (2022 and 2025 data)
+- Ran diagnostic backtests: Jan-Feb 2022 (2 months), Oct-Dec 2025 (3 months) to confirm pattern
+- **CRITICAL FINDING**: EOD exits nearly non-existent (~5 exits out of thousands of trades across 5 months)
+- Identified root cause theory: EOD trades not being recorded in `best_trades` list despite correct exit logic
+- Traced bug to filtering step between `trades` → `best_trades` (likely excludes EOD exits)
+
+**TRADING KNOWLEDGE GAINS:**
+- Understood tick data vs candle data tradeoff (HFT firms use tick, retail uses candles)
+- Learned "wick both ways" candle limitation (can't determine SL vs Target hit order without tick data)
+- Confirmed SL-first checking approach is industry-standard conservative assumption
+
+**KEY INSIGHTS:**
+- ProTrades% should = Target hits + Profitable EOD exits (not just Target hits)
+- Current bug: best_trades likely filtered to exclude EOD, making Win% = ProTrades%
+- Statistical impossibility: Only 4-5 EOD exits across 5 months of data = clear bug signal
+
+**PENDING FOR JAN 20:**
+- Find where `best_trades` is filtered from `trades` list (suspected bug location)
+- Fix EOD trade exclusion issue
+- Add 12 new columns (bounce metrics + regime data) to backtest
+- Run corrected 48-month backtest overnight

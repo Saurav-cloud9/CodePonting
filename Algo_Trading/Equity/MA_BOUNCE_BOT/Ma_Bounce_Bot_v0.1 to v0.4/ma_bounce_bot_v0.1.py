@@ -145,7 +145,7 @@ def place_order(symbol, signal, live_price):
     print(f"   Target: ₹{target_price} (+2%)")
     print(f"   Stop Loss: ₹{stop_loss} (-1%)")
 
-    # TODO: Add actual Upstox API order placement here
+    # Add actual Upstox API order placement here
 
     return True
 
