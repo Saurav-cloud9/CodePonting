@@ -181,9 +181,17 @@ def detect_bounce(df, filter_mas):
                 
                 # Bounce confirmed if close > MA20 (at touch)
                 if bounce_candle['close'] > ma20_at_touch:
+                    # TODO_forwarded CLAUDE FIX: Entry timing - use next candle open (realistic) instead of bounce candle close (time traveling)
+                    # Entry happens AFTER bounce detection, so we enter at next candle's open price
+                    next_candle_idx = j + 1
+                    if next_candle_idx >= len(df):
+                        break  # Skip if no next candle available
+                    
+                    next_candle = df.iloc[next_candle_idx]
+                    
                     signals.append({
-                        'datetime': bounce_candle['datetime'],
-                        'entry_price': bounce_candle['close'],
+                        'datetime': next_candle['datetime'],  # Entry time is next candle
+                        'entry_price': next_candle['open'],    # Entry at next candle OPEN (was: bounce_candle['close'])
                         'ma20': ma20_at_touch,
                         'volume': row['volume'],  # Touch candle volume
                         'avg_volume': row['avg_volume']
@@ -213,19 +221,42 @@ def simulate_trades(df, signals, target_pct):
         for j in range(entry_idx + 1, min(entry_idx + 80, len(df))):  # Max 80 candles (6.5 hours)
             candle = df.iloc[j]
 
-            # Check stop loss first
-            if candle['low'] <= stop_price:
-                exit_price = stop_price
-                exit_time = candle['datetime']
-                exit_reason = 'SL'
-                break
+            # TODO_forwarded CLAUDE FIX: Intra-bar sequence logic - check SL/Target based on candle color
+            # Bullish candle likely went: Open -> Low -> High -> Close (check SL first)
+            # Bearish candle likely went: Open -> High -> Low -> Close (check Target first)
+            
+            is_bullish = candle['close'] > candle['open']
+            
+            if is_bullish:
+                # Bullish candle: likely dipped first, then rallied
+                # Check stop loss first
+                if candle['low'] <= stop_price:
+                    exit_price = stop_price
+                    exit_time = candle['datetime']
+                    exit_reason = 'SL'
+                    break
 
-            # Check target
-            if candle['high'] >= target_price:
-                exit_price = target_price
-                exit_time = candle['datetime']
-                exit_reason = 'Target'
-                break
+                # Check target second
+                if candle['high'] >= target_price:
+                    exit_price = target_price
+                    exit_time = candle['datetime']
+                    exit_reason = 'Target'
+                    break
+            else:
+                # Bearish candle: likely rallied first, then dropped
+                # Check target first
+                if candle['high'] >= target_price:
+                    exit_price = target_price
+                    exit_time = candle['datetime']
+                    exit_reason = 'Target'
+                    break
+
+                # Check stop loss second
+                if candle['low'] <= stop_price:
+                    exit_price = stop_price
+                    exit_time = candle['datetime']
+                    exit_reason = 'SL'
+                    break
 
         # If no exit, close at end of day (last candle)
         if exit_price is None:

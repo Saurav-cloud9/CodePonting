@@ -5,14 +5,16 @@ import urllib.parse
 # NEW
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
 # Load environment variables
-load_dotenv()
+env_path = Path(__file__).resolve().parents[4] / '.env'  # Go up 4 levels to CodePonting
+load_dotenv(dotenv_path=env_path, override=True)
 
 API_KEY = os.getenv('UPSTOX_API_KEY')
 API_SECRET = os.getenv('UPSTOX_API_SECRET')
 REDIRECT_URI = 'http://127.0.0.1:8000'
-
+print(f"Loading API Key from .env: {API_KEY[:10]}...")
 
 print("=" * 70)
 print("UPSTOX AUTHENTICATION")

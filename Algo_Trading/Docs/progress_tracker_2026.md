@@ -858,7 +858,7 @@
 
 ---
 
-### **Tue, Jan 13, 2026** 🔥
+### **Wed, Jan 14, 2026** 🔥
 
 **LIVE BOT DEPLOYMENT + ISSUES IDENTIFIED** ⚠️
 
@@ -1139,3 +1139,36 @@ Perfect day of learning! Rest up for testing tomorrow! 🚀
 - Fix EOD trade exclusion issue
 - Add 12 new columns (bounce metrics + regime data) to backtest
 - Run corrected 48-month backtest overnight
+
+---
+
+### Tue, Jan 20, 2026 - ENTRY TIMING FIX + ATR EXPLORATION + JUPYTER SETUP
+
+**CRITICAL BACKTEST FIXES:**
+- Fixed time-traveling entry bug: Changed from bounce candle close to next candle open (realistic execution)
+- Added intra-bar sequence logic: SL/Target checks now based on candle color (probabilistic price path)
+- Added None check for API failures to prevent crashes
+- Marked all changes with TODO CLAUDE FIX tags for easy tracking
+
+**ROOT CAUSE DISCOVERY - 99% TARGET HIT PROBLEM:**
+- Identified core issue: Fixed % targets (0.5-1.5%) are inside normal volatility noise
+- Current targets getting hit by random price movements, not actual trend confirmation
+- Solution: ATR-based dynamic SL/Target that adjust to market volatility
+
+**ATR IMPLEMENTATION PLANNING:**
+- Studied ATR concept: Average True Range measures candle volatility (high-low)
+- Designed 3 test configs: Conservative (1.0×/2.0×), Balanced (1.5×/2.5×), Aggressive (2.0×/3.0×)
+- Plan: Test all 3 on JAN-MAR 2022, compare EOD exit rates, pick winner
+
+**JUPYTER NOTEBOOK MASTERY:**
+- Set up Jupyter for interactive data exploration (first proper usage)
+- Created explore_atr_calculations.ipynb in BackTesting_20thJAN folder
+- Successfully fetched TATAMOTORS data, calculated ATR, visualized bounce with dynamic SL/Target
+- Validated ATR logic: Entry=₹794.05, ATR=₹2.49, SL=-0.37%, Target=+0.62% (adapts to volatility!)
+
+**DEVELOPMENT WORKFLOW IMPROVEMENTS:**
+- Established Jupyter as testing ground before full backtests (verify calculations first)
+- Cleaned up auth files: Kept desktop version (robust .env path handling), deleted laptop version
+- Adopted "one notebook per experiment" organization strategy
+
+---
