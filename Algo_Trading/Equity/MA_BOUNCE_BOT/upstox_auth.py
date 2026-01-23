@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 # Load environment variables
-env_path = Path(__file__).resolve().parents[4] / '.env'  # Go up 4 levels to CodePonting
+env_path = Path(__file__).resolve().parents[3] / '.env'  # Go up 3 levels to CodePonting
 load_dotenv(dotenv_path=env_path, override=True)
 
 API_KEY = os.getenv('UPSTOX_API_KEY')

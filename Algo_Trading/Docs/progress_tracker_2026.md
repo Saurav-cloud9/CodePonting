@@ -1172,3 +1172,68 @@ Perfect day of learning! Rest up for testing tomorrow! 🚀
 - Adopted "one notebook per experiment" organization strategy
 
 ---
+
+### Wed, Jan 21, 2026 - ATR DYNAMIC STOPS IMPLEMENTATION
+
+**ATR-BASED SL/TARGET SYSTEM:**
+- Replaced hardcoded % targets (0.5-1.5%) with ATR-based dynamic spacing
+- Implemented 4 ATR configs: Sideways (1.0×/1.5×), Regular-1 (1.5×/2.0×), Regular-2 (2.0×/3.0×), Extreme (2.5×/4.0×)
+- Added ATR14 calculation to backtest: true_range + 14-period rolling average
+- Modified simulate_trades() to calculate SL/Target using entry_atr × multipliers
+
+**RESULTS VALIDATION (7-month test):**
+- EOD exits improved: 3-7% (vs ~0% with hardcoded targets)
+- "Extreme" config winning most frequently across stocks
+- Win rates maintained at 50-70% with better breathing room
+- Targets now triggered by real moves, not noise
+
+**CODE STRUCTURE IMPROVEMENTS:**
+- Renamed folder: BackTesting_20thJAN → BackTesting_Realistic_Execution (concept-based naming)
+- Updated results display: "Target %" → "ATR_Config" columns
+- All ATR configs tested per stock, best combo selected automatically
+
+**NEXT STEPS:**
+- Complete full 48-month backtest to validate ATR across all market conditions
+- Add 12 ML feature columns (Volume_Ratio, Bounce_Strength_Pct, etc.)
+- Analyze which ATR config performs best in different market regimes
+
+---
+
+### Thu, Jan 22, 2026 - REGIME-SPECIFIC PLAYBOOK FRAMEWORK & GSS VALIDATION
+
+**PLAYBOOK DEVELOPMENT STRATEGY:**
+- Designed 3 regime-specific playbooks (Bull/Bear/Sideways) from 48-month backtest data
+- Ranking criteria: Primary = Avg Efficiency%, Secondary = Avg Win%, Bonus = Consistency
+- Identified Top 15 consistent performers: VEDL (56.2%), COALINDIA (54.2%), ASHOKLEY (45.8%)
+- Decision: Drop capital-intensive stocks (DIVISLAB) despite occasional high returns
+- Philosophy: Bull→momentum stocks, Bear→defensive longs (no shorting yet), Sideways→range specialists
+
+**GEMINI'S SCORING SYSTEM (GSS) SELECTION:**
+- Evaluated 6 regime detection methods, selected multi-factor weighted approach
+- 4 factors: 200EMA anchor (20%), 20MA slope (30%), ADX strength (30%), price proximity (20%)
+- Score mapping: 70-100=BULL, 30-69=SIDEWAYS, <30=BEAR
+- Key corrections: Slope threshold 0.5%→0.1%, removed abs() from proximity (directional filter)
+- Logic: Use Day N-1 data to predict Day N regime at 9:15 AM
+
+**GSS VALIDATION SCRIPT CREATED:**
+- Built standalone validator: `GSS_Validation/validate_gss.py`
+- Validates GSS on 48 months (Jan 2022-Dec 2025) Nifty historical data
+- Compares GSS prediction vs actual regime (MA crossover based)
+- Target: ≥90% accuracy before using for playbook classification
+- Outputs: Overall accuracy%, regime-wise breakdown, mismatch analysis, CSV results
+
+**FILE STRUCTURE ORGANIZED:**
+- Created production-grade folder: `MA Bounce Strategy/GSS_Validation/`
+- Separated from `BackTesting_Realistic_Execution/` (both siblings under MA Bounce Strategy)
+- Archived experiments in `Test and Practice runs/` (junk drawer pattern)
+
+**CLARIFIED WORKFLOW:**
+- Backtesting: Manual regime classification → Build static playbooks (PBS)
+- Live Trading: GSS auto-detects regime → Loads corresponding PBS
+- GSS = one-time decision per day (9:15 AM) → Trade only those 5 stocks entire day
+
+**NEXT STEPS:**
+- Run GSS validation script to verify ≥90% accuracy
+- If validated, classify 48 months into regimes using GSS
+- Extract Top 5 stocks per regime (Eff%→Win%→Consistency ranking)
+- Build final regime-specific playbooks for live deployment

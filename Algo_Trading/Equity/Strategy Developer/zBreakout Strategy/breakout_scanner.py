@@ -14,7 +14,7 @@ print("BREAKOUT SCANNER - 52-WEEK HIGH STRATEGY")
 print("=" * 70)
 
 # Same 93 stocks from MA Bounce scanner
-# 100 STOCKS - Mixed prices for Breakout Strategy
+# 100 STOCKS - Mixed prices for zBreakout Strategy
 STOCKS = {
     # Under ₹50 (3 stocks)
     'YESBANK': 'NSE_EQ|INE528G01035',  # ₹22

@@ -1,4 +1,5 @@
-# TODO: [URGENT] Fix best_trades filtering - EOD exits being excluded (Win% = ProTrades% bug)
+# TODO_done (2026-01-20): [URGENT] Fix best_trades filtering - EOD exits being excluded (Win% = ProTrades% bug)
+# TODO_done (2026-01-21): Implemented ATR-based dynamic SL/Target with 4 configs (Sideways/Regular-1/Regular-2/Extreme)
 # TODO: [v1.4] Add 12 new columns: Volume_Ratio, Bounce_Strength_Pct, Wick_Ratio, Candle_Color, Hours_Until_Close, Touch_Candle_Index, Bounce_Candle_Index, NIFTY_Price, NIFTY_MA20, NIFTY_MA50, NIFTY_MA200, NIFTY_Regime
 # TODO: [BACKLOG] Review std deviation calculations for threshold discovery
 # TODO: [POST-FIX] Run 48-month backtest overnight with corrected metrics
@@ -66,6 +67,14 @@ STOCKS = {
 TARGETS = [0.005, 0.01, 0.015]
 STOP_LOSS = 0.005
 VOLUME_MULTIPLIER = 1.2
+
+# ATR-based SL/Target configurations
+ATR_CONFIGS = {
+    'Sideways': {'sl_mult': 1.0, 'tgt_mult': 1.5},
+    'Regular-1': {'sl_mult': 1.5, 'tgt_mult': 2.0},
+    'Regular-2': {'sl_mult': 2.0, 'tgt_mult': 3.0},
+    'Extreme': {'sl_mult': 2.5, 'tgt_mult': 4.0}
+}
 
 FILTERS = {
     'No Filter': [],
@@ -181,7 +190,7 @@ def detect_bounce(df, filter_mas):
                 
                 # Bounce confirmed if close > MA20 (at touch)
                 if bounce_candle['close'] > ma20_at_touch:
-                    # TODO CLAUDE FIX: Entry timing - use next candle open (realistic) instead of bounce candle close (time traveling)
+                    # TODO_done (2026-01-20) CLAUDE FIX: Entry timing - use next candle open (realistic) instead of bounce candle close (time traveling)
                     # Entry happens AFTER bounce detection, so we enter at next candle's open price
                     next_candle_idx = j + 1
                     if next_candle_idx >= len(df):
@@ -201,7 +210,7 @@ def detect_bounce(df, filter_mas):
     return signals
 
 
-def simulate_trades(df, signals, target_pct):
+def simulate_trades(df, signals, atr_config):
     """Simulate trades with target and stop loss"""
     trades = []
 
@@ -210,8 +219,16 @@ def simulate_trades(df, signals, target_pct):
         entry_time = signal['datetime']
         entry_idx = df[df['datetime'] == entry_time].index[0]
 
-        target_price = entry_price * (1 + target_pct)
-        stop_price = entry_price * (1 - STOP_LOSS)
+        # Get ATR at entry candle
+        entry_atr = df.loc[entry_idx, 'atr_14']
+
+        # Skip if ATR not available (first 14 candles)
+        if pd.isna(entry_atr):
+            continue
+
+        # Calculate ATR-based SL/Target
+        stop_price = entry_price - (entry_atr * atr_config['sl_mult'])
+        target_price = entry_price + (entry_atr * atr_config['tgt_mult'])
 
         # Scan next candles for exit
         exit_price = None
@@ -221,7 +238,7 @@ def simulate_trades(df, signals, target_pct):
         for j in range(entry_idx + 1, min(entry_idx + 80, len(df))):  # Max 80 candles (6.5 hours)
             candle = df.iloc[j]
 
-            # TODO CLAUDE FIX: Intra-bar sequence logic - check SL/Target based on candle color
+            # TODO_done (2026-01-20) CLAUDE FIX: Intra-bar sequence logic - check SL/Target based on candle color
             # Bullish candle likely went: Open -> Low -> High -> Close (check SL first)
             # Bearish candle likely went: Open -> High -> Low -> Close (check Target first)
             
@@ -287,24 +304,32 @@ def simulate_trades(df, signals, target_pct):
 
 def backtest_stock(df, daily_mas, stock_name):
     """Run MA Bounce v0.9 with all filter/target combinations"""
-    # TODO CLAUDE FIX: Handle None df from API failures
+    # TODO_done (2026-01-20): Handle None df from API failures
     if df is None or len(df) == 0:
         return None
-    
+
     if daily_mas is not None:
         df['date'] = df['datetime'].dt.date
         df = df.merge(daily_mas, on='date', how='left')
     else:
         df['ma50'] = df['ma100'] = df['ma200'] = np.nan
+
+        # Calculate ATR for dynamic SL/Target
+    df['prev_close'] = df['close'].shift(1)
+    df['high_low'] = df['high'] - df['low']
+    df['high_prev_close'] = abs(df['high'] - df['prev_close'])
+    df['low_prev_close'] = abs(df['low'] - df['prev_close'])
+    df['true_range'] = df[['high_low', 'high_prev_close', 'low_prev_close']].max(axis=1)
+    df['atr_14'] = df['true_range'].rolling(window=14).mean()
     results = {}
 
     for filter_name, filter_mas in FILTERS.items():
-        for target in TARGETS:
+        for atr_name, atr_config in ATR_CONFIGS.items():
             # Detect bounces with this filter
             signals = detect_bounce(df, filter_mas)
 
             if len(signals) == 0:
-                results[(filter_name, target)] = {
+                results[(filter_name, atr_name)] = {
                     'trades': 0,
                     'win_rate': 0,
                     'net_profit': 0
@@ -312,7 +337,7 @@ def backtest_stock(df, daily_mas, stock_name):
                 continue
 
             # Simulate trades
-            trades = simulate_trades(df, signals, target)
+            trades = simulate_trades(df, signals, atr_config)
 
             # Calculate metrics
             wins = sum(1 for t in trades if t['pnl'] > 0)
@@ -320,7 +345,7 @@ def backtest_stock(df, daily_mas, stock_name):
             win_rate = (wins / total_trades * 100) if total_trades > 0 else 0
             net_profit = sum(t['pnl'] for t in trades)
 
-            results[(filter_name, target)] = {
+            results[(filter_name, atr_name)] = {
                 'trades': total_trades,
                 'win_rate': win_rate,
                 'net_profit': net_profit
@@ -328,7 +353,7 @@ def backtest_stock(df, daily_mas, stock_name):
 
     # Find best combination
     best_combo = max(results.items(), key=lambda x: x[1]['net_profit'])
-    best_filter, best_target = best_combo[0]
+    best_filter, best_atr_config = best_combo[0]
     best_result = best_combo[1]
 
     # Determine price vs MAs category
@@ -337,8 +362,8 @@ def backtest_stock(df, daily_mas, stock_name):
     # Calculate capital-based efficiency (CORRECTED v1.1)
     # Get the best combo's trades
     best_signals = detect_bounce(df, FILTERS[best_filter])
-    best_trades = simulate_trades(df, best_signals, best_target / 100)
-    
+    best_trades = simulate_trades(df, best_signals, ATR_CONFIGS[best_atr_config])
+
     # Total capital deployed = sum of all entry prices
     total_capital = sum(t['entry_price'] for t in best_trades)
     
@@ -361,7 +386,7 @@ def backtest_stock(df, daily_mas, stock_name):
     return {
         'stock': stock_name,
         'best_filter': best_filter,
-        'best_target': best_target * 100,  # Convert to percentage
+        'best_atr_config': best_atr_config,  # ATR config name (e.g., "Regular-1")
         'trades': best_result['trades'],
         'target_hits': target_hits,
         'sl_hits': sl_hits,
@@ -438,11 +463,11 @@ def main():
         month_results.sort(key=lambda x: x['capital_efficiency'], reverse=True)
 
         print("\n  🏆 TOP 10:")
-        print(f"  {'Rank':<6} {'Stock':<12} {'Trades':<7} {'Targets':<8} {'SL':<4} {'EOD':<5} {'Win%':<6} {'Eff%':<6} {'ProTrades%':<11} {'Net₹':<10} {'Capital₹':<12} {'GE':<20} {'Filter':<12} {'Target':<8}")
+        print(f"  {'Rank':<6} {'Stock':<12} {'Trades':<7} {'Targets':<8} {'SL':<4} {'EOD':<5} {'Win%':<6} {'Eff%':<6} {'ProTrades%':<11} {'Net₹':<10} {'Capital₹':<12} {'GE':<20} {'Filter':<12} {'ATR_Config':<12}")
         print("  " + "-" * 140)
         for rank, r in enumerate(month_results[:10], 1):
             ge_str = f"₹{r['net_profit']:.0f}/₹{r['total_capital']/1000:.0f}K"
-            print(f"  {rank:<6} {r['stock']:<12} {r['trades']:<7} {r['target_hits']:<8} {r['sl_hits']:<4} {r['eod_exits']:<5} {r['win_pct']:<6.0f} {r['capital_efficiency']:<6.1f} {r['protrades_pct']:<11.0f} {r['net_profit']:<10.0f} {r['total_capital']:<12.0f} {ge_str:<20} {r['best_filter']:<12} {r['best_target']:.1f}%")
+            print(f"  {rank:<6} {r['stock']:<12} {r['trades']:<7} {r['target_hits']:<8} {r['sl_hits']:<4} {r['eod_exits']:<5} {r['win_pct']:<6.0f} {r['capital_efficiency']:<6.1f} {r['protrades_pct']:<11.0f} {r['net_profit']:<10.0f} {r['total_capital']:<12.0f} {ge_str:<20} {r['best_filter']:<12} {r['best_atr_config']:<12}")
 
         # Track top 10
         for r in month_results[:10]:
@@ -462,8 +487,8 @@ def main():
     print("-"*80)
     for rank, (stock, count) in enumerate(sorted_stocks[:15], 1):
         consistency = (count / 48) * 100
-        print(f"{rank:<6} {stock:<15} {count}/48{' '*10} {consistency:<15.1f}%")
-    
+        print(f"{rank:<6} {stock:<15} {count}/48{' '*2} {consistency:<15.1f}%")
+
     print(f"\n⏱️  Execution time: {elapsed/60:.1f} minutes")
     print("="*80)
 
