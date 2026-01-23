@@ -24,7 +24,8 @@ def calculate_adx(df, period=14):
     tr2 = (high - close.shift(1)).abs()
     tr3 = (low - close.shift(1)).abs()
     tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-    atr = tr.rolling(period).mean()
+    # Wilder's smoothing for ATR
+    atr = tr.ewm(alpha=1/period, adjust=False).mean()
 
     # Directional Movement
     up = high - high.shift(1)
@@ -38,16 +39,18 @@ def calculate_adx(df, period=14):
     minus_dm[down <= up] = 0
     minus_dm[minus_dm < 0] = 0
 
-    plus_di = 100 * (plus_dm.rolling(period, min_periods=period).mean() / atr)
-    minus_di = 100 * (minus_dm.rolling(period, min_periods=period).mean() / atr)
+    # Wilder's smoothing for DI calculations
+    plus_di = 100 * (plus_dm.ewm(alpha=1/period, adjust=False).mean() / atr)
+    minus_di = 100 * (minus_dm.ewm(alpha=1/period, adjust=False).mean() / atr)
 
     # ADX calculation - fixed zero-division handling
     di_sum = plus_di + minus_di
     dx = pd.Series(index=df.index, dtype=float)
     mask = di_sum > 0
-    dx[mask] = 100 * ((plus_di[mask] - minus_di[mask]).abs() / di_sum[mask])
-    dx[~mask] = 0
-    adx = dx.rolling(period, min_periods=period).mean()
+    dx.loc[mask] = 100 * ((plus_di.loc[mask] - minus_di.loc[mask]).abs() / di_sum.loc[mask])
+    dx.loc[~mask] = 0
+    # Wilder's smoothing for ADX
+    adx = dx.ewm(alpha=1/period, adjust=False).mean()
 
     # Ensure we return a Series, not a DataFrame
     if isinstance(adx, pd.DataFrame):
@@ -56,15 +59,21 @@ def calculate_adx(df, period=14):
     return adx
 
 
-def calculate_actual_regime(row):
-    """Simple regime classification based on price vs MAs"""
-    price = row['Close'].iloc[0] if hasattr(row['Close'], 'iloc') else float(row['Close'])
-    ma20 = row['MA20'].iloc[0] if hasattr(row['MA20'], 'iloc') else float(row['MA20'])
-    ma50 = row['MA50'].iloc[0] if hasattr(row['MA50'], 'iloc') else float(row['MA50'])
-
-    if price > ma20 > ma50:
+def calculate_actual_regime_lookahead(df, current_idx, lookahead=5):
+    """
+    Future-Truth Logic: What actually happened to the price?
+    Uses lookahead days to determine if market truly went BULL/BEAR/SIDEWAYS
+    """
+    if current_idx + lookahead >= len(df):
+        return "SIDEWAYS"
+    
+    start_price = df.iloc[current_idx]['Close']
+    future_price = df.iloc[current_idx + lookahead]['Close']
+    change_pct = ((future_price - start_price) / start_price) * 100
+    
+    if change_pct > 1.5:
         return "BULL"
-    elif price < ma20 < ma50:
+    elif change_pct < -1.5:
         return "BEAR"
     else:
         return "SIDEWAYS"
@@ -130,7 +139,7 @@ def validate_gss():
     # Step 1: Download Nifty data
     print("📥 Downloading Nifty data (Jan 2022 - Dec 2025)...")
     start_date = "2021-01-01"  # Larger buffer so long MAs/ADX have data before 2022
-    end_date = "2025-12-31"
+    end_date = "2026-01-10"  # Extra buffer for 5-day future-truth
 
     nifty = yf.download("^NSEI", start=start_date, end=end_date, progress=False)
 
@@ -145,21 +154,22 @@ def validate_gss():
     nifty['MA20'] = nifty['Close'].rolling(20).mean()
     nifty['MA50'] = nifty['Close'].rolling(50).mean()
     nifty['EMA200'] = nifty['Close'].ewm(span=200).mean()
+    nifty['MA20_5d_ago'] = nifty['MA20'].shift(5)  # Pre-calculate for safety
     nifty['ADX'] = calculate_adx(nifty, period=14)
     print(f"📊 ADX Stats: Min={nifty['ADX'].min():.2f}, Max={nifty['ADX'].max():.2f}, Mean={nifty['ADX'].mean():.2f}")
 
     # Filter to validation period (Jan 2022 onwards) BEFORE dropna
     nifty = nifty[nifty.index >= '2022-01-01']
 
-    # Calculate actual regime
-    nifty['Actual_Regime'] = nifty.apply(calculate_actual_regime, axis=1)
-
-    # Fill forward ADX NaN values from the initial rolling period
-    nifty['ADX'] = nifty['ADX'].bfill()
-
-    # Drop rows with any remaining NaN values
+    # Drop rows with NaN values before calculating actual regime
     nifty = nifty.dropna()
 
+    # Calculate actual regime using Future-Truth logic
+    actual_regimes = []
+    for i in range(len(nifty)):
+        regime = calculate_actual_regime_lookahead(nifty, i, lookahead=5)
+        actual_regimes.append(regime)
+    nifty['Actual_Regime'] = actual_regimes
 
     print(f"✅ Indicators calculated for {len(nifty)} trading days\n")
 
@@ -174,11 +184,8 @@ def validate_gss():
         prev_idx = i - 1
         prev_row = nifty.iloc[prev_idx]
 
-        # Get MA20 from 5 days before N-1 (i.e., index i-6)
-        if i >= 6:
-            ma20_5d_ago = nifty.iloc[i - 6]['MA20']
-        else:
-            ma20_5d_ago = prev_row['MA20']  # Fallback for early days
+        # Get MA20_5d_ago from pre-calculated column (safe, vectorized)
+        ma20_5d_ago = prev_row['MA20_5d_ago']
 
         # Calculate GSS score using N-1 data
         score = calculate_gss(
@@ -251,12 +258,17 @@ def validate_gss():
 
     # Step 8: Decision
     print("═══════════════════════════════════════════════════════════════════════════════")
-    if accuracy >= 90:
-        print("✅ GSS VALIDATED! Accuracy >= 90% - Safe to use for playbook classification.")
-    elif accuracy >= 80:
-        print("⚠️  GSS ACCEPTABLE. Accuracy 80-90% - Review mismatches, may need tuning.")
+    print("VALIDATION METHOD: Future-Truth (5-day lookahead ±1.5%)")
+    print("GSS predicts regime using N-1 data, validated against actual 5-day price movement")
+    print("─────────────────────────────────────────────────────────────────────────────")
+    if accuracy >= 70:
+        print("✅ GSS HAS PREDICTIVE EDGE! Accuracy >= 70% - Strategy has alpha.")
+    elif accuracy >= 60:
+        print("⚠️  GSS ACCEPTABLE. Accuracy 60-70% - Better than random, review edge cases.")
+    elif accuracy >= 50:
+        print("⚠️  GSS MARGINAL. Accuracy 50-60% - Slight edge, needs weight tuning.")
     else:
-        print("❌ GSS NEEDS IMPROVEMENT. Accuracy < 80% - Must adjust weights/thresholds.")
+        print("❌ GSS NO EDGE. Accuracy < 50% - Worse than coin flip, major revision needed.")
     print("═══════════════════════════════════════════════════════════════════════════════")
 
 
