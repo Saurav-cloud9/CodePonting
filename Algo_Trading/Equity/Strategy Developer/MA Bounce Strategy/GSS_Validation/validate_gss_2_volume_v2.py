@@ -75,47 +75,61 @@ def calculate_actual_regime_lookahead(df, current_idx, lookahead=5):
         return "SIDEWAYS"
 
 
-def calculate_gss(price, ma20, ema200, ma20_5d_ago, adx):
+def calculate_gss(price, ma20, ema200, ma20_5d_ago, adx, prev_adx):
     """
-    Gemini's Scoring System (Corrected Version)
+    Gemini's Scoring System (Optimized for Predictive Alpha)
     Returns: score (0-100)
     """
     # Convert all inputs to float to avoid Series comparison errors
-    # Use .iloc[0] for Series, direct conversion for scalars
     price = price.iloc[0] if hasattr(price, 'iloc') else float(price)
     ma20 = ma20.iloc[0] if hasattr(ma20, 'iloc') else float(ma20)
     ema200 = ema200.iloc[0] if hasattr(ema200, 'iloc') else float(ema200)
     ma20_5d_ago = ma20_5d_ago.iloc[0] if hasattr(ma20_5d_ago, 'iloc') else float(ma20_5d_ago)
     adx = adx.iloc[0] if hasattr(adx, 'iloc') else float(adx)
+    prev_adx = prev_adx.iloc[0] if hasattr(prev_adx, 'iloc') else float(prev_adx)
 
     score = 0
 
-    # Factor 1: 200EMA Anchor (20%)
+    # Factor 1: Long-term Anchor (20%)
     if price > ema200:
         score += 20
 
-    # Factor 2: MA20 Slope (30%) - CORRECTED to 0.1%
+    # Factor 2: MA20 Slope (30%) - Back to 0.1% for stricter filtering
     ma_slope_pct = ((ma20 - ma20_5d_ago) / ma20_5d_ago) * 100
-    if ma_slope_pct > 0.1:
+    if ma_slope_pct > 0.1:  # Stricter threshold
         score += 30
 
-    # Factor 3: ADX Strength (30%)
+    # Factor 3: ADX Strength & Momentum (30%)
+    # Logic: Score points if ADX is strong OR if it is rising (momentum)
     if adx > 25:
         score += 30
-    elif adx < 20:
+    elif adx > prev_adx and adx > 15:  # Catching the start of a trend
+        score += 20
+    elif adx < 15:
         score -= 10
 
-    # Factor 4: Price Proximity (20%) - CORRECTED directional
-    dist_pct = (price - ma20) / ma20 * 100  # No abs()
-    if 0 < dist_pct <= 2:  # Must be ABOVE MA20
+    # Factor 4: Price Proximity (20%) - Back to 2% for stricter filtering
+    dist_pct = (price - ma20) / ma20 * 100
+    if 0 < dist_pct <= 2:  # Stricter range
         score += 20
 
     return score
 
 
-def map_score_to_regime(score):
-    """Convert GSS score to regime label"""
-    if score >= 70:
+def map_score_to_regime(score, volume, volume_ma20):
+    """
+    Convert GSS score to regime label with volume confirmation
+    Volume filter prevents false BULL signals in low-conviction setups
+    """
+    # Convert volume inputs to float
+    volume = volume.iloc[0] if hasattr(volume, 'iloc') else float(volume)
+    volume_ma20 = volume_ma20.iloc[0] if hasattr(volume_ma20, 'iloc') else float(volume_ma20)
+    
+    # Volume confirmation: 20% above average = strong demand
+    volume_confirmed = volume > (volume_ma20 * 1.2)
+    
+    # Strict thresholds with volume filter
+    if score >= 70 and volume_confirmed:
         return "BULL"
     elif score >= 30:
         return "SIDEWAYS"
@@ -155,6 +169,7 @@ def validate_gss():
     nifty['MA50'] = nifty['Close'].rolling(50).mean()
     nifty['EMA200'] = nifty['Close'].ewm(span=200).mean()
     nifty['MA20_5d_ago'] = nifty['MA20'].shift(5)  # Pre-calculate for safety
+    nifty['Volume_MA20'] = nifty['Volume'].rolling(20).mean()  # Volume average
     nifty['ADX'] = calculate_adx(nifty, period=14)
     print(f"📊 ADX Stats: Min={nifty['ADX'].min():.2f}, Max={nifty['ADX'].max():.2f}, Mean={nifty['ADX'].mean():.2f}")
 
@@ -187,16 +202,28 @@ def validate_gss():
         # Get MA20_5d_ago from pre-calculated column (safe, vectorized)
         ma20_5d_ago = prev_row['MA20_5d_ago']
 
+        # Get prev_adx (ADX from day before N-1)
+        if i >= 2:
+            prev_adx = nifty.iloc[i - 2]['ADX']
+        else:
+            prev_adx = prev_row['ADX']  # Fallback for early days
+
         # Calculate GSS score using N-1 data
         score = calculate_gss(
             price=prev_row['Close'],
             ma20=prev_row['MA20'],
             ema200=prev_row['EMA200'],
             ma20_5d_ago=ma20_5d_ago,
-            adx=prev_row['ADX']
+            adx=prev_row['ADX'],
+            prev_adx=prev_adx
         )
 
-        prediction = map_score_to_regime(score)
+        # Apply volume-aware regime mapping
+        prediction = map_score_to_regime(
+            score=score,
+            volume=prev_row['Volume'],
+            volume_ma20=prev_row['Volume_MA20']
+        )
 
         gss_scores.append(score)
         gss_predictions.append(prediction)
@@ -239,6 +266,26 @@ def validate_gss():
             print(
                 f"{regime:10} Days: {regime_total:4} | Correct: {regime_matches:4} | Accuracy: {regime_accuracy:5.1f}%")
 
+    print("─────────────────────────────────────────────────────────────────────────────")
+    print("GSS PREDICTION COUNTS:")
+    print("─────────────────────────────────────────────────────────────────────────────")
+    
+    # Show what GSS predicted
+    gss_pred_counts = nifty['GSS_Prediction'].value_counts()
+    for regime in ['BULL', 'BEAR', 'SIDEWAYS']:
+        if regime in gss_pred_counts.index:
+            count = gss_pred_counts[regime]
+            pct = (count / total_days) * 100
+            
+            # Calculate precision for each prediction
+            regime_predictions = nifty[nifty['GSS_Prediction'] == regime]
+            correct_preds = (regime_predictions['GSS_Prediction'] == regime_predictions['Actual_Regime']).sum()
+            precision = (correct_preds / count * 100) if count > 0 else 0
+            
+            print(f"{regime:10} GSS called: {count:4} times ({pct:5.1f}%) | Precision: {precision:5.1f}%")
+        else:
+            print(f"{regime:10} GSS called:    0 times (  0.0%) | Precision:   0.0%")
+
     print("─────────────────────────────────────────────────────────────────────────────\n")
 
     # Step 6: Show mismatches
@@ -259,7 +306,8 @@ def validate_gss():
     # Step 8: Decision
     print("═══════════════════════════════════════════════════════════════════════════════")
     print("VALIDATION METHOD: Future-Truth (5-day lookahead ±1.5%)")
-    print("GSS predicts regime using N-1 data, validated against actual 5-day price movement")
+    print("GSS predicts regime using N-1 data + VOLUME CONFIRMATION for BULL signals")
+    print("BULL requires: Score ≥70 AND Volume >20% above 20-day average")
     print("─────────────────────────────────────────────────────────────────────────────")
     if accuracy >= 70:
         print("✅ GSS HAS PREDICTIVE EDGE! Accuracy >= 70% - Strategy has alpha.")

@@ -1237,3 +1237,35 @@ Perfect day of learning! Rest up for testing tomorrow! 🚀
 - If validated, classify 48 months into regimes using GSS
 - Extract Top 5 stocks per regime (Eff%→Win%→Consistency ranking)
 - Build final regime-specific playbooks for live deployment
+
+### Fri, Jan 23, 2026 - GSS VALIDATION & FUTURE-TRUTH METHODOLOGY
+
+**GSS VALIDATION FRAMEWORK:**
+- Implemented "Future-Truth" validation: GSS predicts regime using N-1 data, validated against actual 5-day price movement (±1.5%)
+- Fixed critical bugs: MultiIndex column flattening, Wilder's smoothing for ADX/ATR, pre-calculated MA20_5d_ago
+- Discovered GSS fundamental limitation: Lagging indicators (MA20, ADX, EMA200) describe PAST, not FUTURE
+- Initial results: 40.4% accuracy (worse than coin flip) - GSS reactive, not predictive
+
+**THRESHOLD TUNING EXPERIMENTS:**
+- Gemini's relaxed thresholds (BULL: 70→60, MA slope: 0.1%→0.05%, proximity: 2%→3%): 34.3% accuracy (WORSE)
+- Problem identified: Over-calling BULL (525 predictions, 79% false alarm rate) - 332 false BULL calls on SIDEWAYS days
+- Root cause: Lowering thresholds without adding NEW information = more noise
+
+**VOLUME FILTER BREAKTHROUGH:**
+- Reverted to strict thresholds (70/30) + added volume confirmation (volume > 1.2× 20-day MA)
+- Results: 52.01% overall accuracy (crossed coin-flip threshold!)
+- SIDEWAYS detection: 78.3% accuracy (462/590) - **KILLING IT!** 🔥
+- BULL precision: 21.8% (19/87 correct) - volume filter cut false calls from 525→87 (83% reduction)
+- Trade-off accepted: Miss some early bulls, but avoid choppy false signals
+
+**KEY INSIGHTS:**
+- GSS excels at identifying when NOT to trade (78% SIDEWAYS accuracy)
+- Volume = leading indicator (demand confirmation before price moves)
+- Better to miss bulls than get chopped in sideways markets
+- Next phase: Add RSI momentum to catch early bulls (target: 40-50% BULL precision)
+
+**TECHNICAL LEARNINGS:**
+- Pandas MultiIndex handling, Series vs DataFrame indexing
+- ADX calculation with Wilder's EMA (alpha=1/14) vs SMA
+- Debugging methodology: trace errors → identify data types → fix root cause
+- Future-truth validation superior to formula-vs-formula circular logic

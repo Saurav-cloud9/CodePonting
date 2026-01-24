@@ -75,49 +75,52 @@ def calculate_actual_regime_lookahead(df, current_idx, lookahead=5):
         return "SIDEWAYS"
 
 
-def calculate_gss(price, ma20, ema200, ma20_5d_ago, adx):
+def calculate_gss(price, ma20, ema200, ma20_5d_ago, adx, prev_adx):
     """
-    Gemini's Scoring System (Corrected Version)
+    Gemini's Scoring System (Optimized for Predictive Alpha)
     Returns: score (0-100)
     """
     # Convert all inputs to float to avoid Series comparison errors
-    # Use .iloc[0] for Series, direct conversion for scalars
     price = price.iloc[0] if hasattr(price, 'iloc') else float(price)
     ma20 = ma20.iloc[0] if hasattr(ma20, 'iloc') else float(ma20)
     ema200 = ema200.iloc[0] if hasattr(ema200, 'iloc') else float(ema200)
     ma20_5d_ago = ma20_5d_ago.iloc[0] if hasattr(ma20_5d_ago, 'iloc') else float(ma20_5d_ago)
     adx = adx.iloc[0] if hasattr(adx, 'iloc') else float(adx)
+    prev_adx = prev_adx.iloc[0] if hasattr(prev_adx, 'iloc') else float(prev_adx)
 
     score = 0
 
-    # Factor 1: 200EMA Anchor (20%)
+    # Factor 1: Long-term Anchor (20%)
     if price > ema200:
         score += 20
 
-    # Factor 2: MA20 Slope (30%) - CORRECTED to 0.1%
+    # Factor 2: MA20 Slope (30%) - Relaxed to 0.05%
     ma_slope_pct = ((ma20 - ma20_5d_ago) / ma20_5d_ago) * 100
-    if ma_slope_pct > 0.1:
+    if ma_slope_pct > 0.05:  # More sensitive to early trends
         score += 30
 
-    # Factor 3: ADX Strength (30%)
+    # Factor 3: ADX Strength & Momentum (30%)
+    # Logic: Score points if ADX is strong OR if it is rising (momentum)
     if adx > 25:
         score += 30
-    elif adx < 20:
+    elif adx > prev_adx and adx > 15:  # Catching the start of a trend
+        score += 20
+    elif adx < 15:
         score -= 10
 
-    # Factor 4: Price Proximity (20%) - CORRECTED directional
-    dist_pct = (price - ma20) / ma20 * 100  # No abs()
-    if 0 < dist_pct <= 2:  # Must be ABOVE MA20
+    # Factor 4: Price Proximity (20%) - Loosened to 3%
+    dist_pct = (price - ma20) / ma20 * 100
+    if 0 < dist_pct <= 3:  # Expanded range
         score += 20
 
     return score
 
 
 def map_score_to_regime(score):
-    """Convert GSS score to regime label"""
-    if score >= 70:
+    """Convert GSS score to regime label - Lowered thresholds"""
+    if score >= 60:  # Lowered from 70
         return "BULL"
-    elif score >= 30:
+    elif score >= 25:  # Lowered from 30
         return "SIDEWAYS"
     else:
         return "BEAR"
@@ -187,13 +190,20 @@ def validate_gss():
         # Get MA20_5d_ago from pre-calculated column (safe, vectorized)
         ma20_5d_ago = prev_row['MA20_5d_ago']
 
+        # Get prev_adx (ADX from day before N-1)
+        if i >= 2:
+            prev_adx = nifty.iloc[i - 2]['ADX']
+        else:
+            prev_adx = prev_row['ADX']  # Fallback for early days
+
         # Calculate GSS score using N-1 data
         score = calculate_gss(
             price=prev_row['Close'],
             ma20=prev_row['MA20'],
             ema200=prev_row['EMA200'],
             ma20_5d_ago=ma20_5d_ago,
-            adx=prev_row['ADX']
+            adx=prev_row['ADX'],
+            prev_adx=prev_adx
         )
 
         prediction = map_score_to_regime(score)
