@@ -210,7 +210,7 @@
 │  ├─ 08:00 AM: Run GSS → Get regime → Load Playbook → Get PBS  │
 │  ├─ 09:15 AM: Monitor PBS stocks for bounce signals            │
 │  ├─ 09:15-3:20: Execute trades per Playbook rules              │
-│  └─ 03:20 PM: Force exit all positions                         │
+│  └─ 03:00 PM: Force exit all positions                         │
 │                                                                  │
 │  ADAPTIVE INTELLIGENCE:                                         │
 │  ├─ Right stocks (PBS based on regime)                         │
