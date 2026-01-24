@@ -182,7 +182,7 @@
 │  Same bounce logic as v1.4 BUT:                                │
 │  ├─ Applied ONLY to PBS stocks (not all 30)                    │
 │  ├─ Uses Playbook-defined filters (regime-optimized)           │
-│  └─ Uses Playbook-defined ATR config (regime-matched)          │
+│  └─ Uses Playbook-defined ATR config (stock-specific)          │
 │                                                                  │
 │  Additional Filters [PLANNED]:                                  │
 │  ├─ Bounce Quality Score (wick ratio, candle color)            │
