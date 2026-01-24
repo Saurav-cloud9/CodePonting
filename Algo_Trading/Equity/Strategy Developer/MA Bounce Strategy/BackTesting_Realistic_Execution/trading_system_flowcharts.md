@@ -181,25 +181,13 @@
 ├─────────────────────────────────────────────────────────────────┤
 │  Same bounce logic as v1.4 BUT:                                │
 │  ├─ Applied ONLY to PBS stocks (not all 30)                    │
-│  ├─ Uses Playbook-defined filters (regime-optimized)           │
+│  ├─ Uses Playbook-defined filters (stock-specific)           │
 │  └─ Uses Playbook-defined ATR config (stock-specific)          │
 │                                                                  │
 │  Additional Filters [PLANNED]:                                  │
 │  ├─ Bounce Quality Score (wick ratio, candle color)            │
 │  ├─ Time-based filters (avoid 3:00-3:20 PM chop)               │
 │  └─ NIFTY correlation check (stock moving with index?)         │
-└────────────────────┬────────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────────────┐
-│              RISK MANAGEMENT (Regime-Adaptive)                   │
-├─────────────────────────────────────────────────────────────────┤
-│  Same ATR-based SL/Targets BUT:                                │
-│  └─ Config auto-selected from Playbook (regime-matched)        │
-│                                                                  │
-│  EXAMPLE:                                                       │
-│  ├─ BULL day → Use Regular-2 (2×/3× ATR) for big moves        │
-│  └─ SIDEWAYS day → Use Sideways (1×/1.5× ATR) for quick exits │
 └────────────────────┬────────────────────────────────────────────┘
                      │
                      ▼
@@ -214,9 +202,9 @@
 │                                                                  │
 │  ADAPTIVE INTELLIGENCE:                                         │
 │  ├─ Right stocks (PBS based on regime)                         │
-│  ├─ Right filters (Playbook-optimized)                         │
-│  ├─ Right risk (ATR config matched to regime)                  │
-│  └─ Higher win rate (regime-aligned setups)                    │
+│  ├─ Right filters (PBS specific)                         │
+│  ├─ Right risk (ATR config matched to PBS)                  │
+│  └─ Higher win rate (PBS-aligned setups)                    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
