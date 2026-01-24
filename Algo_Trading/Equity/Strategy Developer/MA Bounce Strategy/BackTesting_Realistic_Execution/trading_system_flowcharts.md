@@ -48,7 +48,7 @@
 │  Exit Triggers:                                                 │
 │  ├─ Target Hit: Price ≥ Entry + (ATR × target_mult)           │
 │  ├─ SL Hit: Price ≤ Entry - (ATR × sl_mult)                   │
-│  └─ EOD: 3:20 PM forced exit                                   │
+│  └─ EOD: 3:00 PM forced exit                                   │
 └────────────────────┬────────────────────────────────────────────┘
                      │
                      ▼
