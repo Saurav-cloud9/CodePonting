@@ -212,15 +212,15 @@
 
 ## KEY DIFFERENCES: CURRENT vs FUTURE
 
-| **Aspect**              | **Current (v1.4)**                      | **Future (v2.0)**                           |
-|-------------------------|-----------------------------------------|---------------------------------------------|
-| **Stock Selection**     | All 30 stocks every day                | PBS: 5 stocks based on regime              |
-| **Regime Awareness**    | None (blind trading)                   | GSS-driven (BULL/SIDEWAYS/BEAR)            |
-| **Filter Selection**    | Brute force: test all 8 combinations   | Playbook: pre-optimized per regime         |
-| **ATR Config**          | Brute force: test all 4 configs        | Playbook: regime-matched config            |
-| **Win Rate Expectation**| ~45-50% (mixed regime noise)           | ~55-60% (regime-aligned trades)            |
-| **Capital Efficiency**  | Baseline (no regime filter)            | 15-20% improvement (focused deployment)    |
-| **Cognitive Load**      | Trade all setups, hope for best        | Trade only high-probability regime setups  |
+| **Aspect**              | **Current (v1.4)**                      | **Future (v2.0)**                         |
+|-------------------------|-----------------------------------------|-------------------------------------------|
+| **Stock Selection**     | All 30 stocks every day                | PBS: 5 stocks based on regime             |
+| **Regime Awareness**    | None (blind trading)                   | GSS-driven (BULL/SIDEWAYS/BEAR)           |
+| **Filter Selection**    | Brute force: test all 8 combinations   | Playbook: pre-optimized per regime        |
+| **ATR Config**          | Brute force: test all 4 configs        | Playbook: PBS-matched config              |
+| **Win Rate Expectation**| ~45-50% (mixed regime noise)           | ~55-60% (PBS-aligned trades)              |
+| **Capital Efficiency**  | Baseline (no regime filter)            | 15-20% improvement (focused deployment)   |
+| **Cognitive Load**      | Trade all setups, hope for best        | Trade only high-probability regime setups |
 
 ---
 

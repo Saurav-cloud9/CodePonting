@@ -1238,6 +1238,8 @@ Perfect day of learning! Rest up for testing tomorrow! 🚀
 - Extract Top 5 stocks per regime (Eff%→Win%→Consistency ranking)
 - Build final regime-specific playbooks for live deployment
 
+---
+
 ### Fri, Jan 23, 2026 - GSS VALIDATION & FUTURE-TRUTH METHODOLOGY
 
 **GSS VALIDATION FRAMEWORK:**
@@ -1269,3 +1271,152 @@ Perfect day of learning! Rest up for testing tomorrow! 🚀
 - ADX calculation with Wilder's EMA (alpha=1/14) vs SMA
 - Debugging methodology: trace errors → identify data types → fix root cause
 - Future-truth validation superior to formula-vs-formula circular logic
+
+---
+
+### Sat, Jan 24, 2026 - SYSTEM ARCHITECTURE & PLAYBOOK DESIGN
+
+**CONCEPTUAL CLARITY:**
+- Mapped complete dependency chain: Strong GSS → Playbook → PBS → Live Deployment → Higher ROI
+- Understood ATR multipliers place SL/Targets OUTSIDE normal volatility range (>1× ATR) to reduce noise-based exits
+- Confirmed trading strategy: Use GSS for both BULL and SIDEWAYS regimes, not just bull markets
+- Identified current blocker: GSS BULL precision (21.8%) prevents reliable BULL Playbook creation
+
+**PLAYBOOK ARCHITECTURE DESIGN:**
+- Defined Playbook workflow: Regime filtering → Pattern analysis (backtest on regime-specific days) → Extract Top 5 PBS per regime
+- Clarified ATR configs are stock-specific within regimes, not blanket regime-wide (e.g., TATASTEEL needs Extreme, INFY needs Regular-1)
+- Established PBS carries stock-specific filters (MA50/100/200 combos) AND ATR configs from Playbook
+- Noted "No Filter" appears to win frequently but deferred conclusions pending regime-split backtesting
+
+**SYSTEM DOCUMENTATION:**
+- Created comprehensive flowcharts comparing Current (v1.4) vs Future (v2.0) architectures
+- Current: Brute-force optimization (46,080 scenarios), no regime awareness, ATR-based dynamic targets
+- Future: GSS-driven regime detection → Playbook-based stock/filter/ATR selection → PBS deployment
+- Fixed EOD exit timing: 3:00 PM (not 3:20 PM) to avoid Upstox auto-exit risks
+- Removed redundant Risk Management section from Future flowchart (Playbook already covers ATR logic)
+
+**ML FOUNDATION RECOGNITION:**
+- Realized current manual GSS tuning = feature engineering groundwork for future ML transition
+- Current work builds: domain expertise, quality features, validation framework (Future-Truth), baseline accuracy to beat
+- Manual threshold discovery teaches which indicators have predictive power before automating with ML
+- Acknowledged untouched areas: Bounce Quality Score (wick ratio, candle color), statistical std dev analysis awaiting ML phase
+
+**NEXT PRIORITIES:**
+1. Fix GSS BULL precision (add RSI momentum filter, target 40-50%)
+2. Run regime-filtered backtests to build accurate Playbooks
+3. Extract PBS per regime with stock-specific filters/ATR configs
+4. Validate if "No Filter" advantage holds across different regimes
+
+---
+
+### Sun, Jan 25, 2026 - GSS v3.x ITERATIONS & HYPERPARAMETER OPTIMIZATION FRAMEWORK
+
+**GSS v3.0 BASELINE ESTABLISHED:**
+- Implemented ATR-based "Steel Ruler" for Future-Truth: 1.5×ATR threshold filters market noise (beta), labels only statistically significant moves as BULL/BEAR
+- Added leading indicators: RSI momentum (20 pts), ADX acceleration (15 pts) for early signal generation
+- Relaxed thresholds: MA slope 0.1%→0.05%, ADX 25→20, proximity 2%→3% to catch trends earlier
+- Results: 56.14% overall accuracy, BULL precision 17.3% (75 calls), BEAR 18.5% (81 calls), SIDEWAYS 62.3% (759 calls)
+- Identified critical flaw: System became more conservative despite relaxed thresholds due to volume filter blocking signals
+
+**GSS v3.1 DIRECTIONAL FILTERING (FAILED EXPERIMENT):**
+- Added directional filter: ADX points awarded ONLY if +DI > -DI (prevents scoring bearish crashes as bullish)
+- Implemented RSI exhaustion penalty: -10 pts if RSI > 70 (avoids buying overbought peaks)
+- Over-relaxed volume filter: 1.05× standard, 1.0× confirmed momentum (too loose)
+- Results: 41.15% accuracy (-15%), BULL calls doubled to 150 (+100%), BEAR calls tripled to 304 (+275%)
+- Root cause: Volume filter became meaningless, allowing noise through; proved volume WAS doing heavy lifting in v3.0
+
+**GSS v3.2 TRIPLE-LOCK SYSTEM (OVER-CORRECTED):**
+- Implemented "Fresh Momentum" filter: +DI > prev_+DI (accelerating, not exhausted trends)
+- Raised BULL threshold: 70→75, established symmetric BEAR logic (score ≤25, -DI rising, volume confirmed)
+- Re-tightened volume: 1.15× standard, 1.08× confirmed (from v3.1's 1.0×/1.05×)
+- Results: 57.44% accuracy (+16% from v3.1), BUT became ultra-conservative - only 51 BULL calls (5.1%), 33 BEAR calls (3.3%), 910 SIDEWAYS (91.5%)
+- Root cause: +DI doesn't rise every single day during trends - daily fluctuations rejected valid continuation patterns
+- BULL precision dropped to 15.7% despite higher accuracy (missed 95% of opportunities - "Sideways Trap")
+
+**CRITICAL INSIGHTS FROM ITERATIONS:**
+- Manual tuning hit diminishing returns: Fix one problem (bearish crashes), create another (over-filtering or noise flood)
+- Volume filter is double-edged: Too strict (1.2×) = Sideways Trap, too loose (1.0×) = noise explosion
+- Fresh momentum concept valid but implementation flawed: Need 3-day smoothing, not daily comparisons
+- Directional filter (+DI/-DI) necessary but insufficient alone - requires combination with other factors
+- Recognized pattern: Optimizing individual parameters sequentially creates whack-a-mole effect
+
+**TRANSITION TO SYSTEMATIC OPTIMIZATION:**
+- Acknowledged manual tuning reached limits: 3 versions (v3.0→v3.1→v3.2) cycling between under/over-filtering
+- Decision: Move to hyperparameter optimization with Optuna (Bayesian search across 14 parameters simultaneously)
+- Benefit: Mathematical exploration of parameter interactions vs sequential manual adjustment
+- Gemini consultation validated approach: "Done with manual tweaking, let Claude automate the math"
+
+**GSS v4.0 OPTIMIZATION FRAMEWORK DESIGN:**
+- Architecture: Modular separation - `gss_core.py` (reusable engine) + `gss_hyperparameter_search.py` (Optuna optimizer)
+- Search space: 14 parameters including MA/EMA periods (15-25, 150-250), ADX period (10-21), RSI period (9-21), thresholds, volume multipliers
+- Data scope: 10-year backtesting (2015-2025) across multiple regimes - bear runs, COVID crash, V-recovery, inflation cycles
+- Validation: Walk-forward split (Train: 2015-2021, Test: 2022-2025) prevents overfitting through out-of-sample verification
+- Objective: Weighted score (BULL Precision × 0.7 + BULL Recall × 0.3) with floor constraints (≥10% BULL calls, ≥5% BEAR calls)
+
+**CRITICAL FIXES IMPLEMENTED:**
+- Fix #1 (CRITICAL): Predictive wall alignment - corrected 1-day offset where predictions[i] compared to actual_regime[i+1] causing inflated/deflated accuracy
+- Fix #2: Multi-index flattening - explicit handling of yfinance column headers for reliability
+- Fix #3 (Gemini's insight): ADX slope smoothing - 3-day SMA prevents false triggers from 1-day noise spikes in Nifty's jagged ADX
+- Fix #4: Price proximity parameterization - optimize "buy near MA" distance (2.0-5.0%) instead of hardcoding 3%
+- Fix #5: RSI ignition bonus - +5 pts when RSI crosses 50 centerline (more predictive than just being above 50)
+- Fix #6: Memory management - garbage collection after each trial prevents leaks during 300-trial runs
+- Fix #7: Volume range verification - confirmed 0.85-1.15× range allows testing "low volume BEAR" hypothesis (Option 4B)
+- Fix #8: Indicator vision sync - verified scoring engine uses trial-specific periods, not hardcoded defaults
+
+**TECHNICAL IMPLEMENTATION DETAILS:**
+- Optuna TPE sampler: Bayesian optimization learns from previous trials to focus on promising regions (vs random search)
+- 300 trials estimated 60-90 minutes runtime with checkpoints every 50 trials for resumption capability
+- Output: Top 5 parameter sets with train/test comparison, generalization decay analysis (< 5% = excellent, 5-10% = good, >10% = moderate)
+- Integration path: Extract optimized params → update `gss_core.py` calls → deploy in MA Bounce Bot with stock-specific Playbooks
+- Reproducibility: seed=42 ensures identical results across runs for scientific validation
+
+**COLLABORATION DYNAMICS:**
+- Two-AI validation loop: Gemini analyzes results → Claude implements code → Saurav validates both → system improves faster than solo work
+- Gemini contributions: ADX slope smoothing insight, symmetric BEAR logic design, floor constraint strategy, confirmation of optimization approach
+- Claude contributions: Code architecture, bug detection (alignment issue), modular design, comprehensive documentation
+- Selection bias acknowledged: Only seeing Gemini's successful suggestions (highlight reel), but integration workflow is the real win
+
+**NEXT ACTIONS:**
+1. Run `python gss_hyperparameter_search.py` (60-90 min) to find mathematically optimal parameter set across 10 years
+2. Analyze Top 5 results prioritizing generalization quality (train/test decay < 5%)
+3. Extract Rank 1 parameters if generalization excellent, else compare Ranks 2-3 for robustness
+4. Validate optimized GSS on 2026 forward data to confirm out-of-sample performance holds
+5. If BULL precision reaches 40-50%: Resume Playbook creation with regime-filtered backtesting
+6. Build stock-specific PBS configurations using validated GSS regime detection
+
+**EXPECTED OUTCOMES:**
+- Target: BULL Precision 35-45% (vs current 17-21%), BULL Recall 15-25%, Overall Accuracy 55-65%
+- Constraint satisfaction: 10-15% BULL calls (not 5% or 91%), 5-8% BEAR calls
+- Generalization: < 5% train/test decay across 2015-2021 vs 2022-2025 periods
+- If successful: Unblocks Playbook → PBS → Live Deployment pipeline established in Jan 24 architecture
+
+---
+
+### Mon, Jan 26, 2026 - GSS v4.0 HYPERPARAMETER OPTIMIZATION & METHODOLOGY VALIDATION
+
+**GSS v4.0 BAYESIAN OPTIMIZATION EXECUTION:**
+- Ran 400 Optuna trials using TPE sampler with 14-parameter search space (estimated 6.7 trillion combinations)
+- Implemented persistent SQLite storage for resume capability, walk-forward validation (Train: 2015-2021, Test: 2022-2025)
+- Objective function: (BULL Precision × 0.7) + (BULL Recall × 0.3) with constraints (BULL≥10%, BEAR≥5%)
+- Best result (Trial #364): Train 23.9% BULL precision → Test 16.6% precision (7.3% decay marked "GOOD")
+- Convergence confirmed: Trials 350-400 clustered at 23.5-24.0% with no breakthrough, indicating search space exhaustively explored
+
+**CRITICAL FINDINGS & REALITY CHECK:**
+- Optimal parameters discovered: MA24/EMA189, slope 0.116, vol_momentum 0.856, ADX 20/22, wider proximity 4.97%
+- Gemini assessment: "Ready for production" (focusing on low 5.6% decay in Rank 4)
+- Claude counter-assessment: 16.6% precision = 83.4% false positive rate = **financial suicide**, not deployment-ready
+- Key insight: Low decay means "consistently bad on both datasets," not "consistently good" - optimization didn't fail, it revealed GSS's fundamental 24% ceiling
+
+**METHODOLOGY VALIDATION LEARNINGS:**
+- Confirmed walk-forward validation is gold standard: Test phase simulates live trading (no future peeking), preventing "exam question leak"
+- Understood Bayesian optimization strength: 400 trials efficiently explored high-reward regions vs. impossible grid search
+- Identified ROC curve opportunity: Can verify if bull_threshold=67 is mathematically optimal or just local optimum found by Optuna
+- Established Phase 1-6 roadmap: Learn ML techniques → Implement → Experiment → Adapt to MA Bounce → Validate → Paper trade → Live deploy
+
+**STRATEGIC PIVOT DECISION:**
+- GSS hyperparameter tuning exhausted: 400 trials cannot break 24% train precision ceiling
+- Root cause identified: Issue is fundamental GSS logic, not parameter choices
+- Next phase: Explore ML regime detection (HMM, K-Means, Ensemble) via YouTube (Gemini) + PDFs (Claude)
+- Target remains: 35-45% BULL precision for profitable live trading (currently 18.4 points short of minimum)
+
+---
