@@ -67,8 +67,8 @@ def fetch_5m_data(key, start, end):
         df = df.sort_values('datetime').reset_index(drop=True)
 
         # FIX 3: Calculate MA20 & avg_volume before renaming
-        df['ma20'] = df['close'].rolling(20).mean()
-        df['avg_volume'] = df['volume'].rolling(20).mean()
+        #debug_29 df['ma20'] = df['close'].rolling(20).mean()
+        #debug_29 df['avg_volume'] = df['volume'].rolling(20).mean()
 
         # Then rename columns to Title Case
         df = df.rename(columns={
