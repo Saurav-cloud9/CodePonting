@@ -1,13 +1,17 @@
-# v1.5 GSS ONLY - No baseline rerun
-# Compares against existing v1.4 results
+# TODO_done (2026-01-20): [URGENT] Fix best_trades filtering - EOD exits being excluded
+# TODO_done (2026-01-21): Implemented ATR-based dynamic SL/Target with 4 configs
+# TODO_done (2026-01-29): [v1.4.1] Added NIFTY_Regime labeling for playbook analysis
+# TODO_done (2026-01-29): Applied Copilot optimizations - NumPy arrays, vectorized checks
+# TODO: [v1.4.2] Add remaining 11 columns for pattern analysis
+# TODO: [ANALYSIS] Analyze regime-segmented results to build playbooks
 
 """
-Mega Backtest Script v1.5 - GSS FILTER ONLY
-╔═══════════════════════════════════════════════════════════════╗
-║   MEGA BACKTEST - 48 Months × 30 F&O Stocks (CONSOLE ONLY)   ║
-║   Jan 2022 → Dec 2025 | GSS Regime Filter Test               ║
-║   GSS Threshold: 45 (31.8% precision on Nifty)               ║
-╚═══════════════════════════════════════════════════════════════╝
+Mega Backtest Script v1.4.1 OPTIMIZED
+╔════════════════════════════════════════════════════════════════╗
+║   MEGA BACKTEST - 48 Months × 30 F&O Stocks                   ║
+║   Jan 2022 → Dec 2025 | Copilot Optimized | Regime Labeled    ║
+║   NEW: Nifty regime tagging for playbook creation             ║
+╚════════════════════════════════════════════════════════════════╝
 """
 
 import os
@@ -19,9 +23,6 @@ from collections import Counter, defaultdict
 import warnings
 warnings.filterwarnings('ignore')
 
-# Import GSS functions
-from gss_core_option_A_validation import calculate_gss, map_score_to_regime, calculate_adx, calculate_rsi
-
 os.system("powercfg /change standby-timeout-ac 0")
 
 # ═══════════════════════════════════════════════════════════════
@@ -29,6 +30,8 @@ os.system("powercfg /change standby-timeout-ac 0")
 # ═══════════════════════════════════════════════════════════════
 
 ACCESS_TOKEN = "eyJ0eXAiOiJKV1QiLCJrZXlfaWQiOiJza192MS4wIiwiYWxnIjoiSFMyNTYifQ.eyJzdWIiOiJFRTY4MTkiLCJqdGkiOiI2OTdhMTExM2Q2NTkxMDUyZGMwM2Y4OWMiLCJpc011bHRpQ2xpZW50IjpmYWxzZSwiaXNQbHVzUGxhbiI6ZmFsc2UsImlhdCI6MTc2OTYwNzQ0MywiaXNzIjoidWRhcGktZ2F0ZXdheS1zZXJ2aWNlIiwiZXhwIjoxNzY5NjM3NjAwfQ.x2fmxmrIhLgoY4-Iv6hpm0VmkwoMaTmzsb0F_c2v07g"
+
+NIFTY_INSTRUMENT = 'NSE_INDEX|Nifty 50'
 
 STOCKS = {
     'TATASTEEL': 'NSE_EQ|INE081A01020',
@@ -83,19 +86,77 @@ FILTERS = {
     'MA50+100+200': ['ma50', 'ma100', 'ma200']
 }
 
-GSS_PARAMS = {
-    'use_long_term_anchor': True, 'use_ma_slope': True, 'use_adx_strength': True,
-    'use_adx_acceleration': True, 'use_rsi_equilibrium': True, 'use_rsi_rising': True,
-    'use_rsi_ignition': False, 'use_rsi_exhaustion': True, 'use_price_proximity': True,
-    'use_volume_confirmation': False, 'ma_period': 38, 'ema_period': 220,
-    'adx_period': 14, 'rsi_period': 14, 'atr_multiplier': 1.00, 'ma_slope_threshold': 0.070,
-    'adx_strength_threshold': 23, 'rsi_exhaustion_threshold': 70, 'price_proximity_max': 4.0,
-    'vol_standard': 1.0, 'vol_momentum': 1.0, 'require_fresh_momentum': False, 
-    'bear_threshold': 20, 'bull_threshold': 45
-}
-
 configuration = upstox_client.Configuration()
 configuration.access_token = ACCESS_TOKEN
+
+# ═══════════════════════════════════════════════════════════════
+# NIFTY REGIME CALCULATION (NEW v1.4.1)
+# ═══════════════════════════════════════════════════════════════
+
+def fetch_nifty_daily_data():
+    """Fetch Nifty daily data for regime calculation"""
+    try:
+        api_instance = upstox_client.HistoryV3Api(upstox_client.ApiClient(configuration))
+        api_response = api_instance.get_historical_candle_data1(
+            instrument_key=NIFTY_INSTRUMENT,
+            unit='days',
+            interval='1',
+            from_date='2021-12-01',  # Extra buffer for ATR calculation
+            to_date='2025-12-31'
+        )
+        
+        if not hasattr(api_response, 'data') or not api_response.data:
+            return None
+            
+        candles = api_response.data.candles
+        df = pd.DataFrame(candles, columns=['datetime', 'open', 'high', 'low', 'close', 'volume', 'oi'])
+        df['datetime'] = pd.to_datetime(df['datetime'])
+        df = df.sort_values('datetime').reset_index(drop=True)
+        df['date'] = df['datetime'].dt.date
+        
+        # Calculate ATR for regime threshold
+        df['prev_close'] = df['close'].shift(1)
+        df['tr1'] = df['high'] - df['low']
+        df['tr2'] = abs(df['high'] - df['prev_close'])
+        df['tr3'] = abs(df['low'] - df['prev_close'])
+        df['true_range'] = df[['tr1', 'tr2', 'tr3']].max(axis=1)
+        df['atr'] = df['true_range'].rolling(window=14).mean()
+        
+        return df[['date', 'close', 'atr']].dropna()
+        
+    except Exception as e:
+        print(f"Error fetching Nifty data: {e}")
+        return None
+
+
+def calculate_nifty_regimes(nifty_df, lookahead=5, atr_multiplier=1.5):
+    """
+    Calculate actual regime for each day using lookahead
+    Returns: dict {date: 'BULL'/'BEAR'/'SIDEWAYS'}
+    """
+    regimes = {}
+    n = len(nifty_df)
+    
+    for i in range(n - lookahead):
+        current_close = nifty_df.iloc[i]['close']
+        future_close = nifty_df.iloc[i + lookahead]['close']
+        atr = nifty_df.iloc[i]['atr']
+        current_date = nifty_df.iloc[i]['date']
+        
+        # Calculate movement and threshold
+        movement = (future_close - current_close) / current_close
+        threshold = (atr_multiplier * atr) / current_close
+        
+        # Classify regime
+        if movement > threshold:
+            regimes[current_date] = 'BULL'
+        elif movement < -threshold:
+            regimes[current_date] = 'BEAR'
+        else:
+            regimes[current_date] = 'SIDEWAYS'
+    
+    return regimes
+
 
 # ═══════════════════════════════════════════════════════════════
 # DATA FETCHING
@@ -111,10 +172,10 @@ def fetch_upstox_data(instrument_key, from_date, to_date):
             from_date=from_date,
             to_date=to_date
         )
-
-        if not hasattr(api_response, 'data') or not api_response.data or not api_response.data.candles:
+        
+        if not hasattr(api_response, 'data') or not api_response.data:
             return None
-
+            
         candles = api_response.data.candles
         df = pd.DataFrame(candles, columns=['datetime', 'open', 'high', 'low', 'close', 'volume', 'oi'])
         df['datetime'] = pd.to_datetime(df['datetime'])
@@ -122,9 +183,8 @@ def fetch_upstox_data(instrument_key, from_date, to_date):
         df['ma20'] = df['close'].rolling(20).mean()
         df['avg_volume'] = df['volume'].rolling(20).mean()
         return df
-
-    except Exception as e:
-        print(f"Error fetching data: {e}")
+        
+    except:
         return None
 
 
@@ -132,152 +192,120 @@ def fetch_daily_mas(instrument_key, end_date):
     try:
         api_instance = upstox_client.HistoryV3Api(upstox_client.ApiClient(configuration))
         start_date = (end_date - timedelta(days=400)).strftime('%Y-%m-%d')
-        end_date_str = end_date.strftime('%Y-%m-%d')
-
         api_response = api_instance.get_historical_candle_data1(
             instrument_key=instrument_key,
             unit='days',
             interval='1',
             from_date=start_date,
-            to_date=end_date_str
+            to_date=end_date.strftime('%Y-%m-%d')
         )
-
-        if not hasattr(api_response, 'data') or not api_response.data or not api_response.data.candles:
+        
+        if not hasattr(api_response, 'data') or not api_response.data:
             return None
-
+            
         candles = api_response.data.candles
         df = pd.DataFrame(candles, columns=['datetime', 'open', 'high', 'low', 'close', 'volume', 'oi'])
-        df['datetime'] = pd.to_datetime(df['datetime']).dt.date
+        df['datetime'] = pd.to_datetime(df['datetime'])
         df = df.sort_values('datetime').reset_index(drop=True)
         df['ma50'] = df['close'].rolling(50).mean()
         df['ma100'] = df['close'].rolling(100).mean()
         df['ma200'] = df['close'].rolling(200).mean()
-        return df[['datetime', 'ma50', 'ma100', 'ma200']].rename(columns={'datetime': 'date'})
-
-    except Exception as e:
-        print(f"Error fetching daily MAs: {e}")
+        df['date'] = df['datetime'].dt.date
+        return df[['date', 'ma50', 'ma100', 'ma200']]
+    except:
         return None
 
 
 # ═══════════════════════════════════════════════════════════════
-# GSS INDICATOR PREPARATION
+# BOUNCE DETECTION (COPILOT OPTIMIZED)
 # ═══════════════════════════════════════════════════════════════
 
-def prepare_gss_indicators(df):
-    df = df.copy()
-    df = df.rename(columns={'open': 'Open', 'high': 'High', 'low': 'Low', 'close': 'Close', 'volume': 'Volume'})
-    
-    df['MA'] = df['Close'].rolling(GSS_PARAMS['ma_period']).mean()
-    df['EMA'] = df['Close'].ewm(span=GSS_PARAMS['ema_period']).mean()
-    df['MA_5d_ago'] = df['MA'].shift(5)
-    df['ADX'], df['Plus_DI'], df['Minus_DI'] = calculate_adx(df, GSS_PARAMS['adx_period'])
-    df['ADX_prev'] = df['ADX'].shift(1)
-    df['ADX_slope'] = df['ADX'].diff().rolling(3).mean()
-    df['RSI'] = calculate_rsi(df['Close'], GSS_PARAMS['rsi_period'])
-    df['RSI_prev'] = df['RSI'].shift(1)
-    df['Volume_MA'] = df['Volume'].rolling(20).mean()
-    df['Price_Proximity'] = (df['Close'] - df['MA']).abs() / df['MA'] * 100
-    
-    df = df.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume'})
-    return df
-
-
-def check_gss_regime(row, prev_row):
-    required_cols = ['MA', 'EMA', 'MA_5d_ago', 'ADX', 'ADX_prev', 'ADX_slope', 
-                     'RSI', 'RSI_prev', 'Price_Proximity', 'Volume_MA', 'Plus_DI', 'Minus_DI']
-    for col in required_cols:
-        if pd.isna(row[col]):
-            return False
-    
-    score = calculate_gss(
-        row['close'], row['MA'], row['EMA'], row['MA_5d_ago'],
-        row['ADX'], row['ADX_prev'], row['ADX_slope'],
-        row['RSI'], row['RSI_prev'], row['Price_Proximity'],
-        GSS_PARAMS
-    )
-    
-    regime = map_score_to_regime(
-        score, row['volume'], row['Volume_MA'], row['RSI'],
-        row['Plus_DI'], row['Minus_DI'], 
-        prev_row['Plus_DI'], prev_row['Minus_DI'],
-        row['ADX_slope'], GSS_PARAMS
-    )
-    
-    return regime == "BULL"
-
-
-def check_ma_filter(row, filter_mas):
-    if not filter_mas:
-        return True
-    for ma in filter_mas:
-        if pd.isna(row[ma]) or row['close'] <= row[ma]:
-            return False
-    return True
-
-
-# ═══════════════════════════════════════════════════════════════
-# BOUNCE DETECTION WITH GSS FILTER
-# ═══════════════════════════════════════════════════════════════
-
-def detect_bounce_gss(df, filter_mas):
-    """Detect MA20 bounces with GSS regime filter"""
+def detect_bounce_optimized(df, filter_mas):
+    """
+    OPTIMIZED: Use NumPy arrays for 50-100x speedup
+    Copilot optimization applied - extract arrays once, use fast indexing
+    """
     signals = []
-
-    for i in range(20, len(df) - 3):
-        row = df.iloc[i]
-
-        if pd.isna(row['ma20']):
+    n = len(df)
+    if n < 24:
+        return signals
+    
+    # Extract arrays ONCE (avoid repeated df.iloc[i] calls)
+    ma20 = df['ma20'].to_numpy()
+    avg_vol = df['avg_volume'].to_numpy()
+    vol = df['volume'].to_numpy()
+    low = df['low'].to_numpy()
+    close_arr = df['close'].to_numpy()
+    open_arr = df['open'].to_numpy()
+    datetime_arr = df['datetime'].to_numpy()
+    
+    # Pre-compute MA filter mask (vectorized)
+    if filter_mas:
+        filter_mask = np.ones(n, dtype=bool)
+        for ma_col in filter_mas:
+            if ma_col in df.columns:
+                ma_vals = df[ma_col].to_numpy()
+                filter_mask &= (close_arr > ma_vals) & ~np.isnan(ma_vals)
+    else:
+        filter_mask = np.ones(n, dtype=bool)
+    
+    # Fast loop with array indexing
+    for i in range(20, n - 3):
+        m20 = ma20[i]
+        if np.isnan(m20):
             continue
-
-        if not check_ma_filter(row, filter_mas):
+        
+        # Volume check (cheap array lookup)
+        if not np.isnan(avg_vol[i]) and vol[i] < avg_vol[i] * VOLUME_MULTIPLIER:
             continue
-
-        if pd.notna(row['avg_volume']) and row['volume'] < row['avg_volume'] * VOLUME_MULTIPLIER:
-            continue
-
-        if row['low'] <= row['ma20']:
-            ma20_at_touch = row['ma20']
+        
+        # Touch check
+        if low[i] <= m20:
+            ma20_at_touch = m20
             
-            for j in range(i, min(i + 4, len(df))):
-                bounce_candle = df.iloc[j]
-                
-                if bounce_candle['close'] > ma20_at_touch:
-                    next_candle_idx = j + 1
-                    if next_candle_idx >= len(df):
+            # Bounce window check (next 3 candles)
+            for j in range(i, min(i + 4, n)):
+                if close_arr[j] > ma20_at_touch:
+                    next_idx = j + 1
+                    if next_idx >= n:
                         break
                     
-                    next_candle = df.iloc[next_candle_idx]
-                    
-                    # GSS CHECK
-                    if not check_gss_regime(bounce_candle, df.iloc[j-1] if j > 0 else bounce_candle):
+                    # MA filter check (instant array lookup)
+                    if not filter_mask[j]:
                         break
                     
                     signals.append({
-                        'datetime': next_candle['datetime'],
-                        'entry_price': next_candle['open'],
+                        'datetime': datetime_arr[next_idx],
+                        'entry_price': open_arr[next_idx],
                         'ma20': ma20_at_touch,
-                        'volume': row['volume'],
-                        'avg_volume': row['avg_volume']
+                        'volume': vol[i],
+                        'avg_volume': avg_vol[i]
                     })
                     break
-
+    
     return signals
 
 
-def simulate_trades(df, signals, atr_config):
+def simulate_trades(df, signals, atr_config, nifty_regimes):
+    """Simulate trades with ATR-based SL/Target + regime tagging"""
     trades = []
 
     for signal in signals:
         entry_price = signal['entry_price']
         entry_time = signal['datetime']
         entry_idx = df[df['datetime'] == entry_time].index[0]
+        entry_date = entry_time.date()
+        
+        # Get regime for this trade date
+        regime = nifty_regimes.get(entry_date, 'UNKNOWN')
+        
         entry_atr = df.loc[entry_idx, 'atr_14']
-
         if pd.isna(entry_atr):
             continue
 
         stop_price = entry_price - (entry_atr * atr_config['sl_mult'])
         target_price = entry_price + (entry_atr * atr_config['tgt_mult'])
+        
         exit_price = None
         exit_time = None
         exit_reason = None
@@ -324,13 +352,18 @@ def simulate_trades(df, signals, atr_config):
             'exit_price': exit_price,
             'pnl': pnl,
             'pnl_pct': pnl_pct,
-            'reason': exit_reason
+            'reason': exit_reason,
+            'nifty_regime': regime  # NEW: Regime tagging
         })
 
     return trades
 
 
-def backtest_stock_gss(df, daily_mas, stock_name):
+# ═══════════════════════════════════════════════════════════════
+# BACKTEST ENGINE
+# ═══════════════════════════════════════════════════════════════
+
+def backtest_stock(df, daily_mas, stock_name, nifty_regimes):
     if df is None or len(df) == 0:
         return None
 
@@ -340,6 +373,7 @@ def backtest_stock_gss(df, daily_mas, stock_name):
     else:
         df['ma50'] = df['ma100'] = df['ma200'] = np.nan
 
+    # Calculate ATR
     df['prev_close'] = df['close'].shift(1)
     df['high_low'] = df['high'] - df['low']
     df['high_prev_close'] = abs(df['high'] - df['prev_close'])
@@ -347,12 +381,11 @@ def backtest_stock_gss(df, daily_mas, stock_name):
     df['true_range'] = df[['high_low', 'high_prev_close', 'low_prev_close']].max(axis=1)
     df['atr_14'] = df['true_range'].rolling(window=14).mean()
     
-    df = prepare_gss_indicators(df)
     results = {}
 
     for filter_name, filter_mas in FILTERS.items():
         for atr_name, atr_config in ATR_CONFIGS.items():
-            signals = detect_bounce_gss(df, filter_mas)
+            signals = detect_bounce_optimized(df, filter_mas)
 
             if len(signals) == 0:
                 results[(filter_name, atr_name)] = {
@@ -362,7 +395,7 @@ def backtest_stock_gss(df, daily_mas, stock_name):
                 }
                 continue
 
-            trades = simulate_trades(df, signals, atr_config)
+            trades = simulate_trades(df, signals, atr_config, nifty_regimes)
             wins = sum(1 for t in trades if t['pnl'] > 0)
             total_trades = len(trades)
             win_rate = (wins / total_trades * 100) if total_trades > 0 else 0
@@ -384,13 +417,28 @@ def backtest_stock_gss(df, daily_mas, stock_name):
 def main():
     start_time = datetime.now()
     print("="*70)
-    print(" MEGA BACKTEST v1.5 - GSS FILTER ONLY")
+    print(" MEGA BACKTEST v1.4.1 OPTIMIZED - WITH NIFTY REGIME LABELING")
     print("="*70)
     print(f"Start: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"Stocks: {len(STOCKS)} | Period: Jan 2022 - Dec 2025")
-    print(f"GSS Threshold: 45 (31.8% Nifty precision)")
+    print(f"NEW: Nifty regime tagging for playbook analysis")
+    print("="*70)
+    
+    # Fetch and calculate Nifty regimes
+    print("\nFetching Nifty data for regime calculation...")
+    nifty_df = fetch_nifty_daily_data()
+    if nifty_df is None:
+        print("ERROR: Failed to fetch Nifty data. Exiting.")
+        return
+    
+    print("Calculating daily regimes...")
+    nifty_regimes = calculate_nifty_regimes(nifty_df, lookahead=5, atr_multiplier=1.5)
+    
+    regime_counts = Counter(nifty_regimes.values())
+    print(f"Regime distribution: BULL={regime_counts['BULL']}, BEAR={regime_counts['BEAR']}, SIDEWAYS={regime_counts['SIDEWAYS']}")
     print("="*70)
 
+    # Generate month tuples
     months = []
     current = datetime(2022, 1, 1)
     end = datetime(2025, 12, 31)
@@ -428,7 +476,7 @@ def main():
 
         df = pd.concat(combined_df, ignore_index=True)
         daily_mas = fetch_daily_mas(instrument_key, datetime(2025, 12, 31))
-        results = backtest_stock_gss(df, daily_mas, stock_name)
+        results = backtest_stock(df, daily_mas, stock_name, nifty_regimes)
 
         if results:
             for (filter_name, atr_name), metrics in results.items():
@@ -436,8 +484,9 @@ def main():
 
         print(f"  ✓ Done")
 
+    # Save results
     print("\n" + "="*70)
-    print(" RESULTS - GSS FILTER")
+    print(" RESULTS SUMMARY")
     print("="*70)
     
     summary_data = []
@@ -455,8 +504,8 @@ def main():
         })
     
     summary_df = pd.DataFrame(summary_data)
-    summary_df.to_csv('backtest_v1_5_GSS_ONLY.csv', index=False)
-    print("\n✓ Saved: backtest_v1_5_GSS_ONLY.csv")
+    summary_df.to_csv('backtest_v1_4_1_results.csv', index=False)
+    print("\n✓ Results saved to: backtest_v1_4_1_results.csv")
     
     print("\n" + "="*70)
     print(" TOP 10 CONFIGURATIONS")
@@ -467,8 +516,12 @@ def main():
     end_time = datetime.now()
     duration = end_time - start_time
     print("\n" + "="*70)
-    print(f" COMPLETE | Duration: {duration}")
+    print(f" BACKTEST COMPLETE | Duration: {duration}")
     print("="*70)
+    print("\nNEXT STEP: Analyze results by regime to build playbooks!")
+    print("  - Group trades by stock × regime")
+    print("  - Identify top performers per regime")
+    print("  - Create PBS-BULL, PBS-BEAR, PBS-SIDEWAYS")
 
 
 if __name__ == "__main__":

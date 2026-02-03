@@ -1507,3 +1507,119 @@ Perfect day of learning! Rest up for testing tomorrow! 🚀
 - Next session: Execute fix → Validate results → Go/no-go decision
 
 ---
+
+### Thu-Fri, Jan 29-30, 2026 - MEGA BACKTEST OPTIMIZATION & DATA COLLECTION
+
+**v1.4.3 SAFE OPTIMIZATION - 10x Speed Breakthrough**
+- Created v1.4.3 with NumPy array optimizations (extract once, pre-compute filters, array-based lookups)
+- PRESERVED 100% calculation logic - no touching simulate_trades(), entry/exit unchanged
+- Validation: Jan 2022 results PERFECT MATCH vs v1.4 FIXED_1 (BHARTIARTL 112 trades/₹316, POWERGRID 133/₹47, PNB 149/₹13)
+- Speed improvement: 150 min → 20-30 min (5-7x faster from NumPy, actual: 87.9 min for full 48M run)
+- Copilot v1.4.2 comparison revealed subtle logic changes (MA filter boundary, duplicate prevention, float32) = NOT safe replacement
+
+**48-MONTH BACKTEST COMPLETE - DATA GOLDMINE**
+- Full 48-month run completed: 3,309,839 trades analyzed across 30 stocks × 48 months × 32 configs
+- Created v1.4.3_DATA version: parallel CSV + SQLite DB output (4 files: trades_all, monthly_top10, consistency, DB)
+- Files generated: backtest_trades_all_v1_4_3.csv (3.3M rows), backtest_monthly_top10_v1_4_3.csv (480 records), backtest_stock_consistency_v1_4_3.csv (30 stocks), backtest_results_v1_4_3.db
+
+**TOP 15 CONSISTENCY RANKINGS (48 Months)**
+- VEDL: 56.2% (27/48 months, 2,380 trades, 51.2% win, 3.7% EOD, ₹2,017 profit)
+- COALINDIA: 54.2% (26/48, 2,798 trades, 47.9% win, 3.1% EOD, ₹1,285)
+- ASHOKLEY: 45.8% (22/48, 2,096 trades, 48.4% win, 4.4% EOD, ₹381)
+- Top P&L leaders: BHARTIARTL (₹5,004), ADANIPORTS (₹3,758), SUNPHARMA (₹3,899)
+- TATAMOTORS dropped to #13 (35.4% vs memory of higher) - confirmed monthly results identical, consistency calculation correct
+
+**EOD EXIT VALIDATION - Jan 19-22 Journey Resumed**
+- Revisited EOD improvement timeline: Jan 19 bug (0% EOD), Jan 20 root cause (fixed %), Jan 21 ATR implementation, Jan 22+ GSS distraction
+- Current EOD rates: 3-8% range across top stocks (HEALTHY! Jan 19 goal achieved)
+- Average EOD rate: 4.3% (vs theoretical 5-15% ideal range)
+- Highest EOD: PNB 7.9%, ADANIPORTS 7.0%, SBIN 5.4%
+- Lowest EOD: TATASTEEL 2.7%, COALINDIA 3.1%, POWERGRID 3.4%
+
+**CRITICAL UNVALIDATED QUESTIONS IDENTIFIED**
+- EOD P&L quality: Are EOD exits profitable/break-even/losses? Need distribution analysis
+- ATR calibration: "Extreme" (4.0x) wins most - optimal or test 3.0x/3.5x middle ground?
+- Stock-specific tuning: Should high-vol (VEDL) vs low-vol (ITC) use different ATR multipliers?
+- Time-to-exit patterns: Faster exits = better/worse? How many candles before Target/SL/EOD?
+
+**GEMINI THIRD-PARTY VALIDATION PLAN**
+- Decision: Get fresh perspective before layering regime detection
+- Share: v1.4.3 full results + EOD journey + ATR rationale + questions
+- Request: Statistical validation of EOD range, ATR config effectiveness, exit distributions, std dev bounce scoring recommendations
+- Goal: Validate foundation layer before building enhancement layer (Nifty regime labeling v1.4.4)
+
+**LIVE PAPER TRADING ARCHITECTURE DISCUSSION**
+- 7 critical aspects for simulation accuracy: entry timing (wait candle close!), SL/target slippage, data freshness, order timing, MA20 buffer, EOD exit, volume filter
+- Paper trading options explored: Zerodha manual, Upstox API, hybrid Python flag approach (RECOMMENDED)
+- Websockets + Async benefits: 50ms latency (vs 1000ms polling), parallel multi-stock, accurate volume filters, efficient API usage
+- Cost analysis: Upstox FREE tier sufficient (websockets, orders, 100 calls/sec), Zerodha API ₹2k/month not needed yet
+- C++ discussion: Premature for 5-min strategy, API latency = bottleneck (not processing speed), save for Year 2 when 100+ stocks/multiple strategies
+
+**WEBSOCKETS + ASYNC FIXES vs DOESN'T FIX**
+- FIXED: Data freshness (50ms vs 1000ms), volume filter accuracy (tick-level), multi-stock parallel processing
+- NOT FIXED: Entry timing discipline (must wait candle close), slippage (exchange reality), MA20 buffer pre-load, EOD broker rules
+- Key insight: Websockets = SPEED improvement, but LOGIC discipline remains critical for backtest accuracy
+
+**TOMORROW'S TODO - WEBSOCKETS IMPLEMENTATION**
+- Build Upstox websocket wrapper for MA Bounce Bot v1.3
+- Add async multi-stock monitoring (30 stocks simultaneously)
+- Implement proper entry timing (candle close wait logic)
+- Add slippage simulation for paper trading (0.1-0.5% buffers)
+- Pre-load 20-candle buffers at startup
+- Test with 5-10 stocks in paper mode
+
+**VALIDATION ROADMAP FINALIZED**
+- Week 1: Paper trade with websockets (live market testing)
+- Week 2: Compare P&L vs backtest v1.4.3 (accuracy validation)
+- Week 3: Analyze discrepancies (slippage, timing, execution gaps)
+- Week 4: Decision point - Go live with ₹50K OR refine strategy further
+
+**STRATEGIC CLARITY - Foundation Before Enhancement**
+- Foundation Layer (NOW): Bounce detection ✅, ATR exits ⚠️ (needs validation), EOD quality ❓ (verification pending)
+- Enhancement Layer (AFTER): Nifty regime labeling v1.4.4, Playbook creation (PBS-BULL/BEAR/SIDEWAYS), GSS predictions v1.5
+- Advanced Layer (FUTURE): Std dev bounce scoring, ML pattern recognition (700-trade goal), multi-timeframe analysis
+- Philosophy: Building solid foundation, validating each layer properly, not rushing to regime logic
+
+**KEY FILES DELIVERED**
+- mega_backtest_48M_30S_v1_4_3.py (validated safe optimization)
+- mega_backtest_48M_30S_v1_4_3_DATA.py (CSV + DB output version)
+- top15_aggregate_48M.csv (aggregate performance metrics)
+- backtest_trades_all_v1_4_3.csv (3.3M trades with metadata)
+- backtest_monthly_top10_v1_4_3.csv (480 monthly summaries)
+- backtest_results_v1_4_3.db (SQLite for queries)
+
+---
+
+### Sat, Jan 31, 2026 - SQL DEEP-DIVE & EXTREME CONFIG VALIDATION
+
+**BACKTEST DATABASE ANALYSIS:**
+- Set up DBeaver SQL client (dark mode!) for systematic analysis of 3.3M trade database
+- **CRITICAL FINDING**: 56-60% SL hits across ALL stocks, 38-42% target hits - hit rates are NOT the differentiator
+- Discovered ATR config hierarchy: Extreme (2.5/4.0) profits ₹1.57L, Regular-2 barely ₹62K, Regular-1/Sideways LOSE money
+- **KEY INSIGHT**: High-priced stocks (₹1000+) profitable due to ATR SIZE (₹600 target gains vs ₹12 on low-priced), NOT better hit rates
+- Realized precision problem: Need filters to reduce SL hits (GSS regime, volume, candle quality) - not just avoid low-priced stocks
+
+**5 TODO FOR TOMORROW:**
+1. Run 4-Extreme backtest (2.5/4.0, 2.5/4.5, 3.0/4.5, 3.0/5.0) - find optimal config for paper trading (~88 min)
+2. Analyze results in DBeaver: Compare avg P&L, win%, eff%, target:SL ratios across 4 configs
+3. Select BEST Extreme config for paper trading deployment on high-priced stocks (DIMSLAB, BHARTIARTL, INFY, CIPLA)
+4. Document dual-track strategy: Track 1 = deploy proven edge for income, Track 2 = research improvements for all stocks
+5. Plan Monday paper trading setup: Websockets architecture, stock selection (₹1000+ range), execution monitoring
+
+---
+
+### Sun, Feb 01, 2026 - ANTI-CHASING FILTER VALIDATION & MULTIPROCESSING OPTIMIZATION
+
+**BACKTEST OPTIMIZATIONS & COMPARATIVE ANALYSIS:**
+- Implemented 0.5% anti-chasing filter (prevents entries >0.5% from MA20) + 4-worker multiprocessing in v1.4.3_optimized
+- Trade reduction: 3.31M → 2.94M trades (11.2% fewer), but SL hit rate barely improved (58.48% → 57.95%)
+- **CRITICAL FINDING**: Anti-chasing filter doesn't solve the 58% SL problem - hit rates remain structural, not fixable by entry filters
+- Automated file naming using `__file__` basename - future versions auto-generate correct CSV/DB names
+- Set up cross-database comparison workflow in DBeaver using ATTACH DATABASE for systematic A/B testing
+
+**5 TODO FOR TOMORROW:**
+1. Analyze v1.4.4 (4 Extreme configs) results when complete - compare 2.5/4.0 vs 2.5/4.5 vs 3.0/4.5 vs 3.0/5.0
+2. SQL analysis: Which Extreme config has best risk-adjusted returns (P&L per trade, target:SL ratio, capital efficiency)
+3. Finalize paper trading stock selection: High-priced (₹1000+) + best Extreme config from v1.4.4 analysis
+4. Design Monday live execution framework: Websocket streaming, position tracking, real-time P&L monitoring
+5. Document findings: Why anti-chasing failed, why high-priced stocks work, and roadmap for precision filters (GSS/regime detection)
