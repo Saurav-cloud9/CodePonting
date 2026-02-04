@@ -1,0 +1,536 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Trade Report - 2025-12-29</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 20px;
+                min-height: 100vh;
+            }
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 16px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                overflow: hidden;
+            }
+            .header {
+                background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+                color: white;
+                padding: 30px;
+                text-align: center;
+            }
+            .header h1 { font-size: 32px; margin-bottom: 10px; }
+            .summary {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                padding: 30px;
+                background: #f8f9fa;
+            }
+            .summary-card {
+                background: white;
+                padding: 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            }
+            .summary-card h3 { font-size: 14px; color: #6c757d; margin-bottom: 10px; }
+            .summary-card .value { font-size: 24px; font-weight: 700; color: #2c3e50; }
+            .summary-card.profit .value { color: #27ae60; }
+            .summary-card.loss .value { color: #e74c3c; }
+            
+            .tabs {
+                display: flex;
+                background: #f8f9fa;
+                padding: 0 30px;
+                border-bottom: 2px solid #dee2e6;
+            }
+            .tab {
+                padding: 15px 30px;
+                cursor: pointer;
+                font-weight: 600;
+                color: #6c757d;
+                border-bottom: 3px solid transparent;
+                transition: all 0.3s;
+            }
+            .tab:hover { color: #2c3e50; }
+            .tab.active {
+                color: #667eea;
+                border-bottom-color: #667eea;
+            }
+            
+            .tab-content {
+                display: none;
+                padding: 30px;
+            }
+            .tab-content.active { display: block; }
+            
+            /* Timeline styles */
+            .timeline {
+                position: relative;
+                padding-left: 40px;
+            }
+            .timeline::before {
+                content: '';
+                position: absolute;
+                left: 10px;
+                top: 0;
+                bottom: 0;
+                width: 2px;
+                background: #dee2e6;
+            }
+            .timeline-item {
+                position: relative;
+                margin-bottom: 30px;
+                display: flex;
+                align-items: flex-start;
+            }
+            .timeline-marker {
+                position: absolute;
+                left: -33px;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                border: 3px solid white;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            }
+            .timeline-marker.buy { background: #27ae60; }
+            .timeline-marker.sell { background: #e74c3c; }
+            .timeline-content {
+                background: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                flex: 1;
+            }
+            .timeline-time {
+                font-size: 12px;
+                color: #6c757d;
+                margin-bottom: 5px;
+            }
+            .timeline-details { font-size: 14px; }
+            .timeline-order-id {
+                font-size: 11px;
+                color: #6c757d;
+                margin-top: 5px;
+            }
+            
+            /* Table styles */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            thead {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            th {
+                padding: 12px;
+                text-align: left;
+                font-weight: 600;
+                font-size: 12px;
+                text-transform: uppercase;
+            }
+            tbody tr {
+                border-bottom: 1px solid #e9ecef;
+            }
+            tbody tr:hover { background: #f8f9fa; }
+            td {
+                padding: 12px;
+                color: #495057;
+            }
+            
+            .badge {
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 11px;
+                font-weight: 600;
+            }
+            .badge.buy {
+                background: #d4edda;
+                color: #155724;
+            }
+            .badge.sell {
+                background: #f8d7da;
+                color: #721c24;
+            }
+        </style>
+        <script>
+            function showTab(tabName) {
+                // Hide all tabs
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                
+                // Show selected tab
+                document.getElementById(tabName).classList.add('active');
+                document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+            }
+        </script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>💎 Today's Trade Report</h1>
+                <p>December 29, 2025 | Generated: 08:50 PM</p>
+            </div>
+            
+            <div class="summary">
+                <div class="summary-card">
+                    <h3>Total Trades</h3>
+                    <div class="value">10</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Buy Amount</h3>
+                    <div class="value">₹1,697.85</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Sell Amount</h3>
+                    <div class="value">₹1,699.20</div>
+                </div>
+                <div class="summary-card profit">
+                    <h3>Net P&L</h3>
+                    <div class="value">₹+0.00</div>
+                    <p style="font-size: 12px; color: #6c757d; margin-top: 5px;">Realized</p>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('trades')">📋 All Trades</div>
+                <div class="tab" onclick="showTab('timeline')">📅 Order Timeline</div>
+            </div>
+            
+            <div id="trades" class="tab-content active">
+                <h2 style="margin-bottom: 20px; color: #2c3e50;">📋 All Trades</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Symbol</th>
+                            <th>Type</th>
+                            <th>Qty</th>
+                            <th>Buy Price</th>
+                            <th>LTP</th>
+                            <th>Target</th>
+                            <th>Target Profit</th>
+                            <th>Target Reached?</th>
+                            <th>Stop Loss</th>
+                            <th>P&L/Share</th>
+                            <th>Total P&L</th>
+                            <th>Amount</th>
+                            <th>Order ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+        <tr>
+            <td>11:18:24 AM</td>
+            <td><strong>PNB-EQ</strong></td>
+            <td><span class="badge buy">BUY</span></td>
+            <td>5</td>
+            <td>₹119.78</td>
+            <td style="color: #6c757d;">₹119.78</td>
+            <td style="color: #27ae60;">₹122.18</td>
+            <td><span style="color: #27ae60; font-weight: 600;">+₹2.40</span></td>
+            <td><span style="color: #6c757d;">✗ No</span></td>
+            <td style="color: #e74c3c;">₹118.58</td>
+            <td><span style="color: #6c757d;">₹0.00</span></td>
+            <td><span style="color: #6c757d;">₹0.00</span></td>
+            <td>₹598.90</td>
+            <td style="font-size: 11px; color: #6c757d;">251229000158965</td>
+        </tr>
+        
+        <tr>
+            <td>11:20:49 AM</td>
+            <td><strong>IDEA-EQ</strong></td>
+            <td><span class="badge buy">BUY</span></td>
+            <td>5</td>
+            <td>₹11.97</td>
+            <td style="color: #6c757d;">₹11.97</td>
+            <td style="color: #27ae60;">₹12.21</td>
+            <td><span style="color: #27ae60; font-weight: 600;">+₹0.24</span></td>
+            <td><span style="color: #6c757d;">✗ No</span></td>
+            <td style="color: #e74c3c;">₹11.85</td>
+            <td><span style="color: #6c757d;">₹0.00</span></td>
+            <td><span style="color: #6c757d;">₹0.00</span></td>
+            <td>₹59.85</td>
+            <td style="font-size: 11px; color: #6c757d;">251229000162117</td>
+        </tr>
+        
+        <tr>
+            <td>12:09:32 PM</td>
+            <td><strong>YESBANK-EQ</strong></td>
+            <td><span class="badge buy">BUY</span></td>
+            <td>5</td>
+            <td>₹21.42</td>
+            <td style="color: #6c757d;">₹21.42</td>
+            <td style="color: #27ae60;">₹21.85</td>
+            <td><span style="color: #27ae60; font-weight: 600;">+₹0.43</span></td>
+            <td><span style="color: #6c757d;">✗ No</span></td>
+            <td style="color: #e74c3c;">₹21.21</td>
+            <td><span style="color: #6c757d;">₹0.00</span></td>
+            <td><span style="color: #6c757d;">₹0.00</span></td>
+            <td>₹107.10</td>
+            <td style="font-size: 11px; color: #6c757d;">251229000195347</td>
+        </tr>
+        
+        <tr>
+            <td>12:09:47 PM</td>
+            <td><strong>RPOWER-EQ</strong></td>
+            <td><span class="badge buy">BUY</span></td>
+            <td>5</td>
+            <td>₹35.65</td>
+            <td style="color: #6c757d;">₹35.65</td>
+            <td style="color: #27ae60;">₹36.36</td>
+            <td><span style="color: #27ae60; font-weight: 600;">+₹0.71</span></td>
+            <td><span style="color: #6c757d;">✗ No</span></td>
+            <td style="color: #e74c3c;">₹35.29</td>
+            <td><span style="color: #6c757d;">₹0.00</span></td>
+            <td><span style="color: #6c757d;">₹0.00</span></td>
+            <td>₹178.25</td>
+            <td style="font-size: 11px; color: #6c757d;">251229000195507</td>
+        </tr>
+        
+        <tr>
+            <td>12:10:49 PM</td>
+            <td><strong>CANBK-EQ</strong></td>
+            <td><span class="badge buy">BUY</span></td>
+            <td>5</td>
+            <td>₹150.75</td>
+            <td style="color: #6c757d;">₹150.75</td>
+            <td style="color: #27ae60;">₹153.77</td>
+            <td><span style="color: #27ae60; font-weight: 600;">+₹3.02</span></td>
+            <td><span style="color: #6c757d;">✗ No</span></td>
+            <td style="color: #e74c3c;">₹149.24</td>
+            <td><span style="color: #6c757d;">₹0.00</span></td>
+            <td><span style="color: #6c757d;">₹0.00</span></td>
+            <td>₹753.75</td>
+            <td style="font-size: 11px; color: #6c757d;">251229000196354</td>
+        </tr>
+        
+        <tr>
+            <td>02:50:29 PM</td>
+            <td><strong>CANBK-EQ</strong></td>
+            <td><span class="badge sell">SELL</span></td>
+            <td>5</td>
+            <td>₹150.67</td>
+            <td style="color: #6c757d;">-</td>
+            <td style="color: #27ae60;">₹-</td>
+            <td>-</td>
+            <td><span style="color: #6c757d;">-</span></td>
+            <td style="color: #e74c3c;">₹-</td>
+            <td><span style="color: #6c757d;">-</span></td>
+            <td><span style="color: #6c757d;">Squared</span></td>
+            <td>₹753.35</td>
+            <td style="font-size: 11px; color: #6c757d;">251229000315289</td>
+        </tr>
+        
+        <tr>
+            <td>03:00:01 PM</td>
+            <td><strong>PNB-EQ</strong></td>
+            <td><span class="badge sell">SELL</span></td>
+            <td>5</td>
+            <td>₹120.41</td>
+            <td style="color: #6c757d;">-</td>
+            <td style="color: #27ae60;">₹-</td>
+            <td>-</td>
+            <td><span style="color: #6c757d;">-</span></td>
+            <td style="color: #e74c3c;">₹-</td>
+            <td><span style="color: #6c757d;">-</span></td>
+            <td><span style="color: #6c757d;">Squared</span></td>
+            <td>₹602.05</td>
+            <td style="font-size: 11px; color: #6c757d;">251229000323186</td>
+        </tr>
+        
+        <tr>
+            <td>03:05:02 PM</td>
+            <td><strong>RPOWER-EQ</strong></td>
+            <td><span class="badge sell">SELL</span></td>
+            <td>5</td>
+            <td>₹35.40</td>
+            <td style="color: #6c757d;">-</td>
+            <td style="color: #27ae60;">₹-</td>
+            <td>-</td>
+            <td><span style="color: #6c757d;">-</span></td>
+            <td style="color: #e74c3c;">₹-</td>
+            <td><span style="color: #6c757d;">-</span></td>
+            <td><span style="color: #6c757d;">Squared</span></td>
+            <td>₹177.00</td>
+            <td style="font-size: 11px; color: #6c757d;">251229000327184</td>
+        </tr>
+        
+        <tr>
+            <td>03:06:50 PM</td>
+            <td><strong>IDEA-EQ</strong></td>
+            <td><span class="badge sell">SELL</span></td>
+            <td>5</td>
+            <td>₹11.97</td>
+            <td style="color: #6c757d;">-</td>
+            <td style="color: #27ae60;">₹-</td>
+            <td>-</td>
+            <td><span style="color: #6c757d;">-</span></td>
+            <td style="color: #e74c3c;">₹-</td>
+            <td><span style="color: #6c757d;">-</span></td>
+            <td><span style="color: #6c757d;">Squared</span></td>
+            <td>₹59.85</td>
+            <td style="font-size: 11px; color: #6c757d;">251229000328679</td>
+        </tr>
+        
+        <tr>
+            <td>03:07:16 PM</td>
+            <td><strong>YESBANK-EQ</strong></td>
+            <td><span class="badge sell">SELL</span></td>
+            <td>5</td>
+            <td>₹21.39</td>
+            <td style="color: #6c757d;">-</td>
+            <td style="color: #27ae60;">₹-</td>
+            <td>-</td>
+            <td><span style="color: #6c757d;">-</span></td>
+            <td style="color: #e74c3c;">₹-</td>
+            <td><span style="color: #6c757d;">-</span></td>
+            <td><span style="color: #6c757d;">Squared</span></td>
+            <td>₹106.95</td>
+            <td style="font-size: 11px; color: #6c757d;">251229000328997</td>
+        </tr>
+        
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="timeline" class="tab-content">
+                <h2 style="margin-bottom: 30px; color: #2c3e50;">📅 Order Timeline</h2>
+                <div class="timeline">
+                    
+        <div class="timeline-item">
+            <div class="timeline-marker buy"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">2025-12-29 11:18:24</div>
+                <div class="timeline-details">
+                    <span class="badge buy">BUY</span>
+                    <strong>PNB-EQ</strong> × 5 @ ₹119.78 = <strong>₹598.90</strong>
+                    <div class="timeline-order-id">Order ID: 251229000158965</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="timeline-marker buy"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">2025-12-29 11:20:49</div>
+                <div class="timeline-details">
+                    <span class="badge buy">BUY</span>
+                    <strong>IDEA-EQ</strong> × 5 @ ₹11.97 = <strong>₹59.85</strong>
+                    <div class="timeline-order-id">Order ID: 251229000162117</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="timeline-marker buy"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">2025-12-29 12:09:32</div>
+                <div class="timeline-details">
+                    <span class="badge buy">BUY</span>
+                    <strong>YESBANK-EQ</strong> × 5 @ ₹21.42 = <strong>₹107.10</strong>
+                    <div class="timeline-order-id">Order ID: 251229000195347</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="timeline-marker buy"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">2025-12-29 12:09:47</div>
+                <div class="timeline-details">
+                    <span class="badge buy">BUY</span>
+                    <strong>RPOWER-EQ</strong> × 5 @ ₹35.65 = <strong>₹178.25</strong>
+                    <div class="timeline-order-id">Order ID: 251229000195507</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="timeline-marker buy"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">2025-12-29 12:10:49</div>
+                <div class="timeline-details">
+                    <span class="badge buy">BUY</span>
+                    <strong>CANBK-EQ</strong> × 5 @ ₹150.75 = <strong>₹753.75</strong>
+                    <div class="timeline-order-id">Order ID: 251229000196354</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="timeline-marker sell"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">2025-12-29 14:50:29</div>
+                <div class="timeline-details">
+                    <span class="badge sell">SELL</span>
+                    <strong>CANBK-EQ</strong> × 5 @ ₹150.67 = <strong>₹753.35</strong>
+                    <div class="timeline-order-id">Order ID: 251229000315289</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="timeline-marker sell"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">2025-12-29 15:00:01</div>
+                <div class="timeline-details">
+                    <span class="badge sell">SELL</span>
+                    <strong>PNB-EQ</strong> × 5 @ ₹120.41 = <strong>₹602.05</strong>
+                    <div class="timeline-order-id">Order ID: 251229000323186</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="timeline-marker sell"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">2025-12-29 15:05:02</div>
+                <div class="timeline-details">
+                    <span class="badge sell">SELL</span>
+                    <strong>RPOWER-EQ</strong> × 5 @ ₹35.40 = <strong>₹177.00</strong>
+                    <div class="timeline-order-id">Order ID: 251229000327184</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="timeline-marker sell"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">2025-12-29 15:06:50</div>
+                <div class="timeline-details">
+                    <span class="badge sell">SELL</span>
+                    <strong>IDEA-EQ</strong> × 5 @ ₹11.97 = <strong>₹59.85</strong>
+                    <div class="timeline-order-id">Order ID: 251229000328679</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="timeline-item">
+            <div class="timeline-marker sell"></div>
+            <div class="timeline-content">
+                <div class="timeline-time">2025-12-29 15:07:16</div>
+                <div class="timeline-details">
+                    <span class="badge sell">SELL</span>
+                    <strong>YESBANK-EQ</strong> × 5 @ ₹21.39 = <strong>₹106.95</strong>
+                    <div class="timeline-order-id">Order ID: 251229000328997</div>
+                </div>
+            </div>
+        </div>
+        
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    

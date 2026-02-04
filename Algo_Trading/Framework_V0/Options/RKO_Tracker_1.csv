@@ -1,0 +1,6 @@
+Date,Day,Spread 1,Spread 2,Spread 3,Spread 4,Daily P&L,Notes
+Dec 29,Mon,,,,,₹0,Entry day - Place 2 spreads
+Dec 30,Tue,,,,,,Monitor theta decay
+Dec 31,Wed,HOLIDAY,HOLIDAY,,,₹0,Market closed
+Jan 1,Thu,HOLIDAY,HOLIDAY,,,₹0,Market closed
+Jan 2,Fri,,,,,,Close positions by 3:15 PM
