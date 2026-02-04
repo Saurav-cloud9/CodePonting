@@ -1,3 +1,0 @@
-Date,Entry_Time,Exit_Time,Symbol,Entry_Price,Exit_Price,Qty,P&L,P&L%,Target_Price,SL_Price,Target_Hit,Entry_Source,Exit_Source,Hold_Duration_Minutes,MA20_Distance_%,Distance_to_Target_%,Entry_Time_Category
-2025-12-31,13:16:08,13:22:39,IDEA,12.25,12.50,5,1.25,2.04,12.50,12.13,Yes,Bot,Bot_Target,66268806,0.00,-0.04,Late
-2025-12-31,13:16:08,13:42:09,CANBK,157.53,155.70,5,-9.14,-1.16,160.68,155.95,No,Bot,Bot_SL,66268826,0.00,3.10,Late
