@@ -15,46 +15,73 @@ Rules:
 This code must run identically in all environments.
 """
 
-from dataclasses import dataclass
-from typing import Optional
+import numpy as np
 
+class BounceStrategy:
+    def __init__(self, volume_multiplier=1.0, lookahead_candles=3):
+        self.volume_multiplier = volume_multiplier
+        self.lookahead_candles = lookahead_candles
 
-@dataclass
-class StrategyParams:
-    lookback: int
-    atr_mult: float
-    min_volume: Optional[float] = None
+    def generate_signals(self, df, filter_mas=None):
+        """
+        Framework-compatible port of v1.4.5 detect_bounce()
+        Returns list[dict] signals identical in structure to original
+        """
 
+        signals = []
 
-@dataclass
-class Signal:
-    action: str          # "BUY", "SELL", "HOLD"
-    reason: str = ""
+        n = len(df)
 
+        ma20 = df["ma20"].to_numpy()
+        avg_vol = df["avg_volume"].to_numpy()
+        vol = df["volume"].to_numpy()
+        low = df["low"].to_numpy()
+        close_arr = df["close"].to_numpy()
+        open_arr = df["open"].to_numpy()
+        datetime_arr = df["datetime"].to_numpy()
 
-def generate_signal(row, history, params: StrategyParams) -> Signal:
-    """
-    Pure strategy logic.
+        # --- Trend filter mask (Daily MAs) ---
+        if filter_mas:
+            filter_mask = np.ones(n, dtype=bool)
+            for ma_col in filter_mas:
+                if ma_col in df.columns:
+                    ma_vals = df[ma_col].to_numpy()
+                    filter_mask &= (close_arr > ma_vals) & ~np.isnan(ma_vals)
+        else:
+            filter_mask = np.ones(n, dtype=bool)
 
-    Inputs:
-    - row: current candle (pd.Series-like)
-    - history: past candles up to now (pd.DataFrame-like)
-    - params: strategy parameters
+        # --- Bounce detection loop ---
+        for i in range(20, n - 3):
 
-    Output:
-    - Signal(action, reason)
+            if np.isnan(ma20[i]) or not filter_mask[i]:
+                continue
 
-    Rules:
-    - No future access
-    - No execution logic
-    - No portfolio state
-    """
+            # Volume filter
+            if not np.isnan(avg_vol[i]):
+                if vol[i] < avg_vol[i] * self.volume_multiplier:
+                    continue
 
-    if len(history) < params.lookback:
-        return Signal("HOLD", "insufficient_history")
+            # Touch MA20
+            if low[i] <= ma20[i]:
 
-    # Example placeholder logic (to be replaced with your bounce logic)
-    if row["close"] < history["close"].tail(params.lookback).min():
-        return Signal("BUY", "mean_reversion_break")
+                ma_touch = ma20[i]
 
-    return Signal("HOLD", "no_edge")
+                # Look ahead up to 3 candles for reclaim
+                for j in range(i, min(i + self.lookahead_candles + 1, n)):
+
+                    if close_arr[j] > ma_touch:
+
+                        next_idx = j + 1
+                        if next_idx >= n:
+                            break
+
+                        signals.append({
+                            "datetime": datetime_arr[next_idx],
+                            "entry_price": open_arr[next_idx],
+                            "ma20": ma_touch,
+                            "volume": vol[i],
+                            "avg_volume": avg_vol[i],
+                        })
+                        break
+
+        return signals

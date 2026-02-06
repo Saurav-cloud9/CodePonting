@@ -38,7 +38,7 @@
 
 ### Mon, Feb 2, 2026 - mega_backtest_48M_30S_v1_4_3_Optimized & mega_backtest_48M_30S_v1_4_4 analysis
 - Consistency matrix and csv file missing in mega_backtest_48M_30S_v1_4_3_Optimized and mega_backtest_48M_30S_v1_4_4 ---> done
-- simultaneously working on websockets + Async fix implementation for paper trading. ---> forwarded to future date
+- simultaneously working on websockets + Async fix implementation for paper trading. ---> switched to Framework_v1
 - Discuss how to use db + Jupyter nb combo for better analysis of backtest results. ---> forwarded to future date
 - Check how Redis can be used for storing live trade data for better analysis. ---> forwarded to future date
 - Mock Data Generator ---> what's this? ---> can we use it for backtesting? ---> working with Gemini + Chatgpt to develop a script for this. ---> in progress
@@ -71,5 +71,16 @@
 - Quick review of new AI windsurf 
 
 ---
+
+### Thu, Feb 5, 2026 - Framework_V1 development
+- Developing Framework_v1 code with Claude, Chatgpt and Gemini 
+- Quick review of new AI windsurf done
+- Created the Core files for Framework_v1 i.e. engine.py, portfolio.py, strategy.py, indicators.py
+
+**TOMORROW'S TODO**
+- Resume developing Framework_v1 code with Claude, Chatgpt and Gemini
+- Port the flagship strategy i.e. mega_backtest_48M_30S_v1_4_5 into Framework_v1 
+
+
 
 

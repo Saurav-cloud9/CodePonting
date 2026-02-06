@@ -13,3 +13,139 @@ Rules:
 
 Pure state management.
 """
+
+import pandas as pd
+
+
+class Portfolio:
+    def __init__(
+            self,
+            capital=100000,
+            risk_per_trade=0.01,
+            atr_mult_stop=1.0,
+            rr_target=2.0,
+            max_hold_bars=50
+    ):
+        self.initial_capital = capital
+        self.cash = capital
+        self.risk_per_trade = risk_per_trade
+        self.atr_mult_stop = atr_mult_stop
+        self.rr_target = rr_target
+        self.max_hold_bars = max_hold_bars
+        self.positions = []
+        self.trades = []
+        self.equity_curve = []
+
+    # =========================================================
+    # OPEN POSITION
+    # =========================================================
+    def open_position(self, signal, bar, bar_index):
+        """
+        Fixed to match strategy.py signal structure and use bar data directly
+        signal dict keys: datetime, entry_price, ma20, volume, avg_volume
+        bar: DataFrame row (Series) with OHLCV + indicators
+        """
+        entry = signal["entry_price"]
+        entry_time = signal["datetime"]  # matches strategy output
+
+        # Get ATR from bar data (not passed separately)
+        atr = bar["atr_14"]
+
+        # Position sizing
+        stop_dist = atr * self.atr_mult_stop
+        risk_amt = self.cash * self.risk_per_trade
+        if stop_dist <= 0:  # Also catches negative ATR (data corruption)
+            stop_dist = entry * 0.01  # 1% fallback
+        qty = max(int(risk_amt / stop_dist), 1)
+
+        stop = entry - stop_dist
+        target = entry + stop_dist * self.rr_target
+
+        position = {
+            "entry_time": entry_time,
+            "entry_idx": bar_index,
+            "entry_price": entry,
+            "qty": qty,
+            "stop": stop,
+            "target": target,
+            "ma20": signal["ma20"],  # Track MA20 at entry for analysis
+            "status": "open"
+        }
+        self.positions.append(position)
+
+    # =========================================================
+    # BAR UPDATE
+    # =========================================================
+    def update(self, bar, bar_index):
+        """
+        bar: DataFrame row (Series) with OHLCV data
+        """
+        closed = []
+
+        for pos in self.positions:
+            if pos["status"] != "open":
+                continue
+
+            exit_price = None
+            reason = None
+
+            # Stop (access Series attributes, not dict keys)
+            if bar.low <= pos["stop"]:
+                exit_price = pos["stop"]
+                reason = "stop"
+
+            # Target
+            elif bar.high >= pos["target"]:
+                exit_price = pos["target"]
+                reason = "target"
+
+            # Time Exit
+            elif bar_index - pos["entry_idx"] >= self.max_hold_bars:
+                exit_price = bar.close
+                reason = "time"
+
+            if exit_price:
+                self._close(pos, bar.datetime, exit_price, reason)
+                closed.append(pos)
+
+        for c in closed:
+            self.positions.remove(c)
+
+        self._record_equity(bar.close)
+
+    # =========================================================
+    # CLOSE POSITION
+    # =========================================================
+    def _close(self, pos, exit_time, exit_price, reason):
+        pnl = (exit_price - pos["entry_price"]) * pos["qty"]
+        self.cash += pnl
+
+        self.trades.append({
+            "entry_time": pos["entry_time"],
+            "exit_time": exit_time,
+            "entry": pos["entry_price"],
+            "exit": exit_price,
+            "qty": pos["qty"],
+            "pnl": pnl,
+            "reason": reason,
+            "ma20": pos["ma20"]  # Include for analysis
+        })
+
+    # =========================================================
+    # EQUITY TRACK
+    # =========================================================
+    def _record_equity(self, mark_price):
+        unrealized = sum(
+            (mark_price - p["entry_price"]) * p["qty"]
+            for p in self.positions if p["status"] == "open"
+        )
+        self.equity_curve.append(self.cash + unrealized)
+
+    # =========================================================
+    # EXPORTS
+    # =========================================================
+    def trades_df(self):
+        return pd.DataFrame(self.trades)
+
+    def equity_series(self):
+        return pd.Series(self.equity_curve)
