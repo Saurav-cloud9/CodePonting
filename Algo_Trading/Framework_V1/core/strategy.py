@@ -84,4 +84,17 @@ class BounceStrategy:
                         })
                         break
 
+        # In strategy.py, at the end of generate_signals()
+        # Before: return signals
+
+        # Deduplicate by entry time (keep first occurrence)
+        seen_times = set()
+        unique_signals = []
+        for sig in signals:
+            if sig["datetime"] not in seen_times:
+                unique_signals.append(sig)
+                seen_times.add(sig["datetime"])
+
+        return unique_signals
+
         return signals

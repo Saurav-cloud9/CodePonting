@@ -1,5 +1,5 @@
 """
-GSS Core Engine v5.0 - ML-Enhanced Feature Selection
+GSS core Engine v5.0 - ML-Enhanced Feature Selection
 =====================================================
 NEW FEATURES:
 - Feature selection via enable/disable flags

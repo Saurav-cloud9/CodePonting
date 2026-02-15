@@ -1691,3 +1691,21 @@ Perfect day of learning! Rest up for testing tomorrow! 🚀
 3. Port v1.4.5 MA Bounce logic into core/strategy.py following pure function rules (no I/O, no execution, environment-agnostic)
 4. Create adapters/data/parquet.py to read local historical files - replace API calls in backtest flow
 5. Test first full backtest run using Framework_v2 with local data - validate 100x speed improvement vs v1.4.5 API-based approach
+
+---
+
+### Wed, Feb 05, 2026 - FRAMEWORK_V2 CORE MODULES IMPLEMENTATION
+
+**CORE LOGIC PORTING & INTEGRATION:**
+- Implemented core/indicators.py (MA20, ATR14, daily MAs), removed non-v1.4.5 regime function, validated column naming consistency
+- Ported core/strategy.py (BounceStrategy) with exact v1.4.5 bounce detection logic, lookahead confirmation, and volume filtering
+- Fixed core/portfolio.py critical bugs: signal structure mismatch, ATR zero-division guard, Series vs dict access, added ma20 tracking for analysis
+- Debugged core/engine.py performance issue: replaced per-bar signal recalculation with single pre-compute + O(1) lookup (10,000x speedup)
+- Validated end-to-end architecture ready for first smoke test - all modules aligned with v1.4.5 logic and Framework_v2 separation of concerns
+
+**5 TODO FOR TOMORROW (Feb 6):**
+1. Create test_engine.py runner script - load data, apply indicators, execute backtest, print results
+2. Prepare sample dataset (1 stock, 3-month period) as CSV/Parquet for initial testing
+3. Run first end-to-end backtest smoke test - validate no crashes, reasonable trade count, correct DataFrame outputs
+4. Review trades and stats output structure - confirm alignment with v1.4.5 expectations
+5. If test passes, begin scripts/download_data.py for full 2015-2025 historical dataset download via Upstox API

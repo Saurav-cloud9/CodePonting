@@ -81,6 +81,25 @@
 - Resume developing Framework_v1 code with Claude, Chatgpt and Gemini
 - Port the flagship strategy i.e. mega_backtest_48M_30S_v1_4_5 into Framework_v1 
 
+### Fri-Mon, Feb 6-9, 2026 - Framework_V1 development
+- run_backtest.py is built. Next need to run it and validate the flagship strategy ---> in progress
+- Working on 01_data_download_exploration.ipynb to understand Upstox API and download data. Also, understand how parquet files are created and stored.
+- 01_data_download_exploration.ipynb ---> Executed successfully for mock learning
 
+---
 
+### Mon-Thu, Feb 9-12, 2026 - Framework_V1 development
+- Ran download_data.py successfully and downloaded intraday and daily 5 min candles for 30 stocks + Nifty
+- 02_indicator_calculation.ipynb ---> Created 
+- Dark view workaround established on Excel via claude Add-in ---> Needs refinement
+- Installed visualization tools on Pycharm namely plotly, mplfinance and lightweight-charts
+- 02_indicator_calculation.ipynb 03_bounce_detection.ipynb notebooks created and tested for mock learning
+- run_backtest.py created and run successfully
 
+**TOMORROW'S TODO**
+- Validate the framework v1 against flagship backtest output
+
+---
+
+### Fri-Sun, Feb 13-15, 2026 - Framework_V1 Validation
+- framework v1 validation resumed

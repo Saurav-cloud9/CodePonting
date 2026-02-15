@@ -44,9 +44,9 @@ def compute_daily_mas(df: pd.DataFrame) -> pd.DataFrame:
     df["ma50"] = df["close"].rolling(50).mean()
     df["ma100"] = df["close"].rolling(100).mean()
     df["ma200"] = df["close"].rolling(200).mean()
+    df["date"] = df["datetime"].dt.date
 
-    return df[["date", "ma50", "ma100", "ma200"]]
-
+    return df  # Return entire dataframe with new columns added
 
 # ---------- ATR ----------
 def add_atr(df: pd.DataFrame, window: int = 14) -> pd.DataFrame:

@@ -1,5 +1,5 @@
 """
-GSS Core Engine - Reusable Components (v4.0)
+GSS core Engine - Reusable Components (v4.0)
 =============================================
 All indicator calculations and regime mapping logic.
 All parameters are exposed as arguments (no hardcoding).
