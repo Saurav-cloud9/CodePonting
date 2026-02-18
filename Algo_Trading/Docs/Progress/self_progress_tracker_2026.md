@@ -101,5 +101,12 @@
 
 ---
 
-### Fri-Sun, Feb 13-15, 2026 - Framework_V1 Validation
+### Fri-Sun, Feb 13-17, 2026 - Framework_V1 Validation
 - framework v1 validation resumed
+- created mega_backtest_48M_30S_v1_4_5_tatasteel.py to run it only for tatasteel after removing the issue where ma20 for first 19 candles was showing NaN
+- used the TATASTEEL.parquet to fetch data instead of Upstox API call
+- Need to now run the latest Claude sqlite3 query to test the mega_backtest_48M_30S_v1_4_5_tatasteel.db database however, there are some issue around it.
+- mega_backtest_48M_30S_v1_4_5_tatasteel.db and framework v1 output for tatasteel almost match. Need to further refine for an exact match
+
+**TOMORROW'S TODO**
+- Check on both mega_backtest_48M_30S_v1_4_5_tatasteel.py and framework v1 to fix the differences. Post that the framework v1 can be scaled to 30 stocks for futher backtesting

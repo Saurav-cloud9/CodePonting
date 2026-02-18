@@ -24,7 +24,7 @@ class Portfolio:
             risk_per_trade=0.01,
             atr_mult_stop=1.0,
             rr_target=2.0,
-            max_hold_bars=50
+            max_hold_bars=80
     ):
         self.initial_capital = capital
         self.cash = capital
@@ -89,18 +89,30 @@ class Portfolio:
             exit_price = None
             reason = None
 
-            # Stop (access Series attributes, not dict keys)
-            if bar.low <= pos["stop"]:
-                exit_price = pos["stop"]
-                reason = "stop"
+            # v1.4.5 intra-bar sequence logic: check SL/TGT based on candle direction
+            # Bullish candle likely went: Open -> Low -> High -> Close (check SL first)
+            # Bearish candle likely went: Open -> High -> Low -> Close (check TGT first)
+            is_bullish = bar.close > bar.open
 
-            # Target
-            elif bar.high >= pos["target"]:
-                exit_price = pos["target"]
-                reason = "target"
+            if is_bullish:
+                # Bullish: dipped first, then rallied — check SL first
+                if bar.low <= pos["stop"]:
+                    exit_price = pos["stop"]
+                    reason = "stop"
+                elif bar.high >= pos["target"]:
+                    exit_price = pos["target"]
+                    reason = "target"
+            else:
+                # Bearish: rallied first, then dropped — check TGT first
+                if bar.high >= pos["target"]:
+                    exit_price = pos["target"]
+                    reason = "target"
+                elif bar.low <= pos["stop"]:
+                    exit_price = pos["stop"]
+                    reason = "stop"
 
             # Time Exit
-            elif bar_index - pos["entry_idx"] >= self.max_hold_bars:
+            if exit_price is None and bar_index - pos["entry_idx"] >= self.max_hold_bars:
                 exit_price = bar.close
                 reason = "time"
 

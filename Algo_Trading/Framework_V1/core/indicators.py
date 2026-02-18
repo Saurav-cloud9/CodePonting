@@ -39,14 +39,22 @@ def add_intraday_indicators(df: pd.DataFrame) -> pd.DataFrame:
 
 # ---------- Daily trend MAs ----------
 def compute_daily_mas(df: pd.DataFrame) -> pd.DataFrame:
+    """Compute MA50/100/200 on DAILY closes, then merge back to intraday rows.
+    Matches v1.4.5 logic: daily MAs from daily OHLC, not from 5-min candles."""
     df = df.copy()
-
-    df["ma50"] = df["close"].rolling(50).mean()
-    df["ma100"] = df["close"].rolling(100).mean()
-    df["ma200"] = df["close"].rolling(200).mean()
     df["date"] = df["datetime"].dt.date
 
-    return df  # Return entire dataframe with new columns added
+    # Resample to daily: last close of each day
+    daily = df.groupby("date").agg(close=("close", "last")).reset_index()
+    daily["ma50"] = daily["close"].rolling(50).mean()
+    daily["ma100"] = daily["close"].rolling(100).mean()
+    daily["ma200"] = daily["close"].rolling(200).mean()
+    daily = daily[["date", "ma50", "ma100", "ma200"]]
+
+    # Merge daily MAs back to intraday rows
+    df = df.merge(daily, on="date", how="left")
+
+    return df
 
 # ---------- ATR ----------
 def add_atr(df: pd.DataFrame, window: int = 14) -> pd.DataFrame:

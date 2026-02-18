@@ -45,11 +45,14 @@ all_trades = []
 # =========================================================
 # CONFIG
 # =========================================================
-STOCK_FILES = list(Path("../data/historical/intraday_5min/").glob("*.parquet"))
+SCRIPT_DIR = Path(__file__).parent
+BASE_DIR = SCRIPT_DIR.parent  # Framework_V1 root
 
-DATA_PATH = "../data/historical/intraday_5min/TATASTEEL.parquet"  # INPUT
-OUTPUT_DIR = Path("../outputs/trades")  # Add Path()
-OUTPUT_DIR.mkdir(exist_ok=True)
+STOCK_FILES = list((BASE_DIR / "data/historical/intraday_5min/").glob("*.parquet"))
+
+DATA_PATH = BASE_DIR / "data/historical/intraday_5min/TATASTEEL.parquet"
+OUTPUT_DIR = BASE_DIR / "outputs/trades"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 TRADES_OUT = OUTPUT_DIR / "trades.csv"
 EQUITY_OUT = OUTPUT_DIR / "equity.csv"

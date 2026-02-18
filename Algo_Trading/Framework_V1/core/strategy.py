@@ -18,7 +18,7 @@ This code must run identically in all environments.
 import numpy as np
 
 class BounceStrategy:
-    def __init__(self, volume_multiplier=1.0, lookahead_candles=3):
+    def __init__(self, volume_multiplier=1.2, lookahead_candles=3):
         self.volume_multiplier = volume_multiplier
         self.lookahead_candles = lookahead_candles
 
@@ -51,7 +51,8 @@ class BounceStrategy:
             filter_mask = np.ones(n, dtype=bool)
 
         # --- Bounce detection loop ---
-        for i in range(20, n - 3):
+        # Start from 0: indicators must be pre-computed on full continuous dataset
+        for i in range(0, n - 3):
 
             if np.isnan(ma20[i]) or not filter_mask[i]:
                 continue
@@ -96,5 +97,3 @@ class BounceStrategy:
                 seen_times.add(sig["datetime"])
 
         return unique_signals
-
-        return signals
