@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(py scripts/run_backtest.py)"
+    ]
+  }
+}

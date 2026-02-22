@@ -16,6 +16,10 @@ This code must run identically in all environments.
 """
 
 import numpy as np
+import pandas as pd
+from datetime import time as _time
+
+_ENTRY_CUTOFF = _time(14, 30)
 
 class BounceStrategy:
     def __init__(self, volume_multiplier=1.2, lookahead_candles=3):
@@ -74,6 +78,21 @@ class BounceStrategy:
 
                         next_idx = j + 1
                         if next_idx >= n:
+                            break
+
+                        # Discard cross-month signals: v1.4.5 processes data
+                        # month-by-month, so it can never use a touch candle (i)
+                        # from month M to generate an entry in month M+1.
+                        # Checking i vs next_idx is strictly stronger than j vs
+                        # next_idx and also covers the lookahead-crosses-month
+                        # case where touch is in M-1, reclaim crosses into M, and
+                        # entry lands in M (j-vs-entry check would miss those).
+                        if (datetime_arr[i].year, datetime_arr[i].month) != \
+                           (datetime_arr[next_idx].year, datetime_arr[next_idx].month):
+                            break
+
+                        # No new entries at or after 14:30
+                        if pd.Timestamp(datetime_arr[next_idx]).time() >= _ENTRY_CUTOFF:
                             break
 
                         signals.append({

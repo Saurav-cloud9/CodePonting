@@ -6,17 +6,15 @@ Downloads 11 years (2015-2025) of historical data from Upstox API
 Saves as parquet files for offline backtesting
 
 Data Downloaded:
-- NIFTY50 index + 30 F&O stocks
+- 30 F&O stocks
 - 5-min intraday candles (for MA20 bounce detection)
 - Daily candles (for MA50/100/200 regime filters)
 
 Output Structure:
   data/historical/
     ├── intraday_5min/
-    │   ├── NIFTY50.parquet
     │   └── [30 stocks].parquet
     └── daily/
-        ├── NIFTY50.parquet
         └── [30 stocks].parquet
 """
 
@@ -37,7 +35,6 @@ ACCESS_TOKEN = "YOUR_UPSTOX_ACCESS_TOKEN_HERE"
 
 # Instruments to download
 INSTRUMENTS = {
-    'NIFTY50': 'NSE_INDEX|Nifty 50',
     'TATASTEEL': 'NSE_EQ|INE081A01020',
     'HINDALCO': 'NSE_EQ|INE038A01020',
     'JSWSTEEL': 'NSE_EQ|INE019A01038',
@@ -217,7 +214,7 @@ def main():
     print("╔═══════════════════════════════════════════════════════════════╗")
     print("║         Historical Data Download - Framework_V1              ║")
     print("║         Period: 2022-2025 (4 years)                         ║")
-    print("║         Instruments: NIFTY50 + 30 F&O Stocks                 ║")
+    print("║         Instruments: 30 F&O Stocks                           ║")
     print("╚═══════════════════════════════════════════════════════════════╝")
 
     start_time = time.time()

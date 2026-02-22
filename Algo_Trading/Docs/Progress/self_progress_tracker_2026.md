@@ -101,7 +101,7 @@
 
 ---
 
-### Fri-Sun, Feb 13-17, 2026 - Framework_V1 Validation
+### Fri-Tue, Feb 13-17, 2026 - Framework_V1 Validation
 - framework v1 validation resumed
 - created mega_backtest_48M_30S_v1_4_5_tatasteel.py to run it only for tatasteel after removing the issue where ma20 for first 19 candles was showing NaN
 - used the TATASTEEL.parquet to fetch data instead of Upstox API call
@@ -110,3 +110,14 @@
 
 **TOMORROW'S TODO**
 - Check on both mega_backtest_48M_30S_v1_4_5_tatasteel.py and framework v1 to fix the differences. Post that the framework v1 can be scaled to 30 stocks for futher backtesting
+
+### Wed-Thu, Feb 18-19, 2026 - Framework_V1 Validation
+- mega_backtest_48M_30S_v1_4_5_tatasteel.py and framework v1 output have certain mismatches that are being fixed such that we have the exact match of the outputs while retaining the superior logic overall. 
+- fv1 and v145 now match exactly. Tested on tatasteel and vedanta
+
+**TOMORROW'S TODO**
+- Declare fv1 as the new flagship. scale to 30 stocks and further backtest to get better pnl etc
+
+### Fri, Feb 20, 2026 - Backtest Analysis including v143/v145/v146 & fv1
+- Currently writing sql queries to explore the results of all the 4 files in the sub heading
+

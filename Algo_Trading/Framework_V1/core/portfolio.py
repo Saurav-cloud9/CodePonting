@@ -15,16 +15,20 @@ Pure state management.
 """
 
 import pandas as pd
+from datetime import time as _time
+
+_EOD_TIME = _time(15, 0)
 
 
 class Portfolio:
     def __init__(
             self,
-            capital=100000,
+            capital=1000000,
             risk_per_trade=0.01,
             atr_mult_stop=1.0,
             rr_target=2.0,
-            max_hold_bars=80
+            max_hold_bars=80,
+            num_stocks=30
     ):
         self.initial_capital = capital
         self.cash = capital
@@ -32,6 +36,7 @@ class Portfolio:
         self.atr_mult_stop = atr_mult_stop
         self.rr_target = rr_target
         self.max_hold_bars = max_hold_bars
+        self.capital_per_stock = capital / num_stocks
         self.positions = []
         self.trades = []
         self.equity_curve = []
@@ -53,10 +58,12 @@ class Portfolio:
 
         # Position sizing
         stop_dist = atr * self.atr_mult_stop
-        risk_amt = self.cash * self.risk_per_trade
+        risk_amt = self.initial_capital * self.risk_per_trade
         if stop_dist <= 0:  # Also catches negative ATR (data corruption)
             stop_dist = entry * 0.01  # 1% fallback
-        qty = max(int(risk_amt / stop_dist), 1)
+        max_qty_by_capital = int(self.capital_per_stock / entry)
+        max_qty_by_risk    = int(risk_amt / stop_dist)
+        qty                = max(min(max_qty_by_capital, max_qty_by_risk), 1)
 
         stop = entry - stop_dist
         target = entry + stop_dist * self.rr_target
@@ -86,35 +93,41 @@ class Portfolio:
             if pos["status"] != "open":
                 continue
 
+            # Skip the entry candle: cannot exit on the same bar we entered
+            if pos["entry_idx"] == bar_index:
+                continue
+
             exit_price = None
             reason = None
 
-            # v1.4.5 intra-bar sequence logic: check SL/TGT based on candle direction
-            # Bullish candle likely went: Open -> Low -> High -> Close (check SL first)
-            # Bearish candle likely went: Open -> High -> Low -> Close (check TGT first)
-            is_bullish = bar.close > bar.open
-
-            if is_bullish:
-                # Bullish: dipped first, then rallied — check SL first
-                if bar.low <= pos["stop"]:
-                    exit_price = pos["stop"]
-                    reason = "stop"
-                elif bar.high >= pos["target"]:
-                    exit_price = pos["target"]
-                    reason = "target"
-            else:
-                # Bearish: rallied first, then dropped — check TGT first
-                if bar.high >= pos["target"]:
-                    exit_price = pos["target"]
-                    reason = "target"
-                elif bar.low <= pos["stop"]:
-                    exit_price = pos["stop"]
-                    reason = "stop"
-
-            # Time Exit
-            if exit_price is None and bar_index - pos["entry_idx"] >= self.max_hold_bars:
-                exit_price = bar.close
+            # EOD forced close: first bar at/after 15:00 on the entry date
+            bar_dt = bar.datetime.to_pydatetime() if hasattr(bar.datetime, "to_pydatetime") else bar.datetime
+            entry_dt = pos["entry_time"].to_pydatetime() if hasattr(pos["entry_time"], "to_pydatetime") else pos["entry_time"]
+            if bar_dt.date() == entry_dt.date() and bar_dt.time() >= _EOD_TIME:
+                exit_price = bar.open
                 reason = "time"
+            else:
+                # v1.4.5 intra-bar sequence logic: check SL/TGT based on candle direction
+                # Bullish candle likely went: Open -> Low -> High -> Close (check SL first)
+                # Bearish candle likely went: Open -> High -> Low -> Close (check TGT first)
+                is_bullish = bar.close > bar.open
+
+                if is_bullish:
+                    # Bullish: dipped first, then rallied — check SL first
+                    if bar.low <= pos["stop"]:
+                        exit_price = pos["stop"]
+                        reason = "stop"
+                    elif bar.high >= pos["target"]:
+                        exit_price = pos["target"]
+                        reason = "target"
+                else:
+                    # Bearish: rallied first, then dropped — check TGT first
+                    if bar.high >= pos["target"]:
+                        exit_price = pos["target"]
+                        reason = "target"
+                    elif bar.low <= pos["stop"]:
+                        exit_price = pos["stop"]
+                        reason = "stop"
 
             if exit_price:
                 self._close(pos, bar.datetime, exit_price, reason)

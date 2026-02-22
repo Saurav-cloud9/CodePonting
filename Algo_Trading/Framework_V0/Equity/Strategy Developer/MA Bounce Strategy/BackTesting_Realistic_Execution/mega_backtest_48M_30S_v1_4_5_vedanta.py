@@ -1,12 +1,12 @@
-# mega_backtest_48M_30S_v1_4_5_tatasteel.py
+# mega_backtest_48M_30S_v1_4_5_vedanta.py
 
 """
-Mega Backtest Script v1.4.5 - TATASTEEL ONLY (PARQUET + WARM-UP FIX)
+Mega Backtest Script v1.4.5 - VEDL ONLY (PARQUET + WARM-UP FIX)
 ╔═══════════════════════════════════════════════════════════════╗
-║   MEGA BACKTEST - 48 Months × TATASTEEL Only                 ║
+║   MEGA BACKTEST - 48 Months × VEDL Only                      ║
 ║   FEATURES:                                                   ║
 ║     1. NO Anti-Chasing Filter (Standard Bounce)               ║
-║     2. Reads from local TATASTEEL.parquet (no API calls)      ║
+║     2. Reads from local VEDL.parquet (no API calls)           ║
 ║     3. FIXED: Rolling indicators computed on full continuous   ║
 ║        dataset - no NaN warm-up gap at month boundaries       ║
 ║     4. Full Data Collection (CSV + SQLite)                    ║
@@ -35,7 +35,7 @@ os.system("powercfg /change standby-timeout-ac 0")
 # CONFIGURATION
 # ═══════════════════════════════════════════════════════════════
 
-PARQUET_FILE = os.path.join(SCRIPT_DIR, 'TATASTEEL.parquet')
+PARQUET_FILE = r'c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V1\data\historical\intraday_5min\VEDL.parquet'
 
 TARGETS = [0.005, 0.01, 0.015]
 STOP_LOSS = 0.005
@@ -68,7 +68,7 @@ MONTHLY_SUMMARY_DATA = []
 # ═══════════════════════════════════════════════════════════════
 
 def load_intraday_data():
-    """Load full TATASTEEL 5-min intraday data from parquet and compute rolling indicators."""
+    """Load full VEDL 5-min intraday data from parquet and compute rolling indicators."""
     df = pd.read_parquet(PARQUET_FILE)
     df['datetime'] = pd.to_datetime(df['datetime'])
     df = df.sort_values('datetime').reset_index(drop=True)
@@ -283,12 +283,12 @@ def backtest_stock(df, daily_mas, stock_name, month_name="", seen_times_dict=Non
 
 def main():
     print("\n" + "=" * 78)
-    print(" " * 10 + "48-MONTH BACKTEST - TATASTEEL ONLY (PARQUET + WARM-UP FIX)")
+    print(" " * 10 + "48-MONTH BACKTEST - VEDL ONLY (PARQUET + WARM-UP FIX)")
     print(" " * 10 + f"{SCRIPT_NAME.upper()}")
     print("=" * 78 + "\n")
 
     # Load full dataset once - rolling indicators computed on continuous data
-    print("Loading TATASTEEL.parquet...")
+    print("Loading VEDL.parquet...")
     df_full = load_intraday_data()
     print(f"Loaded {len(df_full)} candles ({df_full['datetime'].min()} to {df_full['datetime'].max()})")
 
@@ -307,7 +307,7 @@ def main():
         months.append((first_day, last_day, f"{current.strftime('%b').upper()}_{current.year}"))
         current = datetime(current.year + (1 if current.month == 12 else 0), (current.month % 12) + 1, 1)
 
-    print(f"Total Months: {len(months)} | Stocks: TATASTEEL only")
+    print(f"Total Months: {len(months)} | Stocks: VEDL only")
     print(f"Data Source: {PARQUET_FILE}\n")
 
     start_time = datetime.now()
@@ -319,7 +319,7 @@ def main():
     for i, (f, t, month_name) in enumerate(months, 1):
         # Slice the pre-computed full dataframe for this month
         month_df = get_month_slice(df_full, f, t)
-        result = backtest_stock(month_df, daily_mas, 'TATASTEEL', month_name, seen_times_dict=seen_times_dict)
+        result = backtest_stock(month_df, daily_mas, 'VEDL', month_name, seen_times_dict=seen_times_dict)
 
         if result is not None:
             ALL_TRADES_DATA.extend(result['all_trades'])
@@ -327,7 +327,7 @@ def main():
                   f"Trades: {result['trades']:<3} | Win%: {result['win_pct']:<5.0f} | "
                   f"Net: {result['net_profit']:>8.2f} | Eff: {result['capital_efficiency']:.1f}%")
             MONTHLY_SUMMARY_DATA.append(
-                {'month': month_name, 'rank': 1, 'stock': 'TATASTEEL', 'win_pct': result['win_pct'],
+                {'month': month_name, 'rank': 1, 'stock': 'VEDL', 'win_pct': result['win_pct'],
                  'efficiency': result['capital_efficiency'], 'net_pnl': result['net_profit'],
                  'filter': result['best_filter'], 'atr_config': result['best_atr_config']})
         else:
@@ -336,7 +336,7 @@ def main():
     elapsed = (datetime.now() - start_time).total_seconds()
 
     print("\n" + "=" * 78)
-    print("TATASTEEL - 48 MONTH SUMMARY")
+    print("VEDL - 48 MONTH SUMMARY")
     print("=" * 78)
 
     trades_df = pd.DataFrame(ALL_TRADES_DATA)
