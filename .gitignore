@@ -50,3 +50,7 @@ Thumbs.db
 backtest_trades_all_*.csv
 
 # Keep smaller summary files (monthly, consistency reports are OK to commit)
+
+# Kaggle datasets (large minute-level CSV downloads, regenerable via download_kaggle.py)
+Algo_Trading/Kaggle/dataset1/
+Algo_Trading/Kaggle/dataset2/

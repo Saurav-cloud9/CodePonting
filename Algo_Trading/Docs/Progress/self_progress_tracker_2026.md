@@ -121,3 +121,20 @@
 ### Fri, Feb 20, 2026 - Backtest Analysis including v143/v145/v146 & fv1
 - Currently writing sql queries to explore the results of all the 4 files in the sub heading
 
+### Sat-Mon, Feb 21-23, 2026 - Backtest Analysis including v143/v145/v146 & fv1 and fv2 inception
+- Ran multiple SQL queiries and found that the v143/145 had inflated results and v146/fv1 had technically sound script but strategically not up to the mark
+- Biggest take away from fv1 development and analysis ---> helped to comeup with a roboust environment that can be used to implement strategies effectively
+- Currently working towards development of fv2
+- fv2 development has been paused as the focus has shifted to regime detection.
+- close > ma50 for current day changes the CAGR for fv1 from -9.74% to +8.77%. It can be used as the Ground Truth to build the regime detection filter upon.
+
+**TOMORROW'S TODO**
+- Start the day with clarification around ma50 for jan and feb 2022 for fv1.
+- understand the Drawdown concept using the information provided by CC in the last most recent chat.
+- work with Claude to build the regime filter that can match the Ground truth upto 70-80%.
+
+### Tue-Wed, Feb 24-25 - fv1_strategy_review.md review & Framework_V1_Sandbox Creation
+- Currently reviewing fv1_strategy_review.md with Claude. Later would deploy the improvents on the fv1 via its sandbox environment + add optuna optimization
+
+**TOMORROW'S TODO**
+- Ask Calude: hyperparameter optimization ---> check this and finalize a route

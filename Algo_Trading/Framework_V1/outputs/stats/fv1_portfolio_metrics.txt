@@ -1,0 +1,44 @@
+============================================================
+  FV1 MA BOUNCE — PORTFOLIO PERFORMANCE METRICS
+============================================================
+  Stocks  : 29 (best config per stock)
+  Period  : 2022-01-03  →  2025-12-31
+  Trades  : 76,709
+
+──────────────────────────────────────────────────────────
+  PnL METRICS  (per-share)
+──────────────────────────────────────────────────────────
+  Total PnL (per-share sum)  :   -6769.1439
+  Total PnL (₹ actual)       : ₹ -336,365.79
+  Avg PnL per Trade          :      -0.0882
+  Avg Win                    :       4.7148
+  Avg Loss                   :      -3.7506
+  Largest Win                :     189.5536
+  Largest Loss               :    -101.5286
+  Median Return              :      -0.3839
+
+──────────────────────────────────────────────────────────
+  RISK METRICS
+──────────────────────────────────────────────────────────
+  Win Rate                   :       42.83 %
+  Profit Factor              :       0.9581
+  Expectancy                 :      -0.1248
+  Max Drawdown (per-share)   :   -7613.4093
+  Max DD Duration            :      1388 days
+  Return / Max Drawdown      :      -0.8891
+  Sharpe Ratio (monthly)     :      -0.2157
+
+──────────────────────────────────────────────────────────
+  STREAK METRICS
+──────────────────────────────────────────────────────────
+  Max Win Streak             :       51 trades
+  Max Loss Streak            :      110 trades
+
+──────────────────────────────────────────────────────────
+  PORTFOLIO GROWTH
+──────────────────────────────────────────────────────────
+  Initial Equity             : ₹   1,000,000
+  Final Equity               : ₹  663,634.21
+  CAGR (4-year)              :       -9.74 %
+  Monthly Win Rate           :       43.75 %
+============================================================

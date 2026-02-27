@@ -1,0 +1,73 @@
+﻿Folder PATH listing
+Volume serial number is BC16-DF94
+C:.
+|   fv2_structure.txt
+|   
++---adapters
+|   +---broker
+|   |       live.py
+|   |       simulated.py
+|   |       
+|   +---clock
+|   |       event.py
+|   |       stepped.py
+|   |       
+|   \---data
+|           parquet.py
+|           upstox.py
+|           
++---configs
+|       backtest.yaml
+|       live.yaml
+|       paper.yaml
+|       
++---core
+|       engine.py
+|       indicators.py
+|       metrics.py
+|       portfolio.py
+|       strategy.py
+|       
++---data
+|   +---historical
+|   |   |   README.md
+|   |   |   
+|   |   +---daily
+|   |   |       README.md
+|   |   |       
+|   |   \---intraday_5min
+|   |           README.md
+|   |           
+|   \---indicators
+|           README.md
+|           
++---Notebooks
+|       README.md
+|       
++---outputs
+|   +---reports
+|   |       README.md
+|   |       
+|   +---stats
+|   |       README.md
+|   |       
+|   \---trades
+|           README.md
+|           
++---research
+|       optuna_runner.py
+|       stress_test.py
+|       walk_forward.py
+|       
++---scripts
+|       compute_indicators.py
+|       download_data.py
+|       run_backtest.py
+|       std_analysis.py
+|       
++---sql
+|       README.md
+|       
+\---test
+        test.py
+        

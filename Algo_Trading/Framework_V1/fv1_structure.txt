@@ -1,0 +1,161 @@
+﻿Folder PATH listing
+Volume serial number is BC16-DF94
+C:.
+|   fv1_structure.txt
+|   
++---adapters
+|   +---broker
+|   |       live.py
+|   |       simulated.py
+|   |       
+|   +---clock
+|   |       event.py
+|   |       stepped.py
+|   |       
+|   \---data
+|           parquet.py
+|           upstox.py
+|           
++---configs
+|       backtest.yaml
+|       live.yaml
+|       paper.yaml
+|       
++---core
+|   |   engine.py
+|   |   indicators.py
+|   |   metrics.py
+|   |   portfolio.py
+|   |   strategy.py
+|   |   
+|   \---__pycache__
+|           engine.cpython-312.pyc
+|           indicators.cpython-312.pyc
+|           portfolio.cpython-312.pyc
+|           strategy.cpython-312.pyc
+|           
++---data
+|   +---historical
+|   |   |   README.md
+|   |   |   
+|   |   +---daily
+|   |   |       ADANIPORTS.parquet
+|   |   |       ASHOKLEY.parquet
+|   |   |       AXISBANK.parquet
+|   |   |       BANDHANBNK.parquet
+|   |   |       BHARTIARTL.parquet
+|   |   |       CIPLA.parquet
+|   |   |       COALINDIA.parquet
+|   |   |       DABUR.parquet
+|   |   |       DIVISLAB.parquet
+|   |   |       HDFCBANK.parquet
+|   |   |       HINDALCO.parquet
+|   |   |       ICICIBANK.parquet
+|   |   |       INDUSINDBK.parquet
+|   |   |       INFY.parquet
+|   |   |       ITC.parquet
+|   |   |       JSWSTEEL.parquet
+|   |   |       NATIONALUM.parquet
+|   |   |       NIFTY50.parquet
+|   |   |       NTPC.parquet
+|   |   |       ONGC.parquet
+|   |   |       PNB.parquet
+|   |   |       POWERGRID.parquet
+|   |   |       RELIANCE.parquet
+|   |   |       SBIN.parquet
+|   |   |       SUNPHARMA.parquet
+|   |   |       TATAMOTORS.parquet
+|   |   |       TATASTEEL.parquet
+|   |   |       TECHM.parquet
+|   |   |       VEDL.parquet
+|   |   |       VI.parquet
+|   |   |       WIPRO.parquet
+|   |   |       
+|   |   \---intraday_5min
+|   |           ADANIPORTS.parquet
+|   |           ASHOKLEY.parquet
+|   |           AXISBANK.parquet
+|   |           BANDHANBNK.parquet
+|   |           BHARTIARTL.parquet
+|   |           CIPLA.parquet
+|   |           COALINDIA.parquet
+|   |           DABUR.parquet
+|   |           DIVISLAB.parquet
+|   |           HDFCBANK.parquet
+|   |           HINDALCO.parquet
+|   |           ICICIBANK.parquet
+|   |           INDUSINDBK.parquet
+|   |           INFY.parquet
+|   |           ITC.parquet
+|   |           JSWSTEEL.parquet
+|   |           NATIONALUM.parquet
+|   |           NIFTY50.parquet
+|   |           NTPC.parquet
+|   |           ONGC.parquet
+|   |           PNB.parquet
+|   |           POWERGRID.parquet
+|   |           RELIANCE.parquet
+|   |           SBIN.parquet
+|   |           SUNPHARMA.parquet
+|   |           TATAMOTORS.parquet
+|   |           TATASTEEL.parquet
+|   |           TECHM.parquet
+|   |           VEDL.parquet
+|   |           VI.parquet
+|   |           WIPRO.parquet
+|   |           
+|   \---indicators
+|           README.md
+|           
++---Notebooks
+|       01_data_download_exploration.ipynb
+|       02_indicator_calculation.ipynb
+|       03_bounce_detection.ipynb
+|       NIFTY50.ipynb
+|       parquest and csv.ipynb
+|       
++---outputs
+|   |   folder_summary.md
+|   |   
+|   +---reports
+|   |       avg_vs_std.png
+|   |       monthly_pnl_trend.png
+|   |       README.md
+|   |       sharpe_ratio.png
+|   |       
+|   +---stats
+|   |       README.md
+|   |       
+|   \---trades
+|           carry_over_diagnostic.csv
+|           check_framework_output.py
+|           equity.csv
+|           fv1_30stocks_results.csv
+|           fv1_all_trades.csv
+|           README.md
+|           tatasteel_sunpharma_trades.csv
+|           trades.csv
+|           
++---research
+|       optuna_runner.py
+|       stress_test.py
+|       walk_forward.py
+|       
++---scripts
+|       compute-indicators.py
+|       create_trading_db.py
+|       diagnose_carry_over.py
+|       download_data.py
+|       run_backtest.py
+|       std_analysis.py
+|       
++---sql
+|       fv1_all_trades.csv
+|       trading.db
+|       v143_all_trades.csv
+|       v145_all_trades.csv
+|       v146_all_trades.csv
+|       
+\---test
+        test.py
+        

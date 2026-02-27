@@ -1,0 +1,40 @@
+# PAPER TRADING CONFIGURATION
+# Used for: Live market simulation, system validation
+
+# Environment
+mode: paper
+
+# Data
+data_adapter: upstox_websocket
+symbols:
+  - NSE_EQ|INE081A01020  # TATASTEEL
+  - NSE_EQ|INE361B01024  # DIVISLAB
+  - NSE_EQ|INE397D01024  # BHARTIARTL
+
+# Clock
+clock_adapter: event
+
+# Broker
+broker_adapter: simulated
+fill_model: realistic  # includes slippage and latency
+
+# Strategy Parameters (same as backtest)
+strategy:
+  name: ma_bounce
+  ma_period: 20
+  atr_period: 14
+  atr_sl_mult: 2.0
+  atr_tgt_mult: 3.0
+  volume_multiplier: 1.2
+  filters: []
+
+# Risk Management
+risk:
+  max_position_size: 10000
+  max_daily_loss: 5000
+
+# Outputs
+output_dir: ../outputs/
+save_trades: true
+save_stats: true
+log_level: DEBUG

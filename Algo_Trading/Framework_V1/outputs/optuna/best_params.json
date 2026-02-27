@@ -1,0 +1,53 @@
+{
+  "trial": 2337,
+  "cagr_pct": 2.6902,
+  "gate_logic": "OR",
+  "active_filters": [
+    "PF8",
+    "TF3",
+    "MF4"
+  ],
+  "trade_count": 32162,
+  "pnl_by_year": {
+    "2022": 47959.0,
+    "2023": 42474.0,
+    "2024": 30845.0,
+    "2025": -9250.0
+  },
+  "raw_params": {
+    "thresh_PF8": 0.7497439017107547,
+    "thresh_PF9": 1.2355902137253076,
+    "thresh_VF3": 0.400041241347952,
+    "thresh_TF4_lo": -0.046331375751630946,
+    "thresh_TF4_hi": 0.030994108228266315,
+    "thresh_MF4": 1.2985645287053385,
+    "thresh_VL1_vol": 1.3785215612518726,
+    "gate_logic": "OR",
+    "use_PF1": false,
+    "use_PF2": false,
+    "use_PF3": false,
+    "use_PF4": false,
+    "use_PF5": false,
+    "use_PF6": false,
+    "use_PF7": false,
+    "use_PF8": true,
+    "dir_PF8": false,
+    "use_PF9": false,
+    "use_VF1": false,
+    "use_VF2": false,
+    "use_VF3": false,
+    "use_TF1": false,
+    "use_TF2": false,
+    "use_TF3": true,
+    "dir_TF3": false,
+    "use_TF4": false,
+    "use_VL1": false,
+    "use_VL2": false,
+    "use_MF1": false,
+    "use_MF2": false,
+    "use_MF3": false,
+    "use_MF4": true,
+    "dir_MF4": true,
+    "use_MF5": false
+  }
+}

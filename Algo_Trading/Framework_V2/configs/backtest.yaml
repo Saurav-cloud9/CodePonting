@@ -1,0 +1,38 @@
+# BACKTEST CONFIGURATION
+# Used for: Historical simulation, research, validation
+
+# Environment
+mode: backtest
+
+# Data
+data_adapter: parquet
+data_source: ../data/historical/
+indicator_cache: ../data/indicators/
+
+# Clock
+clock_adapter: stepped
+
+# Broker
+broker_adapter: simulated
+fill_model: instant  # or 'realistic' for slippage
+
+# Strategy Parameters
+strategy:
+  name: ma_bounce
+  ma_period: 20
+  atr_period: 14
+  atr_sl_mult: 2.0
+  atr_tgt_mult: 3.0
+  volume_multiplier: 1.2
+  filters: []  # e.g., ['ma50', 'ma100', 'ma200']
+
+# Risk Management
+risk:
+  max_position_size: null  # unlimited
+  max_daily_loss: null     # unlimited
+  max_positions: 1         # one trade at a time (your current model)
+
+# Outputs
+output_dir: ../outputs/
+save_trades: true
+save_stats: true
