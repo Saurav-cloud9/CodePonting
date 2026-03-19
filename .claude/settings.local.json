@@ -1,7 +1,11 @@
 {
   "permissions": {
+    "defaultMode": "bypassPermissions",
     "allow": [
-      "Bash(py scripts/run_backtest.py)"
+      "Bash(py scripts/run_backtest.py)",
+      "mcp__kite__search_instruments",
+      "mcp__kite__get_historical_data",
+      "mcp__kite__get_profile"
     ]
   }
 }

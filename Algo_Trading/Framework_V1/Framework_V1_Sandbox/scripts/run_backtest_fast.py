@@ -37,7 +37,7 @@ sys.path.insert(0, str(SANDBOX_DIR))
 from core.indicators import add_intraday_indicators, compute_daily_mas, add_atr
 
 # ─── DATA / CONFIG PATHS (point to FV1) ────────────────────────────────────────
-INTRADAY_DIR = FV1_DIR / "data/historical/intraday_5min"
+DS3_DIR      = FV1_DIR / "data/historical/intraday_5min_DS3"
 FV1_METRICS  = FV1_DIR / "outputs/stats/fv1_metrics.csv"
 
 # ─── CONSTANTS ─────────────────────────────────────────────────────────────────
@@ -94,13 +94,12 @@ def run_stock_fast(df: pd.DataFrame, sl_mult: float, tgt_mult: float) -> pd.Data
     atr_a   = df["atr_14"].values.astype(np.float64)
 
     # --- Pre-compute integer time components (no pd.Timestamp in loop) ---
-    # Datetimes are IST (UTC+05:30). numpy casts to UTC internally.
-    # Add IST offset (330 min) so minute-of-day comparisons work in IST.
-    IST_OFFSET = 330
-    dt_m    = dt64.astype("datetime64[m]").astype(np.int64)           # minutes since epoch (UTC)
-    dt_d    = dt64.astype("datetime64[D]").astype(np.int64)           # days since epoch (UTC≡IST for trading hours)
-    dt_M    = dt64.astype("datetime64[M]").astype(np.int64)           # months since epoch (UTC≡IST for trading hours)
-    minutes = ((dt_m + IST_OFFSET) % 1440).astype(np.int32)           # minutes since midnight (IST)
+    # Datetimes are naive IST (tz stripped via strftime at load time).
+    # numpy encodes naive timestamps as-is, so dt_m % 1440 = IST minutes directly.
+    dt_m    = dt64.astype("datetime64[m]").astype(np.int64)           # minutes since epoch
+    dt_d    = dt64.astype("datetime64[D]").astype(np.int64)           # days since epoch
+    dt_M    = dt64.astype("datetime64[M]").astype(np.int64)           # months since epoch
+    minutes = (dt_m % 1440).astype(np.int32)                          # minutes since midnight (IST)
 
     # ── SIGNAL GENERATION (mirrors BounceStrategy.generate_signals) ──────────
     signal_indices: dict[int, tuple] = {}   # bar_idx → (entry_price, atr)
@@ -228,7 +227,7 @@ best_cfg.update(SPECIFIED_BEST)
 
 # ─── DISCOVER STOCK FILES ──────────────────────────────────────────────────────
 stock_files = sorted(
-    f for f in INTRADAY_DIR.glob("*.parquet")
+    f for f in DS3_DIR.glob("*.parquet")
     if f.stem not in EXCLUDE and f.stem in best_cfg
 )
 
@@ -250,7 +249,7 @@ for stock_path in stock_files:
 
     try:
         df = pd.read_parquet(stock_path)
-        df["datetime"] = pd.to_datetime(df["datetime"])
+        df["datetime"] = pd.to_datetime(df["datetime"].dt.strftime("%Y-%m-%d %H:%M:%S"))
         df = df.sort_values("datetime").reset_index(drop=True)
 
         _t = df["datetime"].dt.time

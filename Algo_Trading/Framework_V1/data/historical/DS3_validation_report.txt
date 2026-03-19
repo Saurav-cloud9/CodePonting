@@ -1,0 +1,61 @@
+========================================================================
+DS3 VALIDATION REPORT
+Generated: 2026-03-04 18:57:35
+Source:    Kite MCP (mcp__kite__get_historical_data)
+Interval:  5-minute OHLCV+OI
+Range:     2015-02-02 → 2025-12-31
+Output:    Framework_V1/data/historical/intraday_5min_DS3/
+========================================================================
+
+SUMMARY
+  Stocks total:  30
+  OK:            30
+  WARN:          0
+  MISSING:       0
+  Total candles: 5,929,642
+
+VALIDATIONS APPLIED
+  P1 : No candles after 2025-12-31
+  P2 : No post-15:30 candles
+  P3a: No OHLC violations (high<low, high<open, etc.)
+
+PER-STOCK RESULTS
+  Stock           Status    Candles        First         Last  Days  Issues
+  --------------- -------- -------- ------------ ------------ -----  -------
+  ADANIPORTS      OK        199,738   2015-02-02   2025-12-31  2667  
+  ASHOKLEY        OK        199,738   2015-02-02   2025-12-31  2667  
+  AXISBANK        OK        199,739   2015-02-02   2025-12-31  2667  
+  BANDHANBNK      OK        142,105   2018-03-27   2025-12-31  1898  
+  BHARTIARTL      OK        199,737   2015-02-02   2025-12-31  2667  
+  CIPLA           OK        194,897   2015-02-02   2025-12-31  2601  
+  COALINDIA       OK        199,738   2015-02-02   2025-12-31  2667  
+  DABUR           OK        199,737   2015-02-02   2025-12-31  2667  
+  DIVISLAB        OK        199,737   2015-02-02   2025-12-31  2667  
+  HDFCBANK        OK        199,737   2015-02-02   2025-12-31  2667  
+  HINDALCO        OK        199,739   2015-02-02   2025-12-31  2667  
+  ICICIBANK       OK        199,737   2015-02-02   2025-12-31  2667  
+  INDUSINDBK      OK        199,739   2015-02-02   2025-12-31  2667  
+  INFY            OK        199,739   2015-02-02   2025-12-31  2667  
+  ITC             OK        199,735   2015-02-02   2025-12-31  2667  
+  JSWSTEEL        OK        199,738   2015-02-02   2025-12-31  2667  
+  NATIONALUM      OK        199,738   2015-02-02   2025-12-31  2667  
+  NTPC            OK        199,738   2015-02-02   2025-12-31  2667  
+  ONGC            OK        199,738   2015-02-02   2025-12-31  2667  
+  PNB             OK        199,738   2015-02-02   2025-12-31  2667  
+  POWERGRID       OK        199,738   2015-02-02   2025-12-31  2667  
+  RELIANCE        OK        199,729   2015-02-02   2025-12-31  2667  
+  SBIN            OK        199,737   2015-02-02   2025-12-31  2667  
+  SUNPHARMA       OK        199,737   2015-02-02   2025-12-31  2667  
+  TATAMOTORS      OK        199,733   2015-02-02   2025-12-31  2667  
+  TATASTEEL       OK        199,737   2015-02-02   2025-12-31  2667  
+  TECHM           OK        199,736   2015-02-02   2025-12-31  2667  
+  VEDL            OK        199,736   2015-02-02   2025-12-31  2667  
+  VI              OK        199,739   2015-02-02   2025-12-31  2667  
+  WIPRO           OK        199,738   2015-02-02   2025-12-31  2667  
+
+NOTES
+  - TATAMOTORS: Kite-only data (full 2015-2025 range from token 884737)
+    Historical Kite prices may reflect price-adjusted series vs exchange
+    The data is internally consistent within this dataset.
+  - Low coverage flag: trading_days < 2000
+========================================================================

@@ -117,99 +117,190 @@ Wider stops reduce the probability of getting stopped out by noise but increase 
 
 ---
 
-## Section 7 — Known Limitations and Assumptions
+## Section 7 — Limitations, Assumptions & Improvements
 
-**Dead code — max hold bars:**
-The `Portfolio` accepts a `max_hold_bars` parameter (default 80) but it is never referenced in the position update loop. It has no effect on any backtest or live run. A trade that is not stopped out, does not hit its target, and is entered intraday will always close at EOD — but the parameter implies it was intended to also handle multi-day holding, which the current EOD logic would prevent anyway.
+**1. Trend filter compiled but never activated**
 
-**Trend filter is compiled but never activated:**
-The daily MA50/MA100/MA200 columns are computed and merged for every stock, adding computation time and memory overhead. However, `generate_signals` receives `filter_mas=None` in all runs, so this data is never used to filter any signal. The strategy takes trades regardless of whether the stock is in a strong downtrend.
+*Limitation:* The daily MA50/MA100/MA200 columns are computed and merged for every stock on every run, adding compute time and memory overhead. However, `generate_signals` receives `filter_mas=None` in all runs, so this data is never used to filter any signal. The strategy takes trades regardless of whether the stock is in a strong downtrend.
 
-**Multi-position per stock is unrestricted:**
-If two signals fire for the same stock on the same day, both are opened independently. There is no check for an already-open position on the same instrument. In extreme conditions (high-frequency touches of MA20), this can create many simultaneous positions on one stock.
+*Improvement:* Pass `filter_mas=["ma50"]` or `filter_mas=["ma200"]` to activate the already-built infrastructure. Based on standard mean-reversion theory, MA bounce setups work materially better when the stock is above its longer-term trend. The columns are already computed — this is a single config change with no code required, and is the single highest-impact change that could improve the portfolio win rate.
 
-**Slippage and transaction costs are absent:**
-All entries use the exact open price of the entry bar. All stops and targets fill at exact levels. No brokerage, STT, exchange fees, or bid-ask spread is modelled. Given the strategy's tight per-trade expectancy on most stocks, even ₹20–50 of friction per trade could meaningfully change profitability.
-
-**ATR is on 5-minute bars, not daily:**
-The ATR-14 used for stop and target sizing is computed from 14 consecutive 5-minute candles, not 14 trading days. This makes the stop and target distances very narrow (typically a fraction of a rupee on many stocks), which is why qty values can be large.
-
-**Entry price is the next bar's open:**
-The strategy assumes it can enter at the exact open of the candle after the reclaim. In live markets, this would require a pre-market order or a fast execution at the candle open. Any delay converts this to a mid-candle fill with unknown slippage.
-
-**Cross-month filter is a v1.4.5 compatibility artifact:**
-Any signal where the touch candle and the entry candle fall in different calendar months is silently dropped. In practice this discards setups that occur in the last few candles of a trading month. There is no economic justification for this filter.
-
-**Equity curve uses single mark-to-market price:**
-The unrealised P&L for open positions is computed using the last close price seen across all positions, not each position's own instrument price. In a single-stock backtest this is irrelevant. In a multi-stock portfolio simulation it would be incorrect, but the current backtest is run per-stock in isolation, so this does not create errors.
-
-**No short side:**
-The strategy only goes long. On bearish stocks or in market downturns, the MA bounce pattern may signal repeated short-side setups that the strategy cannot exploit.
-
-**Risk amount is fixed to initial capital:**
-The 1% risk per trade is always calculated on the original ₹10,00,000, not the current portfolio value. If the portfolio grows to ₹12,00,000, the risk per trade stays ₹10,000, meaning the strategy under-risks relative to portfolio size. If it shrinks to ₹7,00,000, the strategy over-risks.
+*Verdict:* Remove compute_daily_mas() call from the runner entirely. Daily MA filter showed minimal improvement in prior testing (v1.4.3) and is unused in current config. A proper regime filter will be implemented via Optuna AFTER Sandbox baseline CAGR is established.
+No code required now — this is a deletion, not an addition.
 
 ---
 
-## Section 8 — CC Suggestions for Improvement
+**2. Dead code — `max_hold_bars`**
 
-**1. Activate the trend filter**
-The infrastructure to apply daily MA filters already exists — `filter_mas` just needs to be passed as `["ma50"]` or `["ma200"]`. Based on standard mean-reversion theory, MA bounce setups work far better when the stock is in an uptrend (price above MA50 or MA200). The daily MA columns are already computed; activating the filter costs nothing and is the single highest-impact change that could improve the portfolio win rate.
+*Limitation:* `Portfolio` accepts a `max_hold_bars` parameter (default 80) that is never referenced in the position update loop. It has no effect on any backtest or live run. A trade that is not stopped out and does not hit target will always close at EOD — the parameter implies multi-day holding was intended, which the current EOD logic already prevents anyway.
 
-**2. Remove or implement max_hold_bars**
-Either delete `max_hold_bars` from the Portfolio constructor (since EOD exit already prevents overnight holds), or implement it as a hard backstop that closes any position that has been open for more than N bars regardless of intraday logic. As-is it creates a misleading contract between the code and its reader.
+*Improvement:* Either delete the parameter entirely (since EOD exit already covers it), or implement it as a hard backstop that closes any position open for more than N bars regardless of intraday logic. As-is it creates a misleading contract between the code and its reader.
 
-**3. Add a concurrent-position guard**
-Before opening a new position, check whether a position on the same stock is already open. On volatile days, a single stock can generate 5–10 bounce signals. Stacking all of them creates unintended concentration and inflates trade counts.
-
-**4. Model transaction costs**
-Even a flat ₹30 per trade (brokerage + STT + exchange fees, conservative estimate for NSE) applied across all 76,000 portfolio trades would amount to roughly ₹23,00,000 in frictional costs over the backtest period — several times larger than the total profit on the top 5 stocks. This is the single most important sanity check before live deployment.
-
-**5. Avoid the first 30 minutes**
-The 09:15–09:45 window on NSE is characterised by wide spreads, high volatility, and unreliable price discovery. Adding a time filter that blocks entries before 09:45 would reduce noise trades and improve signal quality.
-
-**6. Compounding position sizing**
-Replace `initial_capital` with `self.cash` (or `current_equity`) in the risk calculation so that position sizes scale with portfolio performance. Currently the strategy behaves as if it has exactly ₹10,00,000 forever.
-
-**7. Breakeven stop management**
-For the 5 profitable stocks, a significant share of winning trades likely see a favourable move before reversing to hit the wide stop. Implementing a rule to move the stop to breakeven once the trade is, say, 50% of the way to target would materially reduce average loss size and improve expectancy on the marginal stocks (HDFCBANK, ICICIBANK).
-
-**8. Drop the cross-month boundary filter**
-The filter discarding setups that span a month boundary is a legacy artifact from when the strategy processed data month-by-month. In the current continuous-data framework it serves no purpose and silently discards valid signals at month-ends.
-
-**9. Add slippage to the intra-bar exit model**
-Currently, stop-loss fills happen at the exact stop price. A conservative improvement would fill at stop minus one tick (or stop minus a small fixed fraction of ATR) to simulate realistic negative slippage on stop fills. Target fills are less affected since they are limit-like and tend to fill near the target on a bullish move.
-
-**10. Validate signal deduplication logic**
-The deduplication step keeps only the first signal for a given entry datetime. If two different touch candles from different points in the day converge on the same entry bar, one is silently discarded. Log the number of deduplicated signals per stock to understand how often this fires.
+*Verdict:* Delete max_hold_bars parameter entirely. At 5-min bars, 80 bars = 400 minutes which exceeds the full trading session (375 mins) — this parameter can never fire before the EOD exit. It is dead code with no intraday purpose. If a multi-day/swing variant is built in future, reintroduce it then with appropriate logic. For fv1 intraday → remove.
 
 ---
 
-## Section 9 — Open Questions
+**3. Multi-position per stock is unrestricted**
+
+*Limitation:* If two signals fire for the same stock on the same day, both are opened independently with no check for an already-open position on the same instrument. On volatile days with high-frequency MA20 touches, this can create many simultaneous positions on one stock — unintended concentration that inflates trade counts and skews PnL.
+
+*Improvement:* Before opening a new position, check whether a position on the same instrument is already open. A simple `if instrument in self.open_positions: skip` guard eliminates the stacking behaviour. Optionally extend this to: close the existing position first, then re-enter, if a fresher signal is stronger.
+
+*Verdict:* Enforce maximum 1 open position per stock at any time. Current position sizing constraints (capital ceiling + risk per trade) do not prevent a second position from opening on the same stock while the first is active — this must be handled by an explicit check in the engine. For live trading, if a new signal fires on a stock already in an open trade, skip it entirely. Do not close-and-reenter — the added complexity is not justified for an intraday strategy. Add this guard to the engine before Sandbox testing begins.
+
+---
+
+**4. Slippage and transaction costs are absent**
+
+*Limitation:* All entries use the exact open price of the entry bar. All stops and targets fill at exact levels. No brokerage, STT, exchange fees, or bid-ask spread is modelled. Given the strategy's tight per-trade expectancy on most stocks, even ₹20–50 of friction per trade could meaningfully change profitability. At scale across 76,000 portfolio trades, conservative estimates suggest ₹23,00,000+ in unmodelled frictional costs — several times larger than the total profit on the top 5 stocks. Stop-loss fills at the exact stop price further overstate returns, as real fills on stops occur below the stop level.
+
+*Improvement (costs):* Apply a flat per-trade friction charge (₹30–50 as a conservative NSE estimate) deducted from PnL at trade close. Run the full backtest with costs enabled and compare equity curves to establish a break-even frequency threshold. This is the single most important sanity check before live deployment.
+
+*Improvement (exit slippage):* Fill stop-loss exits at `stop_price - 1 tick` (or `- small fraction of ATR`) rather than at the exact stop level to simulate realistic negative slippage. Target fills are less affected as they are limit-like and tend to fill near the target on a bullish move.
+
+*Verdict:* Model transaction costs dynamically using the actual broker formula, not a flat estimate. For each trade, compute charges as: brokerage (0.05% per side for Upstox, 0.03% per side for Kite) + STT (0.025% on sell side only) + exchange fees (0.00345% per side) + SEBI (0.0001% per side) + GST (18% on brokerage + exchange + SEBI) + stamp duty (0.003% on buy side). Deduct from PnL at trade close. Report three output columns: raw_pnl (no charges), net_pnl_upstox, net_pnl_kite — and corresponding CAGR for each. Entry slippage: fill at open + 0.1×ATR (conservative, scales with volatility). SL exit slippage: fill at stop_price - 1 tick. Target fills: exact (no slippage). This gives a realistic view of strategy profitability across both brokers before committing to live deployment.
+
+
+---
+
+**5. Cross-month filter is a v1.4.5 compatibility artifact**
+
+*Limitation:* Any signal where the touch candle and the entry candle fall in different calendar months is silently dropped. This was a compatibility artifact from when the strategy processed data month-by-month. In the current continuous-data framework it serves no purpose and discards valid signals at month-ends with no economic justification.
+
+*Improvement:* Remove the cross-month boundary check from `generate_signals` entirely.
+
+*Verdict:* Remove the cross-month boundary check from generate_signals entirely. With a 14:30 entry cutoff and 15:00 EOD exit, the touch candle and entry candle always fall on the same day — making cross-month signals mathematically impossible. No logging or measurement needed before removal. Straightforward deletion.
+
+---
+
+**6. Risk amount is fixed to initial capital**
+
+*Limitation:* The 1% risk per trade is always calculated on the original ₹10,00,000, not the current portfolio value. If the portfolio grows to ₹12,00,000, the strategy under-risks. If it shrinks to ₹7,00,000, the strategy over-risks. Position sizes do not compound in either direction.
+
+*Improvement:* Replace `initial_capital` with `current_equity` (or `self.cash + open_position_value`) in the risk calculation so position sizes scale with portfolio performance. This is the standard approach in systematic trading and materially changes long-run equity curve shape.
+
+*Verdict:* Replace initial_capital with current_equity in both the risk constraint and capital-per-stock ceiling calculations so position sizes compound with portfolio performance. This is a more realistic simulation of live trading behaviour — sizes grow after winning streaks and shrink after losing streaks. Results will differ from the current flat baseline, but that difference is the point. Implement before Sandbox runs so all 16 combination results reflect compounding from the start.
+
+---
+
+**7. ATR is computed on 5-minute bars, not daily**
+
+*Limitation:* ATR-14 is derived from 14 consecutive 5-minute candles, not 14 trading days. This makes stop and target distances extremely narrow in absolute terms (often a fraction of a rupee), resulting in large share quantities and high sensitivity to minor intrabar moves. It is unclear whether this was intentional or a carry-over from an earlier version.
+
+*Improvement:* Test a parallel config where position sizing uses daily ATR-14 (14 trading days) while stop/target placement retains 5-minute ATR. Daily ATR better represents the stock's realistic daily risk range and would produce more conservative, realistic position sizes. Compare trade counts, average loss, and equity curves between both approaches in Sandbox before committing.
+
+*Verdict:* Keep ATR-14 computed on 5-minute bars for both position sizing and exit logic. This is correct and intentional for an intraday strategy — 5-min ATR produces stop distances proportional to intraday noise, meaningful position sizes, and exits that resolve within the trading session. Daily ATR would produce oversized stops (₹20-50+), tiny quantities, and negligible PnL — effectively breaking the strategy. CC raises a valid question but 5-min ATR is the right choice. No change required.
+
+---
+
+**8. Entry price is the next bar's open**
+
+*Limitation:* The strategy assumes it can enter at the exact open of the candle after the reclaim. In live markets this requires either a pre-market limit order or a very fast market order at candle open. Any delay produces a mid-candle fill at an unknown worse price — especially problematic in the first 30 minutes of the session when spreads are wide.
+
+*Improvement:* Add a configurable entry slippage offset: `entry_price = next_bar_open + (entry_slip_fraction × ATR)`. Default to a small positive fraction (e.g., 0.1 × ATR) to simulate realistic mid-candle fills. This is distinct from transaction costs — it models execution timing risk, not fee drag.
+
+*Verdict:*: No separate action required. The concern about mid-candle fills is overstated for liquid NSE F&O stocks where order books are deep and 50-500ms latency produces negligible price movement. Entry slippage modelled as open + 0.1×ATR (agreed under point #4) already handles this conservatively. Covered.
+
+---
+
+**9. Equity curve uses a single mark-to-market price**
+
+*Limitation:* Unrealised PnL for open positions is computed using the last close price seen across all positions — a single shared value — rather than each position's own instrument price. In the current per-stock isolated backtest this produces no error. In a future multi-stock simultaneous simulation it would silently produce incorrect unrealised PnL.
+
+*Improvement:* Refactor mark-to-market to look up each position's own instrument's last close independently. This is a low-effort correctness fix that future-proofs the portfolio module before multi-stock simulation is enabled.
+
+*Verdict:* Defer to full DS3 backtest phase (Step 5 of master plan). Mark-to-market equity curve has zero impact on CAGR, PnL, win rate, or any Sandbox combination results. Relevant only for drawdown accuracy and risk-adjusted metrics (Sharpe, Calmar). Implement then, not now. Added to deferred improvements tracker.
+
+---
+
+**10. No short side**
+
+*Limitation:* The strategy is long-only. On bearish stocks or during market downturns, the MA bounce pattern generates repeated short-side setups that the strategy cannot exploit. This limits opportunity and leaves the portfolio fully exposed to downtrend periods with no offsetting positions.
+
+*Improvement:* This is a design boundary, not a bug. A short-side mirror (price touches MA from below, reclaims below MA, stock in downtrend via MA50 filter) could be designed as a separate strategy module and tested independently in Sandbox before integration. Not recommended until the long-only version is stable and the trend filter is activated.
+
+*Verdict:* Long-only is correct and intentional for FV1. MA Bounce mean-reversion works best with the structural bullish bias of Indian large-cap equities. Short side requires a completely different signal generator (MA rejection from above), separate SEBI/circuit-breaker risk management, and independent validation before merging with long signals. Defer to FV2 or a dedicated short module. No action required in FV1.
+
+---
+
+**11. No filter for the open auction window**
+
+*Limitation:* The strategy permits entries from 09:15 IST onward, including the first 30 minutes of the session (09:15–09:45). This window is characterised by wide spreads, low liquidity, high volatility, and unreliable price discovery on NSE. Signals generated here are structurally noisier than mid-session signals, but no filter exists to exclude them.
+
+*Improvement:* Add a session open filter: block all entries before 09:45 IST. This is a one-line addition to the entry time check already present in `generate_signals`. Measure its impact on trade count, win rate, and average entry slippage before and after.
+
+*Verdict:* Add a 09:15–09:45 open auction filter as variant E in the Sandbox test matrix. Keep it as a direct comparison against variant A (fixed ATR baseline) with everything else identical. This answers cleanly whether skipping the noisy open window improves CAGR. Updated Sandbox plan: 5 exit variants (A/B/C/D/E) × 4 ATR configs = 20 combinations total. Still fast, ~2.5 mins in Sandbox.
+
+---
+
+**12. No intra-trade risk management (breakeven / trailing stop)**
+
+*Limitation:* Once a position is open, the stop and target levels are fixed for the life of the trade. A trade that moves 80% of the way to target and then reverses will close at the full stop loss — there is no mechanism to protect captured profit mid-session. For the 5 profitable stocks in the universe, a meaningful share of winning trades likely give back significant gains before the final exit.
+
+*Improvement:* Test four variants in Sandbox against all four Extreme ATR configs:
+- **A — Fixed ATR** (current baseline): static SL + static target as per Extreme configs, no adjustment after entry
+- **B — Breakeven-1.5ATR**: move SL to breakeven once price is 1.5 ATR above entry; target unchanged
+- **C — Breakeven-2.5ATR**: move SL to breakeven once price is 2.5 ATR above entry; target unchanged
+- **D — Trailing SL 1.5ATR**: trailing stop that follows price at 1.5 ATR distance once in profit; no fixed target (EOD exit)
+
+All four variants to be tested against all four Extreme ATR configs in `Framework_V1_Sandbox`. Evaluate impact on: win rate, average loss, expectancy, and trade count. A serves as the control. B and C are pure breakeven triggers with no trailing. D is the only variant with a dynamic stop that continues moving after the initial trigger.
+
+*Verdict:* Just follow the above improvement details and implement the required SL using the four variants as described above.
+
+---
+
+**13. Signal deduplication is silent and unmonitored**
+
+*Limitation:* The deduplication step that removes duplicate signals targeting the same entry datetime keeps only the first occurrence and silently discards the rest. There is no logging of how frequently this fires, which stocks it affects most, or whether the discarded signal was systematically different (e.g., from a later, stronger touch). The extent of information loss is unknown.
+
+*Improvement:* Add a debug log or counter that records the number of signals dropped per stock per run. If deduplication fires frequently on certain stocks, investigate whether the two signals represent independent setups or are artefacts of the lookahead logic. This is a diagnostic step — no change to strategy logic required.
+
+*Verdict:* Add a deduplication counter as Phase 1 — log the count of duplicate signals (same entry datetime) per stock per run. After running on DS3, if duplicates are below 1% of total signals → no further action needed. If frequent → Phase 2: compare default behaviour (keep first occurrence) against quality filter (keep highest volume touch candle) and evaluate PnL/CAGR impact. No code change to strategy logic until Phase 1 data justifies it.
+
+---
+
+## Section 8 — Open Questions
 
 **Why 14:30 as the entry cutoff?**
 NSE closes at 15:30 IST. With an entry cutoff at 14:30 and ATR-based wide stops, a trade entered at 14:30 has at most 30 minutes to hit its target before EOD closes it. No rationale is documented for choosing 14:30 specifically over 14:00 or 15:00.
 
+*Resolution — Why 14:30 as entry cutoff:* 14:30 is a reasonable default but untested. Add variant F (entry cutoff extended to 14:45) to the Sandbox test matrix. Compare directly against variant A (14:30 baseline) — same everything else. Let data decide whether the extra 15 minutes of signals improves or hurts CAGR. Updated Sandbox plan: 6 variants (A/B/C/D/E/F) × 4 ATR configs = 24 combinations.
+
 **Why lookahead up to 3 candles?**
 The reclaim can be detected 1, 2, or 3 bars after the touch. There is no documented reason for 3 as the upper bound. A 1-bar reclaim (close above MA on the very next candle) would be a stronger, more decisive signal. Allowing 3 bars increases trade count but may introduce weaker setups.
+
+*Resolution — Why lookahead up to 3 candles:* No fixed verdict on the optimal value yet. Lookahead window {1, 2, 3} added to Optuna parameter space as OP-1 (suggest_int(1, 3)). Let Optuna find the optimal value on DS3 data during the optimization phase. No Sandbox variant created for this — too many combinations if added manually. Defer to Optuna. 🎯
 
 **Why a volume multiplier of exactly 1.2?**
 The 20% above average threshold for volume has no documented rationale. Most momentum literature uses 1.5x–2x. A lower threshold like 1.2x may be generating marginal volume spikes that do not represent genuine institutional interest.
 
+*Resolution — Why volume multiplier of exactly 1.2:* No fixed verdict. Volume multiplier added to Optuna parameter space as OP-3 (suggest_float(1.0, 3.0)). Let Optuna find the optimal value on DS3 data. No Sandbox variant needed. Defer to Optuna.
+
 **What does "Extreme" mean in the config names?**
 The four configs are all labelled "Extreme" without an opposing baseline (e.g., "Conservative" or "Normal"). It is unclear whether these configs were selected from a broader optimisation or hand-picked, and what the eliminated alternatives looked like.
+
+*Resolution — What does "Extreme" mean in config names:* The four configs were named "Extreme" during iterative development as wider-than-typical ATR multiples were tested and found to outperform tighter configs. The naming was not formally documented at the time. No action required on the code. Note for CC context: Extreme-1 through Extreme-4 represent four hand-picked ATR multiplier combinations (stop: 2.5-3.0×, target: 4.0-5.0×) that emerged as the best performers from earlier v1.4.x testing. The full ATR range will be explored systematically via Optuna (OP-4).
 
 **Why is daily MA data computed but never used?**
 The `compute_daily_mas` function runs for every stock on every backtest, adding meaningful compute time for 30 stocks. If the trend filter is never going to be activated, this function call could be removed from the runner to reduce backtest time.
 
+*Resolution — Why is daily MA data computed but never used:* Already resolved under Verdict #1. compute_daily_mas() deleted from the runner entirely. Regime filter (JSWSTEEL-based Optuna classification) is the proper replacement and lives in OP-5 — applied post-Sandbox as Step 3 of the master plan. No further action here.
+
 **Why is risk_per_trade fixed at 1% of initial capital and not configurable per stock?**
 The current configuration gives the same rupee risk per trade (₹10,000) to every stock in the universe, regardless of price level, liquidity, or historical volatility. A low-priced stock like ASHOKLEY (~₹170) ends up with a very different share quantity and capital exposure than a high-priced stock like HDFCBANK (~₹1,600), yet both risk the same ₹10,000. This is true across all 29 stocks — the flat 1% rule takes no account of individual stock characteristics. Is this intentional, or is it a default left in from earlier development?
+
+*Resolution — Why is risk_per_trade fixed at 1% of initial capital:* Two separate issues addressed. First, compounding: resolved under Verdict #6 — replace initial_capital with current_equity. Second, capital cap vs risk constraint conflict: the ₹33,333 capital ceiling dominates the risk constraint, causing actual losses to vary wildly per stock — hiding weak stocks. Fix introduced as SB-G (Fixed Fractional sizing): remove capital ceiling, let risk constraint alone determine qty with ₹1,00,000 emergency guard. Risk per trade revised to ₹2,000-3,000 range (not ₹10,000) to avoid capital concentration on low-ATR stocks. Compare SB-A (current model) vs SB-G (Fixed Fractional) in Sandbox. Risk % range added to Optuna as OP-6 (suggest_float(0.2, 1.0) as % of portfolio). Updated Sandbox: 7 variants (A/B/C/D/E/F/G) × 4 ATR configs = 28 combinations. Updated Optuna: OP-1 through OP-6.
 
 **Why does max_hold_bars exist?**
 The parameter suggests the strategy was at some point intended to handle multi-day or multi-session holding. If all positions are guaranteed to close at EOD, why is this parameter present at all? This raises the question of whether there is a planned multi-day version of the strategy.
 
+*Resolution — Why does max_hold_bars exist:* Already resolved under Verdict #2. Parameter deleted entirely — dead code with no intraday purpose. Not applicable to SB or OP runs.
+
+
 **Why is ATR computed on 5-minute bars rather than daily bars?**
 Using 5-minute ATR for position sizing means the stop distance is extremely small in absolute terms (a few rupees on most stocks). Is this intentional — i.e., was the strategy explicitly designed for tight intraday ATR-based risk? Or is this a carry-over from a different version where daily ATR was intended?
+
+*Resolution — Why is ATR computed on 5-minute bars rather than daily bars:* Already resolved under Verdict #7. 5-min ATR is correct and intentional for both position sizing and exit logic in an intraday strategy. Daily ATR would break the strategy. Not applicable to SB or OP runs.
 
 ---
 

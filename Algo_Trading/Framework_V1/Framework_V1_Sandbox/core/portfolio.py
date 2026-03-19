@@ -18,6 +18,25 @@ import pandas as pd
 from datetime import time as _time
 
 _EOD_TIME = _time(15, 0)
+_TICK     = 0.05    # NSE minimum tick — applied to SL exit fills
+
+
+def _compute_charges(entry, exit_price, qty, broker):
+    """
+    Round-trip transaction charges for NSE equity intraday.
+    broker: 'upstox' (0.05% brokerage) or 'kite' (0.03% brokerage)
+    """
+    buy_val  = entry      * qty
+    sell_val = exit_price * qty
+
+    bkr_rate  = 0.0005 if broker == "upstox" else 0.0003
+    brokerage = min(buy_val * bkr_rate, 20.0) + min(sell_val * bkr_rate, 20.0)
+    stt       = sell_val * 0.00025                          # 0.025% sell-side only
+    exchange  = (buy_val + sell_val) * 0.0000345            # 0.00345% per side
+    sebi      = (buy_val + sell_val) * 0.000001             # 0.0001% per side
+    gst       = (brokerage + exchange + sebi) * 0.18        # 18% on fees
+    stamp     = buy_val * 0.00003                           # 0.003% buy-side only
+    return brokerage + stt + exchange + sebi + gst + stamp
 
 
 class Portfolio:
@@ -27,16 +46,24 @@ class Portfolio:
             risk_per_trade=0.01,
             atr_mult_stop=1.0,
             rr_target=2.0,
-            max_hold_bars=80,
-            num_stocks=30
+            num_stocks=30,
+            sl_variant="A",
+            breakeven_trigger=None,
+            trailing_dist=None,
+            position_guard=True,
+            compounding=True,
     ):
         self.initial_capital = capital
         self.cash = capital
         self.risk_per_trade = risk_per_trade
         self.atr_mult_stop = atr_mult_stop
         self.rr_target = rr_target
-        self.max_hold_bars = max_hold_bars
-        self.capital_per_stock = capital / num_stocks
+        self.num_stocks = num_stocks
+        self.sl_variant = sl_variant
+        self.breakeven_trigger = breakeven_trigger
+        self.trailing_dist = trailing_dist
+        self.position_guard = position_guard
+        self.compounding = compounding
         self.positions = []
         self.trades = []
         self.equity_curve = []
@@ -50,18 +77,26 @@ class Portfolio:
         signal dict keys: datetime, entry_price, ma20, volume, avg_volume
         bar: DataFrame row (Series) with OHLCV + indicators
         """
+        # Position guard: skip if already holding a position for this stock
+        if self.position_guard and self.positions:
+            return
+
         entry = signal["entry_price"]
         entry_time = signal["datetime"]  # matches strategy output
 
         # Get ATR from bar data (not passed separately)
-        atr = bar["atr_14"]
+        atr = bar.atr_14
 
-        # Position sizing
+        # 7a: Entry slippage — 1 tick flat above signal open
+        entry = entry + 0.05
+
+        # Position sizing (compounding: use current cash equity, not fixed initial)
+        eq        = self.cash if self.compounding else self.initial_capital
         stop_dist = atr * self.atr_mult_stop
-        risk_amt = self.initial_capital * self.risk_per_trade
+        risk_amt  = eq * self.risk_per_trade
         if stop_dist <= 0:  # Also catches negative ATR (data corruption)
             stop_dist = entry * 0.01  # 1% fallback
-        max_qty_by_capital = int(self.capital_per_stock / entry)
+        max_qty_by_capital = int((eq / self.num_stocks) / entry)
         max_qty_by_risk    = int(risk_amt / stop_dist)
         qty                = max(min(max_qty_by_capital, max_qty_by_risk), 1)
 
@@ -76,7 +111,10 @@ class Portfolio:
             "stop": stop,
             "target": target,
             "ma20": signal["ma20"],  # Track MA20 at entry for analysis
-            "status": "open"
+            "status": "open",
+            "atr_at_entry": atr,
+            "breakeven_moved": False,
+            "trailing_stop": None,
         }
         self.positions.append(position)
 
@@ -107,7 +145,24 @@ class Portfolio:
                 exit_price = bar.open
                 reason = "time"
             else:
+                # ── SL variant logic: update stop BEFORE exit checks ──────────
+                if self.sl_variant in ("B", "C") and not pos["breakeven_moved"]:
+                    trigger = pos["entry_price"] + self.breakeven_trigger * pos["atr_at_entry"]
+                    if bar.high >= trigger:
+                        pos["stop"] = pos["entry_price"]
+                        pos["breakeven_moved"] = True
+
+                elif self.sl_variant == "D":
+                    new_trail = bar.high - self.trailing_dist * pos["atr_at_entry"]
+                    if pos["trailing_stop"] is None or new_trail > pos["trailing_stop"]:
+                        pos["trailing_stop"] = new_trail
+                    pos["stop"] = pos["trailing_stop"]
+                    # target remains fixed (set in open_position) — only stop trails
+
                 # v1.4.5 intra-bar sequence logic: check SL/TGT based on candle direction
+                # All variants (A, B, C, D) use the same candle-direction priority.
+                # B/C: stop value may have changed to entry_price (breakeven), but logic is identical.
+                # D: stop trails, target remains fixed — same logic applies.
                 # Bullish candle likely went: Open -> Low -> High -> Close (check SL first)
                 # Bearish candle likely went: Open -> High -> Low -> Close (check TGT first)
                 is_bullish = bar.close > bar.open
@@ -115,7 +170,7 @@ class Portfolio:
                 if is_bullish:
                     # Bullish: dipped first, then rallied — check SL first
                     if bar.low <= pos["stop"]:
-                        exit_price = pos["stop"]
+                        exit_price = pos["stop"] - _TICK
                         reason = "stop"
                     elif bar.high >= pos["target"]:
                         exit_price = pos["target"]
@@ -126,7 +181,7 @@ class Portfolio:
                         exit_price = pos["target"]
                         reason = "target"
                     elif bar.low <= pos["stop"]:
-                        exit_price = pos["stop"]
+                        exit_price = pos["stop"] - _TICK
                         reason = "stop"
 
             if exit_price:
@@ -142,18 +197,23 @@ class Portfolio:
     # CLOSE POSITION
     # =========================================================
     def _close(self, pos, exit_time, exit_price, reason):
-        pnl = (exit_price - pos["entry_price"]) * pos["qty"]
-        self.cash += pnl
+        raw_pnl        = (exit_price - pos["entry_price"]) * pos["qty"]
+        charges_upstox = _compute_charges(pos["entry_price"], exit_price, pos["qty"], "upstox")
+        charges_kite   = _compute_charges(pos["entry_price"], exit_price, pos["qty"], "kite")
+        self.cash += raw_pnl
 
         self.trades.append({
-            "entry_time": pos["entry_time"],
-            "exit_time": exit_time,
-            "entry": pos["entry_price"],
-            "exit": exit_price,
-            "qty": pos["qty"],
-            "pnl": pnl,
-            "reason": reason,
-            "ma20": pos["ma20"]  # Include for analysis
+            "entry_time":     pos["entry_time"],
+            "exit_time":      exit_time,
+            "entry":          pos["entry_price"],
+            "exit":           exit_price,
+            "qty":            pos["qty"],
+            "pnl":            raw_pnl,              # alias for raw_pnl (backward compat)
+            "raw_pnl":        raw_pnl,
+            "net_pnl_upstox": raw_pnl - charges_upstox,
+            "net_pnl_kite":   raw_pnl - charges_kite,
+            "reason":         reason,
+            "ma20":           pos["ma20"],
         })
 
     # =========================================================

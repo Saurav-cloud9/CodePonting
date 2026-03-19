@@ -40,7 +40,8 @@ from core.indicators import add_intraday_indicators, compute_daily_mas, add_atr
 # ------------------------------------------------------------------
 SCRIPT_DIR        = Path(__file__).parent
 BASE_DIR          = SCRIPT_DIR.parent
-DATA_PATH         = BASE_DIR / "data/historical/intraday_5min/TATASTEEL.parquet"
+FV1_DIR           = BASE_DIR.parent
+DATA_PATH         = FV1_DIR / "data/historical/intraday_5min_DS3/TATASTEEL.parquet"
 VOLUME_MULTIPLIER = 1.2
 LOOKAHEAD         = 3   # candles j can look ahead from i
 ATR_CONFIGS_COUNT = 4   # run_backtest.py runs 4 ATR configs
@@ -125,7 +126,7 @@ def main():
     # 1. Load + compute indicators (same pipeline as run_backtest.py)
     print("\n[1/3] Loading data and computing indicators...")
     df = pd.read_parquet(DATA_PATH)
-    df["datetime"] = pd.to_datetime(df["datetime"])
+    df["datetime"] = pd.to_datetime(df["datetime"].dt.strftime("%Y-%m-%d %H:%M:%S"))
     df = df.sort_values("datetime").reset_index(drop=True)
     df = add_intraday_indicators(df)
     df = compute_daily_mas(df)

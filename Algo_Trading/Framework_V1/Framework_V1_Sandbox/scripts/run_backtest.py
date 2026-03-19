@@ -40,8 +40,9 @@ ATR_CONFIGS = {
 # =========================================================
 SCRIPT_DIR = Path(__file__).parent
 BASE_DIR   = SCRIPT_DIR.parent
-INTRADAY_DIR = BASE_DIR / "data/historical/intraday_5min"
-OUTPUT_DIR   = BASE_DIR / "outputs/trades"
+FV1_DIR    = BASE_DIR.parent
+DS3_DIR    = FV1_DIR / "data/historical/intraday_5min_DS3"
+OUTPUT_DIR = BASE_DIR / "outputs/trades"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 TRADES_OUT      = OUTPUT_DIR / "trades.csv"
@@ -52,8 +53,8 @@ ALL_TRADES_OUT  = OUTPUT_DIR / "fv1_all_trades.csv"
 # =========================================================
 # DISCOVER STOCKS
 # =========================================================
-stock_files = sorted(f for f in INTRADAY_DIR.glob("*.parquet") if f.stem != "NIFTY50")
-print(f"Found {len(stock_files)} parquet files in {INTRADAY_DIR}")
+stock_files = sorted(f for f in DS3_DIR.glob("*.parquet") if f.stem != "NIFTY50")
+print(f"Found {len(stock_files)} parquet files in {DS3_DIR}")
 
 results          = []   # list of dicts -> summary CSV
 errors           = []   # list of error strings to report at the end
@@ -72,7 +73,7 @@ for stock_path in stock_files:
     # --- Load & clean data ---
     try:
         df = pd.read_parquet(stock_path)
-        df["datetime"] = pd.to_datetime(df["datetime"])
+        df["datetime"] = pd.to_datetime(df["datetime"].dt.strftime("%Y-%m-%d %H:%M:%S"))
         df = df.sort_values("datetime").reset_index(drop=True)
 
         # Drop candles outside regular market hours (09:15 – 15:30 IST)

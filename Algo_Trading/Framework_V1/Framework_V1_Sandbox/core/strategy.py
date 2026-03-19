@@ -19,12 +19,14 @@ import numpy as np
 import pandas as pd
 from datetime import time as _time
 
-_ENTRY_CUTOFF = _time(14, 30)
+_ENTRY_CUTOFF   = _time(14, 30)
+_AUCTION_CUTOFF = _time(9, 45)
 
 class BounceStrategy:
-    def __init__(self, volume_multiplier=1.2, lookahead_candles=3):
+    def __init__(self, volume_multiplier=1.2, lookahead_candles=3, auction_filter=True):
         self.volume_multiplier = volume_multiplier
         self.lookahead_candles = lookahead_candles
+        self.auction_filter    = auction_filter
 
     def generate_signals(self, df, filter_mas=None):
         """
@@ -80,19 +82,14 @@ class BounceStrategy:
                         if next_idx >= n:
                             break
 
-                        # Discard cross-month signals: v1.4.5 processes data
-                        # month-by-month, so it can never use a touch candle (i)
-                        # from month M to generate an entry in month M+1.
-                        # Checking i vs next_idx is strictly stronger than j vs
-                        # next_idx and also covers the lookahead-crosses-month
-                        # case where touch is in M-1, reclaim crosses into M, and
-                        # entry lands in M (j-vs-entry check would miss those).
-                        if (datetime_arr[i].year, datetime_arr[i].month) != \
-                           (datetime_arr[next_idx].year, datetime_arr[next_idx].month):
-                            break
+                        entry_time = pd.Timestamp(datetime_arr[next_idx]).time()
 
                         # No new entries at or after 14:30
-                        if pd.Timestamp(datetime_arr[next_idx]).time() >= _ENTRY_CUTOFF:
+                        if entry_time >= _ENTRY_CUTOFF:
+                            break
+
+                        # Auction filter: skip noisy open window before 09:45
+                        if self.auction_filter and entry_time < _AUCTION_CUTOFF:
                             break
 
                         signals.append({
@@ -104,15 +101,19 @@ class BounceStrategy:
                         })
                         break
 
-        # In strategy.py, at the end of generate_signals()
-        # Before: return signals
-
         # Deduplicate by entry time (keep first occurrence)
         seen_times = set()
         unique_signals = []
+        dedup_dropped = 0
         for sig in signals:
             if sig["datetime"] not in seen_times:
                 unique_signals.append(sig)
                 seen_times.add(sig["datetime"])
+            else:
+                dedup_dropped += 1
+
+        if dedup_dropped > 0:
+            print(f"[strategy] dedup dropped {dedup_dropped} duplicate signals "
+                  f"({dedup_dropped / max(len(signals), 1) * 100:.1f}% of raw)")
 
         return unique_signals
