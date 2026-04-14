@@ -54,3 +54,5 @@ backtest_trades_all_*.csv
 # Kaggle datasets (large minute-level CSV downloads, regenerable via download_kaggle.py)
 Algo_Trading/Kaggle/dataset1/
 Algo_Trading/Kaggle/dataset2/
+Algo_Trading/Framework_V2/outputs/reports/fv2_h1_signal_viewer.html
+Algo_Trading/Framework_V2/outputs/reports/fv2_h1_signal_viewer_old.html

@@ -1,0 +1,37 @@
+/* fv2 signal log — widen Notes column */
+
+/* Reading view */
+.markdown-preview-view table td:last-child,
+.markdown-preview-view table th:last-child {
+    min-width: 300px;
+    width: 35%;
+    white-space: normal !important;
+}
+
+/* Live preview / source view */
+.markdown-source-view.mod-cm6 .cm-content table td:last-child,
+.markdown-source-view.mod-cm6 .cm-content table th:last-child {
+    min-width: 300px;
+}
+
+/* Keep # column tight */
+.markdown-preview-view table td:first-child,
+.markdown-preview-view table th:first-child {
+    white-space: nowrap;
+    width: 30px;
+}
+
+/* Keep G1–G5 gate columns tight */
+.markdown-preview-view table td:nth-child(8),
+.markdown-preview-view table td:nth-child(9),
+.markdown-preview-view table td:nth-child(10),
+.markdown-preview-view table td:nth-child(11),
+.markdown-preview-view table td:nth-child(12),
+.markdown-preview-view table th:nth-child(8),
+.markdown-preview-view table th:nth-child(9),
+.markdown-preview-view table th:nth-child(10),
+.markdown-preview-view table th:nth-child(11),
+.markdown-preview-view table th:nth-child(12) {
+    white-space: nowrap;
+    width: auto;
+}

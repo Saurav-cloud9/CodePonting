@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>H3.1 — Gap 1 Chart View</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f0f;--bg2:#1a1a1a;--bg3:#222;--bg4:#2a2a2a;
+  --fg:#e8e8e8;--fg2:#b8b8b8;--fg3:#888;--fg4:#555;
+  --border:#333;--border2:#444;
+  --green:#4ade80;--red:#f87171;--amber:#fbbf24;--teal:#14b8a6;
+}
+body{background:var(--bg);color:var(--fg);font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;padding:16px 20px}
+.titlebar{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+h1{font-size:15px;font-weight:600;color:var(--fg2)}
+.subtitle{font-size:11px;color:var(--fg3)}
+.h3-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--teal);border-radius:5px;padding:5px 12px;font-size:11px;cursor:pointer;text-decoration:none}
+.h3-btn:hover{background:var(--bg4)}
+.section{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:14px}
+.sec-title{font-size:11px;font-weight:700;color:var(--fg3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
+
+/* ── SLIDERS ── */
+.slider-block{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:12px}
+.sl-group{flex:1;min-width:160px}
+.sl-group label{font-size:11px;color:var(--fg3);display:flex;justify-content:space-between;margin-bottom:4px}
+.sl-group label b{color:var(--fg);font-weight:700}
+input[type=range]{width:100%;accent-color:var(--teal);cursor:pointer}
+
+/* ── READOUT ── */
+.readout{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px 14px}
+.readout-title{font-size:12px;font-weight:600;color:var(--fg2);margin-bottom:8px}
+.readout-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:6px}
+.ro-cell{display:flex;flex-direction:column;gap:2px}
+.ro-lbl{font-size:10px;color:var(--fg3)}
+.ro-val{font-size:12px;font-weight:700}
+.ro-val.g{color:var(--green)}.ro-val.r{color:var(--red)}.ro-val.a{color:var(--amber)}.ro-val.x{color:var(--fg3)}
+.stability{font-size:11px;margin-top:4px}
+.stability.ok{color:var(--green)}.stability.warn{color:var(--amber)}
+/* ── NAVIGATOR ── */
+.nav-btn{background:var(--bg4);border:1px solid var(--border2);color:var(--amber);border-radius:5px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:10px;display:block}
+.nav-btn:hover{background:#333}
+.nav-card{background:var(--bg4);border:1px solid var(--amber);border-radius:6px;padding:10px 14px;margin-bottom:10px;display:none}
+.nav-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.nav-ctrl-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--fg2);border-radius:4px;padding:2px 8px;font-size:12px;cursor:pointer}
+.nav-ctrl-btn:disabled{opacity:.35;cursor:default}
+.nav-pos{font-size:12px;font-weight:700;color:var(--amber);flex:1;text-align:center}
+.nav-reset{background:transparent;border:1px solid var(--border2);color:var(--fg3);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer}
+.nav-reset:hover{color:var(--fg)}
+.nav-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:6px}
+.nav-cell{display:flex;flex-direction:column;gap:2px}
+.nav-lbl{font-size:10px;color:var(--fg3)}
+.nav-val{font-size:12px;font-weight:700;color:var(--fg)}
+.nav-stab{font-size:11px;margin-top:2px}
+.nav-stab.g{color:var(--green)}.nav-stab.a{color:var(--amber)}.nav-stab.r{color:var(--red)}
+.nav-cluster{background:rgba(74,222,128,0.12);border:1px solid var(--green);border-radius:5px;padding:7px 12px;font-size:11px;color:var(--green);margin-bottom:10px;display:none}
+.save-obs-btn{display:block;margin:10px 0 0;background:var(--bg3);border:1px solid var(--border2);color:var(--fg2);border-radius:6px;padding:7px 22px;cursor:pointer;font-size:12px;width:100%}
+.save-obs-btn:hover{background:var(--bg4)}
+.toast-h31{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#14532d;color:#bbf7d0;border-radius:6px;padding:7px 20px;font-size:12px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99}
+.toast-h31.show{opacity:1}
+
+/* ── CHARTS ── */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px}
+.chart-title{font-size:12px;font-weight:600;color:var(--fg2);margin-bottom:8px}
+.chart-subtitle{font-size:10px;color:var(--fg3);margin-bottom:10px}
+canvas{max-height:320px}
+
+footer{text-align:center;color:var(--fg4);font-size:11px;padding:10px 0}
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+  <div>
+    <h1>H3.1 — Gap 1: Slope Chart View</h1>
+    <div class="subtitle">Train 2022–2023 &nbsp;|&nbsp; Test 2024–2025 &nbsp;|&nbsp; 30 stocks &nbsp;·&nbsp; Click chart points to snap sliders</div>
+  </div>
+  <a class="h3-btn" href="fv2_h3_slope_tuner.html" target="_blank">← Heatmap View</a>
+</div>
+
+<!-- ── SECTION 1: SLIDERS ── -->
+<div class="section">
+  <div class="sec-title">Section 1 — Controls</div>
+  <div class="slider-block">
+    <div class="sl-group">
+      <label>Offset &nbsp;<b id="lbl-off">T0</b></label>
+      <input type="range" id="sl-off" min="0" max="7" value="5" oninput="onSlide()">
+    </div>
+    <div class="sl-group">
+      <label>Min Threshold &nbsp;<b id="lbl-thresh">0.05%</b></label>
+      <input type="range" id="sl-thresh" min="0" max="14" value="4" oninput="onSlide()">
+    </div>
+  </div>
+  <button class="nav-btn" onclick="findBestCombos()">&#9733; Find Best Combo</button>
+  <div id="nav-cluster-banner" class="nav-cluster"></div>
+  <div id="nav-card" class="nav-card">
+    <div class="nav-header">
+      <button class="nav-ctrl-btn" id="nav-prev" onclick="navStep(-1)" disabled>&#9664;</button>
+      <span class="nav-pos" id="nav-pos">#1 of 10</span>
+      <button class="nav-ctrl-btn" id="nav-next" onclick="navStep(1)">&#9654;</button>
+      <button class="nav-reset" onclick="resetNavigator()">Reset</button>
+    </div>
+    <div class="nav-grid">
+      <div class="nav-cell"><span class="nav-lbl">Offset</span><span class="nav-val" id="nav-offset">—</span></div>
+      <div class="nav-cell"><span class="nav-lbl">Threshold</span><span class="nav-val" id="nav-thresh">—</span></div>
+      <div class="nav-cell"><span class="nav-lbl">Test PF</span><span class="nav-val" id="nav-pf-te">—</span></div>
+      <div class="nav-cell"><span class="nav-lbl">Train PF</span><span class="nav-val" id="nav-pf-tr">—</span></div>
+      <div class="nav-cell"><span class="nav-lbl">Test N</span><span class="nav-val" id="nav-n-te">—</span></div>
+      <div class="nav-cell"><span class="nav-lbl">Score</span><span class="nav-val" id="nav-score">—</span></div>
+    </div>
+    <div class="nav-stab" id="nav-stability">—</div>
+    <div id="nav-fallback-note" style="display:none;margin-top:6px;padding:5px 10px;background:rgba(251,191,36,0.12);border:1px solid #fbbf24;border-radius:4px;font-size:11px;color:#fbbf24">⚠ No combos above PF 1.0 — showing best available</div>
+  </div>
+  <button class="save-obs-btn" onclick="saveObs()">&#128190; Save Gap 1 Observations to gap_observations.md</button>
+  <div class="toast-h31" id="toast-h31"></div>
+  <div class="readout">
+    <div class="readout-title" id="readout-title">Offset: T0  |  Threshold: 0.05%</div>
+    <div class="readout-grid">
+      <div class="ro-cell"><span class="ro-lbl">Train PF</span><span class="ro-val" id="ro-tr-pf">—</span></div>
+      <div class="ro-cell"><span class="ro-lbl">Train WR</span><span class="ro-val" id="ro-tr-wr">—</span></div>
+      <div class="ro-cell"><span class="ro-lbl">Train Signals</span><span class="ro-val" id="ro-tr-n">—</span></div>
+      <div class="ro-cell"><span class="ro-lbl">Test PF</span><span class="ro-val" id="ro-te-pf">—</span></div>
+      <div class="ro-cell"><span class="ro-lbl">Test WR</span><span class="ro-val" id="ro-te-wr">—</span></div>
+      <div class="ro-cell"><span class="ro-lbl">Test Signals</span><span class="ro-val" id="ro-te-n">—</span></div>
+    </div>
+    <div class="stability" id="stability">—</div>
+  </div>
+</div>
+
+<!-- ── SECTION 2: CHARTS ── -->
+<div class="section">
+  <div class="sec-title">Section 2 — Charts</div>
+  <div class="charts-grid">
+    <div class="chart-wrap">
+      <div class="chart-title">Chart A — Threshold Slice</div>
+      <div class="chart-subtitle" id="chartA-sub">PF across thresholds (offset locked at T0)</div>
+      <canvas id="chartA"></canvas>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">Chart B — Offset Slice</div>
+      <div class="chart-subtitle" id="chartB-sub">PF across offsets (threshold locked at 0.05%)</div>
+      <canvas id="chartB"></canvas>
+    </div>
+  </div>
+</div>
+
+<footer>
+  H3.1 — Gap 1 chart view &nbsp;·&nbsp; 30 stocks &nbsp;·&nbsp; 1-share mode<br>
+  Train: 2022–2023 &nbsp;|&nbsp; Test: 2024–2025 &nbsp;·&nbsp; No position guard
+</footer>
+
+<script>
+// ── EMBEDDED DATA ─────────────────────────────────────────────────────────────
+const GRID     = [{"oi":0,"ti":0,"thresh":0.01,"pf_tr":0.9637,"pf_te":0.9321,"wr_tr":16.27,"wr_te":14.98,"n_tr":18692,"n_te":18509,"avgpnl_tr":-0.05,"avgpnl_te":-0.12,"cagr_tr":-0.04,"cagr_te":-0.11},{"oi":0,"ti":1,"thresh":0.02,"pf_tr":0.9648,"pf_te":0.9315,"wr_tr":16.32,"wr_te":15.01,"n_tr":17051,"n_te":16860,"avgpnl_tr":-0.05,"avgpnl_te":-0.13,"cagr_tr":-0.04,"cagr_te":-0.11},{"oi":0,"ti":2,"thresh":0.03,"pf_tr":0.9724,"pf_te":0.9436,"wr_tr":16.49,"wr_te":15.03,"n_tr":15455,"n_te":15293,"avgpnl_tr":-0.04,"avgpnl_te":-0.11,"cagr_tr":-0.03,"cagr_te":-0.08},{"oi":0,"ti":3,"thresh":0.04,"pf_tr":0.9802,"pf_te":0.9544,"wr_tr":16.69,"wr_te":15.11,"n_tr":13969,"n_te":13765,"avgpnl_tr":-0.03,"avgpnl_te":-0.09,"cagr_tr":-0.02,"cagr_te":-0.06},{"oi":0,"ti":4,"thresh":0.05,"pf_tr":0.9786,"pf_te":0.964,"wr_tr":16.74,"wr_te":15.2,"n_tr":12592,"n_te":12417,"avgpnl_tr":-0.03,"avgpnl_te":-0.07,"cagr_tr":-0.02,"cagr_te":-0.04},{"oi":0,"ti":5,"thresh":0.06,"pf_tr":0.9876,"pf_te":0.9638,"wr_tr":16.91,"wr_te":15.17,"n_tr":11303,"n_te":11145,"avgpnl_tr":-0.02,"avgpnl_te":-0.07,"cagr_tr":-0.01,"cagr_te":-0.04},{"oi":0,"ti":6,"thresh":0.07,"pf_tr":0.9902,"pf_te":0.9767,"wr_tr":16.83,"wr_te":15.37,"n_tr":10124,"n_te":10022,"avgpnl_tr":-0.01,"avgpnl_te":-0.05,"cagr_tr":-0.01,"cagr_te":-0.02},{"oi":0,"ti":7,"thresh":0.08,"pf_tr":1.0087,"pf_te":0.9823,"wr_tr":16.96,"wr_te":15.22,"n_tr":9106,"n_te":8967,"avgpnl_tr":0.01,"avgpnl_te":-0.04,"cagr_tr":0.01,"cagr_te":-0.02},{"oi":0,"ti":8,"thresh":0.09,"pf_tr":1.0011,"pf_te":0.9808,"wr_tr":16.96,"wr_te":15.33,"n_tr":8183,"n_te":8037,"avgpnl_tr":0.0,"avgpnl_te":-0.04,"cagr_tr":0.0,"cagr_te":-0.02},{"oi":0,"ti":9,"thresh":0.1,"pf_tr":0.9929,"pf_te":0.9836,"wr_tr":17.06,"wr_te":15.4,"n_tr":7317,"n_te":7212,"avgpnl_tr":-0.01,"avgpnl_te":-0.03,"cagr_tr":-0.0,"cagr_te":-0.01},{"oi":0,"ti":10,"thresh":0.11,"pf_tr":0.9891,"pf_te":0.9729,"wr_tr":17.23,"wr_te":15.49,"n_tr":6560,"n_te":6463,"avgpnl_tr":-0.02,"avgpnl_te":-0.06,"cagr_tr":-0.01,"cagr_te":-0.02},{"oi":0,"ti":11,"thresh":0.12,"pf_tr":0.9978,"pf_te":0.9788,"wr_tr":17.44,"wr_te":15.4,"n_tr":5855,"n_te":5833,"avgpnl_tr":-0.0,"avgpnl_te":-0.05,"cagr_tr":-0.0,"cagr_te":-0.01},{"oi":0,"ti":12,"thresh":0.13,"pf_tr":0.982,"pf_te":0.9888,"wr_tr":17.47,"wr_te":15.58,"n_tr":5239,"n_te":5146,"avgpnl_tr":-0.03,"avgpnl_te":-0.02,"cagr_tr":-0.01,"cagr_te":-0.01},{"oi":0,"ti":13,"thresh":0.14,"pf_tr":0.9886,"pf_te":0.9837,"wr_tr":17.58,"wr_te":15.58,"n_tr":4658,"n_te":4629,"avgpnl_tr":-0.02,"avgpnl_te":-0.04,"cagr_tr":-0.0,"cagr_te":-0.01},{"oi":0,"ti":14,"thresh":0.15,"pf_tr":0.9702,"pf_te":0.9648,"wr_tr":17.67,"wr_te":15.59,"n_tr":4149,"n_te":4130,"avgpnl_tr":-0.05,"avgpnl_te":-0.08,"cagr_tr":-0.01,"cagr_te":-0.02},{"oi":1,"ti":0,"thresh":0.01,"pf_tr":0.9623,"pf_te":0.9407,"wr_tr":16.14,"wr_te":14.93,"n_tr":18933,"n_te":18604,"avgpnl_tr":-0.05,"avgpnl_te":-0.11,"cagr_tr":-0.05,"cagr_te":-0.1},{"oi":1,"ti":1,"thresh":0.02,"pf_tr":0.9625,"pf_te":0.9384,"wr_tr":16.21,"wr_te":14.92,"n_tr":17170,"n_te":16905,"avgpnl_tr":-0.05,"avgpnl_te":-0.12,"cagr_tr":-0.04,"cagr_te":-0.1},{"oi":1,"ti":2,"thresh":0.03,"pf_tr":0.963,"pf_te":0.9489,"wr_tr":16.31,"wr_te":14.97,"n_tr":15539,"n_te":15273,"avgpnl_tr":-0.05,"avgpnl_te":-0.1,"cagr_tr":-0.04,"cagr_te":-0.07},{"oi":1,"ti":3,"thresh":0.04,"pf_tr":0.9717,"pf_te":0.9485,"wr_tr":16.49,"wr_te":14.93,"n_tr":13997,"n_te":13766,"avgpnl_tr":-0.04,"avgpnl_te":-0.1,"cagr_tr":-0.03,"cagr_te":-0.07},{"oi":1,"ti":4,"thresh":0.05,"pf_tr":0.9805,"pf_te":0.9572,"wr_tr":16.62,"wr_te":14.92,"n_tr":12560,"n_te":12325,"avgpnl_tr":-0.03,"avgpnl_te":-0.08,"cagr_tr":-0.02,"cagr_te":-0.05},{"oi":1,"ti":5,"thresh":0.06,"pf_tr":0.9776,"pf_te":0.958,"wr_tr":16.64,"wr_te":14.89,"n_tr":11293,"n_te":11020,"avgpnl_tr":-0.03,"avgpnl_te":-0.08,"cagr_tr":-0.02,"cagr_te":-0.05},{"oi":1,"ti":6,"thresh":0.07,"pf_tr":0.9907,"pf_te":0.9745,"wr_tr":16.84,"wr_te":14.87,"n_tr":10086,"n_te":9869,"avgpnl_tr":-0.01,"avgpnl_te":-0.05,"cagr_tr":-0.01,"cagr_te":-0.02},{"oi":1,"ti":7,"thresh":0.08,"pf_tr":0.9923,"pf_te":0.9795,"wr_tr":16.94,"wr_te":15.01,"n_tr":9021,"n_te":8780,"avgpnl_tr":-0.01,"avgpnl_te":-0.04,"cagr_tr":-0.01,"cagr_te":-0.02},{"oi":1,"ti":8,"thresh":0.09,"pf_tr":1.0144,"pf_te":0.9887,"wr_tr":16.99,"wr_te":15.15,"n_tr":8022,"n_te":7876,"avgpnl_tr":0.02,"avgpnl_te":-0.02,"cagr_tr":0.01,"cagr_te":-0.01},{"oi":1,"ti":9,"thresh":0.1,"pf_tr":1.0026,"pf_te":0.9918,"wr_tr":17.07,"wr_te":15.34,"n_tr":7164,"n_te":7000,"avgpnl_tr":0.0,"avgpnl_te":-0.02,"cagr_tr":0.0,"cagr_te":-0.01},{"oi":1,"ti":10,"thresh":0.11,"pf_tr":0.9927,"pf_te":0.9931,"wr_tr":17.12,"wr_te":15.26,"n_tr":6430,"n_te":6232,"avgpnl_tr":-0.01,"avgpnl_te":-0.01,"cagr_tr":-0.0,"cagr_te":-0.0},{"oi":1,"ti":11,"thresh":0.12,"pf_tr":0.9765,"pf_te":0.9587,"wr_tr":17.03,"wr_te":15.07,"n_tr":5696,"n_te":5555,"avgpnl_tr":-0.04,"avgpnl_te":-0.09,"cagr_tr":-0.01,"cagr_te":-0.02},{"oi":1,"ti":12,"thresh":0.13,"pf_tr":0.9576,"pf_te":0.9497,"wr_tr":17.1,"wr_te":15.2,"n_tr":5087,"n_te":4934,"avgpnl_tr":-0.07,"avgpnl_te":-0.11,"cagr_tr":-0.02,"cagr_te":-0.03},{"oi":1,"ti":13,"thresh":0.14,"pf_tr":0.9642,"pf_te":0.9605,"wr_tr":17.11,"wr_te":15.43,"n_tr":4517,"n_te":4458,"avgpnl_tr":-0.06,"avgpnl_te":-0.09,"cagr_tr":-0.01,"cagr_te":-0.02},{"oi":1,"ti":14,"thresh":0.15,"pf_tr":0.9695,"pf_te":0.9607,"wr_tr":17.19,"wr_te":15.39,"n_tr":4025,"n_te":3976,"avgpnl_tr":-0.05,"avgpnl_te":-0.09,"cagr_tr":-0.01,"cagr_te":-0.02},{"oi":2,"ti":0,"thresh":0.01,"pf_tr":0.951,"pf_te":0.9422,"wr_tr":16.03,"wr_te":14.82,"n_tr":19122,"n_te":18685,"avgpnl_tr":-0.06,"avgpnl_te":-0.11,"cagr_tr":-0.06,"cagr_te":-0.1},{"oi":2,"ti":1,"thresh":0.02,"pf_tr":0.9542,"pf_te":0.9438,"wr_tr":16.12,"wr_te":14.85,"n_tr":17303,"n_te":16947,"avgpnl_tr":-0.06,"avgpnl_te":-0.11,"cagr_tr":-0.05,"cagr_te":-0.09},{"oi":2,"ti":2,"thresh":0.03,"pf_tr":0.9502,"pf_te":0.9468,"wr_tr":16.29,"wr_te":14.79,"n_tr":15644,"n_te":15259,"avgpnl_tr":-0.07,"avgpnl_te":-0.1,"cagr_tr":-0.05,"cagr_te":-0.08},{"oi":2,"ti":3,"thresh":0.04,"pf_tr":0.9569,"pf_te":0.9535,"wr_tr":16.35,"wr_te":14.59,"n_tr":13990,"n_te":13704,"avgpnl_tr":-0.06,"avgpnl_te":-0.09,"cagr_tr":-0.04,"cagr_te":-0.06},{"oi":2,"ti":4,"thresh":0.05,"pf_tr":0.9757,"pf_te":0.9506,"wr_tr":16.56,"wr_te":14.52,"n_tr":12556,"n_te":12265,"avgpnl_tr":-0.03,"avgpnl_te":-0.1,"cagr_tr":-0.02,"cagr_te":-0.06},{"oi":2,"ti":5,"thresh":0.06,"pf_tr":0.9902,"pf_te":0.9698,"wr_tr":16.69,"wr_te":14.6,"n_tr":11229,"n_te":10938,"avgpnl_tr":-0.01,"avgpnl_te":-0.06,"cagr_tr":-0.01,"cagr_te":-0.03},{"oi":2,"ti":6,"thresh":0.07,"pf_tr":1.0094,"pf_te":0.9845,"wr_tr":16.89,"wr_te":14.75,"n_tr":10067,"n_te":9693,"avgpnl_tr":0.01,"avgpnl_te":-0.03,"cagr_tr":0.01,"cagr_te":-0.01},{"oi":2,"ti":7,"thresh":0.08,"pf_tr":0.993,"pf_te":0.9777,"wr_tr":16.9,"wr_te":14.85,"n_tr":8911,"n_te":8592,"avgpnl_tr":-0.01,"avgpnl_te":-0.05,"cagr_tr":-0.0,"cagr_te":-0.02},{"oi":2,"ti":8,"thresh":0.09,"pf_tr":0.9913,"pf_te":0.979,"wr_tr":17.08,"wr_te":14.79,"n_tr":7877,"n_te":7668,"avgpnl_tr":-0.01,"avgpnl_te":-0.04,"cagr_tr":-0.01,"cagr_te":-0.02},{"oi":2,"ti":9,"thresh":0.1,"pf_tr":0.9786,"pf_te":0.9758,"wr_tr":16.95,"wr_te":14.82,"n_tr":6993,"n_te":6770,"avgpnl_tr":-0.03,"avgpnl_te":-0.05,"cagr_tr":-0.01,"cagr_te":-0.02},{"oi":2,"ti":10,"thresh":0.11,"pf_tr":0.9765,"pf_te":0.9918,"wr_tr":16.93,"wr_te":15.01,"n_tr":6195,"n_te":6043,"avgpnl_tr":-0.04,"avgpnl_te":-0.02,"cagr_tr":-0.01,"cagr_te":-0.01},{"oi":2,"ti":11,"thresh":0.12,"pf_tr":0.9807,"pf_te":0.9792,"wr_tr":16.95,"wr_te":14.97,"n_tr":5521,"n_te":5344,"avgpnl_tr":-0.03,"avgpnl_te":-0.05,"cagr_tr":-0.01,"cagr_te":-0.01},{"oi":2,"ti":12,"thresh":0.13,"pf_tr":0.9396,"pf_te":0.9949,"wr_tr":16.85,"wr_te":15.17,"n_tr":4861,"n_te":4734,"avgpnl_tr":-0.1,"avgpnl_te":-0.01,"cagr_tr":-0.02,"cagr_te":-0.0},{"oi":2,"ti":13,"thresh":0.14,"pf_tr":0.9125,"pf_te":1.0188,"wr_tr":16.69,"wr_te":15.38,"n_tr":4313,"n_te":4207,"avgpnl_tr":-0.14,"avgpnl_te":0.04,"cagr_tr":-0.03,"cagr_te":0.01},{"oi":2,"ti":14,"thresh":0.15,"pf_tr":0.9109,"pf_te":1.0049,"wr_tr":16.7,"wr_te":15.53,"n_tr":3833,"n_te":3755,"avgpnl_tr":-0.15,"avgpnl_te":0.01,"cagr_tr":-0.03,"cagr_te":0.0},{"oi":3,"ti":0,"thresh":0.01,"pf_tr":0.9565,"pf_te":0.9368,"wr_tr":15.98,"wr_te":14.73,"n_tr":19547,"n_te":19016,"avgpnl_tr":-0.06,"avgpnl_te":-0.12,"cagr_tr":-0.06,"cagr_te":-0.11},{"oi":3,"ti":1,"thresh":0.02,"pf_tr":0.9658,"pf_te":0.9463,"wr_tr":16.08,"wr_te":14.72,"n_tr":17646,"n_te":17177,"avgpnl_tr":-0.05,"avgpnl_te":-0.1,"cagr_tr":-0.04,"cagr_te":-0.09},{"oi":3,"ti":2,"thresh":0.03,"pf_tr":0.9652,"pf_te":0.9488,"wr_tr":16.12,"wr_te":14.72,"n_tr":15839,"n_te":15440,"avgpnl_tr":-0.05,"avgpnl_te":-0.1,"cagr_tr":-0.04,"cagr_te":-0.08},{"oi":3,"ti":3,"thresh":0.04,"pf_tr":0.9696,"pf_te":0.9487,"wr_tr":16.32,"wr_te":14.62,"n_tr":14128,"n_te":13792,"avgpnl_tr":-0.04,"avgpnl_te":-0.1,"cagr_tr":-0.03,"cagr_te":-0.07},{"oi":3,"ti":4,"thresh":0.05,"pf_tr":0.9751,"pf_te":0.9508,"wr_tr":16.48,"wr_te":14.52,"n_tr":12624,"n_te":12212,"avgpnl_tr":-0.04,"avgpnl_te":-0.1,"cagr_tr":-0.02,"cagr_te":-0.06},{"oi":3,"ti":5,"thresh":0.06,"pf_tr":0.973,"pf_te":0.9787,"wr_tr":16.57,"wr_te":14.6,"n_tr":11255,"n_te":10794,"avgpnl_tr":-0.04,"avgpnl_te":-0.04,"cagr_tr":-0.02,"cagr_te":-0.02},{"oi":3,"ti":6,"thresh":0.07,"pf_tr":0.9753,"pf_te":0.9892,"wr_tr":16.52,"wr_te":14.56,"n_tr":9936,"n_te":9571,"avgpnl_tr":-0.04,"avgpnl_te":-0.02,"cagr_tr":-0.02,"cagr_te":-0.01},{"oi":3,"ti":7,"thresh":0.08,"pf_tr":0.9818,"pf_te":0.9877,"wr_tr":16.56,"wr_te":14.7,"n_tr":8790,"n_te":8426,"avgpnl_tr":-0.03,"avgpnl_te":-0.03,"cagr_tr":-0.01,"cagr_te":-0.01},{"oi":3,"ti":8,"thresh":0.09,"pf_tr":0.9801,"pf_te":0.9975,"wr_tr":16.69,"wr_te":14.76,"n_tr":7783,"n_te":7452,"avgpnl_tr":-0.03,"avgpnl_te":-0.01,"cagr_tr":-0.01,"cagr_te":-0.0},{"oi":3,"ti":9,"thresh":0.1,"pf_tr":0.9546,"pf_te":0.9989,"wr_tr":16.39,"wr_te":14.84,"n_tr":6884,"n_te":6521,"avgpnl_tr":-0.07,"avgpnl_te":-0.0,"cagr_tr":-0.02,"cagr_te":-0.0},{"oi":3,"ti":10,"thresh":0.11,"pf_tr":0.9506,"pf_te":0.9964,"wr_tr":16.55,"wr_te":14.97,"n_tr":6011,"n_te":5763,"avgpnl_tr":-0.08,"avgpnl_te":-0.01,"cagr_tr":-0.02,"cagr_te":-0.0},{"oi":3,"ti":11,"thresh":0.12,"pf_tr":0.9395,"pf_te":1.026,"wr_tr":16.41,"wr_te":15.15,"n_tr":5313,"n_te":5101,"avgpnl_tr":-0.1,"avgpnl_te":0.06,"cagr_tr":-0.03,"cagr_te":0.01},{"oi":3,"ti":12,"thresh":0.13,"pf_tr":0.9242,"pf_te":1.0373,"wr_tr":16.37,"wr_te":15.13,"n_tr":4654,"n_te":4500,"avgpnl_tr":-0.13,"avgpnl_te":0.08,"cagr_tr":-0.03,"cagr_te":0.02},{"oi":3,"ti":13,"thresh":0.14,"pf_tr":0.9063,"pf_te":1.0345,"wr_tr":16.09,"wr_te":15.31,"n_tr":4107,"n_te":3959,"avgpnl_tr":-0.16,"avgpnl_te":0.08,"cagr_tr":-0.03,"cagr_te":0.02},{"oi":3,"ti":14,"thresh":0.15,"pf_tr":0.9039,"pf_te":1.0022,"wr_tr":15.97,"wr_te":15.09,"n_tr":3619,"n_te":3518,"avgpnl_tr":-0.17,"avgpnl_te":0.0,"cagr_tr":-0.03,"cagr_te":0.0},{"oi":4,"ti":0,"thresh":0.01,"pf_tr":0.9519,"pf_te":0.9496,"wr_tr":15.94,"wr_te":14.61,"n_tr":19636,"n_te":19046,"avgpnl_tr":-0.06,"avgpnl_te":-0.09,"cagr_tr":-0.06,"cagr_te":-0.09},{"oi":4,"ti":1,"thresh":0.02,"pf_tr":0.951,"pf_te":0.9516,"wr_tr":15.93,"wr_te":14.61,"n_tr":17702,"n_te":17107,"avgpnl_tr":-0.07,"avgpnl_te":-0.09,"cagr_tr":-0.06,"cagr_te":-0.08},{"oi":4,"ti":2,"thresh":0.03,"pf_tr":0.9551,"pf_te":0.9643,"wr_tr":15.99,"wr_te":14.72,"n_tr":15838,"n_te":15259,"avgpnl_tr":-0.06,"avgpnl_te":-0.07,"cagr_tr":-0.05,"cagr_te":-0.05},{"oi":4,"ti":3,"thresh":0.04,"pf_tr":0.959,"pf_te":0.9702,"wr_tr":16.17,"wr_te":14.73,"n_tr":14002,"n_te":13546,"avgpnl_tr":-0.06,"avgpnl_te":-0.06,"cagr_tr":-0.04,"cagr_te":-0.04},{"oi":4,"ti":4,"thresh":0.05,"pf_tr":0.967,"pf_te":0.9752,"wr_tr":16.4,"wr_te":14.68,"n_tr":12406,"n_te":11961,"avgpnl_tr":-0.05,"avgpnl_te":-0.05,"cagr_tr":-0.03,"cagr_te":-0.03},{"oi":4,"ti":5,"thresh":0.06,"pf_tr":0.974,"pf_te":0.9742,"wr_tr":16.45,"wr_te":14.51,"n_tr":10927,"n_te":10480,"avgpnl_tr":-0.04,"avgpnl_te":-0.05,"cagr_tr":-0.02,"cagr_te":-0.03},{"oi":4,"ti":6,"thresh":0.07,"pf_tr":0.9737,"pf_te":0.9854,"wr_tr":16.3,"wr_te":14.55,"n_tr":9611,"n_te":9166,"avgpnl_tr":-0.04,"avgpnl_te":-0.03,"cagr_tr":-0.02,"cagr_te":-0.01},{"oi":4,"ti":7,"thresh":0.08,"pf_tr":0.965,"pf_te":0.9874,"wr_tr":16.29,"wr_te":14.75,"n_tr":8435,"n_te":7980,"avgpnl_tr":-0.05,"avgpnl_te":-0.03,"cagr_tr":-0.02,"cagr_te":-0.01},{"oi":4,"ti":8,"thresh":0.09,"pf_tr":0.9403,"pf_te":0.9911,"wr_tr":16.1,"wr_te":14.92,"n_tr":7337,"n_te":6963,"avgpnl_tr":-0.09,"avgpnl_te":-0.02,"cagr_tr":-0.03,"cagr_te":-0.01},{"oi":4,"ti":9,"thresh":0.1,"pf_tr":0.9381,"pf_te":0.9914,"wr_tr":15.93,"wr_te":14.78,"n_tr":6460,"n_te":6111,"avgpnl_tr":-0.1,"avgpnl_te":-0.02,"cagr_tr":-0.03,"cagr_te":-0.01},{"oi":4,"ti":10,"thresh":0.11,"pf_tr":0.9204,"pf_te":1.0212,"wr_tr":15.79,"wr_te":14.93,"n_tr":5616,"n_te":5384,"avgpnl_tr":-0.13,"avgpnl_te":0.05,"cagr_tr":-0.04,"cagr_te":0.01},{"oi":4,"ti":11,"thresh":0.12,"pf_tr":0.8944,"pf_te":1.0311,"wr_tr":15.76,"wr_te":15.38,"n_tr":4912,"n_te":4669,"avgpnl_tr":-0.18,"avgpnl_te":0.07,"cagr_tr":-0.04,"cagr_te":0.02},{"oi":4,"ti":12,"thresh":0.13,"pf_tr":0.8584,"pf_te":1.0268,"wr_tr":15.62,"wr_te":15.29,"n_tr":4271,"n_te":4049,"avgpnl_tr":-0.25,"avgpnl_te":0.06,"cagr_tr":-0.05,"cagr_te":0.01},{"oi":4,"ti":13,"thresh":0.14,"pf_tr":0.8556,"pf_te":1.0472,"wr_tr":15.37,"wr_te":15.39,"n_tr":3755,"n_te":3568,"avgpnl_tr":-0.26,"avgpnl_te":0.1,"cagr_tr":-0.05,"cagr_te":0.02},{"oi":4,"ti":14,"thresh":0.15,"pf_tr":0.8649,"pf_te":1.0792,"wr_tr":15.5,"wr_te":15.45,"n_tr":3322,"n_te":3140,"avgpnl_tr":-0.24,"avgpnl_te":0.18,"cagr_tr":-0.04,"cagr_te":0.03},{"oi":5,"ti":0,"thresh":0.01,"pf_tr":0.9327,"pf_te":0.947,"wr_tr":16.5,"wr_te":15.59,"n_tr":21433,"n_te":20622,"avgpnl_tr":-0.1,"avgpnl_te":-0.1,"cagr_tr":-0.1,"cagr_te":-0.11},{"oi":5,"ti":1,"thresh":0.02,"pf_tr":0.9284,"pf_te":0.9546,"wr_tr":16.55,"wr_te":15.68,"n_tr":19194,"n_te":18401,"avgpnl_tr":-0.11,"avgpnl_te":-0.09,"cagr_tr":-0.1,"cagr_te":-0.08},{"oi":5,"ti":2,"thresh":0.03,"pf_tr":0.9295,"pf_te":0.9529,"wr_tr":16.71,"wr_te":15.71,"n_tr":17010,"n_te":16299,"avgpnl_tr":-0.11,"avgpnl_te":-0.1,"cagr_tr":-0.09,"cagr_te":-0.08},{"oi":5,"ti":3,"thresh":0.04,"pf_tr":0.9414,"pf_te":0.9699,"wr_tr":16.73,"wr_te":15.81,"n_tr":15021,"n_te":14265,"avgpnl_tr":-0.09,"avgpnl_te":-0.06,"cagr_tr":-0.07,"cagr_te":-0.04},{"oi":5,"ti":4,"thresh":0.05,"pf_tr":0.9346,"pf_te":0.9805,"wr_tr":16.84,"wr_te":15.87,"n_tr":13166,"n_te":12423,"avgpnl_tr":-0.1,"avgpnl_te":-0.04,"cagr_tr":-0.07,"cagr_te":-0.03},{"oi":5,"ti":5,"thresh":0.06,"pf_tr":0.9373,"pf_te":0.9776,"wr_tr":17.01,"wr_te":15.57,"n_tr":11496,"n_te":10807,"avgpnl_tr":-0.1,"avgpnl_te":-0.05,"cagr_tr":-0.06,"cagr_te":-0.03},{"oi":5,"ti":6,"thresh":0.07,"pf_tr":0.9313,"pf_te":0.9991,"wr_tr":16.64,"wr_te":15.75,"n_tr":9963,"n_te":9334,"avgpnl_tr":-0.11,"avgpnl_te":-0.0,"cagr_tr":-0.06,"cagr_te":-0.0},{"oi":5,"ti":7,"thresh":0.08,"pf_tr":0.9279,"pf_te":0.9855,"wr_tr":16.58,"wr_te":15.7,"n_tr":8711,"n_te":8017,"avgpnl_tr":-0.12,"avgpnl_te":-0.03,"cagr_tr":-0.05,"cagr_te":-0.01},{"oi":5,"ti":8,"thresh":0.09,"pf_tr":0.9004,"pf_te":1.0202,"wr_tr":16.39,"wr_te":16.05,"n_tr":7580,"n_te":6954,"avgpnl_tr":-0.17,"avgpnl_te":0.04,"cagr_tr":-0.07,"cagr_te":0.02},{"oi":5,"ti":9,"thresh":0.1,"pf_tr":0.8823,"pf_te":1.0393,"wr_tr":16.11,"wr_te":16.18,"n_tr":6573,"n_te":6063,"avgpnl_tr":-0.21,"avgpnl_te":0.09,"cagr_tr":-0.07,"cagr_te":0.03},{"oi":5,"ti":10,"thresh":0.11,"pf_tr":0.8661,"pf_te":1.0416,"wr_tr":16.24,"wr_te":16.05,"n_tr":5641,"n_te":5190,"avgpnl_tr":-0.24,"avgpnl_te":0.09,"cagr_tr":-0.07,"cagr_te":0.02},{"oi":5,"ti":11,"thresh":0.12,"pf_tr":0.8734,"pf_te":1.0399,"wr_tr":16.39,"wr_te":16.27,"n_tr":4892,"n_te":4524,"avgpnl_tr":-0.23,"avgpnl_te":0.09,"cagr_tr":-0.06,"cagr_te":0.02},{"oi":5,"ti":12,"thresh":0.13,"pf_tr":0.8629,"pf_te":1.0479,"wr_tr":16.15,"wr_te":16.32,"n_tr":4266,"n_te":3910,"avgpnl_tr":-0.26,"avgpnl_te":0.11,"cagr_tr":-0.05,"cagr_te":0.02},{"oi":5,"ti":13,"thresh":0.14,"pf_tr":0.8728,"pf_te":1.0668,"wr_tr":16.4,"wr_te":16.04,"n_tr":3750,"n_te":3405,"avgpnl_tr":-0.24,"avgpnl_te":0.16,"cagr_tr":-0.05,"cagr_te":0.03},{"oi":5,"ti":14,"thresh":0.15,"pf_tr":0.8609,"pf_te":1.0314,"wr_tr":16.9,"wr_te":15.96,"n_tr":3266,"n_te":2932,"avgpnl_tr":-0.27,"avgpnl_te":0.08,"cagr_tr":-0.04,"cagr_te":0.01},{"oi":6,"ti":0,"thresh":0.01,"pf_tr":0.9428,"pf_te":0.9634,"wr_tr":16.76,"wr_te":15.91,"n_tr":21692,"n_te":20868,"avgpnl_tr":-0.08,"avgpnl_te":-0.07,"cagr_tr":-0.09,"cagr_te":-0.08},{"oi":6,"ti":1,"thresh":0.02,"pf_tr":0.9532,"pf_te":0.9793,"wr_tr":16.83,"wr_te":16.1,"n_tr":19264,"n_te":18455,"avgpnl_tr":-0.07,"avgpnl_te":-0.04,"cagr_tr":-0.07,"cagr_te":-0.04},{"oi":6,"ti":2,"thresh":0.03,"pf_tr":0.9549,"pf_te":0.9864,"wr_tr":16.97,"wr_te":16.12,"n_tr":16973,"n_te":16127,"avgpnl_tr":-0.07,"avgpnl_te":-0.03,"cagr_tr":-0.06,"cagr_te":-0.02},{"oi":6,"ti":3,"thresh":0.04,"pf_tr":0.9442,"pf_te":0.9919,"wr_tr":17.08,"wr_te":16.07,"n_tr":14878,"n_te":14057,"avgpnl_tr":-0.09,"avgpnl_te":-0.02,"cagr_tr":-0.06,"cagr_te":-0.01},{"oi":6,"ti":4,"thresh":0.05,"pf_tr":0.9491,"pf_te":1.0033,"wr_tr":17.06,"wr_te":16.32,"n_tr":12916,"n_te":12104,"avgpnl_tr":-0.08,"avgpnl_te":0.01,"cagr_tr":-0.05,"cagr_te":0.0},{"oi":6,"ti":5,"thresh":0.06,"pf_tr":0.9427,"pf_te":1.019,"wr_tr":17.12,"wr_te":16.18,"n_tr":11224,"n_te":10362,"avgpnl_tr":-0.09,"avgpnl_te":0.04,"cagr_tr":-0.05,"cagr_te":0.02},{"oi":6,"ti":6,"thresh":0.07,"pf_tr":0.9416,"pf_te":1.0325,"wr_tr":17.17,"wr_te":16.5,"n_tr":9649,"n_te":8812,"avgpnl_tr":-0.1,"avgpnl_te":0.07,"cagr_tr":-0.05,"cagr_te":0.03},{"oi":6,"ti":7,"thresh":0.08,"pf_tr":0.9425,"pf_te":1.0414,"wr_tr":17.23,"wr_te":16.54,"n_tr":8251,"n_te":7565,"avgpnl_tr":-0.1,"avgpnl_te":0.09,"cagr_tr":-0.04,"cagr_te":0.03},{"oi":6,"ti":8,"thresh":0.09,"pf_tr":0.9471,"pf_te":1.0653,"wr_tr":17.05,"wr_te":16.94,"n_tr":7095,"n_te":6475,"avgpnl_tr":-0.09,"avgpnl_te":0.15,"cagr_tr":-0.03,"cagr_te":0.05},{"oi":6,"ti":9,"thresh":0.1,"pf_tr":0.9298,"pf_te":1.0671,"wr_tr":17.22,"wr_te":17.1,"n_tr":6061,"n_te":5498,"avgpnl_tr":-0.13,"avgpnl_te":0.15,"cagr_tr":-0.04,"cagr_te":0.04},{"oi":6,"ti":10,"thresh":0.11,"pf_tr":0.9242,"pf_te":1.0777,"wr_tr":17.29,"wr_te":17.01,"n_tr":5211,"n_te":4708,"avgpnl_tr":-0.14,"avgpnl_te":0.18,"cagr_tr":-0.04,"cagr_te":0.04},{"oi":6,"ti":11,"thresh":0.12,"pf_tr":0.9275,"pf_te":1.059,"wr_tr":17.5,"wr_te":17.11,"n_tr":4486,"n_te":4026,"avgpnl_tr":-0.14,"avgpnl_te":0.14,"cagr_tr":-0.03,"cagr_te":0.03},{"oi":6,"ti":12,"thresh":0.13,"pf_tr":0.9176,"pf_te":1.0758,"wr_tr":17.56,"wr_te":17.3,"n_tr":3879,"n_te":3451,"avgpnl_tr":-0.16,"avgpnl_te":0.18,"cagr_tr":-0.03,"cagr_te":0.03},{"oi":6,"ti":13,"thresh":0.14,"pf_tr":0.9076,"pf_te":1.0916,"wr_tr":17.73,"wr_te":17.22,"n_tr":3334,"n_te":2950,"avgpnl_tr":-0.18,"avgpnl_te":0.22,"cagr_tr":-0.03,"cagr_te":0.03},{"oi":6,"ti":14,"thresh":0.15,"pf_tr":0.9188,"pf_te":1.0731,"wr_tr":17.82,"wr_te":17.38,"n_tr":2879,"n_te":2543,"avgpnl_tr":-0.16,"avgpnl_te":0.18,"cagr_tr":-0.02,"cagr_te":0.02},{"oi":7,"ti":0,"thresh":0.01,"pf_tr":0.9702,"pf_te":1.0005,"wr_tr":17.5,"wr_te":16.78,"n_tr":21714,"n_te":20951,"avgpnl_tr":-0.04,"avgpnl_te":0.0,"cagr_tr":-0.05,"cagr_te":0.0},{"oi":7,"ti":1,"thresh":0.02,"pf_tr":0.9832,"pf_te":1.0078,"wr_tr":17.84,"wr_te":16.99,"n_tr":19280,"n_te":18408,"avgpnl_tr":-0.02,"avgpnl_te":0.02,"cagr_tr":-0.02,"cagr_te":0.01},{"oi":7,"ti":2,"thresh":0.03,"pf_tr":0.992,"pf_te":1.0269,"wr_tr":17.98,"wr_te":17.16,"n_tr":16816,"n_te":15937,"avgpnl_tr":-0.01,"avgpnl_te":0.06,"cagr_tr":-0.01,"cagr_te":0.04},{"oi":7,"ti":3,"thresh":0.04,"pf_tr":1.0034,"pf_te":1.0609,"wr_tr":18.1,"wr_te":17.56,"n_tr":14571,"n_te":13768,"avgpnl_tr":0.01,"avgpnl_te":0.13,"cagr_tr":0.0,"cagr_te":0.09},{"oi":7,"ti":4,"thresh":0.05,"pf_tr":1.0127,"pf_te":1.0698,"wr_tr":18.34,"wr_te":17.79,"n_tr":12602,"n_te":11743,"avgpnl_tr":0.02,"avgpnl_te":0.15,"cagr_tr":0.01,"cagr_te":0.09},{"oi":7,"ti":5,"thresh":0.06,"pf_tr":1.0228,"pf_te":1.1,"wr_tr":18.55,"wr_te":18.15,"n_tr":10784,"n_te":9948,"avgpnl_tr":0.04,"avgpnl_te":0.22,"cagr_tr":0.02,"cagr_te":0.11},{"oi":7,"ti":6,"thresh":0.07,"pf_tr":1.0288,"pf_te":1.1324,"wr_tr":18.57,"wr_te":18.43,"n_tr":9171,"n_te":8445,"avgpnl_tr":0.05,"avgpnl_te":0.29,"cagr_tr":0.02,"cagr_te":0.12},{"oi":7,"ti":7,"thresh":0.08,"pf_tr":1.0362,"pf_te":1.1776,"wr_tr":18.8,"wr_te":18.88,"n_tr":7868,"n_te":7080,"avgpnl_tr":0.06,"avgpnl_te":0.39,"cagr_tr":0.02,"cagr_te":0.14},{"oi":7,"ti":8,"thresh":0.09,"pf_tr":1.0523,"pf_te":1.1711,"wr_tr":19.19,"wr_te":19.08,"n_tr":6701,"n_te":6006,"avgpnl_tr":0.09,"avgpnl_te":0.38,"cagr_tr":0.03,"cagr_te":0.12},{"oi":7,"ti":9,"thresh":0.1,"pf_tr":1.05,"pf_te":1.1384,"wr_tr":19.15,"wr_te":19.11,"n_tr":5724,"n_te":5091,"avgpnl_tr":0.09,"avgpnl_te":0.32,"cagr_tr":0.03,"cagr_te":0.08},{"oi":7,"ti":10,"thresh":0.11,"pf_tr":1.0529,"pf_te":1.1675,"wr_tr":19.61,"wr_te":19.44,"n_tr":4859,"n_te":4285,"avgpnl_tr":0.09,"avgpnl_te":0.39,"cagr_tr":0.02,"cagr_te":0.08},{"oi":7,"ti":11,"thresh":0.12,"pf_tr":1.049,"pf_te":1.1664,"wr_tr":20.13,"wr_te":19.8,"n_tr":4099,"n_te":3646,"avgpnl_tr":0.09,"avgpnl_te":0.39,"cagr_tr":0.02,"cagr_te":0.07},{"oi":7,"ti":12,"thresh":0.13,"pf_tr":1.0539,"pf_te":1.1813,"wr_tr":20.04,"wr_te":20.39,"n_tr":3513,"n_te":3100,"avgpnl_tr":0.1,"avgpnl_te":0.43,"cagr_tr":0.02,"cagr_te":0.07},{"oi":7,"ti":13,"thresh":0.14,"pf_tr":1.0452,"pf_te":1.1569,"wr_tr":19.92,"wr_te":20.67,"n_tr":2997,"n_te":2642,"avgpnl_tr":0.09,"avgpnl_te":0.38,"cagr_tr":0.01,"cagr_te":0.05},{"oi":7,"ti":14,"thresh":0.15,"pf_tr":1.0347,"pf_te":1.1827,"wr_tr":20.12,"wr_te":21.17,"n_tr":2609,"n_te":2263,"avgpnl_tr":0.07,"avgpnl_te":0.45,"cagr_tr":0.01,"cagr_te":0.05}];
+const BASELINE = {"train":{"pf":0.9058,"wr":16.12,"n":47094,"avgPnl":-0.14,"cagr":-0.32},"test":{"pf":0.9212,"wr":15.08,"n":46388,"avgPnl":-0.15,"cagr":-0.36}};
+
+const OFF_LABELS   = ['T-5','T-4','T-3','T-2','T-1','T0','T+1','T+2'];
+const THRESH_VALS  = [0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.10,0.11,0.12,0.13,0.14,0.15];
+const THRESH_LBLS  = THRESH_VALS.map(v => v.toFixed(2)+'%');
+
+// Lookup: grid[oi][ti] → row
+const gridLookup = {};
+GRID.forEach(r => { gridLookup[r.oi + '_' + r.ti] = r; });
+function g(oi, ti) { return gridLookup[oi + '_' + ti] || null; }
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let selOff   = 5;   // T0
+let selThresh = 4;  // 0.05%
+
+// ── CHART COLOURS ─────────────────────────────────────────────────────────────
+const C_TRAIN  = '#4ade80';
+const C_TEST   = '#14b8a6';
+const C_COUNT  = 'rgba(120,120,120,0.25)';
+const C_BASE   = 'rgba(255,255,255,0.25)';
+const C_AMBER  = 'rgba(251,191,36,0.45)';
+
+const chartDefaults = {
+  animation: false,
+  responsive: true,
+  maintainAspectRatio: true,
+  interaction: { mode: 'index', intersect: false },
+  plugins: {
+    legend: {
+      labels: { color: '#888', font: { size: 10 }, boxWidth: 14, padding: 10,
+        filter: (item) => item.text !== '' }
+    },
+    tooltip: {
+      backgroundColor: '#1a1a1a',
+      borderColor: '#444',
+      borderWidth: 1,
+      titleColor: '#b8b8b8',
+      bodyColor: '#e8e8e8',
+      padding: 8,
+    }
+  },
+  scales: {
+    x:      { ticks: { color: '#888', font: { size: 10 } }, grid: { color: '#2a2a2a' } },
+    yLeft:  { type:'linear', position:'left',  min:0.75, max:1.25,
+              ticks: { color: '#888', font: { size: 10 } }, grid: { color: '#2a2a2a' } },
+    yRight: { type:'linear', position:'right', min:0,
+              ticks: { color: '#555', font: { size: 9 } }, grid: { drawOnChartArea: false } },
+  }
+};
+
+// ── CUSTOM PLUGINS ────────────────────────────────────────────────────────────
+
+// Vertical crosshair line at selected index
+const vlinePl = {
+  id: 'vline',
+  afterDraw(chart, args, opts) {
+    if (opts.idx === undefined || opts.idx === null) return;
+    const { ctx, chartArea, scales } = chart;
+    const x = scales.x.getPixelForValue(opts.idx);
+    ctx.save();
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x, chartArea.top);
+    ctx.lineTo(x, chartArea.bottom);
+    ctx.stroke();
+    ctx.restore();
+  }
+};
+
+// Lookahead shading for Chart B (T+1 = idx 6, T+2 = idx 7)
+const lookaheadPl = {
+  id: 'lookahead',
+  afterDraw(chart) {
+    const { ctx, chartArea, scales } = chart;
+    const x6 = scales.x.getPixelForValue(6);
+    const x7 = scales.x.getPixelForValue(7);
+    const bw  = (x7 - x6);
+    const xStart = x6 - bw / 2;
+    ctx.save();
+    ctx.fillStyle = 'rgba(239,68,68,0.09)';
+    ctx.fillRect(xStart, chartArea.top, chartArea.right - xStart, chartArea.bottom - chartArea.top);
+    ctx.fillStyle = 'rgba(239,68,68,0.55)';
+    ctx.font = '9px sans-serif';
+    ctx.fillText('\u26A0 lookahead', xStart + 4, chartArea.top + 13);
+    ctx.restore();
+  }
+};
+
+// ── BUILD CHART A (Threshold Slice) ──────────────────────────────────────────
+function makeChartA() {
+  const ctx = document.getElementById('chartA').getContext('2d');
+
+  const refLine = (val, color, label) => ({
+    type: 'line', label, data: THRESH_VALS.map(() => val),
+    borderColor: color, borderDash: [4, 4], borderWidth: 1,
+    pointRadius: 0, yAxisID: 'yLeft', order: 10
+  });
+
+  return new Chart(ctx, {
+    data: {
+      labels: THRESH_LBLS,
+      datasets: [
+        { type:'line', label:'Train PF', data:[], borderColor:C_TRAIN, backgroundColor:'transparent',
+          borderWidth:2, pointRadius:3, pointHoverRadius:5, yAxisID:'yLeft', order:1 },
+        { type:'line', label:'Test PF',  data:[], borderColor:C_TEST,  backgroundColor:'transparent',
+          borderDash:[5,3], borderWidth:2, pointRadius:3, pointHoverRadius:5, yAxisID:'yLeft', order:2 },
+        { type:'bar',  label:'Signals (train)', data:[], backgroundColor:C_COUNT, yAxisID:'yRight', order:5 },
+        refLine(1.0,  C_BASE,  'PF = 1.0'),
+        refLine(0.95, C_AMBER, 'PF = 0.95'),
+        { type:'line', label:'', data:[], showLine:false, borderColor:'#f97316', backgroundColor:'#f97316',
+          pointRadius:9, pointHoverRadius:11, pointStyle:'circle', yAxisID:'yLeft', order:0 },
+        { type:'line', label:'', data:[], showLine:false, borderColor:'#f97316', backgroundColor:'transparent',
+          pointRadius:5, pointHoverRadius:7, pointStyle:'circle', yAxisID:'yLeft', order:0 },
+      ]
+    },
+    options: Object.assign({}, chartDefaults, {
+      plugins: Object.assign({}, chartDefaults.plugins, {
+        vline: { idx: selThresh },
+        tooltip: Object.assign({}, chartDefaults.plugins.tooltip, {
+          callbacks: {
+            label: function(ctx) {
+              if (ctx.datasetIndex > 2) return null;
+              const oi = selOff, ti = ctx.dataIndex;
+              const row = g(oi, ti);
+              if (!row) return ctx.dataset.label + ': —';
+              if (ctx.datasetIndex === 0)
+                return 'Train: PF ' + (row.pf_tr ? row.pf_tr.toFixed(2) : '—') +
+                       '  WR ' + (row.wr_tr ? row.wr_tr.toFixed(1) + '%' : '—') +
+                       '  N ' + row.n_tr.toLocaleString() +
+                       '  Avg ' + (row.avgpnl_tr !== null ? (row.avgpnl_tr >= 0 ? '+' : '') + row.avgpnl_tr.toFixed(2) : '—');
+              if (ctx.datasetIndex === 1)
+                return 'Test:  PF ' + (row.pf_te ? row.pf_te.toFixed(2) : '—') +
+                       '  WR ' + (row.wr_te ? row.wr_te.toFixed(1) + '%' : '—') +
+                       '  N ' + row.n_te.toLocaleString() +
+                       '  Avg ' + (row.avgpnl_te !== null ? (row.avgpnl_te >= 0 ? '+' : '') + row.avgpnl_te.toFixed(2) : '—');
+              return 'Signals: ' + row.n_tr.toLocaleString();
+            }
+          }
+        })
+      }),
+      onClick(evt, elems, chart) {
+        if (!elems.length) return;
+        const ti = elems[0].index;
+        selThresh = ti;
+        document.getElementById('sl-thresh').value = ti;
+        syncAll();
+      }
+    }),
+    plugins: [vlinePl]
+  });
+}
+
+// ── BUILD CHART B (Offset Slice) ─────────────────────────────────────────────
+function makeChartB() {
+  const ctx = document.getElementById('chartB').getContext('2d');
+
+  const refLine = (val, color, label) => ({
+    type: 'line', label, data: OFF_LABELS.map(() => val),
+    borderColor: color, borderDash: [4, 4], borderWidth: 1,
+    pointRadius: 0, yAxisID: 'yLeft', order: 10
+  });
+
+  return new Chart(ctx, {
+    data: {
+      labels: OFF_LABELS,
+      datasets: [
+        { type:'line', label:'Train PF', data:[], borderColor:C_TRAIN, backgroundColor:'transparent',
+          borderWidth:2, pointRadius:3, pointHoverRadius:5, yAxisID:'yLeft', order:1 },
+        { type:'line', label:'Test PF',  data:[], borderColor:C_TEST,  backgroundColor:'transparent',
+          borderDash:[5,3], borderWidth:2, pointRadius:3, pointHoverRadius:5, yAxisID:'yLeft', order:2 },
+        { type:'bar',  label:'Signals (train)', data:[], backgroundColor:C_COUNT, yAxisID:'yRight', order:5 },
+        refLine(1.0,  C_BASE,  'PF = 1.0'),
+        refLine(0.95, C_AMBER, 'PF = 0.95'),
+        { type:'line', label:'', data:[], showLine:false, borderColor:'#f97316', backgroundColor:'#f97316',
+          pointRadius:9, pointHoverRadius:11, pointStyle:'circle', yAxisID:'yLeft', order:0 },
+        { type:'line', label:'', data:[], showLine:false, borderColor:'#f97316', backgroundColor:'transparent',
+          pointRadius:5, pointHoverRadius:7, pointStyle:'circle', yAxisID:'yLeft', order:0 },
+      ]
+    },
+    options: Object.assign({}, chartDefaults, {
+      plugins: Object.assign({}, chartDefaults.plugins, {
+        vline: { idx: selOff },
+        tooltip: Object.assign({}, chartDefaults.plugins.tooltip, {
+          callbacks: {
+            label: function(ctx) {
+              if (ctx.datasetIndex > 2) return null;
+              const oi = ctx.dataIndex, ti = selThresh;
+              const row = g(oi, ti);
+              if (!row) return ctx.dataset.label + ': —';
+              if (ctx.datasetIndex === 0)
+                return 'Train: PF ' + (row.pf_tr ? row.pf_tr.toFixed(2) : '—') +
+                       '  WR ' + (row.wr_tr ? row.wr_tr.toFixed(1) + '%' : '—') +
+                       '  N ' + row.n_tr.toLocaleString() +
+                       '  Avg ' + (row.avgpnl_tr !== null ? (row.avgpnl_tr >= 0 ? '+' : '') + row.avgpnl_tr.toFixed(2) : '—');
+              if (ctx.datasetIndex === 1)
+                return 'Test:  PF ' + (row.pf_te ? row.pf_te.toFixed(2) : '—') +
+                       '  WR ' + (row.wr_te ? row.wr_te.toFixed(1) + '%' : '—') +
+                       '  N ' + row.n_te.toLocaleString() +
+                       '  Avg ' + (row.avgpnl_te !== null ? (row.avgpnl_te >= 0 ? '+' : '') + row.avgpnl_te.toFixed(2) : '—');
+              return 'Signals: ' + row.n_tr.toLocaleString();
+            }
+          }
+        })
+      }),
+      onClick(evt, elems, chart) {
+        if (!elems.length) return;
+        const oi = elems[0].index;
+        selOff = oi;
+        document.getElementById('sl-off').value = oi;
+        syncAll();
+      }
+    }),
+    plugins: [vlinePl, lookaheadPl]
+  });
+}
+
+// ── UPDATE FUNCTIONS ──────────────────────────────────────────────────────────
+
+// ── SAVE OBSERVATION ──────────────────────────────────────────────────────────────────
+function saveObs() {
+  if (!navCombos.length) {
+    alert('Please run \u201cFind Best Combo\u201d first to generate Top 10 before saving.');
+    return;
+  }
+  const now = new Date().toISOString().slice(0, 10);
+  const clusterEl = document.getElementById('nav-cluster-banner');
+  const clusterTxt = clusterEl && clusterEl.style.display !== 'none'
+    ? clusterEl.textContent.trim()
+    : 'No strong cluster detected — results scattered across offsets/thresholds.';
+  const best = navCombos[0];
+  const sfFn = r => Math.max(0, 1 - Math.abs(r.pf_tr - r.pf_te) / 0.1).toFixed(2);
+  const dpf  = r => (r.pf_te >= r.pf_tr ? '+' : '') + (r.pf_te - r.pf_tr).toFixed(3);
+  const stab = r => Math.abs(r.pf_te - r.pf_tr) < 0.03 ? 'Stable'
+                  : Math.abs(r.pf_te - r.pf_tr) < 0.07 ? 'Marginal' : 'Unstable';
+
+  const rows = navCombos.map((r, i) =>
+    '| ' + [i+1, OFF_LABELS[r.oi], r.thresh.toFixed(2)+'%',
+      r.pf_tr.toFixed(3), r.pf_te.toFixed(3),
+      r.n_te.toLocaleString(), dpf(r), stab(r), r.score.toFixed(3)
+    ].join(' | ') + ' |'
+  ).join('\n');
+
+  const fallbackNote = navFallback
+    ? 'Fallback mode active — no combos above PF 1.0; showing best above PF 0.96'
+    : 'Primary mode — all combos pass PF_test \u2265 1.0';
+
+  const md = [
+    '',
+    '## Gap 1 \u2014 Slope Offset + Threshold',
+    'Date: ' + now,
+    'Scoring: PF_test \u00d7 log(signals) \u00d7 stability_factor',
+    'Min PF filter: 1.0 (fallback 0.96) \u2014 ' + fallbackNote,
+    '',
+    '### Top 10 Combos',
+    '| Rank | Offset | Threshold | PF_train | PF_test | Signals | \u0394PF | Stable | Score |',
+    '|------|--------|-----------|----------|---------|---------|-----|--------|-------|',
+    rows,
+    '',
+    '### Cluster Check',
+    clusterTxt,
+    '',
+    '### Key Observations',
+    '- Best combo: Offset ' + OFF_LABELS[best.oi] + ', Threshold ' + best.thresh.toFixed(2) + '% (PF_test ' + best.pf_te.toFixed(3) + ', N=' + best.n_te.toLocaleString() + ')',
+    '- Train vs Test regime note: test period (2024\u20132025) shows cleaner trending conditions vs 2022\u20132023 chop',
+    '- Gap 1 alone: PF > 1.0 requires high threshold \u2192 low signals',
+    '- Parameters NOT locked \u2014 awaiting Gaps 2\u20135 + joint Optuna',
+    '',
+    '### Next Step',
+    'H4 \u2014 Gap 2: Pullback quality (depth + structure)',
+    '',
+  ].join('\n');
+
+  const toast = (msg, ok) => {
+    const t = document.getElementById('toast-h31');
+    t.textContent = msg;
+    t.style.background = ok ? '#14532d' : '#7f1d1d';
+    t.style.color = ok ? '#bbf7d0' : '#fca5a5';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+  };
+
+  if (window.showSaveFilePicker) {
+    // showSaveFilePicker works for both new and existing files
+    window.showSaveFilePicker({
+      suggestedName: 'gap_observations.md',
+      types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md'] } }],
+    }).then(async (fh) => {
+      let existing = '';
+      try { const f = await fh.getFile(); existing = await f.text(); } catch(e) {}
+      const writable = await fh.createWritable();
+      await writable.write(existing + md);
+      await writable.close();
+      toast('Saved to gap_observations.md ✅', true);
+    }).catch((e) => {
+      if (e && e.name === 'AbortError') return;
+      fallbackDownload(md);
+    });
+  } else {
+    fallbackDownload(md);
+  }
+}
+
+function fallbackDownload(md) {
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'gap_observations.md'; a.click();
+  URL.revokeObjectURL(url);
+  const t = document.getElementById('toast-h31');
+  t.textContent = 'Downloaded — move to Framework_V2/research/';
+  t.style.background = '#1e3a5f'; t.style.color = '#93c5fd';
+  t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+function updateReadout() {
+  const row = g(selOff, selThresh);
+  document.getElementById('readout-title').textContent =
+    'Offset: ' + OFF_LABELS[selOff] + '  |  Threshold: ' + THRESH_VALS[selThresh].toFixed(2) + '%';
+
+  function fillRo(id, val, higherGood) {
+    const el = document.getElementById(id);
+    el.textContent = val !== null && val !== undefined ? val : '—';
+    const n = parseFloat(val);
+    if (isNaN(n)) { el.className = 'ro-val x'; return; }
+    el.className = 'ro-val ' + (higherGood ? (n >= 1.0 ? 'g' : n >= 0.95 ? 'a' : 'r') :
+                                             (n > 0 ? 'g' : n < 0 ? 'r' : 'x'));
+  }
+
+  if (!row) {
+    ['ro-tr-pf','ro-tr-wr','ro-tr-n','ro-te-pf','ro-te-wr','ro-te-n'].forEach(id => {
+      document.getElementById(id).textContent = '—';
+    });
+    document.getElementById('stability').textContent = '—';
+    document.getElementById('stability').className = 'stability';
+    return;
+  }
+
+  document.getElementById('ro-tr-pf').textContent = row.pf_tr ? row.pf_tr.toFixed(2) : '—';
+  document.getElementById('ro-tr-wr').textContent = row.wr_tr ? row.wr_tr.toFixed(1) + '%' : '—';
+  document.getElementById('ro-tr-n').textContent  = row.n_tr.toLocaleString();
+  document.getElementById('ro-te-pf').textContent = row.pf_te ? row.pf_te.toFixed(2) : '—';
+  document.getElementById('ro-te-wr').textContent = row.wr_te ? row.wr_te.toFixed(1) + '%' : '—';
+  document.getElementById('ro-te-n').textContent  = row.n_te.toLocaleString();
+
+  const pfTr = row.pf_tr, pfTe = row.pf_te;
+  ['ro-tr-pf','ro-te-pf'].forEach(id => {
+    const el = document.getElementById(id), n = parseFloat(el.textContent);
+    el.className = 'ro-val ' + (!isNaN(n) ? n >= 1.0 ? 'g' : n >= 0.95 ? 'a' : 'r' : 'x');
+  });
+
+  const stEl = document.getElementById('stability');
+  if (pfTr !== null && pfTe !== null) {
+    const delta = Math.abs(pfTr - pfTe);
+    const deltaPF = (pfTe - pfTr >= 0 ? '+' : '') + (pfTe - pfTr).toFixed(3);
+    if (delta < 0.05) {
+      stEl.textContent = '\u2705 Stable  |  \u0394PF = ' + deltaPF + '  (train/test within \xB10.05)';
+      stEl.className = 'stability ok';
+    } else {
+      stEl.textContent = '\u26A0\uFE0F Unstable  |  \u0394PF = ' + deltaPF + '  (train/test gap > 0.05)';
+      stEl.className = 'stability warn';
+    }
+  } else {
+    stEl.textContent = '—';
+    stEl.className = 'stability';
+  }
+}
+
+function updateChartA() {
+  // Threshold slice: X = thresholds, offset locked
+  const trPF = [], tePF = [], counts = [];
+  for (let ti = 0; ti < 15; ti++) {
+    const row = g(selOff, ti);
+    trPF.push(row && row.pf_tr ? row.pf_tr : null);
+    tePF.push(row && row.pf_te ? row.pf_te : null);
+    counts.push(row ? row.n_tr : 0);
+  }
+  chartA.data.datasets[0].data = trPF;
+  chartA.data.datasets[1].data = tePF;
+  chartA.data.datasets[2].data = counts;
+  chartA.options.plugins.vline.idx = selThresh;
+  document.getElementById('chartA-sub').textContent =
+    'PF across thresholds (offset locked at ' + OFF_LABELS[selOff] + ')';
+  chartA.update('none');
+}
+
+function updateChartB() {
+  // Offset slice: X = offsets, threshold locked
+  const trPF = [], tePF = [], counts = [];
+  for (let oi = 0; oi < 8; oi++) {
+    const row = g(oi, selThresh);
+    trPF.push(row && row.pf_tr ? row.pf_tr : null);
+    tePF.push(row && row.pf_te ? row.pf_te : null);
+    counts.push(row ? row.n_tr : 0);
+  }
+  chartB.data.datasets[0].data = trPF;
+  chartB.data.datasets[1].data = tePF;
+  chartB.data.datasets[2].data = counts;
+  chartB.options.plugins.vline.idx = selOff;
+  document.getElementById('chartB-sub').textContent =
+    'PF across offsets (threshold locked at ' + THRESH_VALS[selThresh].toFixed(2) + '%)';
+  chartB.update('none');
+}
+
+// ── NAVIGATOR ─────────────────────────────────────────────────────────────────────────────────
+let navCombos   = [];
+let navIdx      = -1;
+let navFallback = false;
+
+function findBestCombos() {
+  const scoreFn = r => {
+    const sf = Math.max(0, 1 - Math.abs(r.pf_tr - r.pf_te) / 0.1);
+    return r.pf_te * Math.log(r.n_te) * sf;
+  };
+  const base = GRID.filter(r => r.oi < 6 && r.n_te >= 1000)
+    .map(r => ({ ...r, score: scoreFn(r) }))
+    .sort((a, b) => b.score - a.score);
+  const qualified = base.filter(r => r.pf_te >= 1.0);
+  const fallback96 = base.filter(r => r.pf_te >= 0.96);
+  navFallback = qualified.length < 5;
+  navCombos = (navFallback ? fallback96 : qualified).slice(0, 10);
+  navIdx = 0;
+  checkCluster();
+  renderNavCard();
+  navSnapSliders();
+}
+
+function navStep(dir) {
+  const next = navIdx + dir;
+  if (next < 0 || next >= navCombos.length) return;
+  navIdx = next;
+  renderNavCard();
+  navSnapSliders();
+}
+
+function navSnapSliders() {
+  const r = navCombos[navIdx];
+  document.getElementById('sl-off').value    = r.oi;
+  document.getElementById('sl-thresh').value = r.ti;
+  syncAll();
+}
+
+function renderNavCard() {
+  const card = document.getElementById('nav-card');
+  if (!navCombos.length) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  const fbEl = document.getElementById('nav-fallback-note');
+  if (fbEl) fbEl.style.display = navFallback ? 'block' : 'none';
+  const r = navCombos[navIdx];
+  document.getElementById('nav-pos').textContent     = '#' + (navIdx + 1) + ' of ' + navCombos.length;
+  document.getElementById('nav-offset').textContent  = OFF_LABELS[r.oi];
+  document.getElementById('nav-thresh').textContent  = r.thresh.toFixed(2) + '%';
+  document.getElementById('nav-pf-te').textContent   = r.pf_te.toFixed(3);
+  document.getElementById('nav-pf-tr').textContent   = r.pf_tr.toFixed(3);
+  document.getElementById('nav-n-te').textContent    = r.n_te.toLocaleString();
+  document.getElementById('nav-score').textContent   = r.score.toFixed(3);
+  const delta = Math.abs(r.pf_te - r.pf_tr);
+  const stEl  = document.getElementById('nav-stability');
+  if (delta < 0.03)      { stEl.textContent = '\u25CF Stable (|\u0394PF| < 0.03)';        stEl.className = 'nav-stab g'; }
+  else if (delta < 0.07) { stEl.textContent = '\u25CF Marginal (|\u0394PF| < 0.07)';      stEl.className = 'nav-stab a'; }
+  else                   { stEl.textContent = '\u25CF Unstable (|\u0394PF| \u2265 0.07)'; stEl.className = 'nav-stab r'; }
+  document.getElementById('nav-prev').disabled = (navIdx === 0);
+  document.getElementById('nav-next').disabled = (navIdx === navCombos.length - 1);
+  updateNavDots();
+}
+
+function resetNavigator() {
+  navCombos = [];
+  navIdx    = -1;
+  document.getElementById('nav-card').style.display = 'none';
+  document.getElementById('nav-cluster-banner').style.display = 'none';
+  const fbEl2 = document.getElementById('nav-fallback-note');
+  if (fbEl2) fbEl2.style.display = 'none';
+  navFallback = false;
+  [chartA, chartB].forEach(ch => {
+    ch.data.datasets[5].data = [];
+    ch.data.datasets[6].data = [];
+    ch.update('none');
+  });
+}
+
+function checkCluster() {
+  const banner = document.getElementById('nav-cluster-banner');
+  if (navCombos.length < 7) { banner.style.display = 'none'; return; }
+  const top    = navCombos[0];
+  const nearby = navCombos.filter(r =>
+    Math.abs(r.oi - top.oi) <= 1 && Math.abs(r.thresh - top.thresh) <= 0.02
+  );
+  if (nearby.length >= 7) {
+    banner.style.display = 'block';
+    banner.textContent = '\u2605 Cluster: ' + nearby.length + '/10 combos within \xB11 offset & \xB10.02% of best (' +
+      OFF_LABELS[top.oi] + ', ' + top.thresh.toFixed(2) + '%)';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+function updateNavDots() {
+  if (!navCombos.length) return;
+  const curr   = navCombos[navIdx];
+  const others = navCombos.filter((_, i) => i !== navIdx);
+
+  const currA   = Array(15).fill(null);
+  const othersA = Array(15).fill(null);
+  currA[curr.ti] = curr.pf_te;
+  others.forEach(r => { if (othersA[r.ti] === null) othersA[r.ti] = r.pf_te; });
+
+  const currB   = Array(8).fill(null);
+  const othersB = Array(8).fill(null);
+  currB[curr.oi] = curr.pf_te;
+  others.forEach(r => { if (othersB[r.oi] === null) othersB[r.oi] = r.pf_te; });
+
+  chartA.data.datasets[5].data = currA;
+  chartA.data.datasets[6].data = othersA;
+  chartB.data.datasets[5].data = currB;
+  chartB.data.datasets[6].data = othersB;
+  chartA.update('none');
+  chartB.update('none');
+}
+
+function syncAll() {
+  selOff    = +document.getElementById('sl-off').value;
+  selThresh = +document.getElementById('sl-thresh').value;
+  document.getElementById('lbl-off').textContent    = OFF_LABELS[selOff];
+  document.getElementById('lbl-thresh').textContent = THRESH_VALS[selThresh].toFixed(2) + '%';
+  updateReadout();
+  updateChartA();
+  updateChartB();
+}
+
+function onSlide() { syncAll(); }
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+Chart.defaults.color = '#888';
+const chartA = makeChartA();
+const chartB = makeChartB();
+syncAll();
+</script>
+</body>
+</html>

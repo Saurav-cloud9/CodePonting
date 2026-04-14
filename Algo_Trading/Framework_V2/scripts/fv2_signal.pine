@@ -1,0 +1,79 @@
+//@version=5
+indicator("fv2 MA Bounce Signal", overlay=true, max_labels_count=500, max_boxes_count=500)
+
+// ── Inputs ────────────────────────────────────────────────────────────────────
+slope_threshold = input.float(0.05, "Slope Threshold %", step=0.01)
+slope_offset    = input.int(5,    "Slope Offset (bars)", minval=1, maxval=10)
+vol_mult        = input.float(1.2, "Volume Ratio Floor", step=0.1)
+atr_mult_sl     = input.float(2.5, "ATR Mult SL", step=0.1)
+atr_mult_tgt    = input.float(4.5, "ATR Mult Target", step=0.1)
+g1_filter       = input.bool(false, "G1: Rising slope filter")
+show_slope_bg   = input.bool(false, "Show rising slope background")
+box_from        = input.time(timestamp("2025-12-22 00:00 +0530"), "Box window from")
+box_to          = input.time(timestamp("2025-12-23 00:00 +0530"), "Box window to")
+
+// ── Indicators ────────────────────────────────────────────────────────────────
+ma20     = ta.sma(close, 20)
+atr14    = ta.atr(14)
+vol_ma20 = ta.sma(volume, 20)
+
+slope     = (ma20 - ma20[slope_offset]) / ma20 * 100
+is_rising = slope > slope_threshold
+
+// ── H1 state machine ─────────────────────────────────────────────────────────
+var bool  skip_next      = false
+var int   min_touch_bidx = 0
+var bool  mark_entry     = false
+var float entry_slope    = na
+
+new_day = dayofmonth != dayofmonth[1]
+if new_day
+    skip_next      := false
+    min_touch_bidx := bar_index
+    mark_entry     := false
+
+// ── Entry bar (bounce + 1) ────────────────────────────────────────────────────
+bool entry_bar = mark_entry
+if mark_entry
+    mark_entry := false
+
+// ── Signal detection ─────────────────────────────────────────────────────────
+bool  signal_fire = false
+int   touch_k     = 0
+
+if skip_next
+    skip_next := false
+else
+    bool is_bounce = close > ma20 and volume >= vol_mult * vol_ma20
+    if is_bounce
+        // Scan k=0→3, keep updating best_k — final = highest k = EARLIEST touch (matches H1)
+        int best_k = -1
+        for k = 0 to 3
+            if bar_index - k < min_touch_bidx
+                break
+            if low[k] <= ma20[k] and dayofmonth[k] == dayofmonth
+                best_k := k
+        if best_k >= 0
+            signal_fire    := true
+            touch_k        := best_k
+            entry_slope    := slope[best_k]
+            skip_next      := true
+            min_touch_bidx := bar_index + 2
+            mark_entry     := true
+
+// ── Boxes — bar_index coords, exact 1-bar width ───────────────────────────────
+bool in_window = time >= box_from and time <= box_to
+if signal_fire and in_window
+    float t_top = math.max(open[touch_k], close[touch_k])
+    float t_bot = math.min(open[touch_k], close[touch_k])
+    float b_top = math.max(open, close)
+    float b_bot = math.min(open, close)
+    // Touch candle — orange
+    box.new(bar_index[touch_k], t_top, bar_index[touch_k] + 1, t_bot, border_color=#FFB300, border_width=3, bgcolor=color.new(#FFB300, 70), xloc=xloc.bar_index)
+    // Bounce candle — blue
+    box.new(bar_index, b_top, bar_index + 1, b_bot, border_color=#1E90FF, border_width=3, bgcolor=color.new(#1E90FF, 70), xloc=xloc.bar_index)
+
+// ── Plot ──────────────────────────────────────────────────────────────────────
+plot(ma20, "MA20", color=color.new(color.teal, 0), linewidth=2)
+plotshape(entry_bar, title="Entry", style=shape.triangleup, location=location.belowbar, color=color.new(color.lime, 0), size=size.small)
+bgcolor(show_slope_bg and is_rising ? color.new(color.green, 97) : na, title="Rising slope bg")

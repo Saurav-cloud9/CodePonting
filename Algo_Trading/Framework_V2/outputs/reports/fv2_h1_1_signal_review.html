@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>fv2 Signal Review — H1.1</title>
+<style>
+:root {
+    --bg: #0e1117; --bg2: #141822; --bg3: #1a1f2e;
+    --border: #2a2d3e; --fg: #c9d1d9; --fg2: #8b949e; --fg3: #555d72;
+    --amber: #f59e0b; --green: #4ade80; --red: #ef4444; --blue: #60a5fa;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--fg); font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; min-height: 100vh; padding: 24px; }
+h1 { font-size: 15px; font-weight: 600; color: var(--amber); margin-bottom: 20px; letter-spacing: 0.5px; }
+.signal-header { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.hdr-item { display: flex; flex-direction: column; gap: 3px; }
+.hdr-label { font-size: 10px; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.8px; }
+.hdr-val { font-size: 13px; color: var(--fg); font-weight: 500; }
+.hdr-val.amber { color: var(--amber); }
+.hdr-val.green { color: var(--green); }
+.hdr-val.red { color: var(--red); }
+
+table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+thead th { background: var(--bg3); color: var(--fg3); font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+tbody tr { border-bottom: 1px solid var(--border); }
+tbody tr:hover { background: var(--bg2); }
+td { padding: 7px 10px; vertical-align: middle; }
+td.param-num { color: var(--fg3); width: 36px; font-size: 11px; }
+td.param-name { color: var(--amber); width: 160px; font-weight: 500; }
+td.param-gate { width: 40px; }
+.gate-badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+.gate-G1 { background: #1e2a3a; color: #60a5fa; }
+.gate-G2 { background: #2a1e3a; color: #c084fc; }
+.gate-G3 { background: #3a2a1e; color: #fb923c; }
+.gate-G4 { background: #1e3a2a; color: #4ade80; }
+.gate-G5 { background: #3a1e2a; color: #f472b6; }
+td.param-desc { color: var(--fg2); font-size: 11px; }
+td.param-formula { color: var(--fg3); font-size: 10px; font-style: italic; width: 160px; }
+td.param-value { width: 90px; font-size: 12px; font-weight: 600; }
+td.param-value .val-pos { color: var(--green); }
+td.param-value .val-neg { color: var(--red); }
+td.param-value .val-neu { color: var(--fg2); }
+td.param-value .val-na  { color: var(--fg3); font-style: italic; }
+td.param-verdict { width: 120px; }
+td.param-comment { }
+
+select.verdict-sel {
+    background: var(--bg3); border: 1px solid var(--border); color: var(--fg);
+    font-family: inherit; font-size: 12px; padding: 3px 8px; border-radius: 4px;
+    cursor: pointer; outline: none; width: 100%;
+}
+select.verdict-sel:focus { border-color: var(--amber); }
+select.verdict-sel.pass { border-color: #2d6a4f; color: var(--green); }
+select.verdict-sel.weak { border-color: #7c5c1e; color: var(--amber); }
+select.verdict-sel.fail { border-color: #6a2d2d; color: var(--red); }
+select.verdict-sel.na { color: var(--fg3); }
+
+input.comment-input {
+    background: var(--bg3); border: 1px solid var(--border); color: var(--fg2);
+    font-family: inherit; font-size: 11px; padding: 3px 8px; border-radius: 4px;
+    outline: none; width: 100%;
+}
+input.comment-input:focus { border-color: var(--border); color: var(--fg); }
+
+.final-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+.final-section label { display: block; font-size: 10px; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+textarea.final-comment {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--fg);
+    font-family: inherit; font-size: 12px; padding: 10px; border-radius: 4px;
+    resize: vertical; min-height: 80px; outline: none;
+}
+textarea.final-comment:focus { border-color: var(--amber); }
+
+.outcome-row { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; }
+.outcome-row label { font-size: 10px; color: var(--fg3); text-transform: uppercase; letter-spacing: 0.8px; white-space: nowrap; }
+select.outcome-sel {
+    background: var(--bg3); border: 1px solid var(--border); color: var(--fg);
+    font-family: inherit; font-size: 12px; padding: 3px 8px; border-radius: 4px;
+    cursor: pointer; outline: none;
+}
+
+.btn-row { display: flex; gap: 10px; }
+.submit-btn {
+    background: #1e3a2f; border: 1px solid #2d6a4f; color: var(--green);
+    padding: 8px 24px; border-radius: 4px; cursor: pointer; font-family: inherit;
+    font-size: 13px; font-weight: 600; transition: all .15s;
+}
+.submit-btn:hover { background: #2d6a4f; }
+.submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.status-msg { font-size: 12px; color: var(--fg2); padding: 8px 0; }
+.status-msg.ok { color: var(--green); }
+.status-msg.err { color: var(--red); }
+</style>
+</head>
+<body>
+
+<h1>&#9998; fv2 Signal Review — H1.1</h1>
+
+<div class="signal-header" id="signalHeader">
+    <div class="hdr-item"><span class="hdr-label">Stock</span><span class="hdr-val amber" id="hStock">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">Date</span><span class="hdr-val" id="hDate">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">Touch</span><span class="hdr-val" id="hTouch">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">Bounce</span><span class="hdr-val" id="hBounce">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">Entry</span><span class="hdr-val" id="hEntry">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">Slope</span><span class="hdr-val" id="hSlope">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">Category</span><span class="hdr-val" id="hCat">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">Raw PnL</span><span class="hdr-val" id="hPnl">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">SL Price</span><span class="hdr-val" id="hSL">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">Target</span><span class="hdr-val" id="hTgt">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">Exit Reason</span><span class="hdr-val" id="hExit">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">ATR14 @ Touch</span><span class="hdr-val" id="hAtr">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">MA20 @ Touch</span><span class="hdr-val" id="hMa">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">Low @ Touch</span><span class="hdr-val" id="hLow">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">Open @ Touch</span><span class="hdr-val" id="hOpen">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">Close @ Touch</span><span class="hdr-val" id="hClose">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">VR @ Touch</span><span class="hdr-val" id="hTouchVr">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">VR @ Bounce</span><span class="hdr-val" id="hBounceVr">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">VR @ Entry</span><span class="hdr-val" id="hEntryVr">—</span></div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Param</th>
+            <th>Gate</th>
+            <th>Description</th>
+            <th>Formula</th>
+            <th>Value</th>
+            <th>Verdict</th>
+            <th>Comment (optional)</th>
+        </tr>
+    </thead>
+    <tbody id="paramTable"></tbody>
+</table>
+
+<div class="final-section">
+    <div class="outcome-row">
+        <label>Outcome</label>
+        <select class="outcome-sel" id="outcomeSelect">
+            <option value="">— select —</option>
+            <option value="SL">SL (stop hit before 14:50)</option>
+            <option value="Win">Win (target hit before 14:50)</option>
+            <option value="EOD+">EOD+ (open at 14:50, in profit)</option>
+            <option value="EOD-">EOD- (open at 14:50, at loss)</option>
+            <option value="EOD">EOD skip (post 15:00 signal)</option>
+            <option value="LATE">LATE (entry ≥ 14:45 — EOD exit almost certain)</option>
+        </select>
+    </div>
+    <div id="lateWarning" style="display:none;color:#f90;font-size:0.85em;margin-top:4px;">⚠️ Entry ≥ 14:45 — auto-flagged as LATE</div>
+    <label>Final comment</label>
+    <textarea class="final-comment" id="finalComment" placeholder="Any observations about this signal..."></textarea>
+</div>
+
+<div class="btn-row">
+    <button class="submit-btn" id="submitBtn" onclick="submitReview()">Submit Review</button>
+    <span class="status-msg" id="statusMsg"></span>
+</div>
+
+<script>
+const PARAMS = [
+    {num:'01', name:'slope_threshold', gate:'G1', desc:'MA slope % minimum at touch',          formula:'slope @ T0'},
+    {num:'02', name:'slope_offset',    gate:'G1', desc:'MA slope % minimum at T-3',            formula:'slope @ T-3'},
+    {num:'03', name:'candles_above',      gate:'G1', desc:'consecutive lows > MA20 before touch — price approached from above', formula:'— (bar scan)'},
+    {num:'04', name:'pullback_bars',      gate:'G1', desc:'bars from swing high to touch',        formula:'— (bar scan)'},
+    {num:'05', name:'shoot_depth',        gate:'G2', desc:'(MA - low) / ATR14 at touch',          formula:'(MA−low) / ATR14'},
+    {num:'06', name:'touch_body_pct',     gate:'G2', desc:'body size % of total candle range',    formula:'|C−O| / (H−L)'},
+    {num:'07', name:'wick_defence_ratio', gate:'G2', desc:'wick above MA / wick below MA — higher = stronger defence. >1 = buyers recovered more than they overshot', formula:'(min(O,C)−MA) / (MA−low)'},
+    {num:'08', name:'bounce_vr_abs',   gate:'G2', desc:'bounce VR > 1.2x absolute floor',      formula:'VR @ bounce'},
+    {num:'09', name:'bounce_vr_rel',   gate:'G2', desc:'bounce VR > touch VR relative spike',  formula:'VR_bounce / VR_touch'},
+    {num:'10', name:'same_candle_tb',  gate:'G2', desc:'touch + bounce same candle (bool)',     formula:'touchIdx == bounceIdx'},
+    {num:'11', name:'G5a',             gate:'G3', desc:'entry close > bounce close',            formula:'C_entry − C_bounce'},
+    {num:'12', name:'G5b',             gate:'G3', desc:'entry VR > bounce VR',                 formula:'VR_entry / VR_bounce'},
+];
+
+const VERDICTS = ['', 'pass', 'weak', 'fail', 'N/A'];
+
+// Load signal from URL query param
+let signal = {};
+try {
+    const param = new URLSearchParams(window.location.search).get('signal');
+    if (param) signal = JSON.parse(decodeURIComponent(param));
+} catch(e) {}
+
+// Populate header
+document.getElementById('hStock').textContent  = signal.stock     || '—';
+document.getElementById('hDate').textContent   = signal.date      || '—';
+document.getElementById('hTouch').textContent  = signal.touch_time || '—';
+document.getElementById('hBounce').textContent = signal.bounce_time || '—';
+document.getElementById('hEntry').textContent  = signal.entry_time || '—';
+// Auto-flag LATE if entry >= 14:45
+if (signal.entry_time && signal.entry_time >= '14:45') {
+    document.getElementById('outcomeSelect').value = 'LATE';
+    document.getElementById('lateWarning').style.display = 'block';
+}
+document.getElementById('hCat').textContent    = signal.category   || '—';
+document.getElementById('hExit').textContent   = signal.exit_reason || '—';
+document.getElementById('hSL').textContent     = signal.sl_price   || '—';
+document.getElementById('hTgt').textContent    = signal.tgt_price  || '—';
+
+const _tc = signal.candle_touch  || {};
+const _bc = signal.candle_bounce || {};
+const _ec = signal.candle_entry  || {};
+
+document.getElementById('hAtr').textContent = _tc.atr != null ? _tc.atr.toFixed(2) : '—';
+document.getElementById('hMa').textContent  = _tc.ma  != null ? _tc.ma.toFixed(2)  : '—';
+document.getElementById('hLow').textContent = _tc.l   != null ? _tc.l.toFixed(2)   : '—';
+
+const oEl = document.getElementById('hOpen');
+oEl.textContent = _tc.o != null ? _tc.o.toFixed(2) : '—';
+if (_tc.o != null && _tc.ma != null)
+    oEl.className = 'hdr-val ' + (_tc.o > _tc.ma ? 'green' : 'red');
+
+const cEl = document.getElementById('hClose');
+cEl.textContent = _tc.c != null ? _tc.c.toFixed(2) : '—';
+if (_tc.c != null && _tc.ma != null)
+    cEl.className = 'hdr-val ' + (_tc.c > _tc.ma ? 'green' : 'red');
+
+const tvEl = document.getElementById('hTouchVr');
+tvEl.textContent = _tc.vr != null ? _tc.vr.toFixed(2) + 'x' : '—';
+tvEl.className = 'hdr-val ' + (_tc.vr >= 1.2 ? 'green' : '');
+
+const bvEl = document.getElementById('hBounceVr');
+bvEl.textContent = _bc.vr != null ? _bc.vr.toFixed(2) + 'x' : '—';
+bvEl.className = 'hdr-val ' + (_bc.vr >= 1.2 ? 'green' : '');
+
+const evEl = document.getElementById('hEntryVr');
+evEl.textContent = _ec.vr != null ? _ec.vr.toFixed(2) + 'x' : '—';
+evEl.className = 'hdr-val ' + (_ec.vr >= 1.2 ? 'green' : '');
+
+const slope = parseFloat(signal.slope);
+const slopeEl = document.getElementById('hSlope');
+slopeEl.textContent = isNaN(slope) ? '—' : (slope > 0 ? '+' : '') + slope.toFixed(3) + '%';
+slopeEl.className = 'hdr-val ' + (slope > 0.05 ? 'green' : slope < -0.05 ? 'red' : '');
+
+const pnl = parseFloat(signal.pnl);
+const pnlEl = document.getElementById('hPnl');
+pnlEl.textContent = isNaN(pnl) ? '—' : (pnl >= 0 ? '+' : '') + pnl.toFixed(2);
+pnlEl.className = 'hdr-val ' + (pnl > 0 ? 'green' : pnl < 0 ? 'red' : '');
+
+// Compute numeric values from candle snapshots
+const tc = signal.candle_touch  || null;
+const t3 = signal.candle_t3    || null;
+const bc = signal.candle_bounce || null;
+const ec = signal.candle_entry  || null;
+const sameCandle = signal.touch_idx === signal.bounce_idx;
+
+function pct(v) { return v !== null && !isNaN(v) ? (v * 100).toFixed(2) + '%' : '—'; }
+function fx(v, dec=2) { return v !== null && !isNaN(v) ? v.toFixed(dec) : '—'; }
+
+function computeValue(num) {
+    switch(num) {
+        case '01': return tc && tc.sl !== null ? {txt: (tc.sl > 0 ? '+' : '') + fx(tc.sl, 3) + '%', cls: tc.sl > 0.05 ? 'val-pos' : 'val-neg'} : {txt:'—', cls:'val-na'};
+        case '02': return t3 && t3.sl !== null ? {txt: (t3.sl > 0 ? '+' : '') + fx(t3.sl, 3) + '%', cls: t3.sl > 0.05 ? 'val-pos' : 'val-neg'} : {txt:'N/A', cls:'val-na'};
+        case '03': return {txt: '—', cls: 'val-na'};
+        case '04': return {txt: '—', cls: 'val-na'};
+        case '05': if (!tc || tc.ma === null || tc.atr === null) return {txt:'—', cls:'val-na'};
+                   const sd = (tc.ma - tc.l) / tc.atr;
+                   return {txt: fx(sd, 3) + ' ATR', cls: sd < 0.5 ? 'val-pos' : sd > 1.0 ? 'val-neg' : 'val-neu'};
+        case '06': if (!tc) return {txt:'—', cls:'val-na'};
+                   const rng06 = tc.h - tc.l; if (rng06 === 0) return {txt:'—', cls:'val-na'};
+                   const bp = Math.abs(tc.c - tc.o) / rng06 * 100;
+                   return {txt: fx(bp, 1) + '%', cls: bp > 40 ? 'val-neg' : 'val-pos'};
+        case '07': if (!tc || tc.ma == null) return {txt:'—', cls:'val-na'};
+                   const wickAbove = Math.min(tc.o, tc.c) - tc.ma;
+                   const wickBelow = tc.ma - tc.l;
+                   if (wickBelow <= 0) return {txt:'no overshoot', cls:'val-pos'};
+                   const wdr = wickAbove / wickBelow;
+                   return {txt: fx(wdr, 2), cls: wdr >= 1 ? 'val-pos' : 'val-neg'};
+        case '08': return bc && bc.vr !== null ? {txt: fx(bc.vr, 2) + 'x', cls: bc.vr >= 1.2 ? 'val-pos' : 'val-neg'} : {txt:'—', cls:'val-na'};
+        case '09': if (sameCandle) return {txt:'N/A (same candle)', cls:'val-na'};
+                   if (!bc || !tc || bc.vr === null || tc.vr === null || tc.vr === 0) return {txt:'—', cls:'val-na'};
+                   const ratio = bc.vr / tc.vr;
+                   return {txt: fx(ratio, 2) + 'x', cls: ratio > 1 ? 'val-pos' : 'val-neg'};
+        case '10': return {txt: sameCandle ? 'Yes (same candle)' : 'No', cls: sameCandle ? 'val-pos' : 'val-neu'};
+        case '11': if (!ec || !bc) return {txt:'—', cls:'val-na'};
+                   const diff11 = ec.c - bc.c;
+                   return {txt: (diff11 >= 0 ? '+' : '') + fx(diff11, 2), cls: diff11 > 0 ? 'val-pos' : 'val-neg'};
+        case '12': if (!ec || !bc || bc.vr === null || ec.vr === null || bc.vr === 0) return {txt:'—', cls:'val-na'};
+                   const ratio12 = ec.vr / bc.vr;
+                   return {txt: fx(ratio12, 2) + 'x', cls: ratio12 > 1 ? 'val-pos' : 'val-neg'};
+        default: return {txt:'—', cls:'val-na'};
+    }
+}
+
+// Build param table
+const tbody = document.getElementById('paramTable');
+PARAMS.forEach(p => {
+    const val = computeValue(p.num);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td class="param-num">#${p.num}</td>
+        <td class="param-name">${p.name}</td>
+        <td class="param-gate"><span class="gate-badge gate-${p.gate}">${p.gate}</span></td>
+        <td class="param-desc">${p.desc}</td>
+        <td class="param-formula">${p.formula}</td>
+        <td class="param-value"><span class="${val.cls}">${val.txt}</span></td>
+        <td class="param-verdict">
+            <select class="verdict-sel" id="v${p.num}" onchange="styleVerdict(this)">
+                ${VERDICTS.map(v => `<option value="${v}">${v || '— select —'}</option>`).join('')}
+            </select>
+        </td>
+        <td class="param-comment"><input class="comment-input" id="c${p.num}" type="text" placeholder=""></td>
+    `;
+    tbody.appendChild(tr);
+});
+
+function styleVerdict(sel) {
+    sel.className = 'verdict-sel ' + (sel.value === 'N/A' ? 'na' : sel.value);
+}
+
+// File System Access API — persist directory handle in IndexedDB
+let dirHandle = null;
+
+function idbOpen() {
+    return new Promise((res, rej) => {
+        const req = indexedDB.open('fv2-fs', 1);
+        req.onupgradeneeded = e => e.target.result.createObjectStore('handles');
+        req.onsuccess = e => res(e.target.result);
+        req.onerror = e => rej(e);
+    });
+}
+async function idbGet(key) {
+    const db = await idbOpen();
+    return new Promise((res, rej) => {
+        const tx = db.transaction('handles', 'readonly');
+        const req = tx.objectStore('handles').get(key);
+        req.onsuccess = () => res(req.result);
+        req.onerror = () => res(null);
+    });
+}
+async function idbSet(key, val) {
+    const db = await idbOpen();
+    return new Promise((res, rej) => {
+        const tx = db.transaction('handles', 'readwrite');
+        tx.objectStore('handles').put(val, key);
+        tx.oncomplete = () => res();
+        tx.onerror = () => res();
+    });
+}
+
+async function getDir() {
+    if (dirHandle) return dirHandle;
+    // Try stored handle first
+    const stored = await idbGet('analysis-dir');
+    if (stored) {
+        const perm = await stored.requestPermission({ mode: 'readwrite' });
+        if (perm === 'granted') { dirHandle = stored; return dirHandle; }
+    }
+    // Fall back to picker
+    try {
+        dirHandle = await window.showDirectoryPicker({ mode: 'readwrite', id: 'analysis-folder' });
+        await idbSet('analysis-dir', dirHandle);
+        return dirHandle;
+    } catch(e) {
+        return null;
+    }
+}
+
+async function submitReview() {
+    const outcome = document.getElementById('outcomeSelect').value;
+    if (!outcome) { showStatus('Select an outcome first.', 'err'); return; }
+
+    // Check all verdicts filled
+    const missing = PARAMS.filter(p => !document.getElementById('v' + p.num).value);
+    if (missing.length) { showStatus('Fill in all 12 verdicts before submitting.', 'err'); return; }
+
+    document.getElementById('submitBtn').disabled = true;
+    showStatus('Requesting folder access...', '');
+
+    const dir = await getDir();
+    if (!dir) { showStatus('Folder access denied or cancelled.', 'err'); document.getElementById('submitBtn').disabled = false; return; }
+
+    // Build markdown block
+    const stock = signal.stock || 'UNKNOWN';
+    const date  = signal.date  || '—';
+    const touch = signal.touch_time  || '—';
+    const bounce= signal.bounce_time || '—';
+    const entry = signal.entry_time  || '—';
+    const finalComment = document.getElementById('finalComment').value.trim();
+
+    // Signal log row
+    const g1 = [v('01'), v('02'), v('03'), v('04')].join('');
+    const g2 = [v('05'), v('06'), v('07'), v('08'), v('09'), v('10')].join('');
+    const g3 = [v('11'), v('12')].join('');
+    const notes = finalComment || '—';
+
+    // Detail table
+    let detailRows = '';
+    PARAMS.forEach(p => {
+        const verdict = document.getElementById('v' + p.num).value;
+        const comment = document.getElementById('c' + p.num).value.trim();
+        detailRows += `| ${p.num} | ${p.name} | ${p.gate} | ${verdict} | ${comment || '—'} |\n`;
+    });
+
+    const block = `
+### Signal — ${date} ${touch} (T) ${bounce} (B) ${entry} (E)
+**Stock:** ${stock} | **Outcome:** ${outcome}
+
+| # | Param | Gate | Verdict | Comment |
+|---|-------|------|---------|---------|
+${detailRows}
+**Final comment:** ${finalComment || '—'}
+
+---
+`;
+
+    // Read existing file and append row to log table + add detail block
+    const fileName = `fv2_signals_${stock}.md`;
+    try {
+        let fileHandle;
+        try {
+            fileHandle = await dir.getFileHandle(fileName, { create: false });
+        } catch(e) {
+            fileHandle = await dir.getFileHandle(fileName, { create: true });
+        }
+
+        const existing = await (await fileHandle.getFile()).text();
+
+        // Find the last row in the signal log table to get next signal number
+        // Only match signal log rows (non-zero-padded numbers followed by stock name in caps)
+        const rowMatches = [...existing.matchAll(/^\| *([1-9][0-9]*) *\| *[A-Z]{4,}/gm)];
+        const nextNum = rowMatches.length > 0 ? Math.max(...rowMatches.map(m => parseInt(m[1]))) + 1 : 1;
+
+        // Build log row
+        const logRow = `| ${nextNum} | ${stock} | ${date} | ${touch} | ${bounce} | ${entry} | ${outcome} | ${g1} | ${g2} | ${g3} | ${notes} |\n`;
+
+        // Insert log row before the first '---' separator after the table header
+        let updated;
+        const sepIdx = existing.indexOf('\n---\n');
+        if (sepIdx !== -1) {
+            // Find last table row before separator
+            const tableEnd = existing.lastIndexOf('|\n', sepIdx) + 2;
+            updated = existing.slice(0, tableEnd) + logRow + existing.slice(tableEnd);
+        } else {
+            updated = existing + '\n' + logRow;
+        }
+
+        // Append detail block at end
+        updated = updated.trimEnd() + '\n' + block;
+
+        const writable = await fileHandle.createWritable();
+        await writable.write(updated);
+        await writable.close();
+
+        showStatus(`Saved to ${fileName} — signal #${nextNum} logged.`, 'ok');
+    } catch(e) {
+        showStatus('Write error: ' + e.message, 'err');
+        document.getElementById('submitBtn').disabled = false;
+        return;
+    }
+
+    document.getElementById('submitBtn').disabled = false;
+}
+
+function v(num) {
+    const val = document.getElementById('v' + num).value;
+    if (val === 'pass') return '✅';
+    if (val === 'weak') return '⚠️';
+    if (val === 'fail') return '❌';
+    return 'N/A';
+}
+
+function showStatus(msg, cls) {
+    const el = document.getElementById('statusMsg');
+    el.textContent = msg;
+    el.className = 'status-msg ' + cls;
+}
+</script>
+</body>
+</html>

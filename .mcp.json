@@ -2,10 +2,23 @@
   "mcpServers": {
     "kite": {
       "command": "npx",
-      "args": [
-        "mcp-remote",
-        "https://mcp.kite.trade/mcp"
-      ]
+      "args": ["mcp-remote", "https://mcp.kite.trade/mcp"]
+    },
+    "rss-reader": {
+      "command": "npx",
+      "args": ["-y", "rss-reader-mcp"]
+    },
+    "obsidian": {
+      "command": "node",
+      "args": ["C:/Users/Saurav/AppData/Local/npm-cache/_npx/fef731b619fd78c6/node_modules/mcp-obsidian/dist/index.js", "C:/Users/Saurav/CodePonting"]
+    },
+    "tradingview": {
+      "command": "node",
+      "args": ["C:/Users/Saurav/tradingview-mcp-jackson/src/server.js"]
+    },
+    "youtube-transcript": {
+      "command": "npx",
+      "args": ["-y", "@kimtaeyoon83/mcp-server-youtube-transcript"]
     }
   }
 }

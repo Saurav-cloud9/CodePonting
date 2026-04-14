@@ -1,6 +1,7 @@
 # CodePonting — Project Structure
 
-**Main Strategy:** MA Bounce Bot — detects MA20 touches on 5-min candles with volume confirmation (1.2× avg) and 15-min bounce window for 30 NSE F&O stocks.
+**Status:** fv1 CLOSED (2026-03-25). fv2 ACTIVE — true MA bounce redesign, TATAMOTORS 5-min, Gap 1 implemented.
+**Strategy:** MA Bounce — 6 classic bounce criteria (fv2). fv1 was proximity detector, not true bounce.
 
 **API Integrations:** Upstox (live trading) · Zerodha Kite (via MCP server)
 
@@ -172,27 +173,44 @@ Live      →  Upstox API adapter    +  Event clock     +  Live Upstox broker
 | `trades/carry_over_diagnostic.csv` | Position carry-over diagnostics |
 | `trades/equity.csv` | Equity curve data |
 
-#### Framework_V1_Sandbox/
+#### Framework_V1_Sandbox/ — CLOSED ❌
 
-Mirror of Framework_V1 structure for experimental changes without breaking production code. Includes `fv1_strategy_review.md` and fast backtest variants.
+Closed alongside fv1 (2026-03-25). All experiments complete. Read-only reference.
+
+Key outputs:
+- `bqs_trades.parquet` — 28,085 trades, 38 cols (R1+R2 BQS metrics)
+- `bqs_filter_cagr.py` — 9-filter CAGR replay, F4 best (+0.62% raw, -Rs62k after Upstox)
+- `BQS_DECISIONS.md` — charge formulas, w1/w2/w3 definitions, all 19 metric verdicts
+- DT/RF scripts: `bqs_dt_rf.py`, `bqs_leaf_analysis.py`
 
 ---
 
-### Framework_V2/ — Next-Gen Framework (WIP)
+### Framework_V2/ — ACTIVE DEVELOPMENT ✅
 
-Cleaner, leaner rewrite of Framework_V1. Same adapter/core architecture, streamlined.
+True MA bounce redesign. Same adapter/core architecture as fv1. TATAMOTORS-only for now.
 
-| Component | Description |
-|-----------|-------------|
-| `core/` | Same modules as V1 (engine, strategy, portfolio, indicators, metrics) |
-| `adapters/` | Same adapter pattern (broker, clock, data) |
-| `configs/` | YAML configs (backtest, paper, live) |
-| `data/` | Same 30-stock historical data structure |
-| `scripts/` | compute_indicators, download_data, run_backtest, std_analysis |
-| `research/` | optuna_runner, stress_test, walk_forward |
-| `sql/` | SQL database handling |
-| `Notebooks/` | Jupyter notebooks |
-| `fv2_structure.txt` | Directory tree documentation |
+#### data/historical/csv/intraday_5min/
+
+| File | Description |
+|------|-------------|
+| `TATAMOTORS_5min.csv` | 73,174 rows, 7 cols + outcome columns |
+| | Cols: open, high, low, close, volume, ma20 |
+| | Outcome cols: signal_type, exit_reason, raw_pnl, win |
+| | Coverage: 2022–2025, MA20 pre-warmed (0 NaN) |
+| | Signals: 1,511 total — rising 319, flat 458, falling 734 |
+
+#### outputs/reports/
+
+| File | Description |
+|------|-------------|
+| `fv2_signal_viewer.html` | HTML1 — signal viewer, Gap 1 toggle, year/month/day navigator |
+| `fv2_calculator.html` | HTML2 — Panel A vs B calculator, delta bar, slope breakdown |
+| | Panel A (all signals): CAGR -172%, MDD -169%, PF 0.77, WR 16.4% |
+| | Panel B (rising only): CAGR -2.07%, MDD -17.88%, PF 0.95, WR 20.4% |
+
+#### core/ / adapters/ / configs/ / scripts/ / research/
+
+Same structure as Framework_V1 — scaffolded, active development.
 
 ---
 
@@ -254,4 +272,4 @@ Cleaner, leaner rewrite of Framework_V1. Same adapter/core architecture, streaml
 
 ---
 
-*Last updated: 2026-03-03*
+*Last updated: 2026-03-27*

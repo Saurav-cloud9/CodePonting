@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "py C:/Users/Saurav/CodePonting/.claude/hooks/log_modified.py"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "py C:/Users/Saurav/CodePonting/.claude/hooks/scan_modified.py"
+          }
+        ]
+      }
+    ]
+  }
+}

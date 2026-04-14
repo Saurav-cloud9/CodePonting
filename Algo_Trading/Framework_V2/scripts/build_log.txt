@@ -1,0 +1,27 @@
+Building H1 data for 30 stocks...
+  ADANIPORTS       days= 978  signals= 2980  R= 835(28%)  L=1148  F= 997
+  ASHOKLEY         days= 978  signals= 3202  R= 942(29%)  L=1314  F= 946
+  AXISBANK         days= 978  signals= 3377  R= 904(27%)  L=1550  F= 923
+  BAJFINANCE       days= 977  signals= 3186  R= 833(26%)  L=1463  F= 890
+  BANDHANBNK       days= 978  signals= 3038  R= 928(31%)  L=1083  F=1027
+  BHARTIARTL       days= 978  signals= 3337  R= 899(27%)  L=1589  F= 849
+  CIPLA            days= 912  signals= 3211  R= 855(27%)  L=1503  F= 853
+  COALINDIA        days= 978  signals= 3262  R= 934(29%)  L=1445  F= 883
+  DABUR            days= 978  signals= 3485  R= 960(28%)  L=1649  F= 876
+  DIVISLAB         days= 978  signals= 3303  R= 930(28%)  L=1406  F= 967
+  HDFCBANK         days= 978  signals= 3409  R= 794(23%)  L=1849  F= 766
+  HINDALCO         days= 978  signals= 2972  R= 880(30%)  L=1121  F= 971
+  ICICIBANK        days= 978  signals= 3447  R= 919(27%)  L=1684  F= 844
+  INDUSINDBK       days= 978  signals= 3306  R= 964(29%)  L=1282  F=1060
+  INFY             days= 978  signals= 3171  R= 791(25%)  L=1570  F= 810
+  ITC              days= 978  signals= 3552  R= 847(24%)  L=1903  F= 802
+  JSWSTEEL         days= 978  signals= 3256  R=1003(31%)  L=1228  F=1025
+  NATIONALUM       days= 978  signals= 3185  R=1022(32%)  L=1048  F=1115
+  NTPC             days= 978  signals= 3399  R= 967(28%)  L=1411  F=1021
+  ONGC             days= 978  signals= 3320  R= 896(27%)  L=1478  F= 946
+  PNB              days= 978  signals= 3298  R= 972(29%)  L=1260  F=1066
+  POWERGRID        days= 978  signals= 3295  R= 932(28%)  L=1450  F= 913
+  RELIANCE         days= 978  signals= 3082  R= 724(23%)  L=1578  F= 780
+  SBIN             days= 978  signals= 3207  R= 764(24%)  L=1577  F= 866
+  SUNPHARMA        days= 978  signals= 3456  R= 970(28%)  L=1611  F= 875
+  TATAMOTORS       days= 978  signals= 2826  R= 708(25%)  L=1205  F= 913

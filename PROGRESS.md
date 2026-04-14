@@ -1,20 +1,18 @@
-# PROGRESS.md — CodePonting fv1 Sandbox
-# One line per completed step. Status only. No lengthy details.
-# Update: add new line at bottom when a step completes.
+# PROGRESS.md — CodePonting
+# Two views, 5 pointers each. Update both on every SS.
+# Full history → PROGRESS_HISTORY.md
 # ─────────────────────────────────────────────────────────────
 
-Step 1    ✅  fv1 code review — 13 verdicts documented in fv1_pending_changes.md
-Step 2    ✅  Sandbox blockers implemented (Changes 1–6)
-Step 3.1  ✅  16-combo brute-force feature sweep
-Step 3.2  ✅  SL variant Optuna — winner: SL=A, PG+CP+AF, CAGR=-2.15% (DS3)
-Step 3.3  ✅  Slippage + charges merged — baseline: -8.62% raw CAGR
-Step 4.1  ✅  Regime filter Optuna 2022–2025 — overfit (PF9+TF4, zero trades 2015–2020)
-Step 4.2  ✅  Regime filter Optuna 2015–2025 — exhausted, no viable regime signal found
-Step 4.3  ✅  BQS export: 9 metrics on 28,085 trades; M5/M6/M8 = HIGH signal
-Step 4.3b ✅  BQS validation: all 9 metrics ROBUST on 2015-2025 (77,028 trades)
+── RECENT (last 5 steps) ────────────────────────────────────
+1. H1.1 hardened — IndexedDB folder persistence, row counter bug fixed ([A-Z]{4,})
+2. wick_defence_ratio implemented — replaces lower_wick_pct; formula (min(O,C)−MA)/(MA−low)
+3. POWERGRID signals fixed — #9 corrected (was #13), #1 reviewed and logged, table reordered
+4. TATAMOTORS signal review started — #1 and #2 logged via H1.1
+5. H1.1 output cleaned — Final comment no longer duplicated in detail section
 
-── DATA & INFRA ──────────────────────────────────────────────
-DS3 migration  ✅  All 13 sandbox scripts migrated to intraday_5min_DS3
-Daily data     ✅  Built from DS3 5-min resample (2015–2025) + yfinance warmup for 28/29 stocks
-CLAUDE.md      ✅  Updated with full master plan, baselines, sandbox config, clarification protocol
-CLAUDE.md      ✅  Added PROGRESS/TODO protocol + context file links
+── MILESTONES (5 most important) ────────────────────────────
+1. fv2 direction locked — 5 structural gaps vs true MA bounce; fv1 closed (charges = 3.4× profit)
+2. Gap 1 done — slope filter: PF 0.77→0.95, CAGR -172%→-2.07% across 30-stock universe
+3. Gap 1 insufficient — H3 analysis: zero combos stable+profitable; Gap 2+3 needed for edge
+4. H4 built ✅ — G2+G3 combined; shoot_depth+body_pct = real G2 edge
+5. fv2 codebase audited + all bugs fixed; 29-stock CSV rebuild complete; H5 next

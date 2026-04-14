@@ -307,6 +307,19 @@ def time_int_to_mins(t_int):
     return (t_int // 100) * 60 + (t_int % 100)
 
 
+def _charges_vec(entry, exit_price, qty, bkr_rate):
+    """Vectorized round-trip NSE intraday charges (from core/portfolio.py)."""
+    buy_val   = entry      * qty
+    sell_val  = exit_price * qty
+    brokerage = np.minimum(buy_val * bkr_rate, 20.0) + np.minimum(sell_val * bkr_rate, 20.0)
+    stt       = sell_val * 0.00025
+    exchange  = (buy_val + sell_val) * 0.0000345
+    sebi      = (buy_val + sell_val) * 0.000001
+    gst       = (brokerage + exchange + sebi) * 0.18
+    stamp     = buy_val * 0.00003
+    return brokerage + stt + exchange + sebi + gst + stamp
+
+
 # ── STEP 4: COMPUTE BQS METRICS ─────────────────────────────────────────────────
 print("Step 4: Computing BQS metrics...", flush=True)
 
@@ -403,10 +416,38 @@ for rec in all_trades:
     })
 
 df_bqs = pd.DataFrame(rows)
-# Drop internal index columns not needed in output
-df_bqs = df_bqs.drop(columns=["touch_idx", "bounce_idx"])
+df_bqs = df_bqs.rename(columns={
+    "touch_idx":  "raw_touch_idx",
+    "bounce_idx": "raw_bounce_idx",
+})
 
 print(f"  {len(df_bqs):,} trades enriched with BQS metrics", flush=True)
+
+
+# ── STEP 4.5: COMPUTE CHARGES + w2/w3 ───────────────────────────────────────────
+print("Step 4.5: Computing charges and winner labels (w2/w3)...", flush=True)
+
+ep_arr  = df_bqs["entry_price"].to_numpy()
+xp_arr  = df_bqs["exit_price"].to_numpy()
+qty_arr = df_bqs["qty"].to_numpy()
+pnl_arr = df_bqs["pnl"].to_numpy()
+
+charges_upstox = _charges_vec(ep_arr, xp_arr, qty_arr, 0.0005)
+charges_kite   = _charges_vec(ep_arr, xp_arr, qty_arr, 0.0003)
+
+df_bqs["net_pnl_upstox"] = pnl_arr - charges_upstox
+df_bqs["net_pnl_kite"]   = pnl_arr - charges_kite
+df_bqs["w2"]             = (df_bqs["net_pnl_upstox"] > 0).astype(int)
+df_bqs["w3"]             = (df_bqs["net_pnl_kite"]   > 0).astype(int)
+
+n_total  = len(df_bqs)
+w1_count = int(df_bqs["winner"].sum())
+w2_count = int(df_bqs["w2"].sum())
+w3_count = int(df_bqs["w3"].sum())
+
+print(f"  w1 (target hit)  : {w1_count:,}  ({w1_count/n_total*100:.1f}%)", flush=True)
+print(f"  w2 (net upstox)  : {w2_count:,}  ({w2_count/n_total*100:.1f}%)", flush=True)
+print(f"  w3 (net kite)    : {w3_count:,}  ({w3_count/n_total*100:.1f}%)", flush=True)
 
 
 # ── STEP 5: EXPORT ───────────────────────────────────────────────────────────────

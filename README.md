@@ -1,23 +1,38 @@
-# MA Bounce Bot - Algorithmic Trading System
+# CodePonting — Algorithmic Trading System
 
-Automated intraday trading bot implementing the Moving Average Bounce strategy on Indian F&O stocks.
+MA Bounce strategy research and development for NSE F&O stocks.
 
-## Overview
+## Status
 
-MA Bounce Bot detects price bounces off the 20-period Moving Average (MA20) on 5-minute timeframes and executes trades with automated position management.
+| Framework | Status | Notes |
+|-----------|--------|-------|
+| Framework_V0 | ⛔ Archived | Legacy bot v0.1–v1 |
+| Framework_V1 | ❌ Closed (2026-03-25) | Signal insufficient, charges 3.4× raw profit |
+| Framework_V1_Sandbox | ❌ Closed | BQS + DT/RF exhausted, no viable filter |
+| **Framework_V2** | ✅ **Active** | Signal redesign, Gap 1 done, raw edge target |
 
-**Current Version:** v1.3 (Enhanced Signal Logging)  
-**Strategy:** TRUE bounce detection (touch + bounce confirmation within 15-minute window)  
+**Active Work:** fv2 signal redesign — TATAMOTORS 5-min, Gap 1 implemented (rising slope filter).  
+Gap 1 result: CAGR -172% → -2.07%, MDD -169% → -17.88%, PF 0.77 → 0.95  
+Next: improve raw edge from PF 0.95 → >1.01
+
 **Market:** NSE F&O stocks  
 **Trading Hours:** 9:30 AM - 3:00 PM IST
 
-## Core Strategy
+## fv2 Signal Design (Active)
 
-The bot identifies opportunities where:
-1. Price touches MA20 (low ≤ MA20)
-2. Price bounces above MA20 within 3 candles (15-minute window)
-3. Volume exceeds 1.2x average
-4. Entry with 1.5% target and 0.5% stop loss
+True MA bounce — 6 classic bounce criteria addressing fv1's structural gaps:
+- Gap 1 ✅ Trend context — rising slope filter applied
+- Gap 2   Pullback quality — depth/structure (pending)
+- Gap 3   Touch precision — exact vs proximity (pending)
+- Gap 4   Volume signature — quality not just threshold (pending)
+- Gap 5   Follow-through confirmation (pending)
+
+## fv1 Signal (Closed — reference only)
+
+1. Price touches MA20 (low ≤ MA20) — proximity detector, not true bounce
+2. Volume confirmation: 1.2× average
+3. ATR-based SL (SL=A), 1.8R target
+4. Verdict: 28,085 trades/4yr, charges killed every filter variant
 
 ## Top Performing Stocks (48-Month Validation)
 
@@ -117,24 +132,20 @@ CodePonting/
 └── README.md                            # This file
 ```
 
-## Roadmap
+## fv2 Roadmap
 
-### v1.4 - Bounce Quality Score (In Progress)
-- [ ] Implement 0-100 scoring system
-- [ ] Volume ratio (40 pts)
-- [ ] Momentum strength (30 pts)
-- [ ] Time remaining (20 pts)
-- [ ] Wick pattern analysis (10 pts)
+### Signal Gaps (active)
+- [x] Gap 1 — Rising slope filter
+- [ ] Gap 2–5 — Pullback, touch, volume, follow-through
+- [ ] HTML3 — Slope offset tuner (T-3 to T+2, WFA folds)
 
-### v1.5 - Advanced Filters
-- [ ] Nifty regime detection (trending vs sideways)
-- [ ] Time window optimization (avoid 11 AM - 2 PM chop)
-- [ ] Multi-timeframe confirmation
+### Scale
+- [ ] Expand TATAMOTORS signal to all 29 DS3 stocks
+- [ ] Aggregate view across universe
 
-### Future Enhancements
-- [ ] Trailing stop-loss
-- [ ] SHORTING capability for downtrends
-- [ ] Machine learning signal validation (700+ trade dataset required)
+### Future
+- [ ] Paper trading once PF > 1.1 confirmed OOS
+- [ ] Live trading via Upstox adapter
 
 ## Backtesting Results
 
@@ -176,7 +187,7 @@ Private repository - Not for distribution
 ## Author
 
 **Saurav (CodePonting)**  
-Algorithmic Trader | Python Developer | Strategy Researcher
+Quant | Algorithmic Trader | Python Developer | Strategy Researcher
 
 *Built in Dehradun with Claude AI assistance*
 
