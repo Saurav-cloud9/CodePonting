@@ -193,7 +193,7 @@ Contributions welcome! Areas of focus:
 
 ## License
 
-Private repository - Not for distribution
+Open Source — Research & Educational purposes
 
 ## Author
 
