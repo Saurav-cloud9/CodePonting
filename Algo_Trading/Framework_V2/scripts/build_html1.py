@@ -67,14 +67,15 @@ def build_stock_data(stock: str) -> dict:
         else:
             df['vol_ma20'] = df['volume'].rolling(20).mean()
 
-    # ATR14: True Range rolling mean (global, no per-day reset)
+    # ATR14: Wilder's RMA (matches Pine ta.atr(14)) — global, no per-day reset
     prev_close = df['close'].shift(1)
     tr = pd.concat([
         df['high'] - df['low'],
         (df['high'] - prev_close).abs(),
         (df['low']  - prev_close).abs(),
     ], axis=1).max(axis=1)
-    df['atr14'] = tr.rolling(14).mean()
+    alpha = 1 / 14
+    df['atr14'] = tr.ewm(alpha=alpha, adjust=False).mean()
 
     # Slope: 5-candle change in MA20 (global context, not per-day)
     df['slope'] = (df['ma20'] - df['ma20'].shift(5)) / df['ma20'] * 100
@@ -271,7 +272,9 @@ canvas{display:block;width:100%}
 .tooltip .tt-val{color:var(--fg);font-weight:500}
 .crosshair-x,.crosshair-y{position:absolute;background:var(--fg3);pointer-events:none;display:none}
 .crosshair-x{width:1px;top:0;bottom:0;opacity:0.3}
-.crosshair-y{height:1px;left:0;right:0;opacity:0.3}"""
+.crosshair-y{height:1px;left:0;right:0;opacity:0.3}
+.review-btn{margin-top:10px;width:100%;background:#1e2a3a;border:1px solid #2a5a8a;color:#60a5fa;padding:7px 0;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;transition:all .15s}
+.review-btn:hover{background:#2a3a4a;color:#93c5fd}"""
 
 
 # ── HTML body (topbar with stock dropdown added) ───────────────────────────────
@@ -296,6 +299,7 @@ BODY = f"""<div class="layout">
 <button class="nav-btn" onclick="goToDate()">Go</button>
 </div>
 <button class="nav-btn" onclick="navDay(1)">Next &#9654;</button>
+<button class="nav-btn" onclick="resetZoom()" title="Reset zoom to full day">1:1</button>
 <div class="toggle-wrap">
 <div class="toggle on" id="slopeToggle" onclick="toggleSlope()"><div class="knob"></div></div>
 <span class="toggle-label" id="toggleLabel">Gap 1: Slope filter ON</span>
@@ -344,6 +348,7 @@ BODY = f"""<div class="layout">
 <div class="sd-row"><span class="sd-label">SL</span><span class="sd-val" id="sdSL">—</span></div>
 <div class="sd-row"><span class="sd-label">Target</span><span class="sd-val" id="sdTgt">—</span></div>
 <div class="sd-row"><span class="sd-label">Type</span><span class="sd-val" id="sdType">—</span></div>
+<button class="review-btn" onclick="openReview()">&#9998; Review in H1.1</button>
 </div>
 </div>
 <div class="legend">
@@ -374,23 +379,31 @@ const ctx = canvas.getContext('2d');
 const chartArea = document.getElementById('chartArea');
 const tooltip = document.getElementById('tooltip');
 const crossX = document.getElementById('crossX');
+const crossY = document.getElementById('crossY');
+let zoomStart = 0, zoomEnd = 0;
+let isPanning = false, panStartX = 0, panStartZoomStart = 0, panStartZoomEnd = 0;
 
 // ── Event listeners — placed early so browser registers them before parsing large data block ──
 chartArea.addEventListener('mousemove', e => {
+    if (isPanning) return;
+    if (!W || !plotH || !plotW) return;
     const rect = chartArea.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
     if (mx < PAD.left || mx > W - PAD.right || my < PAD.top || my > PAD.top + plotH) {
         tooltip.style.display = 'none'; crossX.style.display = 'none'; crossY.style.display = 'none'; return;
     }
-    const n = candles.length;
+    const n = zoomEnd - zoomStart;
+    if (n <= 0) return;
     const cw = plotW / n;
     const idx = Math.floor((mx - PAD.left) / cw);
     if (idx < 0 || idx >= n) return;
-    const c = candles[idx];
+    const fullIdx = zoomStart + idx;
+    const c = candles[fullIdx];
+    if (!c) return;
     crossX.style.display = 'block'; crossX.style.left = (PAD.left + idx * cw + cw/2) + 'px';
     crossY.style.display = 'block'; crossY.style.top = my + 'px';
-    let html = '<div class="tt-row"><span class="tt-label">Time</span><span class="tt-val">' + timeLabel(idx) + '</span></div>';
+    let html = '<div class="tt-row"><span class="tt-label">Time</span><span class="tt-val">' + timeLabel(fullIdx) + '</span></div>';
     html += '<div class="tt-row"><span class="tt-label">O</span><span class="tt-val">' + c.o.toFixed(2) + '</span></div>';
     html += '<div class="tt-row"><span class="tt-label">H</span><span class="tt-val">' + c.h.toFixed(2) + '</span></div>';
     html += '<div class="tt-row"><span class="tt-label">L</span><span class="tt-val">' + c.l.toFixed(2) + '</span></div>';
@@ -412,12 +425,53 @@ chartArea.addEventListener('mouseleave', () => {
     tooltip.style.display = 'none'; crossX.style.display = 'none'; crossY.style.display = 'none';
 });
 
+chartArea.addEventListener('wheel', e => {
+    e.preventDefault();
+    if (!candles.length) return;
+    const total = candles.length;
+    const viewLen = zoomEnd - zoomStart;
+    const rect = chartArea.getBoundingClientRect();
+    const frac = Math.max(0, Math.min(1, (e.clientX - rect.left - PAD.left) / plotW));
+    const center = zoomStart + Math.round(frac * viewLen);
+    const step = Math.max(1, Math.floor(viewLen * 0.15));
+    const delta = e.deltaY > 0 ? step : -step;
+    const newLen = Math.max(5, Math.min(total, viewLen + delta));
+    let ns = Math.max(0, Math.round(center - newLen * frac));
+    let ne = ns + newLen;
+    if (ne > total) { ne = total; ns = Math.max(0, ne - newLen); }
+    zoomStart = ns; zoomEnd = ne;
+    draw();
+}, {passive: false});
+
+chartArea.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    isPanning = true;
+    panStartX = e.clientX;
+    panStartZoomStart = zoomStart;
+    panStartZoomEnd = zoomEnd;
+    chartArea.style.cursor = 'grabbing';
+    e.preventDefault();
+});
+document.addEventListener('mousemove', e => {
+    if (!isPanning) return;
+    const viewLen = panStartZoomEnd - panStartZoomStart;
+    const cw = plotW / viewLen;
+    const delta = Math.round((panStartX - e.clientX) / cw);
+    const total = candles.length;
+    let ns = Math.max(0, Math.min(total - viewLen, panStartZoomStart + delta));
+    zoomStart = ns; zoomEnd = ns + viewLen;
+    draw();
+});
+document.addEventListener('mouseup', () => {
+    if (isPanning) { isPanning = false; chartArea.style.cursor = 'default'; }
+});
+
 document.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft') navDay(-1);
     if (e.key === 'ArrowRight') navDay(1);
     if (e.key === 'f' || e.key === 'F') toggleSlope();
+    if (e.key === 'Escape') resetZoom();
 });
-const crossY = document.getElementById('crossY');
 
 const volCanvas = document.getElementById('volCanvas');
 const vctx = volCanvas.getContext('2d');
@@ -461,6 +515,7 @@ function loadDay(idx) {
     candles = parseDay(date);
     daySigs = DATA.s[date] || [];
     selectedSig = -1;
+    zoomStart = 0; zoomEnd = candles.length;
     document.getElementById('dateDisplay').textContent = date;
     updateSidebar();
     draw();
@@ -642,15 +697,17 @@ function timeLabel(idx) {
 
 function draw() {
     if (!candles.length) return;
+    if (zoomEnd <= zoomStart) { zoomStart = 0; zoomEnd = candles.length; }
     ctx.clearRect(0, 0, W, H);
     drawVol();
 
+    const viewCandles = candles.slice(zoomStart, zoomEnd);
     let lo = Infinity, hi = -Infinity;
-    candles.forEach(c => { if (c.l < lo) lo = c.l; if (c.h > hi) hi = c.h; if (c.ma && c.ma < lo) lo = c.ma; if (c.ma && c.ma > hi) hi = c.ma; });
+    viewCandles.forEach(c => { if (c.l < lo) lo = c.l; if (c.h > hi) hi = c.h; if (c.ma && c.ma < lo) lo = c.ma; if (c.ma && c.ma > hi) hi = c.ma; });
     const margin = (hi - lo) * 0.08;
     lo -= margin; hi += margin;
 
-    const n = candles.length;
+    const n = viewCandles.length;
     const cw = plotW / n;
     const bw = Math.max(2, cw * 0.6);
 
@@ -669,7 +726,7 @@ function draw() {
 
     ctx.fillStyle = '#555d72'; ctx.font = '10px "JetBrains Mono"'; ctx.textAlign = 'center';
     const interval = Math.max(1, Math.floor(n / 8));
-    for (let i = 0; i < n; i += interval) { ctx.fillText(timeLabel(i), x(i), H - 8); }
+    for (let i = 0; i < n; i += interval) { ctx.fillText(timeLabel(zoomStart + i), x(i), H - 8); }
 
     const sigSet = {};
     daySigs.forEach((s, idx) => {
@@ -681,7 +738,7 @@ function draw() {
 
     ctx.beginPath(); ctx.strokeStyle = '#14b8a6'; ctx.lineWidth = 1.5;
     let started = false;
-    candles.forEach((c, i) => {
+    viewCandles.forEach((c, i) => {
         if (c.ma !== null) {
             if (!started) { ctx.moveTo(x(i), y(c.ma)); started = true; }
             else ctx.lineTo(x(i), y(c.ma));
@@ -689,12 +746,12 @@ function draw() {
     });
     ctx.stroke();
 
-    candles.forEach((c, i) => {
+    viewCandles.forEach((c, i) => {
         const cx = x(i);
         const isGreen = c.c >= c.o;
         let fillColor = isGreen ? '#22c55e' : '#ef4444';
         let alpha = 1;
-        const sig = sigSet[i];
+        const sig = sigSet[zoomStart + i];
         if (sig && !sig.show) alpha = 0.15;
         ctx.globalAlpha = alpha;
 
@@ -778,6 +835,37 @@ function draw() {
     }
 }
 
+function resetZoom() {
+    if (!candles.length) return;
+    zoomStart = 0; zoomEnd = candles.length;
+    draw();
+}
+
+function openReview() {
+    if (selectedSig < 0 || !daySigs.length) return;
+    const s = daySigs[selectedSig];
+    const tc = candles[s[0]] || {};
+    const bc = candles[s[1]] || {};
+    const ec = s[2] !== null ? (candles[s[2]] || null) : null;
+    const signal = {
+        stock:        currentStock,
+        date:         DATA.d[currentDateIdx],
+        touch_time:   timeLabel(s[0]),
+        bounce_time:  timeLabel(s[1]),
+        entry_time:   s[2] !== null ? timeLabel(s[2]) : null,
+        category:     s[4],
+        pnl:          s[5],
+        exit_reason:  s[10],
+        sl_price:     s[8],
+        tgt_price:    s[9],
+        candle_touch:  {o: tc.o, h: tc.h, l: tc.l, c: tc.c, ma: tc.ma, atr: tc.atr, vr: tc.vr},
+        candle_bounce: {o: bc.o, h: bc.h, l: bc.l, c: bc.c, vr: bc.vr},
+        candle_entry:  ec ? {o: ec.o, h: ec.h, l: ec.l, c: ec.c, vr: ec.vr} : null,
+    };
+    const url = 'fv2_h1_1_signal_review.html?signal=' + encodeURIComponent(JSON.stringify(signal));
+    window.open(url, '_blank');
+}
+
 function switchStock(stock) {
     currentStock = stock;
     DATA = ALL_STOCKS_DATA[stock];
@@ -791,25 +879,26 @@ function switchStock(stock) {
 function drawVol() {
     if (!candles.length || !vPlotW) return;
     vctx.clearRect(0, 0, VW, VH);
-    const n = candles.length;
+    const viewCandles = candles.slice(zoomStart, zoomEnd);
+    const n = viewCandles.length;
     const cw = vPlotW / n;
-    const maxVol = Math.max(...candles.map(c => c.vol || 0));
+    const maxVol = Math.max(...viewCandles.map(c => c.vol || 0));
     if (maxVol === 0) return;
-    const vx = i => VOL_PAD.left + i * cw + cw / 2;
 
     // Build signal sets for colouring
     const touchSet = new Set(), bounceSet = new Set();
     daySigs.forEach(s => { touchSet.add(s[0]); bounceSet.add(s[1]); });
 
-    candles.forEach((c, i) => {
+    viewCandles.forEach((c, i) => {
         if (!c.vol) return;
+        const fullI = zoomStart + i;
         const barH = (c.vol / maxVol) * vPlotH;
         const bx = VOL_PAD.left + i * cw + 1;
         const by = VOL_PAD.top + vPlotH - barH;
         const bw = Math.max(1, cw - 2);
         // Colour: orange=high VR, teal=bounce, red/green=candle direction, gray=normal
         let col;
-        if (bounceSet.has(i) || touchSet.has(i)) col = c.vr && c.vr >= 1.2 ? '#f97316' : '#14b8a6';
+        if (bounceSet.has(fullI) || touchSet.has(fullI)) col = c.vr && c.vr >= 1.2 ? '#f97316' : '#14b8a6';
         else if (c.vr && c.vr >= 1.2) col = 'rgba(249,115,22,0.7)';
         else col = c.c >= c.o ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)';
         vctx.fillStyle = col;

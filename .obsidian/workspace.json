@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "74bf13a7ddf5842c",
+        "id": "d0fd3a655fb6851a",
         "type": "tabs",
         "children": [
           {
-            "id": "505b478198e36168",
+            "id": "d7e6dae155608e28",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Algo_Trading/Docs/Analysis/fv2_signal_patterns.md",
+                "file": "Algo_Trading/Docs/Analysis/fv2_signals_POWERGRID.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "fv2_signal_patterns"
+              "title": "fv2_signals_POWERGRID"
             }
           }
         ]
@@ -94,7 +94,8 @@
             "state": {
               "type": "backlink",
               "state": {
-                "collapseAll": false,
+                "file": "Algo_Trading/Docs/Analysis/fv2_signals_TATAMOTORS.md",
+                "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
                 "showSearch": false,
@@ -103,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for fv2_signals_TATAMOTORS"
             }
           },
           {
@@ -112,11 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "Algo_Trading/Docs/Analysis/fv2_signals_TATAMOTORS.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links"
+              "title": "Outgoing links from fv2_signals_TATAMOTORS"
             }
           },
           {
@@ -154,20 +156,21 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Algo_Trading/Docs/Analysis/fv2_signals_TATAMOTORS.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of fv2_signals_TATAMOTORS"
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -180,32 +183,33 @@
       "bases:Create new base": false
     }
   },
-  "active": "505b478198e36168",
+  "active": "d7e6dae155608e28",
   "lastOpenFiles": [
+    "Learning/Codedex/Final_Project.py",
+    "Learning/Codedex/lambda_func.py",
+    "Learning/Codedex/python-basics-2.pdf",
+    "Learning/Codedex/__pycache__/bday_messages.cpython-314.pyc",
+    "Learning/Codedex/__pycache__",
+    "Learning/Codedex/wiki.py",
+    "requirements.txt",
+    "Learning/Codedex/__pycache__/bday_messages.cpython-312.pyc",
+    "Learning/Codedex/main.py",
+    "Learning/Codedex/bday_messages.py",
+    "Learning/Codedex/solar_system.py",
     "Algo_Trading/Docs/Analysis/fv2_signals_TATAMOTORS.md",
     "Algo_Trading/Docs/Analysis/fv2_signals_POWERGRID.md",
     "Algo_Trading/Docs/Analysis/fv2_signals_HDFCBANK.md",
-    "Algo_Trading/Docs/Analysis/fv2_obs_G1_slope.md",
     "Algo_Trading/Docs/Analysis/fv2_obs_G1_pretouch.md",
-    "Algo_Trading/Docs/Analysis/fv2_obs_G3_followthrough.md",
     "Algo_Trading/Docs/Analysis/fv2_obs_G2_touchbounce.md",
+    "Algo_Trading/Docs/Analysis/fv2_obs_G3_followthrough.md",
+    "Algo_Trading/Docs/Analysis/fv2_signal_patterns.md",
+    "Algo_Trading/Docs/Analysis/fv2_index.md",
+    "Algo_Trading/Docs/Analysis/fv2_obs_G1_slope.md",
     "Algo_Trading/Docs/Analysis/fv2_obs_G1_prettouch.md",
     "Algo_Trading/Docs/Analysis/fv2_obs_G5_followthrough.md",
     "Algo_Trading/Docs/Analysis/fv2_obs_G4_volume.md",
     "Algo_Trading/Docs/Analysis/fv2_obs_G3_touch.md",
     "Algo_Trading/Docs/Analysis/fv2_obs_G2_pullback.md",
-    "Algo_Trading/Docs/Analysis/fv2_index.md",
-    "Algo_Trading/Docs/Analysis/sedz22wRN",
-    "Algo_Trading/Docs/Analysis/sedSrJa6k",
-    "Algo_Trading/Docs/Analysis/sedkBFXlH",
-    "Algo_Trading/Docs/Analysis/sedDKxyqu",
-    "Algo_Trading/Docs/Analysis/sedHNvWR2",
-    "Algo_Trading/Docs/Analysis/fv2_signals_TATAMOTORS.md.crswap",
-    "CLAUDE.md.tmp.12948.1776100228741",
-    "Algo_Trading/Framework_V2/outputs/reports/sedXoszGe",
-    "Algo_Trading/Framework_V2/outputs/reports/sedzIVdcX",
-    "Algo_Trading/Framework_V2/outputs/reports/sedu9oD8d",
-    "Algo_Trading/Docs/Analysis/fv2_signal_patterns.md",
     "2026-04-08.md",
     "Untitled.canvas",
     "Algo_Trading/Docs/Architecture/Core_Framework.md",

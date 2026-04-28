@@ -1,47 +1,37 @@
-# Handoff Note — 2026-04-13
+# Handoff Note — 2026-04-22
 
-## Current task
-Manual signal review — fv2 MA Bounce. POWERGRID complete (9 signals). TATAMOTORS in progress (2 of many).
+## State
+POWERGRID signal review — 16 signals logged. #15 and #16 are first winners (June 23 2025).
+Signal #16 detail block not yet added in Obsidian (only log row logged so far).
+Pine ATR mismatch identified: `ta.atr(14)` = RMA (Wilder's), Python = SMA rolling mean → SL/TGT diverge.
+Purple triangle for k=0 compiled but needs chart reload on TV to take effect.
 
-## Status
-- 9 POWERGRID + 2 HDFCBANK + 2 TATAMOTORS = 13 signals reviewed total
-- H1.1 fully stable — folder persistence, row counter fixed, output clean
-- Next signal: TATAMOTORS 2025-05-15 signal #3 onwards
+## Next
+1. Fix Pine ATR: change Python `tr.rolling(14).mean()` → Wilder's RMA in `build_html1.py` line ~77, rebuild H1
+2. Reload POWERGRID chart on TV to pick up purple k=0 triangle
+3. Log signal #16 detail block in Obsidian (via H1.1 review form)
+4. Continue signal review — target 5 clean winners total, then H5 build
 
-## Key conventions (all locked)
+## Context
+- Stop hook disabled (`"Stop": []` in `.claude/settings.json`) — re-enable when returning to Python dev
+- H1.1 submit button fixed: serial regex now matches date in col2, no stock column, diff calculated
+- G3a/G3b fixed in H1.1 param names (was G5a/G5b)
+- Signal review pacing: 3-5 signals/day, 70% signal review / 30% Codedex
+- Key hypothesis: G1 slope both pass = load-bearing condition for winners (2 data points only — not conclusive)
+- Failed prior touch → clears weak hands → stronger second setup (observed on June 23 POWERGRID)
+- Pine SL scan: TV shows SL hit on #16 but price never reaches 289.7 — investigate alongside ATR fix
+- H1 launch config: `.claude/launch.json`, port 7701
+
+## Key conventions (locked)
 - Forced exit at 14:50 — wins after = EOD+
-- Outcome: Win / SL / EOD+ / EOD- / EOD skip (post 15:00)
-- #02 N/A when opening bar; #03 N/A when opening bar (no prior candles)
-- #09 N/A when k=0; #10 pass when k=0, N/A when different candles
-- G2 fail → G3 all N/A cascade; G2 N/A → G3 also N/A
-
-## Gate ordering (locked 2026-04-13)
-- G1: Trend — slope_threshold (#01), slope_offset (#02)
-- G2: Approach direction — candles_above (#03) — gates G3
-- G3: Pullback quality — pullback_bars (#04), shoot_depth (#05), touch_body_pct (#06), wick_defence_ratio (#07)
-- G4: Volume — bounce_vr_abs (#08), bounce_vr_rel (#09), same_candle_tb (#10)
-- G5: Follow-through — G5a (#11), G5b (#12)
-
-## Key patterns emerging (13 signals)
-- POWERGRID: no G1+G2 double pass yet across 9 signals
-- TATAMOTORS #2: G1+G2+G5 all pass, G3 weak — wins anyway. G3 quality may be less critical than G1+G2
-- wick_defence_ratio needs threshold calibration — 1.0 is starting point only
-
-## H1.1 workflow
-- Select signal in H1 sidebar → "✎ Review Signal" activates
-- Opens H1.1 in new tab, pre-filled
-- Fill 12 dropdowns + comments + outcome → Submit
-- Folder stored in IndexedDB — no picker after first use per browser session
-- Writes to Docs/Analysis/fv2_signals_STOCK.md
+- 3-gate system (NO cascade — all 12 params always evaluated):
+  - G1: pre-touch (#01–#04) | G2: touch & bounce (#05–#10) | G3: post-bounce (#11–#12)
+- Signal review target revised: 5 clean winners → then H5 build (not 50-200)
 
 ## Files
 - POWERGRID log: Algo_Trading/Docs/Analysis/fv2_signals_POWERGRID.md
 - TATAMOTORS log: Algo_Trading/Docs/Analysis/fv2_signals_TATAMOTORS.md
-- HDFCBANK log: Algo_Trading/Docs/Analysis/fv2_signals_HDFCBANK.md
 - H1: Framework_V2/outputs/reports/fv2_h1_signal_viewer.html
 - H1.1: Framework_V2/outputs/reports/fv2_h1_1_signal_review.html
-
-## Next steps
-1. Continue TATAMOTORS signal review via H1.1
-2. Target 30–50 total signals before drawing conclusions
-3. Watch for: first G1+G2 double pass on TATAMOTORS, wick_defence_ratio values across wins vs SL
+- build_html1.py: Framework_V2/scripts/build_html1.py (ATR fix here)
+- Pine Script: fv2_bounce_v1 on TV (POWERGRID 5-min)

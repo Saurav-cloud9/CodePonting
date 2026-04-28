@@ -1,23 +1,31 @@
-# Session Log — 2026-04-13
+# Session Log — 2026-04-22
 
 ## What was done
-- Continued signal review from previous session (POWERGRID + TATAMOTORS)
-- Fixed H1.1 row counter bug — regex now [A-Z]{4,} to exclude gate labels (G5b, G2 etc)
-- Fixed POWERGRID signal numbering — #13→#9, #13→#1, table reordered 1–9
-- HDFCBANK numbering fixed — #4/#5 → #1/#2
-- H1.1: IndexedDB folder persistence added — no more picker on every open
-- H1.1: Final comment removed from detail section (was duplicate of Notes column)
-- TATAMOTORS signal review started — #1 (rejected, opening bar) and #2 (Win) logged
-- wick_defence_ratio implemented — replaces lower_wick_pct
-  Formula: (min(O,C)−MA) / (MA−low), threshold ≥1.0, green/red in Value column
-- Feedback table format agreed: # | Param | Gate | Your Call | My Verdict | Your Comment | Notes
+- POWERGRID signals #13–#16 reviewed and logged
+  - #13 (12:45T/13:00B/13:05E): EOD- — delayed touch, bounce VR lag pushed T0 past clean pullback
+  - #14 (13:45T/14:00B/14:05E): SL — full G1 fail, false breakout, good surge but no conviction
+  - #15 (12:05T/12:20B/12:25E): Win ⭐ — first winner, 7/11 pass, G1 slope intact, imperfect touch shape
+  - #16 (12:35T/12:35B/12:40E): Win ⭐ — first full G1 pass (all 4 ✅), k=0, strongest signal seen
+- H1.1 submit button bugs fixed: serial number detection regex + stock column removed + diff column added
+- G3a/G3b param names fixed in H1.1 (was G5a/G5b)
+- Signal detail headings #10–#14 serial numbers added
+- Pine k=0 triangle → purple (compiled, needs chart reload to take effect)
+- ATR mismatch identified: Pine uses RMA, Python uses SMA — fix tomorrow
+- Emerging patterns updated: imperfect winner hypothesis, failed prior touch → stronger setup, G1 load-bearing condition
+- F0a (investment plan) removed from TODO — complete
+- F0b → renamed F8 (insurance review, low urgency)
+- Plan panel demo run for Saurav
 
 ## Key findings this session
-- wick_defence_ratio is a better metric than lower_wick_pct — captures MA defence quality not just wick length
-- TATAMOTORS #2: G1+G3+G5 all pass despite G2 weakness — signal wins. Pattern to watch.
-- Row counter bug root cause: param rows like "| 12 | G5b |" matched old regex → max=12 → nextNum=13
+- G1 slope intact appears to be the load-bearing condition — every winner so far has G1 #01 #02 passing
+- 2 winners not enough to conclude — need more winning trades
+- Delayed touch failure mode: bounce VR threshold delays T0 recognition past clean pullback structure
+- False breakout fingerprint: mini correction in bad regime, buyers show up briefly then exit
+- Mean reversion only works when MA is a genuine equilibrium (rising trend context)
+- Signal review target revised: 5 clean winners → then H5 build (not 50-200 total)
 
 ## Status at SS
-- 9 POWERGRID + 2 HDFCBANK + 2 TATAMOTORS = 13 signals reviewed total
-- H1.1 stable and working correctly
-- Next: continue TATAMOTORS signal review
+- POWERGRID: 16 signals reviewed (14 bad, 2 winners)
+- TATAMOTORS: 11 signals (unchanged this session)
+- Total: 27 signals reviewed
+- Next: Signal #16 detail block to be added in Obsidian + Pine ATR fix + purple triangle chart reload

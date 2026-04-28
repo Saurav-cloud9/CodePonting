@@ -67,10 +67,9 @@ Execution rules:
     2. Write a brief summary of what was done to .remember/today.md
     3. Update .remember/handoff.md with current task + next step + known issues
     4. Call /remember:remember to save state
-    All four are MANDATORY. Without them, next session starts with no context.
-  - When Saurav types "ssc" (save state complete), do everything above PLUS:
     5. Update TODO.md (max 5 items, P1 priority first)
     6. Append to PROGRESS_HISTORY.md (never delete existing entries)
+    All six are MANDATORY. Without them, next session starts with no context.
     Files: C:\Users\Saurav\CodePonting\.remember\
       today.md   → session log (what was done, key findings)
       handoff.md → current task status, next step, blockers
@@ -87,17 +86,17 @@ Execution rules:
   ### When Saurav types "SS" (Save State):
   - CC updates PROGRESS.md (Recent 5 steps + 5 Milestones)
   - CC updates .remember/handoff.md + today.md + weekly.md
-    (these are Claude.ai CCP sources — read via cc-memory tools)
-  - TODO.md + PROGRESS_HISTORY.md are updated by Claude.ai (Sonnet) separately
+  - CC updates TODO.md (max 5 items, P1 priority first)
+  - CC appends to PROGRESS_HISTORY.md (never delete existing entries)
+  - CC calls /remember:remember to save state
 
-  ### When Saurav types "SSC" (Save State Complete):
-  - Everything SS does, PLUS
-  - CC also updates TODO.md (max 5 items, P1 priority first)
-  - CC also updates PROGRESS_HISTORY.md (append new entries, never delete)
+  ### When Saurav types "SSP" (Save State Peek):
+  - Read these files in order: .remember/remember.md, PROGRESS.md, TODO.md
+  - Reply with a 3-part summary: (1) where we are, (2) what's next, (3) any blockers
+  - No file writes. Read-only. Fast.
 
   ### When Saurav types "SSD" (Save State + Drive):
-  - Everything SS does, PLUS
-  - CC syncs all 4 .remember/ files to Google Drive
+  - Everything SS does, PLUS syncs all 4 .remember/ files to Google Drive
     CodePonting/.remember/ folder
 
   ### CCP (Context Catch-Up Protocol):
@@ -451,3 +450,66 @@ fv2 CSV                 : Framework_V2/data/historical/csv/intraday_5min/TATAMOT
 ## How to call:
   Use the Agent tool with subagent_type="general-purpose", model="opus"
   Pass: question + context_summary + attempt_count in the prompt
+
+
+# ── FUTURE SKILLS & PLATFORM UPDATES ─────────────────────────
+#
+# When Saurav shares a platform update/announcement (tweet, blog post, etc.),
+# add it here with: feature name, source, date spotted, and exactly WHEN to
+# flag it back during this project's pipeline. Do NOT act on these early —
+# surface them only at the specified trigger step.
+#
+# FLAG RULE: When the current task matches a "Flag at" step below, print:
+#   ⚑ FUTURE SKILL READY: <feature name> — <one-line reminder>
+# Then ask Saurav if he wants to explore it before continuing.
+# ──────────────────────────────────────────────────────────────
+
+## [2026-04-21] Claude Live Artifacts (Cowork)
+  Source    : @claudeai tweet, 2026-04-21
+  Feature   : Persistent dashboards built inside Claude Cowork that stay
+              connected to your files and data. Refresh live, retain version
+              history, accessible across sessions.
+  Use case  : Paper/live trading monitoring — build a live P&L dashboard,
+              daily signal tracker, or trade log viewer that auto-refreshes
+              from output CSVs/logs without rebuilding each session.
+  Flag at   : Step 8 (Paper Trading) — when setting up monitoring infra.
+              Also flag at Step 9 (Live Trading) if not adopted in Step 8.
+  Notes     : Available on all paid Claude plans. Requires Claude Cowork
+              (desktop app). Version history means we can track dashboard
+              changes alongside strategy changes.
+
+
+# ── HACKATHON IDEAS ───────────────────────────────────────────────────────────
+#
+# Side quests. Not on the critical path. Revisit when fv2 signal is stable.
+# ──────────────────────────────────────────────────────────────────────────────
+
+## [2026-04-22] NSE Signal Dashboard
+
+  Name      : NSE Signal Dashboard
+  Stack     : Claude Code (backend) + Opus 4.7 (explanations)
+              + Claude Design (visual layer)
+
+  Core loop :
+    1. CC runs fv2 signal pipeline on 29 NSE stocks
+    2. Each stock screened through G1-G3 sequentially
+    3. Passing signals surface with PF, equity curve, drawdown
+    4. Opus 4.7 explains each gate verdict in plain English
+    5. User can ask follow-up questions via chat input
+
+  Differentiator : "Existing tools show WHAT. Claude shows WHY."
+                   Conversational drill-down on any signal/gate — unique.
+
+  Target user    : Systematic traders + curious non-quants who want
+                   transparent, explainable signal reasoning.
+
+  Hackathon MVP  : Backtesting data only (2022–2025, 48 months).
+                   No live trading needed for demo.
+
+  Post-hackathon :
+    → Add paper/live trade results as fv2 matures
+    → Gate toggling (interactive, Phase 2)
+    → Full dashboard once H5 + Optuna complete
+
+  Philosophy     : Not a showcase — a tool we'd actually use daily.
+                   Hackathon = side quest. CodePonting = main quest. 🏏

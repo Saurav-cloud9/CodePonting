@@ -1,8 +1,12 @@
-from core.indicators import (
-    add_intraday_indicators,
-    compute_daily_mas,  # Fixed name
-    add_atr
-)
-from core.engine import BacktestEngine
+butterflies = 10
+beetles = 12
+ladybugs = 20
+total = butterflies + beetles + ladybugs
 
-print("✅ All imports successful")
+print('I caught ' + str(butterflies) + ' 🦋 butterflies!')
+print('I caught ' + str(beetles) + ' 🪲 beetles!')
+print('I caught ' + str(ladybugs) + ' 🐞 ladybugs!')
+
+print('I caught ' + str(total) + ' total bugs!')
+      
+

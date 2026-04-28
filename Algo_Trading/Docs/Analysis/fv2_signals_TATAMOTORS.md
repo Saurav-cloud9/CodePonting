@@ -14,16 +14,18 @@ Parent: [[fv2_index]]
 | 6   | TATAMOTORS | 2023-11-30 | 14:40 | 14:40  | 14:45 | LATE    | ✅✅✅✅    | ✅✅✅✅✅N/A✅  | ✅❌  | the touch happens at 1440 → possible reason why it ends up as EOD- since hardly any time to hit target. LATE flag applied. |
 | 7 | TATAMOTORS | 2025-02-14 | 09:25 | 09:35 | 09:40 | SL | ❌N/A✅⚠️ | ✅❌❌✅❌N/A | ❌❌ | fail. so even though it has 3 and 4, since 1 & 2 arent there plus body pct and negative wick defence means low buyers conviction at touch resulting in a weak bounce setup followed by weak entry. |
 | 8 | TATAMOTORS | 2025-02-14 | 14:00 | 14:15 | 14:20 | Win | ❌❌❌❌ | ❌❌❌✅❌N/A | ❌❌ | interesting case. the bounce vr alone carried it to target. but that is what we are able to conclude based on the 12 params. perhaps there is a param that we haven't configured for our review. the most obvious thing that i notice on the bounce candle is the upward surge, can this be a param altogether? advise |
+| 9 | TATAMOTORS | 2025-03-17 | 12:00 | 12:15 | 12:20 | SL | ❌❌❌❌ | ❌✅❌✅✅N/A | ❌❌ | this one has a weak pullback setup and infact fails it since G2 itself fails. Visually it does give a fase impression initially that there could be a possible quality pullback leading upto a proper touch/bounce combo but that doesnt happen due to the sudden upward movement caused by the green candle at 1135. So correctly flagged as a failed signal and the SL hit cofirms the same. Let me know if you have any futher insights to add. |
+| 10 | TATAMOTORS | 2025-03-17 | 13:10 | 13:25 | 13:30 | EOD- | ❌❌❌❌ | ❌❌❌✅✅N/A | ❌❌ | straight forward fail. has got most things wrong except the bounce candle surge, infact we have kept that as a potential future candidate for H1.1 right? this looks like a random candle identifying as bounce just coz it closed above ma line. |
+| 11 | TATAMOTORS | 2025-03-17 | 13:40 | 13:45 | 13:50 | EOD+ | ❌❌✅⚠️ | ✅❌❌✅✅N/A | ✅❌ | weak signal, mostly fail since it doesn't have a good pullback structure nor a good touch/bounce setup |
 
 ---
 
 ## Outcome Key
 - **SL** = stop hit before 14:50
 - **Win** = target hit before 14:50
-- **EOD+** = open at 14:50, in profit (forced exit)
-- **EOD-** = open at 14:50, at loss (forced exit)
-- **EOD** = post-15:00 signal, skipped in review
-- **LATE** = entry ≥ 14:45 — structurally disadvantaged, EOD exit almost certain, flag separately
+- **EOD+** = exit at 14:50, in profit (forced exit)
+- **EOD-** = exit at 14:50, at loss (forced exit)
+- **LATE** = entry ≥ 14:45 — covers all post-14:45 entries incl. post-15:00 signals
 
 ---
 
@@ -161,7 +163,7 @@ Parent: [[fv2_index]]
 
 ---
 
-### Signal — 2025-02-14 09:25 (T) 09:35 (B) 09:40 (E)
+### Signal #7 — 2025-02-14 09:25 (T) 09:35 (B) 09:40 (E)
 **Stock:** TATAMOTORS | **Outcome:** SL
 
 | # | Param | Gate | Verdict | Comment |
@@ -179,12 +181,56 @@ Parent: [[fv2_index]]
 | 11 | G5a | G3 | fail | — |
 | 12 | G5b | G3 | fail | — |
 
-**Final comment:** fail. so even though it has 3 and 4, since 1 & 2 arent there plus body pct and negative wick defence means low buyers conviction at touch resulting in a weak bounce setup followed by weak entry.
+**Final comment:** fail. so even though it has 3 and 4, since 1 & 2 aren't there plus body pct and negative wick defense means low buyers conviction at touch resulting in a weak bounce setup followed by weak entry.
 
 ---
 
-### Signal — 2025-02-14 14:00 (T) 14:15 (B) 14:20 (E)
+### Signal #8 — 2025-02-14 14:00 (T) 14:15 (B) 14:20 (E)
 **Stock:** TATAMOTORS | **Outcome:** Win
+
+| #   | Param              | Gate | Verdict | Comment |     |
+| --- | ------------------ | ---- | ------- | ------- | --- |
+| 01  | slope_threshold    | G1   | fail    | —       |     |
+| 02  | slope_offset       | G1   | fail    | —       |     |
+| 03  | candles_above      | G1   | fail    | —       |     |
+| 04  | pullback_bars      | G1   | fail    | —       |     |
+| 05  | shoot_depth        | G2   | fail    | —       |     |
+| 06  | touch_body_pct     | G2   | fail    | —       |     |
+| 07  | wick_defence_ratio | G2   | fail    | —       |     |
+| 08  | bounce_vr_abs      | G2   | pass    | —       |     |
+| 09  | bounce_vr_rel      | G2   | fail    | —       |     |
+| 10  | same_candle_tb     | G2   | N/A     | —       |     |
+| 11  | G5a                | G3   | fail    | —       |     |
+| 12  | G5b                | G3   | fail    | —       |     |
+
+**Final comment:** interesting case. the bounce vr alone carried it to target. but that is what we are able to conclude based on the 12 params. perhaps there is a param that we haven't configured for our review. the most obvious thing that i notice on the bounce candle is the upward surge, can this be a param altogether? advise
+
+---
+
+### Signal — 2025-03-17 12:00 (T) 12:15 (B) 12:20 (E)
+**Stock:** TATAMOTORS | **Outcome:** SL
+
+| # | Param | Gate | Verdict | Comment |
+|---|-------|------|---------|---------|
+| 01 | slope_threshold | G1 | fail | — |
+| 02 | slope_offset | G1 | fail | — |
+| 03 | candles_above | G1 | fail | — |
+| 04 | pullback_bars | G1 | fail | — |
+| 05 | shoot_depth | G2 | fail | — |
+| 06 | touch_body_pct | G2 | pass | — |
+| 07 | wick_defence_ratio | G2 | fail | — |
+| 08 | bounce_vr_abs | G2 | pass | — |
+| 09 | bounce_vr_rel | G2 | pass | — |
+| 10 | same_candle_tb | G2 | N/A | — |
+| 11 | G5a | G3 | fail | — |
+| 12 | G5b | G3 | fail | — |
+
+**Final comment:** this one has a weak pullback setup and infact fails it since G2 itself fails. Visually it does give a fase impression initially that there could be a possible quality pullback leading upto a proper touch/bounce combo but that doesnt happen due to the sudden upward movement caused by the green candle at 1135. So correctly flagged as a failed signal and the SL hit cofirms the same. Let me know if you have any futher insights to add.
+
+---
+
+### Signal — 2025-03-17 13:10 (T) 13:25 (B) 13:30 (E)
+**Stock:** TATAMOTORS | **Outcome:** EOD-
 
 | # | Param | Gate | Verdict | Comment |
 |---|-------|------|---------|---------|
@@ -196,11 +242,33 @@ Parent: [[fv2_index]]
 | 06 | touch_body_pct | G2 | fail | — |
 | 07 | wick_defence_ratio | G2 | fail | — |
 | 08 | bounce_vr_abs | G2 | pass | — |
-| 09 | bounce_vr_rel | G2 | fail | — |
+| 09 | bounce_vr_rel | G2 | pass | — |
 | 10 | same_candle_tb | G2 | N/A | — |
 | 11 | G5a | G3 | fail | — |
 | 12 | G5b | G3 | fail | — |
 
-**Final comment:** interesting case. the bounce vr alone carried it to target. but that is what we are able to conclude based on the 12 params. perhaps there is a param that we haven't configured for our review. the most obvious thing that i notice on the bounce candle is the upward surge, can this be a param altogether? advise
+**Final comment:** straight forward fail. has got most things wrong except the bounce candle surge, infact we have kept that as a potential future candidate for H1.1 right? this looks like a random candle identifying as bounce just coz it closed above ma line.
+
+---
+
+### Signal — 2025-03-17 13:40 (T) 13:45 (B) 13:50 (E)
+**Stock:** TATAMOTORS | **Outcome:** EOD+
+
+| # | Param | Gate | Verdict | Comment |
+|---|-------|------|---------|---------|
+| 01 | slope_threshold | G1 | fail | — |
+| 02 | slope_offset | G1 | fail | — |
+| 03 | candles_above | G1 | pass | — |
+| 04 | pullback_bars | G1 | weak | — |
+| 05 | shoot_depth | G2 | pass | — |
+| 06 | touch_body_pct | G2 | fail | — |
+| 07 | wick_defence_ratio | G2 | fail | — |
+| 08 | bounce_vr_abs | G2 | pass | — |
+| 09 | bounce_vr_rel | G2 | pass | — |
+| 10 | same_candle_tb | G2 | N/A | — |
+| 11 | G5a | G3 | pass | — |
+| 12 | G5b | G3 | fail | — |
+
+**Final comment:** weak signal, mostly fail since it doesn't have a good pullback structure nor a good touch/bounce setup
 
 ---

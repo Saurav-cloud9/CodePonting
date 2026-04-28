@@ -89,3 +89,32 @@ Step 8.1  ✅  H1 zoom/pan added: scroll-wheel, +/−/1:1 buttons, arrow key pan
 Step 8.2  ✅  Pine touch candle fix: best_k accumulator picks EARLIEST touch (matches H1 forward-scan)
 Step 8.3  ✅  Pine box sizing: body-only (open/close), not wicks; date filter to stay under 500 box cap
 Step 8.4      TV box alignment in progress — T/B ground-truth labels added; time±150000 compiled, pending confirm
+
+Step 9      — Manual Signal Review + Gate Restructure (2026-04-16)
+Step 9.1  ✅  Gate system redesigned: 5-gate (G1-G5) → 3-gate temporal (G1=pre-touch, G2=touch&bounce, G3=post-bounce)
+           ✅  H1.1 PARAMS + submitReview() updated; log row now writes G1/G2/G3 columns only
+           ✅  All signal .md files restructured: TATAMOTORS (#1-8), POWERGRID (#1-9), HDFCBANK (#1-4)
+           ✅  Obsidian analysis folder rebuilt: new obs files (G1_pretouch/G2_touchbounce/G3_followthrough); old G1-G5 deleted
+           ✅  fv2_signal_patterns.md: Param Candidates section added; bounce_close_vs_MA parked from TATAMOTORS #8
+
+Step 9.2  —   Python learning session (2026-04-16) — no fv2 changes; quadratic formula + Codedex basics
+           ✅  touch_body_pct threshold corrected: >40% = fail (was >60%)
+           ✅  LATE outcome added: entry ≥ 14:45 auto-flagged in H1.1; 3 signals flagged across stocks
+
+Step 9.3  —   Idle session (2026-04-17) — no fv2 changes; CC desktop feature Q&A only
+
+Step 9.4  — 2026-04-19
+           ✅  TATAMOTORS signals #9–#11 logged (March 17 2025 — SL spike, EOD- resistance, wanna-be pullback)
+           ✅  Pine touch loop fix deployed — removed break, earliest touch (largest k) live on TMPV 5-min
+           ✅  H1 Review Signal button moved to sidebar; Chrome MCP via localhost:8765 HTTP server
+           ✅  G2 param roles locked: wick_defence_ratio=hard gate, shoot_depth=wick-touch primary, touch_body_pct=uniformity proxy
+           ✅  fv2_obs_G2_touchbounce.md updated with param roles + wanna-be pullback pattern note
+           ✅  22 signals reviewed total (9 POWERGRID + 2 HDFCBANK + 11 TATAMOTORS)
+
+2026-04-22  SS ───────────────────────────────────────────────────────────
+           ✅  POWERGRID signals #13–#16 reviewed — #15 and #16 first winners
+           ✅  H1.1 submit bug fixed — serial number regex + stock col removed + diff added
+           ✅  G3a/G3b param names fixed in H1.1 (was G5a/G5b)
+           ✅  Pine k=0 triangle → purple compiled; ATR mismatch (RMA vs SMA) flagged
+           ✅  Emerging patterns: G1 load-bearing hypothesis + failed prior touch pattern
+           ✅  27 signals reviewed total (16 POWERGRID + 11 TATAMOTORS)

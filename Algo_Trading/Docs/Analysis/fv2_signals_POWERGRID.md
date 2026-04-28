@@ -4,27 +4,34 @@ Parent: [[fv2_index]]
 
 ## Signal Log
 
-| #   | Stock     | Date       | Touch | Bounce | Entry | Outcome | G1      | G2              | G3  | Notes |
-| --- | --------- | ---------- | ----- | ------ | ----- | ------- | ------- | --------------- | --- | ----- |
-| 1   | POWERGRID | 2025-12-22 | 14:20 | 14:35  | 14:40 | EOD-    | ❌❌❌    | ❌✅✅❌✅✅N/A    | ❌❌  | signal rejected as per review. |
-| 2   | POWERGRID | 2025-12-22 | 14:45 | 14:45  | 14:50 | SL      | ❌❌❌    | N/AN/AN/A✅N/A✅  | ❌❌  | Triple G1 fail. G2 vol noise. k=0. |
-| 3   | POWERGRID | 2025-12-22 | 14:55 | 15:05  | 15:10 | SL      | ❌❌❌    | N/AN/AN/A✅✅N/A  | ❌❌  | G2 vol double pass, still rejected. |
-| 4   | POWERGRID | 2025-12-22 | 15:15 | 15:15  | 15:20 | EOD     | ❌❌❌    | N/AN/AN/A✅N/A✅  | ❌✅  | Post-15:00 signal. Split G3. k=0. |
-| 5   | POWERGRID | 2024-04-01 | 09:15 | 09:15  | 09:20 | EOD+    | ❌N/AN/A | N/AN/AN/A✅N/A✅  | ✅❌  | Opening bar. #02 N/A (no T-3). #03 N/A (no prior candles). Split G3. |
-| 6   | POWERGRID | 2024-04-01 | 11:45 | 12:00  | 12:05 | EOD+    | ❌❌❌    | N/AN/AN/A✅✅N/A  | ✅❌  | Win after 14:50 → EOD+. Split G3. |
-| 7   | POWERGRID | 2024-04-01 | 12:10 | 12:25  | 12:30 | EOD+    | ❌❌❌    | N/AN/AN/A✅✅N/A  | ✅✅  | First full G3 pass on rejected signal. EOD+. |
-| 8   | POWERGRID | 2024-04-01 | 13:05 | 13:15  | 13:20 | EOD+    | ❌❌✅    | ❌✅❌❌✅✅N/A     | ✅❌  | ⭐ FIRST G1 #03 pass. G2 touch quality still mostly fails. Target hit after 14:50 → EOD+. |
-| 9   | POWERGRID | 2024-04-01 | 14:55 | 14:55  | 15:00 | EOD     | ✅✅✅✅   | ⚠️❌✅✅N/A✅     | ✅✅  | Post-1450. 9 params clear. touch_body_pct fails. Worth logging but skip deep analysis. |
+| #   | Date       | Touch      | Bounce | Entry | diff  | Outcome | G1 (4)   | G2 (6)         | G3 (2) | Verdict                                                                                    |
+| --- | ---------- | ---------- | ------ | ----- | ----- | ------- | -------- | -------------- | ------ | ------------------------------------------------------------------------------------------ |
+| 1   | 2025-12-22 | 14:20      | 14:35  | 14:40 | 3     | EOD-    | ❌❌❌      | ❌✅✅❌✅✅N/A      | ❌❌     | G1 broken, vol noise, rejected                                                             |
+| 2   | 2025-12-22 | 14:45      | 14:45  | 14:50 | 0     | SL      | ❌❌❌      | N/AN/AN/A✅N/A✅ | ❌❌     | diff=0, G1 fail, vol noise                                                                 |
+| 3   | 2025-12-22 | 14:55      | 15:05  | 15:10 | 2     | SL      | ❌❌❌      | N/AN/AN/A✅✅N/A | ❌❌     | G1 fail, vol passes, G3 fail                                                               |
+| 4   | 2025-12-22 | 15:15      | 15:15  | 15:20 | 0     | EOD     | ❌❌❌      | N/AN/AN/A✅N/A✅ | ❌✅     | post-15:00, skip                                                                           |
+| 5   | 2024-04-01 | 09:15      | 09:15  | 09:20 | 0     | EOD+    | ❌N/AN/A  | N/AN/AN/A✅N/A✅ | ✅❌     | opening bar, split G3                                                                      |
+| 6   | 2024-04-01 | 11:45      | 12:00  | 12:05 | 3     | EOD+    | ❌❌❌      | N/AN/AN/A✅✅N/A | ✅❌     | G1 fail, G3a pass, price followed                                                          |
+| 7   | 2024-04-01 | 12:10      | 12:25  | 12:30 | 3     | EOD+    | ❌❌❌      | N/AN/AN/A✅✅N/A | ✅✅     | first full G3 pass, price followed                                                         |
+| 8   | 2024-04-01 | 13:05      | 13:15  | 13:20 | 2     | EOD+    | ❌❌✅      | ❌✅❌❌✅✅N/A      | ✅❌     | ⭐ first G1 #03 pass, price followed                                                        |
+| 9   | 2024-04-01 | 14:55      | 14:55  | 15:00 | 0     | EOD     | ✅✅✅✅     | ⚠️❌✅✅N/A✅      | ✅✅     | post-14:50, 9/12 pass, skip                                                                |
+| 10  | 2025-03-17 | 09:20      | 09:20  | 09:25 | 0     | SL      | ❌N/A✅N/A | ⚠️✅❌✅N/A✅      | ✅❌     | opening rush, T-1 first candle of day                                                      |
+| 11  | 2025-06-04 | 10:25      | 10:40  | 10:45 | 3     | SL      | ❌❌❌❌     | ✅❌✅✅✅N/A       | ❌❌     | diff=3 stale touch, entry reversed immediately                                             |
+| 12  | 2025-06-04 | 10:50      | 10:55  | 11:00 | 1     | EOD+    | ❌❌❌❌     | ❌✅❌✅✅N/A       | ❌❌     | diff=1, no pullback, poor touch, rejected                                                  |
+| 13  | 2025-06-04 | 12:45      | 13:00  | 13:05 | 3     | EOD-    | ✅✅❌❌     | ⚠️✅❌✅✅N/A      | ❌❌     | delayed touch — vol lag pushed T0 past pullback structure; T+3 bounce, poor follow-through |
+| 14  | 2025-06-04 | 13:45      | 14:00  | 14:05 | 3     | SL      | ❌❌❌❌     | ⚠️❌❌✅✅N/A      | ✅❌     | bad setup at G1; bounce/entry show good surge but sudden downward movement in subsequent candles |
+| 15 | 2025-06-23 | 12:05 | 12:20 | 12:25 | 3 | Win | ✅✅❌✅ | ✅❌❌✅✅N/A | ❌✅ | not a perfect setup still wins. need to be discussed as to what pushed it to the finish line. |
+| 16 | 2025-06-23 | 12:35 | 12:35 | 12:40 | 0 | Win | ✅✅✅✅ | ⚠️✅✅✅N/A✅ | ✅❌ | strongest signal we have come across imo. passes! |
+| 17 | 2025-06-26 | 12:20 | 12:35 | 12:40 | 3 | Win | ❌❌❌❌ | ❌✅❌✅✅N/A | ❌❌ | fails almost everything yet wins — exception, not a pattern |
 
 ---
 
 ## Outcome Key
 - **SL** = stop hit before 14:50
 - **Win** = target hit before 14:50
-- **EOD+** = open at 14:50, in profit (forced exit)
-- **EOD-** = open at 14:50, at loss (forced exit)
-- **EOD** = post-15:00 signal, skipped in review
-- **LATE** = entry ≥ 14:45 — structurally disadvantaged, EOD exit almost certain, flag separately
+- **EOD+** = exit at 14:50, in profit (forced exit)
+- **EOD-** = exit at 14:50, at loss (forced exit)
+- **LATE** = entry ≥ 14:45 — covers all post-14:45 entries incl. post-15:00 signals
 
 ---
 
@@ -48,9 +55,16 @@ Seen across signals #2–#7. Volume is present but context is wrong.
 | #6 | pass | fail | EOD+ |
 | #7 | pass | pass | EOD+ |
 | #8 | pass | fail | EOD+ |
+| #14 | pass | fail | SL |
+| #15 | fail | pass | Win |
+| #16 | pass | fail | Win |
+| #17 | fail | fail | Win |
 
 Pattern emerging: G3a pass correlates with EOD+ (price followed through at entry).
 Full G3 pass (#7) = strongest entry confirmation seen so far — still EOD+ not win.
+⚠️ #14 breaks the G3a→EOD+ pattern — first G3a pass ending in SL. G1 full fail context may be the differentiator.
+⭐ #15 and #16 both Win with split G3 — G3 alone is not the deciding factor. G1 slope intact appears to be the load-bearing condition.
+⚠️ #17 breaks the G1 slope hypothesis — full G1 fail, G3 both fail, only bounce vol passes. Win outcome. Exception: bounce VR combination may have been strong enough to force the outcome in a weak-regime setup. Do not generalise.
 
 ### Opening bar edge case (#5)
 T0 = 09:15 → #02 N/A (T-3 pre-market), #03 N/A (no prior session candles).
@@ -59,6 +73,23 @@ T0 = 09:15 → #02 N/A (T-3 pre-market), #03 N/A (no prior session candles).
 Signals #5, #6, #7 all on same day, all EOD+.
 Possible: stock was in a slow grind-up on that day — weak regime by our definition but directionally positive intraday.
 
+### Winner candidates — 2025-06-23 ✅ reviewed
+Signal #15 (12:05) and #16 (12:35) — both Win on same day. Both have G1 slope intact.
+
+### First full G1 pass → Win (#16) ⭐
+Signal #16: first signal with all 4 G1 params passing AND k=0 AND Win outcome.
+- Orderly pullback to T0 — consistent bars drawing toward touch, near-perfect T0 attributes
+- k=0: touch and bounce same candle, strong VR confirmation
+- Swing high bar shows sudden surge (grey area) — but context explains it:
+  A prior pullback+touch earlier in the day failed (two huge red candles post swing high, low VR at touch, no conviction) → weak hands cleared → late surge built the swing high for signal #16 → on the follow-up pullback, genuine buyer conviction at MA produced a proper bounce and entry follow-through
+- Theory: failed prior touch → clears weak hands → sets up stronger second attempt
+
+### Imperfect winner hypothesis (#15)
+Signal #15 won with 7/11 params pass, 1 N/A. Key observations:
+- G2 touch quality: 2/3 touch bar params failed (touch_body_pct, wick_defence_ratio) but both bounce bar params passed (bounce_vr_abs, bounce_vr_rel) — bounce confirmed buyers even though touch wasn't clean
+- G1 slope both pass (#01 #02 ✅) may be the load-bearing condition — MA was genuinely rising
+- Theory: when G1 slope is intact, G2 touch shape params matter less. Needs more winners to confirm.
+
 ---
 
 ## Signal Detail
@@ -66,20 +97,20 @@ Possible: stock was in a slow grind-up on that day — weak regime by our defini
 ### Signal #1 — 2025-12-22 14:20 (T) 14:35 (B) 14:40 (E)
 **Stock:** POWERGRID | **Outcome:** EOD-
 
-| # | Param | Gate | Verdict | Comment |
-|---|-------|------|---------|---------|
-| 01 | slope_threshold | G1 | fail | — |
-| 02 | slope_offset | G1 | fail | — |
-| 03 | candles_above | G1 | fail | not approaching from above |
-| 04 | pullback_bars | G1 | fail | no pullback structure |
-| 05 | shoot_depth | G2 | fail | barely touching MA → pass (original note), but G1 regime broken |
-| 06 | touch_body_pct | G2 | pass | its still huge right? shouldn't it be less than 50%? |
-| 07 | wick_defence_ratio | G2 | pass | — |
-| 08 | bounce_vr_abs | G2 | pass | — |
-| 09 | bounce_vr_rel | G2 | pass | — |
-| 10 | same_candle_tb | G2 | N/A | Different candles |
-| 11 | G5a | G3 | fail | — |
-| 12 | G5b | G3 | fail | — |
+| #   | Param              | Gate | Verdict | Comment                                                         |
+| --- | ------------------ | ---- | ------- | --------------------------------------------------------------- |
+| 01  | slope_threshold    | G1   | fail    | —                                                               |
+| 02  | slope_offset       | G1   | fail    | —                                                               |
+| 03  | candles_above      | G1   | fail    | not approaching from above                                      |
+| 04  | pullback_bars      | G1   | fail    | no pullback structure                                           |
+| 05  | shoot_depth        | G2   | fail    | barely touching MA → pass (original note), but G1 regime broken |
+| 06  | touch_body_pct     | G2   | pass    | its still huge right? shouldn't it be less than 50%?            |
+| 07  | wick_defence_ratio | G2   | pass    | —                                                               |
+| 08  | bounce_vr_abs      | G2   | pass    | —                                                               |
+| 09  | bounce_vr_rel      | G2   | pass    | —                                                               |
+| 10  | same_candle_tb     | G2   | N/A     | Different candles                                               |
+| 11  | G5a                | G3   | fail    | —                                                               |
+| 12  | G5b                | G3   | fail    | —                                                               |
 
 **Final comment:** signal rejected as per review. G1 triple fail kills it.
 
@@ -258,5 +289,181 @@ Possible: stock was in a slow grind-up on that day — weak regime by our defini
 | 12 | G5b | G3 | pass | — |
 
 **Final comment:** in my opinion its got 9 params clear. this table view with all the columns is making me look at the data differently. like what should be the cutoff to rule out a signal? should it get all 12 params ticked or even 1 param failing means the signal fails? normally we would fail this one coz it has weak pullback and fails at #6. plus its a signal post 1450. perhaps worth skipping discussing it too much. for now you can clarify the points i have mentioned here and in the one line comments.
+
+---
+
+### Signal #10 — 2025-03-17 09:20 (T) 09:20 (B) 09:25 (E)
+**Stock:** POWERGRID | **Outcome:** SL
+
+| # | Param | Gate | Verdict | Comment |
+|---|-------|------|---------|---------|
+| 01 | slope_threshold | G1 | fail | — |
+| 02 | slope_offset | G1 | N/A | — |
+| 03 | candles_above | G1 | pass | — |
+| 04 | pullback_bars | G1 | N/A | only 1 candle before T0 |
+| 05 | shoot_depth | G2 | weak | — |
+| 06 | touch_body_pct | G2 | pass | — |
+| 07 | wick_defence_ratio | G2 | fail | >1 = buyers recovered more than they overshot -> what does this part mean |
+| 08 | bounce_vr_abs | G2 | pass | — |
+| 09 | bounce_vr_rel | G2 | N/A | — |
+| 10 | same_candle_tb | G2 | pass | — |
+| 11 | G5a | G3 | pass | — |
+| 12 | G5b | G3 | fail | — |
+
+**Final comment:** the T-1 candles is huge and has a sudden downward movement. T-1 is also the first candle of the day and so there is no prior candle to build a pattern. The touch candle looks decent visually but gets followed by a neutral entry candle and post that there is consistent downward movement. This suggests that at the start of the day if there is a sudden downward movement then perhaps its best not to trade for the first few minutes.
+
+---
+
+### Signal #11 — 2025-06-04 10:25 (T) 10:40 (B) 10:45 (E)
+**Stock:** POWERGRID | **Outcome:** SL
+
+| # | Param | Gate | Verdict | Comment |
+|---|-------|------|---------|---------|
+| 01 | slope_threshold | G1 | fail | — |
+| 02 | slope_offset | G1 | fail | — |
+| 03 | candles_above | G1 | fail | — |
+| 04 | pullback_bars | G1 | fail | — |
+| 05 | shoot_depth | G2 | pass | — |
+| 06 | touch_body_pct | G2 | fail | — |
+| 07 | wick_defence_ratio | G2 | pass | — |
+| 08 | bounce_vr_abs | G2 | pass | — |
+| 09 | bounce_vr_rel | G2 | pass | — |
+| 10 | same_candle_tb | G2 | N/A | — |
+| 11 | G5a | G3 | fail | — |
+| 12 | G5b | G3 | fail | — |
+
+**Final comment:** most things went wrong from start to end. no pullback setup, the T0 candle itself looks fine but has a poor pullback preceeding it. There is a visible surge of price from T0 to T3(bounce), but the bounce candle despite showing huge volume has a weak follow thru or rather sudded downfall at the entry. rightly fails the setup
+
+---
+
+### Signal #12 — 2025-06-04 10:50 (T) 10:55 (B) 11:00 (E)
+**Stock:** POWERGRID | **Outcome:** EOD+
+
+| # | Param | Gate | Verdict | Comment |
+|---|-------|------|---------|---------|
+| 01 | slope_threshold | G1 | fail | — |
+| 02 | slope_offset | G1 | fail | — |
+| 03 | candles_above | G1 | fail | — |
+| 04 | pullback_bars | G1 | fail | — |
+| 05 | shoot_depth | G2 | fail | — |
+| 06 | touch_body_pct | G2 | pass | — |
+| 07 | wick_defence_ratio | G2 | fail | — |
+| 08 | bounce_vr_abs | G2 | pass | — |
+| 09 | bounce_vr_rel | G2 | pass | — |
+| 10 | same_candle_tb | G2 | N/A | — |
+| 11 | G5a | G3 | fail | — |
+| 12 | G5b | G3 | fail | — |
+
+**Final comment:** its an EOD+ so it needs to be seen later if this one and signals like these actually profit us or end up as losers. For our signal review this one gets rejected. No pullback, no good touch, only bounce candle looks somewhat promising but gets followed up by a poor entry bar.
+
+---
+
+### Signal #13 — 2025-06-04 12:45 (T) 13:00 (B) 13:05 (E)
+**Stock:** POWERGRID | **Outcome:** EOD-
+
+| # | Param | Gate | Verdict | Comment |
+|---|-------|------|---------|---------|
+| 01 | slope_threshold | G1 | pass | — |
+| 02 | slope_offset | G1 | pass | — |
+| 03 | candles_above | G1 | fail | — |
+| 04 | pullback_bars | G1 | fail | — |
+| 05 | shoot_depth | G2 | weak | — |
+| 06 | touch_body_pct | G2 | pass | — |
+| 07 | wick_defence_ratio | G2 | fail | — |
+| 08 | bounce_vr_abs | G2 | pass | — |
+| 09 | bounce_vr_rel | G2 | pass | — |
+| 10 | same_candle_tb | G2 | N/A | — |
+| 11 | G5a | G3 | fail | — |
+| 12 | G5b | G3 | fail | — |
+
+**Final comment:** Delayed touch — T-2 was the structurally cleaner touch but its subsequent bounce didn't meet VR criteria, so Pine skipped it. T0 (12:45) was selected because its bounce (13:00) had sufficient VR. By then the pullback structure was consumed. T+3 bounce exists but follow-through is weak. Rejected.
+
+---
+
+### Signal #14 — 2025-06-04 13:45 (T) 14:00 (B) 14:05 (E)
+**Stock:** POWERGRID | **Outcome:** SL
+
+| # | Param | Gate | Verdict | Comment |
+|---|-------|------|---------|---------|
+| 01 | slope_threshold | G1 | fail | — |
+| 02 | slope_offset | G1 | fail | — |
+| 03 | candles_above | G1 | fail | — |
+| 04 | pullback_bars | G1 | fail | — |
+| 05 | shoot_depth | G2 | weak | — |
+| 06 | touch_body_pct | G2 | fail | — |
+| 07 | wick_defence_ratio | G2 | fail | — |
+| 08 | bounce_vr_abs | G2 | pass | — |
+| 09 | bounce_vr_rel | G2 | pass | — |
+| 10 | same_candle_tb | G2 | N/A | — |
+| 11 | G5a | G3 | pass | — |
+| 12 | G5b | G3 | fail | — |
+
+**Final comment:** bad setup at G1. poor touch although bounce/entry show good surge but are followed by sudden downward movement in the subsequent candles.
+
+---
+
+### Signal #15 — 2025-06-23 12:05 (T) 12:20 (B) 12:25 (E)
+**Stock:** POWERGRID | **Outcome:** Win
+
+| # | Param | Gate | Verdict | Comment |
+|---|-------|------|---------|---------|
+| 01 | slope_threshold | G1 | pass | — |
+| 02 | slope_offset | G1 | pass | — |
+| 03 | candles_above | G1 | fail | — |
+| 04 | pullback_bars | G1 | pass | passes visual test but needs to be discussed since T-1 isnt above ma |
+| 05 | shoot_depth | G2 | pass | — |
+| 06 | touch_body_pct | G2 | fail | — |
+| 07 | wick_defence_ratio | G2 | fail | — |
+| 08 | bounce_vr_abs | G2 | pass | — |
+| 09 | bounce_vr_rel | G2 | pass | — |
+| 10 | same_candle_tb | G2 | N/A | — |
+| 11 | G3a | G3 | fail | — |
+| 12 | G3b | G3 | pass | — |
+
+**Final comment:** not a perfect setup still wins. need to be discussed as to what pushed it to the finish line.
+
+---
+
+### Signal #16 — 2025-06-23 12:35 (T) 12:35 (B) 12:40 (E)
+**Stock:** POWERGRID | **Outcome:** Win
+
+| # | Param | Gate | Verdict | Comment |
+|---|-------|------|---------|---------|
+| 01 | slope_threshold | G1 | pass | — |
+| 02 | slope_offset | G1 | pass | — |
+| 03 | candles_above | G1 | pass | — |
+| 04 | pullback_bars | G1 | pass | 3 bars = satifies the bare minimum |
+| 05 | shoot_depth | G2 | weak | — |
+| 06 | touch_body_pct | G2 | pass | — |
+| 07 | wick_defence_ratio | G2 | pass | — |
+| 08 | bounce_vr_abs | G2 | pass | — |
+| 09 | bounce_vr_rel | G2 | N/A | — |
+| 10 | same_candle_tb | G2 | pass | — |
+| 11 | G3a | G3 | pass | — |
+| 12 | G3b | G3 | fail | — |
+
+**Final comment:** strongest signal we have come across imo. passes!
+
+---
+
+### Signal #17 — 2025-06-26 12:20 (T) 12:35 (B) 12:40 (E)
+**Stock:** POWERGRID | **Outcome:** Win | **k=3**
+
+| # | Param | Gate | Verdict | Comment |
+|---|-------|------|---------|---------|
+| 01 | slope_threshold | G1 | fail | — |
+| 02 | slope_offset | G1 | fail | — |
+| 03 | candles_above | G1 | fail | — |
+| 04 | pullback_bars | G1 | fail | — |
+| 05 | shoot_depth | G2 | fail | — |
+| 06 | touch_body_pct | G2 | pass | — |
+| 07 | wick_defence_ratio | G2 | fail | — |
+| 08 | bounce_vr_abs | G2 | pass | — |
+| 09 | bounce_vr_rel | G2 | pass | — |
+| 10 | same_candle_tb | G2 | N/A | k=3, different candles |
+| 11 | G3a | G3 | fail | — |
+| 12 | G3b | G3 | fail | — |
+
+**Final comment:** fails almost everything — G1 complete fail, G2 mostly fail, G3 both fail. Only bounce vol both pass. Treat as exception: bounce volume + price movement together pulled off the win despite no structural setup. Not a repeatable pattern.
 
 ---

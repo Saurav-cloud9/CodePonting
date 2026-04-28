@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "h1-viewer",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "7701", "--directory", "Algo_Trading/Framework_V2/outputs/reports"],
+      "port": 7701
+    }
+  ]
+}

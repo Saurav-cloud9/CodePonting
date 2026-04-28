@@ -20,12 +20,22 @@ Next: improve raw edge from PF 0.95 → >1.01
 
 ## fv2 Signal Design (Active)
 
-True MA bounce — 6 classic bounce criteria addressing fv1's structural gaps:
+True MA bounce — 12 params across a 3-gate temporal evaluation system:
+
+| Gate | Params | What it checks |
+|------|--------|---------------|
+| G1 — Pre-touch (#01–#04) | slope_threshold, slope_offset, candles_above, pullback_bars | Trend context + approach direction |
+| G2 — Touch & bounce (#05–#10) | shoot_depth, touch_body_pct, wick_defence_ratio, bounce_vr_abs, bounce_vr_rel, same_candle_tb | Price interaction with MA at touch + bounce confirmation |
+| G3 — Post-bounce (#11–#12) | follow-through params | Price behaviour after bounce |
+
+No cascade logic — all 12 params always evaluated regardless of gate result.
+
+Structural gaps being addressed:
 - Gap 1 ✅ Trend context — rising slope filter applied
-- Gap 2   Pullback quality — depth/structure (pending)
-- Gap 3   Touch precision — exact vs proximity (pending)
-- Gap 4   Volume signature — quality not just threshold (pending)
-- Gap 5   Follow-through confirmation (pending)
+- Gap 2 ✅ Approach direction — candles_above (G1)
+- Gap 3 🔄 Pullback quality — shoot_depth, touch_body_pct, wick_defence_ratio (G2, under review)
+- Gap 4 🔄 Volume signature — bounce_vr_abs/rel (G2, under review)
+- Gap 5 🔄 Follow-through confirmation (G3, under review)
 
 ## fv1 Signal (Closed — reference only)
 
@@ -134,10 +144,11 @@ CodePonting/
 
 ## fv2 Roadmap
 
-### Signal Gaps (active)
-- [x] Gap 1 — Rising slope filter
-- [ ] Gap 2–5 — Pullback, touch, volume, follow-through
-- [ ] HTML3 — Slope offset tuner (T-3 to T+2, WFA folds)
+### Signal Review (active)
+- [x] 3-gate system locked (G1/G2/G3, 12 params, no cascade)
+- [x] 22 signals reviewed — POWERGRID (9) + HDFCBANK (2) + TATAMOTORS (11)
+- [ ] Target 30–50 signals before drawing param conclusions
+- [ ] H5 — master combined tuner (coarse grid → 4-condition filter)
 
 ### Scale
 - [ ] Expand TATAMOTORS signal to all 29 DS3 stocks

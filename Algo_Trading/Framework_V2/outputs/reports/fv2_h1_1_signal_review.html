@@ -141,9 +141,8 @@ select.outcome-sel {
             <option value="">— select —</option>
             <option value="SL">SL (stop hit before 14:50)</option>
             <option value="Win">Win (target hit before 14:50)</option>
-            <option value="EOD+">EOD+ (open at 14:50, in profit)</option>
-            <option value="EOD-">EOD- (open at 14:50, at loss)</option>
-            <option value="EOD">EOD skip (post 15:00 signal)</option>
+            <option value="EOD+">EOD+ (exit at 14:50, in profit)</option>
+            <option value="EOD-">EOD- (exit at 14:50, at loss)</option>
             <option value="LATE">LATE (entry ≥ 14:45 — EOD exit almost certain)</option>
         </select>
     </div>
@@ -169,8 +168,8 @@ const PARAMS = [
     {num:'08', name:'bounce_vr_abs',   gate:'G2', desc:'bounce VR > 1.2x absolute floor',      formula:'VR @ bounce'},
     {num:'09', name:'bounce_vr_rel',   gate:'G2', desc:'bounce VR > touch VR relative spike',  formula:'VR_bounce / VR_touch'},
     {num:'10', name:'same_candle_tb',  gate:'G2', desc:'touch + bounce same candle (bool)',     formula:'touchIdx == bounceIdx'},
-    {num:'11', name:'G5a',             gate:'G3', desc:'entry close > bounce close',            formula:'C_entry − C_bounce'},
-    {num:'12', name:'G5b',             gate:'G3', desc:'entry VR > bounce VR',                 formula:'VR_entry / VR_bounce'},
+    {num:'11', name:'G3a',             gate:'G3', desc:'entry close > bounce close',            formula:'C_entry − C_bounce'},
+    {num:'12', name:'G3b',             gate:'G3', desc:'entry VR > bounce VR',                 formula:'VR_entry / VR_bounce'},
 ];
 
 const VERDICTS = ['', 'pass', 'weak', 'fail', 'N/A'];
@@ -418,12 +417,20 @@ ${detailRows}
         const existing = await (await fileHandle.getFile()).text();
 
         // Find the last row in the signal log table to get next signal number
-        // Only match signal log rows (non-zero-padded numbers followed by stock name in caps)
-        const rowMatches = [...existing.matchAll(/^\| *([1-9][0-9]*) *\| *[A-Z]{4,}/gm)];
+        // Match rows where col1 = number, col2 = date (YYYY-MM-DD)
+        const rowMatches = [...existing.matchAll(/^\| *([1-9][0-9]*) *\| *\d{4}-\d{2}-\d{2}/gm)];
         const nextNum = rowMatches.length > 0 ? Math.max(...rowMatches.map(m => parseInt(m[1]))) + 1 : 1;
 
-        // Build log row
-        const logRow = `| ${nextNum} | ${stock} | ${date} | ${touch} | ${bounce} | ${entry} | ${outcome} | ${g1} | ${g2} | ${g3} | ${notes} |\n`;
+        // Calculate diff (touch→bounce in 5-min bars)
+        let diff = '?';
+        if (touch && bounce && touch !== '—' && bounce !== '—') {
+            const [th, tm] = touch.split(':').map(Number);
+            const [bh, bm] = bounce.split(':').map(Number);
+            diff = Math.round(((bh * 60 + bm) - (th * 60 + tm)) / 5);
+        }
+
+        // Build log row (no stock column — matches table format: # | Date | Touch | Bounce | Entry | diff | Outcome | G1 | G2 | G3 | Verdict)
+        const logRow = `| ${nextNum} | ${date} | ${touch} | ${bounce} | ${entry} | ${diff} | ${outcome} | ${g1} | ${g2} | ${g3} | ${notes} |\n`;
 
         // Insert log row before the first '---' separator after the table header
         let updated;

@@ -16,10 +16,9 @@ Parent: [[fv2_index]]
 ## Outcome Key
 - **SL** = stop hit before 14:50
 - **Win** = target hit before 14:50
-- **EOD+** = open at 14:50, in profit (forced exit)
-- **EOD-** = open at 14:50, at loss (forced exit)
-- **EOD** = post-15:00 signal, skipped in review
-- **LATE** = entry ≥ 14:45 — structurally disadvantaged, EOD exit almost certain, flag separately
+- **EOD+** = exit at 14:50, in profit (forced exit)
+- **EOD-** = exit at 14:50, at loss (forced exit)
+- **LATE** = entry ≥ 14:45 — covers all post-14:45 entries incl. post-15:00 signals
 
 ---
 
