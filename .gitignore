@@ -1,3 +1,6 @@
+# Accidentally committed CC package
+package/
+
 # IDE files
 .idea/
 .vscode/
