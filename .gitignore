@@ -1,6 +1,9 @@
 # Accidentally committed CC package
 package/
 
+# Local exploration / reference (not for commit)
+_explore/
+
 # IDE files
 .idea/
 .vscode/
