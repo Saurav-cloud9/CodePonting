@@ -11,8 +11,8 @@ P1a Pine + H1 fixes
 
 P1b TradingView AI Chart Copilot — explore beta, test on Pine Script fixes
 
-P2  Signal review — 31 done, 2 winners; target 5 winners → H5 build
-        Next: signal #16 detail block (POWERGRID June 23) then continue
+P2  Signal review — 32 done, 3 winners (#15 #16 #17); target 5 winners → H5 build
+        Next: continue POWERGRID signals from #18
 
 P3  Build H5 — master combined tuner (all G1–G3 params)
 
@@ -28,3 +28,5 @@ P4  Optuna joint sweep — all 12 params, maximise PF_test
 # F7  H1 bar replay mode
 # F8  Insurance review
 # F9  Add and manage MCP servers in VS Code
+# F10 Stock mock + algo test — paper run on equity cash with full algo execution
+#     Revisit before F&O go-live (post Step 8 paper trading)
