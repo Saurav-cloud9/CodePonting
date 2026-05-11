@@ -81,7 +81,7 @@ Step 7.3  ✅  Full independent cold audit: 2 MEDIUM + 5 LOW bugs found across f
            ✅  Bug 1: eod_map positional → eod_datetimes set (robust, no index dependency)
            ✅  Bugs 3,7,8: dead code removed, NaN ATR skip added to H1, unreachable path fixed
            ✅  29 DS3 CSVs rebuilt clean: 43,296 signals; BAJFINANCE Kite fetch pending
-Step 7.4      BAJFINANCE CSV missing — Kite MCP returned no candles; retry pending
+Step 7.4  ✅  BAJFINANCE CSV confirmed present — BAJFINANCE_5min.csv in fv2 intraday_5min folder
            ✅  Signal insight: G4+G5 pass → hits target despite G1/G2/G3 fail (POWERGRID Dec 22 sig 1)
 
 Step 8      — TV Pine Signal Visualisation (2026-04-10)
@@ -118,3 +118,63 @@ Step 9.4  — 2026-04-19
            ✅  Pine k=0 triangle → purple compiled; ATR mismatch (RMA vs SMA) flagged
            ✅  Emerging patterns: G1 load-bearing hypothesis + failed prior touch pattern
            ✅  27 signals reviewed total (16 POWERGRID + 11 TATAMOTORS)
+
+2026-04-30  SS ───────────────────────────────────────────────────────────
+           ✅  Signal #17 logged (POWERGRID Jun 26 12:20T) — G1 full fail, bounce vol only, Win; exception flagged
+           ✅  Signal detail block serial numbers #15/#16 corrected in POWERGRID log
+           ✅  TODO parked F10 updated: Stock mock + algo test merged, pre-F&O context added
+           ✅  32 signals reviewed total (POWERGRID: 32 signals, 3 winners: #15 #16 #17)
+
+2026-05-04  SS ───────────────────────────────────────────────────────────
+           ✅  TV vs Kite OHLC mismatch root-caused — tick aggregation difference; Kite = ground truth
+           ✅  9:15 TV touch gap explained — ₹0.005 TV/Kite ma20 delta flips borderline condition
+           ✅  H1.1 bugs fixed: sl missing from candle_touch (#01), candle_t3 never in object (#02),
+               touch_idx/bounce_idx missing → sameCandle always true (#09/#10)
+           ✅  build_html1.py patched + H1 rebuilt; smoke test passed on k=0 and k>0 signals
+           ✅  CC contract rule + SMOKE TEST RULE added to CLAUDE.md
+           ✅  P2a closed; TODO cleaned to 3-item critical path; F12 TV Copilot added to parked
+
+2026-05-05  SS ───────────────────────────────────────────────────────────
+           ✅  POWERGRID signals #18–#21 reviewed — June 26 2025 flagged as momentum day anomaly
+           ✅  Fakeout pattern documented: k=0/1 + extreme vr (3x+) + no pullback = noise win category
+           ✅  Gate implication: min pullback bars (swing high → T0 ≥ 3) would reject all fakeouts
+           ✅  Signal #21 (9:15 Win) flagged as opening bar special case; P4 added to TODO
+           ✅  CLAUDE.md cleaned — 5-gap → 3-gate language, 30 stocks corrected, stale lines removed
+           ✅  H1 tooltip hover delay (200ms) + hide-on-move fix implemented surgically
+           ✅  36 signals reviewed total; decision pending: H5-first vs continue manual review
+
+2026-05-06  SS ───────────────────────────────────────────────────────────
+           ✅  Signal #22 logged — POWERGRID Jul 22 11:15, Win, anomaly (full G1 fail)
+           ✅  Signal #23 logged — POWERGRID Jul 22 11:50, Win, not a winner (#04 fail: lows rising to T0, wick touch only)
+           ✅  Signal detail headers #18–#23 fixed (missing signal numbers)
+           ✅  Deep pullback analysis: lower high concept validated via CSV data; swing high unconfirmable for #23
+           ✅  38 signals reviewed total; decision: move to H5 build (signal review phase complete)
+           ✅  H5 planning questions raised — build script + HTML, 30 stocks, gate sliders + auto verdicts
+           ✅  CC Remote Setup documented in CLAUDE.md — .bat path, correct command, bug fix logged
+           ✅  CCP protocol expanded — reads all 8 files (6 SS-triggered + 2 auto-memory)
+           ✅  BAJFINANCE CSV confirmed present; Step 7.4 marked complete in PROGRESS_HISTORY.md
+           ✅  Signal #22 logged — POWERGRID Jul 22 2025, 11:15 touch, Win, anomaly (fails most params)
+           ✅  Abbreviation rules + glossary added — CLAUDE.md 4-rule policy + TODO.md glossary
+           ✅  tb_gap introduced as standard replacement for k (touch-to-bounce gap in bars)
+           ✅  37 signals reviewed total; #23 (Jul 22, 11:50 touch) in progress — H1 params pending
+
+2026-05-09  SS ───────────────────────────────────────────────────────────
+           ✅  /resume vs CCP protocol clarified — resume = recovery, CCP = intentional SS
+           ✅  export_h5_signals.py built — raw signal detection, 12 params, SL/target exit sim
+           ✅  p04 swing high logic fixed — window: T0-1 back to prior touch, highest high wins
+           ✅  bounce_bar_index + entry_bar_index added to signals CSV schema
+           ✅  export_h5_candles.py built — T0-10 to exit+3 window, bar_index relative to T0
+           ✅  CSV encoding fixed — UTF-8, LF line endings, no BOM
+           ✅  H5 Lite React artifact built on claude.ai — 3-panel, 12 params, real CSV support
+           ✅  SVG candlestick chart wired — T0/BNC/ENT markers, MA20, SL, TGT lines
+           ✅  Signal tuning loop validated end-to-end on POWERGRID 2022 (100 signals)
+
+2026-05-07  SS ───────────────────────────────────────────────────────────
+           ✅  H5 param spec built — all 12 params discussed one by one (formula + H5 implementation)
+           ✅  fv2_params.md created at Algo_Trading/Docs/fv2_params.md
+           ✅  H5 design decisions locked: Explore/Filter modes, gate independence, N/A propagation rules
+           ✅  Param types defined: tunable threshold, tunable count, tunable range, binary/quality
+           ✅  Opus review completed — 7 valid findings fixed, 5 invalid/out-of-scope skipped
+           ✅  Slider ranges updated (#01→0.50%, #02→0.20%, #05 max→2.0, #07 max→5.0)
+           ✅  #07 edge cases hardened (negative numerator/denominator → N/A)
+           ✅  F0 added to TODO: Claude-in-Claude React artifact for H5 lite

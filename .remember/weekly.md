@@ -1,28 +1,19 @@
-# Weekly Summary — week of 2026-03-15 to 2026-03-21
+# Weekly Log — w/c 2026-05-05
 
-## Major milestones
-- Step 4.3a complete: BQS R1 (9 metrics) validated — M5/M6 best signals but correlated
-- Step 4.3b complete: BQS R2 (10 new metrics, M1–M10) validated — no star bucket found
-- bqs_export.py fixed: raw_touch_idx + raw_bounce_idx retained in parquet
-- remember plugin installed; MCP cc-memory server built and registered in Claude Desktop
-- CLAUDE.md updated: mandatory /remember:remember call added to session protocol
-- PROGRESS.md restructured with clean step numbering (4.3 → 4.3a → 4.3b → 4.4)
+## This week
+- Signal review phase complete (38 signals, 3 winners: #15 #16 #17)
+- Decision: move to H5 build (param tuner) instead of continuing manual review
+- fv2_params.md built: all 12 params specced, Opus-reviewed, moved to Framework_V2/docs/
+- H5 design decisions locked: Explore/Filter modes, gate independence, N/A rules
+- H5 Lite React artifact built on claude.ai — 3-panel UI, real CSV, candlestick chart
+- POWERGRID 2022 signal CSVs generated: signals (100) + candles (~1985 rows)
+- bounce_bar_index added to signals schema — artifact can now label T0/BNC/ENT correctly
 
-## BQS R2 leaderboard summary
-| Metric        | Best lift | Verdict  |
-|---------------|-----------|----------|
-| M1 MA slope   | +0.8pp w1 | WEAK     |
-| M2 RSI-14     | +8.5pp w1 | WEAK (146 trades) |
-| M3 Freshness  | +4.7pp w1 | WEAK (anomaly) |
-| M4 Vol trend  | 0.0pp     | EXCLUDE  |
-| M5 Day pos    | +1.6pp w1 | WEAK     |
-| M6 Body ratio | +1.6pp w1 | EXCLUDE  |
-| M6.1 Wick/body| +1.4pp w1 | EXCLUDE  |
-| M7 Doji type  | +2.0pp w1 | EXCLUDE  |
-| M8 Day of week| +1.1pp w1 | EXCLUDE  |
-| M9 Vol ratio  | +1.2pp w1 | EXCLUDE  |
-| M10 Gap open  | +6.3pp w2 | WEAK (242 trades) |
+## Key insight this week
+- p04 swing high = highest high in window from T0-1 back to prior touch (not arbitrary lookback)
+- H5 Lite validates the param tuning loop end-to-end before H5 full build
 
-## Conclusion
-No single metric is strong enough as a standalone filter.
-Step 4.4 (DT/RF) is the correct next move — find combo effects.
+## Next week
+- Complete H5 Lite chart refinement on claude.ai
+- H5 full build: Python + HTML, 30 stocks
+- Optuna joint sweep (P3) after H5 full validated

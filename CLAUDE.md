@@ -10,6 +10,17 @@
 
   vsa = "very short answer" — reply in 1–2 lines max, no elaboration
 
+── ABBREVIATION RULES ───────────────────────────────────────────
+
+  1. First use in any session: spell out in full, short form in brackets.
+     Example: "Position Guard (PG)", "touch-to-bounce gap (tb_gap)"
+  2. Preferred short forms are defined in TODO.md → GLOSSARY section.
+     Use those — do not invent new ones without adding them to the glossary.
+  3. When a new abbreviation is introduced (in replies, logs, or code),
+     add it to the TODO.md glossary immediately — same turn, no batching.
+  4. Generic single-letter variables (k, x, n) are banned for domain
+     concepts. Use descriptive short forms (tb_gap, not k).
+
   token-efficiency = always choose the method/technique/option that consumes
     fewer tokens with no compromise to the final outcome. applies to all tasks
     (patching vs rebuild, inline vs script, etc.)
@@ -73,7 +84,6 @@ Execution rules:
     Files: C:\Users\Saurav\CodePonting\.remember\
       today.md   → session log (what was done, key findings)
       handoff.md → current task status, next step, blockers
-      weekly.md  → update only when a major milestone is crossed
 
 
 ## Progress & Context Management Protocol
@@ -85,24 +95,30 @@ Execution rules:
 
   ### When Saurav types "SS" (Save State):
   - CC updates PROGRESS.md (Recent 5 steps + 5 Milestones)
-  - CC updates .remember/handoff.md + today.md + weekly.md
+  - CC updates .remember/handoff.md + today.md
   - CC updates TODO.md (max 5 items, P1 priority first)
   - CC appends to PROGRESS_HISTORY.md (never delete existing entries)
   - CC calls /remember:remember to save state
 
-  ### When Saurav types "SSP" (Save State Peek):
-  - Read these files in order: .remember/remember.md, PROGRESS.md, TODO.md
+  ### When Saurav types "CCP" (Context Catch-Up / Peek):
+  - Read these files in order:
+      SS-triggered (6):
+        1. .remember/remember.md
+        2. .remember/handoff.md
+        3. .remember/today.md
+        4. PROGRESS.md
+        5. PROGRESS_HISTORY.md
+        6. TODO.md
+      Auto-memory (always live):
+        7. memory/MEMORY.md
+        8. memory/ linked files (project_*, feedback_*, etc.)
   - Reply with a 3-part summary: (1) where we are, (2) what's next, (3) any blockers
   - No file writes. Read-only. Fast.
+  - Note: Claude.ai uses CCP to read CC memory via cc-memory MCP tools — same spirit, different mechanism.
 
   ### When Saurav types "SSD" (Save State + Drive):
   - Everything SS does, PLUS syncs all 4 .remember/ files to Google Drive
     CodePonting/.remember/ folder
-
-  ### CCP (Context Catch-Up Protocol):
-  - Claude.ai reads CC memory via cc-memory MCP tools
-  - Provides session summary: what was done + next step
-  - Triggered by typing "CCP" or "ccp"
 
   ### Files and their purpose:
   - PROGRESS_HISTORY.md → full chronological audit trail (CC writes)
@@ -135,12 +151,11 @@ Framework_V1  →  CLOSED ❌ (as of 2026-03-25)
                  Adapter Pattern + Strategy Pattern architecture retained for fv2.
 
 Framework_V2  →  ACTIVE DEVELOPMENT ✅
-                 Signal redesign underway. 5 structural gaps identified vs
-                 true MA bounce. Lower trade frequency (~319/4yr) makes
-                 charges manageable (1.6% of capital). Raw edge is the target.
+                 Signal redesign underway. 3-gate system (G1/G2/G3) addressing
+                 structural gaps vs true MA bounce. Raw edge is the target.
                  Data: Framework_V2/data/historical/csv/intraday_5min/
                  Outputs: Framework_V2/outputs/reports/
-                 Current: TATAMOTORS-only. Scale to 29 stocks next.
+                 Universe: 30 stocks (29 DS3 + BAJFINANCE via Kite MCP). All CSVs built.
 
 Framework_V1_Sandbox → CLOSED alongside fv1.
                         All BQS/DT/RF experiments complete and documented.
@@ -151,12 +166,10 @@ Framework_V1_Sandbox → CLOSED alongside fv1.
 
 Status      : REDESIGN IN PROGRESS
               fv1 was a proximity detector, NOT a true MA bounce.
-              Opus review identified 5 structural gaps:
-                Gap 1 — Trend context (rising slope filter) ✅ implemented
-                Gap 2 — Approach direction (price from above — gates G3)
-                Gap 3 — Pullback quality (depth/structure/wick defence)
-                Gap 4 — Volume signature (not just threshold)
-                Gap 5 — Follow-through confirmation
+              Opus review identified gaps → restructured into 3 temporal gates:
+                G1 — Pre-touch  : trend context + approach direction
+                G2 — Touch & bounce : pullback quality + volume signature
+                G3 — Post-bounce : follow-through confirmation
 
 fv2 Signal  : True MA bounce — 6 classic bounce criteria
               TATAMOTORS 5-min (2022–2025) as development stock
@@ -355,6 +368,46 @@ adapters/           : Swap these for different environments
 - DO NOT use intraday_5min in sandbox scripts — DS3 only
 - DO NOT restart optuna_study.db without explicit instruction from Saurav
 
+# ── SURGICAL EDIT RULE (fv2 HTML + Pine Script) ───────────────
+# Applies to ALL files in fv2 signal viewer (HTML/Python) and ALL Pine Script files on TradingView.
+
+Before editing any such file:
+  1. Read the task carefully
+  2. Identify the MINIMUM lines/functions that need to change
+  3. Modify ONLY those — nothing else
+
+Do NOT:
+  - Refactor or restructure existing code
+  - Rename variables or functions
+  - Remove any existing feature or block
+  - "Clean up" anything not mentioned in the task
+  - Overwrite or modify h1_extensions.js unless explicitly instructed
+  - Remove the <script src="h1_extensions.js"> tag from build_html1.py
+
+If the fix requires changes beyond the stated scope:
+  STOP → list what needs to change and why → wait for approval
+
+After every edit, confirm:
+  ✅ What was changed
+  ✅ What was deliberately left untouched
+
+# ── H1.1 CONTRACT RULES ────────────────────────────────────────
+# H1.1 (fv2_h1_1_signal_review.html) is a static file that receives
+# signal data from build_html1.py via the openReview() function.
+# The two files are coupled — changes to one can silently break the other.
+
+# CC RULE — before saving any edit to openReview() in build_html1.py:
+#   Check the H1.1 contract comment (above the signal object in openReview())
+#   and verify every field listed there is still present in the signal object.
+#   If a field is missing → stop and restore it before proceeding.
+
+# SMOKE TEST RULE — after any H1 rebuild:
+#   Open H1.1 on one k=0 signal and one k>0 signal and confirm:
+#     - #01 shows a slope value (not "—%")
+#     - #02 shows a slope value (not "N/A", unless touch is in first 3 bars of day)
+#     - #09/#10 show "N/A / Yes" for k=0, and actual ratio / "No" for k>0
+#   Takes 30 seconds. Catches any silent regression before signal review continues.
+
 
 # ── OUTPUTS ───────────────────────────────────────────────────
 
@@ -513,3 +566,25 @@ fv2 CSV                 : Framework_V2/data/historical/csv/intraday_5min/TATAMOT
 
   Philosophy     : Not a showcase — a tool we'd actually use daily.
                    Hackathon = side quest. CodePonting = main quest. 🏏
+
+
+# ── CC REMOTE SETUP ───────────────────────────────────────────
+
+## Auto-launch
+  Startup .bat : C:\Users\Saurav\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\claude_remote.bat
+
+## Correct .bat command
+  @echo off
+  cd /d C:\Users\Saurav\CodePonting
+  start "Claude Code Remote" cmd /k "claude --dangerously-skip-permissions --name CodePonting"
+
+## Bug fixed (2026-05-06)
+  Broken command : claude remote-control --permission-mode bypassPermissions --name CodePonting --spawn same-dir
+  Root cause     : "remote-control" is NOT a valid subcommand in v2.1.128
+  Fix            : Remote control activates automatically on CC launch — no extra flags needed
+
+## Confirmed working clients
+  - Terminal
+  - VS Code GUI
+  - Claude.ai CC
+  - Claude Desktop

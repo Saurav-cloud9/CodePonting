@@ -273,8 +273,8 @@ canvas{display:block;width:100%}
 .crosshair-x,.crosshair-y{position:absolute;background:var(--fg3);pointer-events:none;display:none}
 .crosshair-x{width:1px;top:0;bottom:0;opacity:0.3}
 .crosshair-y{height:1px;left:0;right:0;opacity:0.3}
-.review-btn{margin-top:10px;width:100%;background:#1e2a3a;border:1px solid #2a5a8a;color:#60a5fa;padding:7px 0;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;transition:all .15s}
-.review-btn:hover{background:#2a3a4a;color:#93c5fd}"""
+.review-btn{margin-top:10px;width:100%;background:#1a2e1a;border:1px solid #22c55e;color:#4ade80;padding:7px 0;border-radius:4px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;transition:all .15s}
+.review-btn:hover{background:#243d24;color:#86efac}"""
 
 
 # ── HTML body (topbar with stock dropdown added) ───────────────────────────────
@@ -416,12 +416,18 @@ chartArea.addEventListener('mousemove', e => {
     if (c.atr !== null) html += '<div class="tt-row"><span class="tt-label">ATR14</span><span class="tt-val" style="color:#888">' + c.atr.toFixed(2) + '</span></div>';
     if (c.vr !== null) { const vrColor = c.vr >= 1.2 ? '#f97316' : '#555d72'; html += '<div class="tt-row"><span class="tt-label">Vol Ratio</span><span class="tt-val" style="color:' + vrColor + '">' + c.vr.toFixed(2) + 'x</span></div>'; }
     html += '<div style="margin-top:5px;padding-top:4px;border-top:1px solid #333;font-size:9px;color:#555">Slope = (MA20[T0] \u2212 MA20[T0\u22125]) / MA20[T0] \xd7 100</div>';
-    tooltip.innerHTML = html; tooltip.style.display = 'block';
-    let tx = mx + 16; if (tx + 160 > W) tx = mx - 170;
-    tooltip.style.left = tx + 'px'; tooltip.style.top = Math.max(PAD.top, my - 40) + 'px';
+    clearTimeout(tooltipTimer);
+    tooltip.style.display = 'none';
+    const _html = html, _mx = mx, _my = my;
+    tooltipTimer = setTimeout(() => {
+        tooltip.innerHTML = _html; tooltip.style.display = 'block';
+        let tx = _mx + 16; if (tx + 160 > W) tx = _mx - 170;
+        tooltip.style.left = tx + 'px'; tooltip.style.top = Math.max(PAD.top, _my - 40) + 'px';
+    }, 200);
 });
 
 chartArea.addEventListener('mouseleave', () => {
+    clearTimeout(tooltipTimer);
     tooltip.style.display = 'none'; crossX.style.display = 'none'; crossY.style.display = 'none';
 });
 
@@ -478,6 +484,8 @@ const vctx = volCanvas.getContext('2d');
 const VOL_PAD = {top: 6, right: 60, bottom: 18, left: 12};
 const PAD = {top: 20, right: 60, bottom: 30, left: 12};
 let W, H, plotW, plotH, VW, VH, vPlotW, vPlotH;
+let priceOffset = 0;
+let tooltipTimer = null;
 
 function resize() {
     const r = window.devicePixelRatio || 1;
@@ -516,6 +524,7 @@ function loadDay(idx) {
     daySigs = DATA.s[date] || [];
     selectedSig = -1;
     zoomStart = 0; zoomEnd = candles.length;
+    priceOffset = 0;
     document.getElementById('dateDisplay').textContent = date;
     updateSidebar();
     draw();
@@ -706,6 +715,7 @@ function draw() {
     viewCandles.forEach(c => { if (c.l < lo) lo = c.l; if (c.h > hi) hi = c.h; if (c.ma && c.ma < lo) lo = c.ma; if (c.ma && c.ma > hi) hi = c.ma; });
     const margin = (hi - lo) * 0.08;
     lo -= margin; hi += margin;
+    lo -= priceOffset; hi -= priceOffset;
 
     const n = viewCandles.length;
     const cw = plotW / n;
@@ -838,6 +848,7 @@ function draw() {
 function resetZoom() {
     if (!candles.length) return;
     zoomStart = 0; zoomEnd = candles.length;
+    priceOffset = 0;
     draw();
 }
 
@@ -858,7 +869,22 @@ function openReview() {
         exit_reason:  s[10],
         sl_price:     s[8],
         tgt_price:    s[9],
-        candle_touch:  {o: tc.o, h: tc.h, l: tc.l, c: tc.c, ma: tc.ma, atr: tc.atr, vr: tc.vr},
+        // ── H1.1 Signal Contract ─────────────────────────────────────────────
+        // H1.1 (fv2_h1_1_signal_review.html) reads these fields from the signal object.
+        // DO NOT remove or rename fields without updating H1.1 computeValue() to match.
+        //   candle_touch : {o,h,l,c,ma,sl,atr,vr}  — sl=slope used by #01
+        //   candle_t3    : {sl} or null             — slope at T-3, used by #02
+        //   candle_bounce: {o,h,l,c,vr}             — used by #08, #09, #10, #11
+        //   candle_entry : {o,h,l,c,vr} or null     — used by #10, #11
+        //   touch_idx    : int   — s[0], used by #09/obs sameCandle check
+        //   bounce_idx   : int   — s[1], used by #09/obs sameCandle check
+        //   slope        : float — s[3], used by header + #01
+        // ─────────────────────────────────────────────────────────────────────
+        touch_idx:     s[0],
+        bounce_idx:    s[1],
+        slope:         s[3],
+        candle_touch:  {o: tc.o, h: tc.h, l: tc.l, c: tc.c, ma: tc.ma, sl: tc.sl, atr: tc.atr, vr: tc.vr},
+        candle_t3:     (s[0] >= 3 ? (function(){ const _t3 = candles[s[0]-3]; return _t3 ? {sl: _t3.sl} : null; })() : null),
         candle_bounce: {o: bc.o, h: bc.h, l: bc.l, c: bc.c, vr: bc.vr},
         candle_entry:  ec ? {o: ec.o, h: ec.h, l: ec.l, c: ec.c, vr: ec.vr} : null,
     };
@@ -946,6 +972,7 @@ HTML = f"""<!DOCTYPE html>
 <script>
 {js_final}
 </script>
+<script src="h1_extensions.js"></script>
 </body>
 </html>"""
 

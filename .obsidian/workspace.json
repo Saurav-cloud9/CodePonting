@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Algo_Trading/Docs/Analysis/fv2_signals_POWERGRID.md",
+                "file": "Algo_Trading/Framework_V2/docs/fv2_params.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "fv2_signals_POWERGRID"
+              "title": "fv2_params"
             }
           }
         ]
@@ -185,19 +185,21 @@
   },
   "active": "d7e6dae155608e28",
   "lastOpenFiles": [
-    "Learning/Codedex/Final_Project.py",
-    "Learning/Codedex/lambda_func.py",
-    "Learning/Codedex/python-basics-2.pdf",
-    "Learning/Codedex/__pycache__/bday_messages.cpython-314.pyc",
-    "Learning/Codedex/__pycache__",
-    "Learning/Codedex/wiki.py",
-    "requirements.txt",
-    "Learning/Codedex/__pycache__/bday_messages.cpython-312.pyc",
-    "Learning/Codedex/main.py",
-    "Learning/Codedex/bday_messages.py",
-    "Learning/Codedex/solar_system.py",
-    "Algo_Trading/Docs/Analysis/fv2_signals_TATAMOTORS.md",
+    "my_playlist.txt",
+    "Learning/Codedex/working_with_a_file.txt",
+    "Learning/Codedex/file_functions.txt",
+    "Learning/Codedex/my_playlist.py",
+    "Learning/Codedex/my_playlist.txt",
+    "file_path",
+    "Learning/Codedex/working_with_a_file.py",
+    "_tmp_renumber_params.py",
+    "Algo_Trading/Framework_V2/outputs/h5/powergrid_2022_h5_candles.csv",
+    "Algo_Trading/Framework_V2/scripts/export_h5_candles.py",
+    "Algo_Trading/Framework_V2/outputs/h5/4800F400",
+    "Algo_Trading/Framework_V2/docs/fv2_params.md",
     "Algo_Trading/Docs/Analysis/fv2_signals_POWERGRID.md",
+    "Algo_Trading/Docs/fv2_params.md",
+    "Algo_Trading/Docs/Analysis/fv2_signals_TATAMOTORS.md",
     "Algo_Trading/Docs/Analysis/fv2_signals_HDFCBANK.md",
     "Algo_Trading/Docs/Analysis/fv2_obs_G1_pretouch.md",
     "Algo_Trading/Docs/Analysis/fv2_obs_G2_touchbounce.md",

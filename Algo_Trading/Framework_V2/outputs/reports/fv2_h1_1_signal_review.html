@@ -34,6 +34,7 @@ td.param-gate { width: 40px; }
 .gate-G3 { background: #3a2a1e; color: #fb923c; }
 .gate-G4 { background: #1e3a2a; color: #4ade80; }
 .gate-G5 { background: #3a1e2a; color: #f472b6; }
+.gate-obs { background: #252525; color: #666; }
 td.param-desc { color: var(--fg2); font-size: 11px; }
 td.param-formula { color: var(--fg3); font-size: 10px; font-style: italic; width: 160px; }
 td.param-value { width: 90px; font-size: 12px; font-weight: 600; }
@@ -167,9 +168,9 @@ const PARAMS = [
     {num:'07', name:'wick_defence_ratio', gate:'G2', desc:'wick above MA / wick below MA — higher = stronger defence. >1 = buyers recovered more than they overshot', formula:'(min(O,C)−MA) / (MA−low)'},
     {num:'08', name:'bounce_vr_abs',   gate:'G2', desc:'bounce VR > 1.2x absolute floor',      formula:'VR @ bounce'},
     {num:'09', name:'bounce_vr_rel',   gate:'G2', desc:'bounce VR > touch VR relative spike',  formula:'VR_bounce / VR_touch'},
-    {num:'10', name:'same_candle_tb',  gate:'G2', desc:'touch + bounce same candle (bool)',     formula:'touchIdx == bounceIdx'},
-    {num:'11', name:'G3a',             gate:'G3', desc:'entry close > bounce close',            formula:'C_entry − C_bounce'},
-    {num:'12', name:'G3b',             gate:'G3', desc:'entry VR > bounce VR',                 formula:'VR_entry / VR_bounce'},
+    {num:'obs', name:'same_candle_tb', gate:'obs', desc:'touch + bounce same candle — observation only, not a gate param', formula:'touchIdx == bounceIdx'},
+    {num:'10', name:'G3a',             gate:'G3', desc:'entry close > bounce close',            formula:'C_entry − C_bounce'},
+    {num:'11', name:'G3b',             gate:'G3', desc:'entry VR ≥ bounce VR',                 formula:'VR_entry / VR_bounce'},
 ];
 
 const VERDICTS = ['', 'pass', 'weak', 'fail', 'N/A'];
@@ -271,13 +272,13 @@ function computeValue(num) {
                    if (!bc || !tc || bc.vr === null || tc.vr === null || tc.vr === 0) return {txt:'—', cls:'val-na'};
                    const ratio = bc.vr / tc.vr;
                    return {txt: fx(ratio, 2) + 'x', cls: ratio > 1 ? 'val-pos' : 'val-neg'};
-        case '10': return {txt: sameCandle ? 'Yes (same candle)' : 'No', cls: sameCandle ? 'val-pos' : 'val-neu'};
-        case '11': if (!ec || !bc) return {txt:'—', cls:'val-na'};
-                   const diff11 = ec.c - bc.c;
-                   return {txt: (diff11 >= 0 ? '+' : '') + fx(diff11, 2), cls: diff11 > 0 ? 'val-pos' : 'val-neg'};
-        case '12': if (!ec || !bc || bc.vr === null || ec.vr === null || bc.vr === 0) return {txt:'—', cls:'val-na'};
-                   const ratio12 = ec.vr / bc.vr;
-                   return {txt: fx(ratio12, 2) + 'x', cls: ratio12 > 1 ? 'val-pos' : 'val-neg'};
+        case 'obs': return {txt: sameCandle ? 'Yes (same candle)' : 'No', cls: sameCandle ? 'val-pos' : 'val-neu'};
+        case '10': if (!ec || !bc) return {txt:'—', cls:'val-na'};
+                   const diff10 = ec.c - bc.c;
+                   return {txt: (diff10 >= 0 ? '+' : '') + fx(diff10, 2), cls: diff10 > 0 ? 'val-pos' : 'val-neg'};
+        case '11': if (!ec || !bc || bc.vr === null || ec.vr === null || bc.vr === 0) return {txt:'—', cls:'val-na'};
+                   const ratio11 = ec.vr / bc.vr;
+                   return {txt: fx(ratio11, 2) + 'x', cls: ratio11 > 1 ? 'val-pos' : 'val-neg'};
         default: return {txt:'—', cls:'val-na'};
     }
 }
@@ -287,20 +288,34 @@ const tbody = document.getElementById('paramTable');
 PARAMS.forEach(p => {
     const val = computeValue(p.num);
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td class="param-num">#${p.num}</td>
-        <td class="param-name">${p.name}</td>
-        <td class="param-gate"><span class="gate-badge gate-${p.gate}">${p.gate}</span></td>
-        <td class="param-desc">${p.desc}</td>
-        <td class="param-formula">${p.formula}</td>
-        <td class="param-value"><span class="${val.cls}">${val.txt}</span></td>
-        <td class="param-verdict">
-            <select class="verdict-sel" id="v${p.num}" onchange="styleVerdict(this)">
-                ${VERDICTS.map(v => `<option value="${v}">${v || '— select —'}</option>`).join('')}
-            </select>
-        </td>
-        <td class="param-comment"><input class="comment-input" id="c${p.num}" type="text" placeholder=""></td>
-    `;
+    if (p.num === 'obs') {
+        tr.style.opacity = '0.6';
+        tr.innerHTML = `
+            <td class="param-num">obs</td>
+            <td class="param-name">${p.name}</td>
+            <td class="param-gate"><span class="gate-badge gate-obs">obs</span></td>
+            <td class="param-desc">${p.desc}</td>
+            <td class="param-formula">${p.formula}</td>
+            <td class="param-value"><span class="${val.cls}">${val.txt}</span></td>
+            <td class="param-verdict" style="color:var(--fg3);font-size:11px;font-style:italic;">observation</td>
+            <td class="param-comment"></td>
+        `;
+    } else {
+        tr.innerHTML = `
+            <td class="param-num">#${p.num}</td>
+            <td class="param-name">${p.name}</td>
+            <td class="param-gate"><span class="gate-badge gate-${p.gate}">${p.gate}</span></td>
+            <td class="param-desc">${p.desc}</td>
+            <td class="param-formula">${p.formula}</td>
+            <td class="param-value"><span class="${val.cls}">${val.txt}</span></td>
+            <td class="param-verdict">
+                <select class="verdict-sel" id="v${p.num}" onchange="styleVerdict(this)">
+                    ${VERDICTS.map(v => `<option value="${v}">${v || '— select —'}</option>`).join('')}
+                </select>
+            </td>
+            <td class="param-comment"><input class="comment-input" id="c${p.num}" type="text" placeholder=""></td>
+        `;
+    }
     tbody.appendChild(tr);
 });
 
@@ -360,9 +375,9 @@ async function submitReview() {
     const outcome = document.getElementById('outcomeSelect').value;
     if (!outcome) { showStatus('Select an outcome first.', 'err'); return; }
 
-    // Check all verdicts filled
-    const missing = PARAMS.filter(p => !document.getElementById('v' + p.num).value);
-    if (missing.length) { showStatus('Fill in all 12 verdicts before submitting.', 'err'); return; }
+    // Check all verdicts filled (obs row has no select — skip it)
+    const missing = PARAMS.filter(p => p.num !== 'obs' && !document.getElementById('v' + p.num).value);
+    if (missing.length) { showStatus('Fill in all 11 verdicts before submitting.', 'err'); return; }
 
     document.getElementById('submitBtn').disabled = true;
     showStatus('Requesting folder access...', '');
@@ -380,16 +395,21 @@ async function submitReview() {
 
     // Signal log row
     const g1 = [v('01'), v('02'), v('03'), v('04')].join('');
-    const g2 = [v('05'), v('06'), v('07'), v('08'), v('09'), v('10')].join('');
-    const g3 = [v('11'), v('12')].join('');
+    const g2 = [v('05'), v('06'), v('07'), v('08'), v('09')].join('');
+    const g3 = [v('10'), v('11')].join('');
     const notes = finalComment || '—';
 
     // Detail table
     let detailRows = '';
     PARAMS.forEach(p => {
-        const verdict = document.getElementById('v' + p.num).value;
-        const comment = document.getElementById('c' + p.num).value.trim();
-        detailRows += `| ${p.num} | ${p.name} | ${p.gate} | ${verdict} | ${comment || '—'} |\n`;
+        if (p.num === 'obs') {
+            const obsVal = computeValue('obs');
+            detailRows += `| obs | ${p.name} | obs | ${obsVal.txt} | — |\n`;
+        } else {
+            const verdict = document.getElementById('v' + p.num).value;
+            const comment = document.getElementById('c' + p.num).value.trim();
+            detailRows += `| ${p.num} | ${p.name} | ${p.gate} | ${verdict} | ${comment || '—'} |\n`;
+        }
     });
 
     const block = `

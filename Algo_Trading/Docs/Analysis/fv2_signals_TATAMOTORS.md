@@ -45,9 +45,9 @@ Parent: [[fv2_index]]
 | 07 | wick_defence_ratio | G2 | fail | long enuf to fail the signal |
 | 08 | bounce_vr_abs | G2 | pass | — |
 | 09 | bounce_vr_rel | G2 | N/A | Same candle |
-| 10 | same_candle_tb | G2 | pass | — |
-| 11 | G5a | G3 | fail | — |
-| 12 | G5b | G3 | fail | — |
+| obs | same_candle_tb | obs | pass | — |
+| 10 | G3a | G3 | fail | — |
+| 11 | G3b | G3 | fail | — |
 
 **Final comment:** whats interesting is that even if we fail this one as per review there is another signal right after this one that hits the target. and the next one looks like a text book bounce as well. this one is SL hit so good call to reject it.
 
@@ -67,9 +67,9 @@ Parent: [[fv2_index]]
 | 07 | wick_defence_ratio | G2 | fail | we need to define this better. right now you have failed it based on the fact that most of the lower wick is below ma line right? if yes, then we need to define this |
 | 08 | bounce_vr_abs | G2 | pass | — |
 | 09 | bounce_vr_rel | G2 | N/A | Same candle |
-| 10 | same_candle_tb | G2 | pass | — |
-| 11 | G5a | G3 | pass | — |
-| 12 | G5b | G3 | pass | — |
+| obs | same_candle_tb | obs | pass | — |
+| 10 | G3a | G3 | pass | — |
+| 11 | G3b | G3 | pass | — |
 
 **Final comment:** interesting one coz it hits target, looks like a textbook bounce from pull back pov. just that #6 and #7 fail.
 
@@ -89,9 +89,9 @@ Parent: [[fv2_index]]
 | 07 | wick_defence_ratio | G2 | N/A | — |
 | 08 | bounce_vr_abs | G2 | pass | — |
 | 09 | bounce_vr_rel | G2 | pass | — |
-| 10 | same_candle_tb | G2 | N/A | — |
-| 11 | G5a | G3 | pass | — |
-| 12 | G5b | G3 | pass | — |
+| obs | same_candle_tb | obs | N/A | — |
+| 10 | G3a | G3 | pass | — |
+| 11 | G3b | G3 | pass | — |
 
 **Final comment:** fail as per review. right call. G1 #03 candles_above fails — price not approaching from above. G2 touch/depth params not applicable (no proper pullback structure). EOD+ but structurally weak entry.
 
@@ -111,9 +111,9 @@ Parent: [[fv2_index]]
 | 07 | wick_defence_ratio | G2 | N/A | — |
 | 08 | bounce_vr_abs | G2 | pass | — |
 | 09 | bounce_vr_rel | G2 | pass | — |
-| 10 | same_candle_tb | G2 | N/A | — |
-| 11 | G5a | G3 | pass | — |
-| 12 | G5b | G3 | fail | — |
+| obs | same_candle_tb | obs | N/A | — |
+| 10 | G3a | G3 | pass | — |
+| 11 | G3b | G3 | fail | — |
 
 **Final comment:** signal fails review but hits target, so G2 vol (bounce_vr_abs + bounce_vr_rel) and partial G3 got it thru. Note: #05-#07 not applicable since no pullback structure confirmed — volume alone was driving this move.
 
@@ -133,9 +133,9 @@ Parent: [[fv2_index]]
 | 07 | wick_defence_ratio | G2 | fail | — |
 | 08 | bounce_vr_abs | G2 | pass | — |
 | 09 | bounce_vr_rel | G2 | N/A | — |
-| 10 | same_candle_tb | G2 | pass | — |
-| 11 | G5a | G3 | fail | — |
-| 12 | G5b | G3 | fail | — |
+| obs | same_candle_tb | obs | pass | — |
+| 10 | G3a | G3 | fail | — |
+| 11 | G3b | G3 | fail | — |
 
 **Final comment:** another EOD+ -> how do pros differentiate positive EOD that is the ones that end up with profit after charges from the ones that end up with loss after charges. Should we not worry about this during signal review and revisit later? advise. also 9/12 -> mostly pass if EOD profit stays truly positive.
 
@@ -155,9 +155,9 @@ Parent: [[fv2_index]]
 | 07 | wick_defence_ratio | G2 | pass | — |
 | 08 | bounce_vr_abs | G2 | pass | — |
 | 09 | bounce_vr_rel | G2 | N/A | — |
-| 10 | same_candle_tb | G2 | pass | — |
-| 11 | G5a | G3 | pass | — |
-| 12 | G5b | G3 | fail | — |
+| obs | same_candle_tb | obs | pass | — |
+| 10 | G3a | G3 | pass | — |
+| 11 | G3b | G3 | fail | — |
 
 **Final comment:** the touch happens at 1440 → possible reason why it ends up as EOD- since hardly any time to hit target. LATE flag applied — entry at 14:45 means only 1 candle before forced exit at 14:50.
 
@@ -177,9 +177,9 @@ Parent: [[fv2_index]]
 | 07 | wick_defence_ratio | G2 | fail | this param catches the close touching the ma. so my doubt at #5 is answered. pls confirm |
 | 08 | bounce_vr_abs | G2 | pass | — |
 | 09 | bounce_vr_rel | G2 | fail | — |
-| 10 | same_candle_tb | G2 | N/A | — |
-| 11 | G5a | G3 | fail | — |
-| 12 | G5b | G3 | fail | — |
+| obs | same_candle_tb | obs | N/A | — |
+| 10 | G3a | G3 | fail | — |
+| 11 | G3b | G3 | fail | — |
 
 **Final comment:** fail. so even though it has 3 and 4, since 1 & 2 aren't there plus body pct and negative wick defense means low buyers conviction at touch resulting in a weak bounce setup followed by weak entry.
 
@@ -199,9 +199,9 @@ Parent: [[fv2_index]]
 | 07  | wick_defence_ratio | G2   | fail    | —       |     |
 | 08  | bounce_vr_abs      | G2   | pass    | —       |     |
 | 09  | bounce_vr_rel      | G2   | fail    | —       |     |
-| 10  | same_candle_tb     | G2   | N/A     | —       |     |
-| 11  | G5a                | G3   | fail    | —       |     |
-| 12  | G5b                | G3   | fail    | —       |     |
+| obs | same_candle_tb     | obs | N/A     | —       |     |
+| 10 | G3a                | G3   | fail    | —       |     |
+| 11 | G3b                | G3   | fail    | —       |     |
 
 **Final comment:** interesting case. the bounce vr alone carried it to target. but that is what we are able to conclude based on the 12 params. perhaps there is a param that we haven't configured for our review. the most obvious thing that i notice on the bounce candle is the upward surge, can this be a param altogether? advise
 
@@ -221,9 +221,9 @@ Parent: [[fv2_index]]
 | 07 | wick_defence_ratio | G2 | fail | — |
 | 08 | bounce_vr_abs | G2 | pass | — |
 | 09 | bounce_vr_rel | G2 | pass | — |
-| 10 | same_candle_tb | G2 | N/A | — |
-| 11 | G5a | G3 | fail | — |
-| 12 | G5b | G3 | fail | — |
+| obs | same_candle_tb | obs | N/A | — |
+| 10 | G3a | G3 | fail | — |
+| 11 | G3b | G3 | fail | — |
 
 **Final comment:** this one has a weak pullback setup and infact fails it since G2 itself fails. Visually it does give a fase impression initially that there could be a possible quality pullback leading upto a proper touch/bounce combo but that doesnt happen due to the sudden upward movement caused by the green candle at 1135. So correctly flagged as a failed signal and the SL hit cofirms the same. Let me know if you have any futher insights to add.
 
@@ -243,9 +243,9 @@ Parent: [[fv2_index]]
 | 07 | wick_defence_ratio | G2 | fail | — |
 | 08 | bounce_vr_abs | G2 | pass | — |
 | 09 | bounce_vr_rel | G2 | pass | — |
-| 10 | same_candle_tb | G2 | N/A | — |
-| 11 | G5a | G3 | fail | — |
-| 12 | G5b | G3 | fail | — |
+| obs | same_candle_tb | obs | N/A | — |
+| 10 | G3a | G3 | fail | — |
+| 11 | G3b | G3 | fail | — |
 
 **Final comment:** straight forward fail. has got most things wrong except the bounce candle surge, infact we have kept that as a potential future candidate for H1.1 right? this looks like a random candle identifying as bounce just coz it closed above ma line.
 
@@ -265,9 +265,9 @@ Parent: [[fv2_index]]
 | 07 | wick_defence_ratio | G2 | fail | — |
 | 08 | bounce_vr_abs | G2 | pass | — |
 | 09 | bounce_vr_rel | G2 | pass | — |
-| 10 | same_candle_tb | G2 | N/A | — |
-| 11 | G5a | G3 | pass | — |
-| 12 | G5b | G3 | fail | — |
+| obs | same_candle_tb | obs | N/A | — |
+| 10 | G3a | G3 | pass | — |
+| 11 | G3b | G3 | fail | — |
 
 **Final comment:** weak signal, mostly fail since it doesn't have a good pullback structure nor a good touch/bounce setup
 

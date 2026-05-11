@@ -40,9 +40,9 @@ Parent: [[fv2_index]]
 | 07 | wick_defence_ratio | G2 | pass | — |
 | 08 | bounce_vr_abs | G2 | pass | — |
 | 09 | bounce_vr_rel | G2 | pass | — |
-| 10 | same_candle_tb | G2 | N/A | — |
-| 11 | G5a | G3 | pass | — |
-| 12 | G5b | G3 | fail | — |
+| obs | same_candle_tb | obs | N/A | — |
+| 10 | G3a | G3 | pass | — |
+| 11 | G3b | G3 | fail | — |
 
 **Final comment:** 10/11 pass. 1 N/A. overall looks like a pass but EOD+.
 
@@ -62,9 +62,9 @@ Parent: [[fv2_index]]
 | 07 | wick_defence_ratio | G2 | fail | — |
 | 08 | bounce_vr_abs | G2 | pass | — |
 | 09 | bounce_vr_rel | G2 | pass | — |
-| 10 | same_candle_tb | G2 | N/A | — |
-| 11 | G5a | G3 | fail | — |
-| 12 | G5b | G3 | fail | — |
+| obs | same_candle_tb | obs | N/A | — |
+| 10 | G3a | G3 | fail | — |
+| 11 | G3b | G3 | fail | — |
 
 **Final comment:** fail. EOD+. G1 passes, G2 touch quality fails (#5 weak, #6 fail, #7 fail), G3 also fails.
 
@@ -84,9 +84,9 @@ Parent: [[fv2_index]]
 | 07 | wick_defence_ratio | G2 | fail | — |
 | 08 | bounce_vr_abs | G2 | — | — |
 | 09 | bounce_vr_rel | G2 | — | — |
-| 10 | same_candle_tb | G2 | — | — |
-| 11 | G5a | G3 | fail | — |
-| 12 | G5b | G3 | — | — |
+| obs | same_candle_tb | obs | — | — |
+| 10 | G3a | G3 | fail | — |
+| 11 | G3b | G3 | — | — |
 
 **Final comment:** Rising regime. G2 touch quality correctly rejects. Needs full re-review via H1.1.
 
@@ -106,9 +106,9 @@ Parent: [[fv2_index]]
 | 07 | wick_defence_ratio | G2 | fail | — |
 | 08 | bounce_vr_abs | G2 | — | — |
 | 09 | bounce_vr_rel | G2 | — | — |
-| 10 | same_candle_tb | G2 | — | — |
-| 11 | G5a | G3 | fail | — |
-| 12 | G5b | G3 | — | — |
+| obs | same_candle_tb | obs | — | — |
+| 10 | G3a | G3 | fail | — |
+| 11 | G3b | G3 | — | — |
 
 **Final comment:** Flat signal. G1 alone kills it. Entry ≥ 14:45 — LATE flag applied.
 
