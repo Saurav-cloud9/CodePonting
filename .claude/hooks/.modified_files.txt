@@ -170,3 +170,9 @@ C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\outputs\reports\fv2_h1_1_s
 C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\outputs\reports\fv2_h1_1_signal_review.html
 C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\outputs\reports\fv2_h1_1_signal_review.html
 C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\build_html1.py
+C:\Users\Saurav\CodePonting\.remember\remember.md
+C:\Users\Saurav\CodePonting\.remember\today.md
+C:\Users\Saurav\CodePonting\.remember\handoff.md
+C:\Users\Saurav\CodePonting\.remember\remember.md
+C:\Users\Saurav\CodePonting\.remember\today.md
+C:\Users\Saurav\CodePonting\.remember\handoff.md

@@ -178,3 +178,5 @@ Step 9.4  — 2026-04-19
            ✅  Slider ranges updated (#01→0.50%, #02→0.20%, #05 max→2.0, #07 max→5.0)
            ✅  #07 edge cases hardened (negative numerator/denominator → N/A)
            ✅  F0 added to TODO: Claude-in-Claude React artifact for H5 lite
+
+2026-05-11  Line 46 bug fixed in export_h5_signals.py — removed hardcoded prev bar condition from T0 definition; p03=0 signals now included in CSV

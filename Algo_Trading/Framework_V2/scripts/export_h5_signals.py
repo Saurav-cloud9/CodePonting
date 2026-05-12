@@ -42,8 +42,8 @@ while i < len(df) - 2 and len(signals) < MAX_SIGNALS:
         i += 1
         continue
 
-    # Touch: low[T0] <= ma20[T0], previous bar closed above MA20
-    if row['low'] <= row['ma20'] and pd.notna(prev['ma20']) and prev['close'] > prev['ma20']:
+    # Touch: low[T0] <= ma20[T0]  
+    if row['low'] <= row['ma20']: # removed -> and pd.notna(prev['ma20']) and prev['close'] > prev['ma20']:
         T0 = i
         t0_date = row['date']
         t0r = df.iloc[T0]

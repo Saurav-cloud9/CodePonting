@@ -15,12 +15,13 @@ P3  Optuna joint sweep — all 12 params, maximise PF_test
 P4  Opening bar framework — 9:15 signals need separate G1 evaluation (3/4 params
         structurally N/A). Collect more data points before designing. Seen: #5, #21.
 
+P5  CC source code exploration — hooks, skills, tools, remote folders
+        Goal: better hooks, custom slash commands, MCP design patterns
+
 # ── PARKED / FUTURE ───────────────────────────────────────────
-F0  Explore "Claude-in-Claude" Artifacts — paste raw OHLCV into React artifact,
+F1  Explore "Claude-in-Claude" Artifacts — paste raw OHLCV into React artifact,
     Claude API analyses signal quality + gate status + gives H1 verdict.
     Zero backend, runs in browser. Ref: Anthropic API in Artifacts (claude-sonnet-4-20250514)
-
-F1  CC source code exploration
 F2  GCP OAuth → SSD Google Drive sync
 F3  H2: per-stock comparison table
 F4  Signal replacement / position upgrade logic (post-WFA)

@@ -183,8 +183,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "d7e6dae155608e28",
+  "active": "475d5543b9cf1c48",
   "lastOpenFiles": [
+    "PROGRESS.md.tmp.31364.be2b2e025269",
     "my_playlist.txt",
     "Learning/Codedex/working_with_a_file.txt",
     "Learning/Codedex/file_functions.txt",
@@ -195,7 +196,6 @@
     "_tmp_renumber_params.py",
     "Algo_Trading/Framework_V2/outputs/h5/powergrid_2022_h5_candles.csv",
     "Algo_Trading/Framework_V2/scripts/export_h5_candles.py",
-    "Algo_Trading/Framework_V2/outputs/h5/4800F400",
     "Algo_Trading/Framework_V2/docs/fv2_params.md",
     "Algo_Trading/Docs/Analysis/fv2_signals_POWERGRID.md",
     "Algo_Trading/Docs/fv2_params.md",

@@ -4,11 +4,11 @@
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. same_candle_tb reclassified: observation column only, not gate param
-2. Param renumbering: #11→#10 (G3a), #12→#11 (G3b); 11 params total
-3. export_h5_signals.py updated; CSV re-exported with new schema
-4. 38 signal detail tables updated across 3 Obsidian files (POWERGRID/TM/HDFC)
-5. fv2_params.md, fv2_index.md, obs files, TODO glossary all updated
+1. H5 Lite fully functional — gate logic, real CSV, candlestick chart validated
+2. Line 46 bug fixed: removed hardcoded prev bar condition from T0 definition
+3. CSV stale — needs re-export with fixed T0 before H5 Lite work resumes
+4. CC source code explored; promoted to P5 in TODO
+5. F0 (Claude-in-Claude) renumbered F1, kept parked — scope clarified vs H5 Lite
 
 ── MILESTONES (5 most important) ────────────────────────────
 1. fv2 direction locked — 3-gate system (G1/G2/G3) addressing structural gaps vs true MA bounce
