@@ -176,3 +176,4 @@ C:\Users\Saurav\CodePonting\.remember\handoff.md
 C:\Users\Saurav\CodePonting\.remember\remember.md
 C:\Users\Saurav\CodePonting\.remember\today.md
 C:\Users\Saurav\CodePonting\.remember\handoff.md
+c:\Users\Saurav\CodePonting\.gitignore

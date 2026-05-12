@@ -7,6 +7,10 @@ _explore/
 # IDE files
 .idea/
 .vscode/
+
+# Auto-modified by tools (not for commit)
+.obsidian/workspace.json
+.remember/remember.md
 *.swp
 *.swo
 
