@@ -1,15 +1,14 @@
-# Handoff Note — 2026-05-12
+# Handoff Note — 2026-05-13
 
 ## State
+max_tb_gap added as p10, G3a→p11, G3b→p12. CSV re-exported with 12 params.
 Line-by-line review of export_h5_signals.py paused at line 46.
-Line 46 bug fixed (removed prev bar condition from T0). CSV not yet re-exported.
-TODO.md updated: CC source exploration now P5.
 
 ## Next
-1. Re-run export_h5_signals.py → regenerate powergrid_2022_h5_signals.csv
-2. Continue line-by-line review from line 47
-3. H5 Lite chart refinement on claude.ai (P1)
+1. Continue line-by-line review from line 47
+2. Upload new CSV to H5 Lite, validate p10 slider
+3. H5 Lite chart refinement (P1)
 
 ## Known Issues
-- CSV stale — re-export before any H5 Lite work
-- 9:15 signals always p03=0 — P4 TODO, no fix yet
+- p03=0 for 65/100 signals — expected after T0 fix, not a bug
+- CSV column names have trailing spaces — handled in script (str.strip() on load)

@@ -4,11 +4,11 @@
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. H5 Lite fully functional — gate logic, real CSV, candlestick chart validated
-2. Line 46 bug fixed: removed hardcoded prev bar condition from T0 definition
-3. CSV stale — needs re-export with fixed T0 before H5 Lite work resumes
-4. CC source code explored; promoted to P5 in TODO
-5. F0 (Claude-in-Claude) renumbered F1, kept parked — scope clarified vs H5 Lite
+1. Line 46 bug fixed: removed hardcoded prev bar condition from T0 definition
+2. max_tb_gap added as p10 (G2 ceiling); G3a→p11, G3b→p12 across all files
+3. CSV re-exported: 100 signals, p10-p12 present, p03=0 for 65/100 (expected)
+4. H5 Lite (claude.ai) updated to match — both ends in sync
+5. CC source code explored; promoted to P5 in TODO
 
 ── MILESTONES (5 most important) ────────────────────────────
 1. fv2 direction locked — 3-gate system (G1/G2/G3) addressing structural gaps vs true MA bounce
