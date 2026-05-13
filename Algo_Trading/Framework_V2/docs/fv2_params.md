@@ -182,13 +182,29 @@
 
 ---
 
-## G3 — Post-bounce Follow-through
+### #10 — max_tb_gap
 
-**G3 params: #10–#11 (2 params)**
+| Field           | Value                                                                                      |
+|-----------------|--------------------------------------------------------------------------------------------|
+| Gate            | G2                                                                                         |
+| Type            | Tunable threshold (ceiling)                                                                |
+| Formula         | `bounce_bar - T0` (bars between touch and bounce)                                         |
+| Pass condition  | `max_tb_gap <= threshold`                                                                  |
+| Data source     | Derived from signal detection logic (`bounce_bar_index`)                                  |
+| H5 control      | Slider (integer)                                                                           |
+| Range           | 0 to 9, step 1                                                                             |
+| Default         | 9 (most permissive)                                                                        |
+| Note            | Lower gap = tighter bounce = stronger level. 0 = same candle touch+bounce. Added 2026-05-13 after data analysis: POWERGRID 2022 shows 14/100 signals with gap > 3, WR identical to tighter gaps — Optuna to determine optimal ceiling. |
 
 ---
 
-### #10 — G3a (entry_close_above_bounce)
+## G3 — Post-bounce Follow-through
+
+**G3 params: #11–#12 (2 params)**
+
+---
+
+### #11 — G3a (entry_close_above_bounce)
 
 | Field           | Value                                                                                      |
 |-----------------|--------------------------------------------------------------------------------------------|
@@ -202,7 +218,7 @@
 
 ---
 
-### #11 — G3b (entry_vr_holds)
+### #12 — G3b (entry_vr_holds)
 
 | Field           | Value                                                                                      |
 |-----------------|--------------------------------------------------------------------------------------------|

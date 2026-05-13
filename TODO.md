@@ -62,7 +62,8 @@ F12 TradingView AI Chart Copilot — explore when Pine dev resumes
 # bounce_vr_rel     — G2 #09: bounce candle VR relative to touch candle VR
 # same_candle_tb    — observation column (not a gate param): touch and bounce in same candle (tb_gap = 0)
 
-# G3a / G3b         — G3 #10/#11: entry close > bounce close / entry VR holds
+# max_tb_gap        — G2 #10: bars from T0 to bounce bar (ceiling threshold — lower = tighter)
+# G3a / G3b         — G3 #11/#12: entry close > bounce close / entry VR holds
 
 ## Metrics & System
 # vr          — volume ratio: bar volume ÷ vol_ma20

@@ -16,7 +16,9 @@ YEAR = 2022
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-df = pd.read_csv(CSV_PATH, parse_dates=['datetime'])
+df = pd.read_csv(CSV_PATH)
+df.columns = df.columns.str.strip()
+df['datetime'] = pd.to_datetime(df['datetime'])
 df['date'] = df['datetime'].dt.date
 df = df[df['datetime'].dt.year == YEAR].copy().reset_index(drop=True)
 
@@ -142,14 +144,17 @@ while i < len(df) - 2 and len(signals) < MAX_SIGNALS:
         else:
             p09 = 1 if br['vr'] > t0r['vr'] else 0
 
-        # --- p10: G3a (entry_close_above_bounce) ---
-        p10 = 1 if er['close'] > br['close'] else 0
+        # --- p10: max_tb_gap (touch-to-bounce bar gap) ---
+        p10 = bounce_bar_index  # raw gap; H5 applies ceiling threshold
 
-        # --- p11: G3b (entry_vr_holds) ---
+        # --- p11: G3a (entry_close_above_bounce) ---
+        p11 = 1 if er['close'] > br['close'] else 0
+
+        # --- p12: G3b (entry_vr_holds) ---
         if pd.notna(er['vr']) and pd.notna(br['vr']):
-            p11 = 1 if er['vr'] >= br['vr'] else 0
+            p12 = 1 if er['vr'] >= br['vr'] else 0
         else:
-            p11 = np.nan
+            p12 = np.nan
 
         # --- PnL + Outcome simulation ---
         entry_price = er['open']
@@ -200,6 +205,7 @@ while i < len(df) - 2 and len(signals) < MAX_SIGNALS:
             'p09': p09,
             'p10': p10,
             'p11': p11,
+            'p12': p12,
             'same_candle_tb': same_candle,
             'bounce_bar_index': bounce_bar_index,
             'entry_bar_index':  entry_bar_index,
@@ -215,4 +221,4 @@ out = pd.DataFrame(signals)
 out.columns = out.columns.str.strip()
 out.to_csv(OUTPUT_FILE, index=False, encoding='utf-8', lineterminator='\n')
 print(f"Exported {len(out)} signals -> {OUTPUT_FILE}")
-print(out[['signal_id', 'datetime', 'p01', 'p05', 'p07', 'p07_na', 'p08', 'p09', 'p10', 'p11', 'same_candle_tb']].to_string(index=False))
+print(out[['signal_id', 'datetime', 'p01', 'p05', 'p07', 'p07_na', 'p08', 'p09', 'p10', 'p11', 'p12', 'same_candle_tb']].to_string(index=False))
