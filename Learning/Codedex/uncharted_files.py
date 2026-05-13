@@ -38,28 +38,37 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 file_path = os.path.join(script_dir, 'sent_message.txt')
 
 try:
-    file = open(file_path, 'w')
-    file.write("here is a secret")
+    file = open(file_path, 'w') # file opened in write mode
+    file.write("here is a secret, and the secret is here") # file written via write func
 finally:
-    file.close
+    file.close() #file is closed
 
 try:
-    file = open(file_path, 'r+')
-    original_message = file.read()
-    print(original_message)
-    part2_message = file.read()
-    print(part2_message)
+    file = open(file_path, 'r+') # file opened in read/write mode
+    original_message = file.read() # file read via read func
+    print(original_message) #file is printed
+    part2_message = file.read() # file is read again
+    print(part2_message) # file is printed but nothing shows here in print coz the cursor was already past the last character of the original message
+
+    file.seek(0) # the cursor is moved to the begining
+    part3_message = file.read() # file is read from the begining since the cursor is now at the start
+    print(part3_message) # the file was read and stored in another variable which is printed
+
+    file.seek(0) # cursor moved back to the beginning of the file
+
+    unsent_message = 'This message has been unsent.'
+
+    file.write(unsent_message)
 
     file.seek(0)
-    part3_message = file.read()
-    print(part3_message)
 
-    file.seek(0)
+    file.truncate(len(unsent_message))
 
-    file.truncate(4)
-    part4_message = file.read()
-    print(part4_message)
+
+    # file.truncate(4) # everything after the first 4 characters is deleted or truncated via the truncate func but the cursor remains at position 0
+    part4_message = file.read() # the left over chars i.e. the first 4 chars are read via read func and stored inside a variable
+    print(part4_message) # the variable from line 64 is now printed, the output shows the first 4 chars 
 
 
 finally:
-    file.close
+    file.close() # the file is finally closed via finally clause -> close func
