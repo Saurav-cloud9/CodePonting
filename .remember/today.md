@@ -1,20 +1,15 @@
-# Session Log — 2026-05-13
+# Session Log — 2026-05-14 (continued)
 
 ## What was done
-- CCP performed — context loaded
-- Discussed CC source code: TSX/JSX/React concepts, practical value for quant workflow
-- F1 (CC source exploration) promoted to P5 in TODO.md
-- F0 (Claude-in-Claude) renumbered F1, kept parked — architecture discussed
-- Continued line-by-line review of export_h5_signals.py (lines 34–46)
-- Discussed pandas/numpy as data stack, vectorized operations, rolling windows across days
-- bounce_bar_index distribution analysed: 14/100 signals have gap > 3, WR identical above/below
-- max_tb_gap added as p10 (G2, ceiling), G3a→p11, G3b→p12
-- export_h5_signals.py, fv2_params.md, TODO.md glossary all updated
-- CSV column name trailing spaces fixed — str.strip() on load
-- CSV re-exported: 100 signals, p10-p12 present, p03=0 for 65/100 (expected after T0 fix)
-- claude.ai H5 Lite updated to match — both ends in sync
+- Line-by-line review continued: lines 92–135 (p03 through p07)
+- p07 logic fixed: removed numer < 0 → NaN; now only denom == 0 sets p07_na=1
+- Opus advisor confirmed: keep negative values, use floor slider at 0 to filter
+- p07 slider range determined from data: -1.5 to 5.0
+- S014 p07=19 explained: tiny wick (0.005) with strong body recovery (0.095)
+- Both CSVs rebuilt: signals (100 rows) + candles (2108 rows)
+- export_h5_candles.py fixed for trailing spaces issue
+- Discussed denom <= 0 vs denom == 0 — changed to == 0 with comment explaining why < 0 is impossible
 
-## Key decisions
-- max_tb_gap = p10, ceiling threshold, range 0–9, default 9 (most permissive)
-- Optuna to determine optimal ceiling — POWERGRID 2022 alone insufficient to hardcode
-- Line 46 fix confirmed: 65/100 signals now have p03=0 vs 54 before
+## Status at SS
+- Line review paused at line 136 (p08)
+- H5 Lite on claude.ai needs p07 slider range update before next testing session

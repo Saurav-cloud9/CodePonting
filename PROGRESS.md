@@ -4,11 +4,11 @@
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. Line 46 bug fixed: removed hardcoded prev bar condition from T0 definition
-2. max_tb_gap added as p10 (G2 ceiling); G3a→p11, G3b→p12 across all files
-3. CSV re-exported: 100 signals, p10-p12 present, p03=0 for 65/100 (expected)
-4. H5 Lite (claude.ai) updated to match — both ends in sync
-5. CC source code explored; promoted to P5 in TODO
+1. TODO parked list cleaned: removed F2/F3/F5/F7, renumbered F1–F8
+2. p07 fix: negative numer now kept; only denom==0 sets p07_na=1
+3. Both CSVs rebuilt and in sync: signals (100) + candles (2108 rows)
+4. export_h5_candles.py fixed for trailing spaces
+5. Line-by-line review: lines 92–135 done; paused at line 136 (p08)
 
 ── MILESTONES (5 most important) ────────────────────────────
 1. fv2 direction locked — 3-gate system (G1/G2/G3) addressing structural gaps vs true MA bounce

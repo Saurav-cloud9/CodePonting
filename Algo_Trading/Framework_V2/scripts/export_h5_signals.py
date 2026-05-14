@@ -118,7 +118,7 @@ while i < len(df) - 2 and len(signals) < MAX_SIGNALS:
 
         # --- p05: shoot_depth ---
         atr = t0r['atr14']
-        p05 = (t0r['ma20'] - t0r['low']) / atr if pd.notna(atr) and atr > 0 else np.nan
+        p05 = (t0r['ma20'] - t0r['low']) / atr if atr > 0 else np.nan
 
         # --- p06: touch_body_pct ---
         candle_range = t0r['high'] - t0r['low']
@@ -129,7 +129,7 @@ while i < len(df) - 2 and len(signals) < MAX_SIGNALS:
         body_low = min(t0r['open'], t0r['close'])
         denom = ma20 - t0r['low']
         numer = body_low - ma20
-        if denom <= 0 or numer < 0:
+        if denom == 0: # the condition denom < 0 is excluded as its never going to happen since it would imply no touch happened at the first place
             p07, p07_na = np.nan, 1
         else:
             p07, p07_na = round(numer / denom, 4), 0

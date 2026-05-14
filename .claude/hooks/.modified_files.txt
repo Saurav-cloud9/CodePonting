@@ -186,3 +186,14 @@ C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\export_h5_signals.
 C:\Users\Saurav\CodePonting\.remember\remember.md
 C:\Users\Saurav\CodePonting\.remember\handoff.md
 C:\Users\Saurav\CodePonting\.remember\today.md
+C:\Users\Saurav\CodePonting\.remember\p5_cc_source_exploration.md
+C:\Users\Saurav\CodePonting\.remember\today.md
+C:\Users\Saurav\CodePonting\Algo_Trading\Docs\Quantitative Trading Book\notes.md
+C:\Users\Saurav\CodePonting\.remember\remember.md
+C:\Users\Saurav\CodePonting\.remember\handoff.md
+C:\Users\Saurav\CodePonting\.remember\today.md
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\export_h5_candles.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\export_h5_candles.py
+C:\Users\Saurav\CodePonting\.remember\remember.md
+C:\Users\Saurav\CodePonting\.remember\handoff.md
+C:\Users\Saurav\CodePonting\.remember\today.md
