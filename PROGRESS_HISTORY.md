@@ -180,3 +180,10 @@ Step 9.4  — 2026-04-19
            ✅  F0 added to TODO: Claude-in-Claude React artifact for H5 lite
 
 2026-05-11  Line 46 bug fixed in export_h5_signals.py — removed hardcoded prev bar condition from T0 definition; p03=0 signals now included in CSV
+
+2026-05-16  SS ───────────────────────────────────────────────────────────
+           ✅  guides/ folder created — 6 reference docs extracted from CLAUDE.md
+           ✅  Excel Dark Mode Setup guide saved to guides/excel_dark_mode_setup.md
+           ✅  CLAUDE.md GUIDES section added with what-goes-where decision rule
+           ✅  CLAUDE.md heading hierarchy fixed: # → ## for all section headings (Obsidian)
+           ✅  #01/#09/#10 Obsidian tag issue fixed — escaped with backslash

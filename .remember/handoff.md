@@ -1,13 +1,18 @@
-# Handoff Note — 2026-05-14
+# Handoff Note — 2026-05-16
 
 ## State
-p07 fix done. Both CSVs rebuilt and in sync.
-Line-by-line review paused at line 136 (p08).
+CLAUDE.md housekeeping session complete:
+- guides/ folder created with 6 reference docs
+- CLAUDE.md cleaned up for Obsidian: ## headings, \# escapes, [[wikilinks]]
+- No fv2 code changes this session
+
+Main fv2 work still paused at line 136 (p08) from previous session.
 
 ## Next
-1. Update H5 Lite on claude.ai: p07 slider range -1.5 to 5.0, verify p07_na handling
-2. Upload new CSVs to H5 Lite
-3. Resume line review from line 136 (p08)
+1. Resume H5 Lite line-by-line review from line 136 (p08)
+2. Update H5 Lite on claude.ai: p07 slider range -1.5 to 5.0
+3. Upload updated CSVs to H5 Lite
 
 ## Known Issues
-- None. Both CSVs clean and current.
+- [[wikilink]] format triggers VS Code security warning — harmless, Obsidian renders fine
+- Obsidian wikilinks for guides not yet confirmed clickable (user still testing)

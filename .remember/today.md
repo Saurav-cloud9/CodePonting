@@ -1,15 +1,20 @@
-# Session Log — 2026-05-14 (continued)
+# Session Log — 2026-05-16
 
 ## What was done
-- Line-by-line review continued: lines 92–135 (p03 through p07)
-- p07 logic fixed: removed numer < 0 → NaN; now only denom == 0 sets p07_na=1
-- Opus advisor confirmed: keep negative values, use floor slider at 0 to filter
-- p07 slider range determined from data: -1.5 to 5.0
-- S014 p07=19 explained: tiny wick (0.005) with strong body recovery (0.095)
-- Both CSVs rebuilt: signals (100 rows) + candles (2108 rows)
-- export_h5_candles.py fixed for trailing spaces issue
-- Discussed denom <= 0 vs denom == 0 — changed to == 0 with comment explaining why < 0 is impossible
+- Saved Excel Dark Mode Setup guide → guides/excel_dark_mode_setup.md (new file)
+- Created guides/ folder as a reference library pattern for CLAUDE.md
+- Extracted 5 more sections from CLAUDE.md into guides/:
+    - transaction_costs.md (charge formula)
+    - sandbox_master_plan.md (full step history)
+    - cc_remote_setup.md (.bat command + bug fix)
+    - hackathon_ideas.md (NSE Signal Dashboard)
+    - future_skills.md (Claude Live Artifacts entry)
+- Added "what belongs in CLAUDE.md vs guides/" decision table + rule
+- Fixed CLAUDE.md heading hierarchy: all `# ── SECTION ──` → `##` so Obsidian doesn't render everything as H1
+- Fixed #01/#02/#09/#10 being picked up as Obsidian tags — escaped with \#
+- Tried markdown links then [[wikilinks]] for guides — wikilinks work in Obsidian
+- VS Code shows security warning for [[wikilinks]] — harmless, can ignore
 
 ## Status at SS
-- Line review paused at line 136 (p08)
-- H5 Lite on claude.ai needs p07 slider range update before next testing session
+- CLAUDE.md housekeeping complete. Obsidian renders cleanly.
+- Main work (fv2 H5 Lite) unchanged — still paused at line 136 (p08)

@@ -4,11 +4,11 @@
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. TODO parked list cleaned: removed F2/F3/F5/F7, renumbered F1–F8
-2. p07 fix: negative numer now kept; only denom==0 sets p07_na=1
-3. Both CSVs rebuilt and in sync: signals (100) + candles (2108 rows)
-4. export_h5_candles.py fixed for trailing spaces
-5. Line-by-line review: lines 92–135 done; paused at line 136 (p08)
+1. Created guides/ folder; extracted 6 reference docs from CLAUDE.md
+2. Added "what belongs in CLAUDE.md vs guides/" rule to GUIDES section
+3. Fixed CLAUDE.md heading hierarchy: # → ## for all section headings
+4. Fixed #01/#09/#10 rendering as Obsidian tags — escaped with \#
+5. Converted guide links to [[wikilink]] format for Obsidian compatibility
 
 ── MILESTONES (5 most important) ────────────────────────────
 1. fv2 direction locked — 3-gate system (G1/G2/G3) addressing structural gaps vs true MA bounce
