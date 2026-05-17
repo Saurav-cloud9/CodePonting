@@ -14,7 +14,10 @@
 - Fixed #01/#02/#09/#10 being picked up as Obsidian tags — escaped with \#
 - Tried markdown links then [[wikilinks]] for guides — wikilinks work in Obsidian
 - VS Code shows security warning for [[wikilinks]] — harmless, can ignore
+- Added Python learning journey section to CLAUDE.md
+- Added `lm` shorthand to CLAUDE.md
+- Codedex CSV module: file modes, csv.reader/writer, lazy eval, try/except, append pattern
 
 ## Status at SS
-- CLAUDE.md housekeeping complete. Obsidian renders cleanly.
+- CLAUDE.md housekeeping + learning session complete
 - Main work (fv2 H5 Lite) unchanged — still paused at line 136 (p08)

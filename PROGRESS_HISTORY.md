@@ -187,3 +187,6 @@ Step 9.4  — 2026-04-19
            ✅  CLAUDE.md GUIDES section added with what-goes-where decision rule
            ✅  CLAUDE.md heading hierarchy fixed: # → ## for all section headings (Obsidian)
            ✅  #01/#09/#10 Obsidian tag issue fixed — escaped with backslash
+           ✅  Python learning journey section added to CLAUDE.md (Codecombat→Codedex→RealPython)
+           ✅  `lm` shorthand added — learning mode: explain concepts, no solution code
+           ✅  Codedex CSV module completed: file modes, csv.reader/writer, try/except, append pattern

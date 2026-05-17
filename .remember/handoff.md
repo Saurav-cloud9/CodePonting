@@ -1,10 +1,10 @@
 # Handoff Note — 2026-05-16
 
 ## State
-CLAUDE.md housekeeping session complete:
+CLAUDE.md housekeeping + Codedex CSV learning session complete.
 - guides/ folder created with 6 reference docs
-- CLAUDE.md cleaned up for Obsidian: ## headings, \# escapes, [[wikilinks]]
-- No fv2 code changes this session
+- CLAUDE.md: Python learning journey + `lm` shorthand added
+- Codedex CSV module done: file modes, csv.reader/writer, try/except, append
 
 Main fv2 work still paused at line 136 (p08) from previous session.
 
@@ -15,4 +15,3 @@ Main fv2 work still paused at line 136 (p08) from previous session.
 
 ## Known Issues
 - [[wikilink]] format triggers VS Code security warning — harmless, Obsidian renders fine
-- Obsidian wikilinks for guides not yet confirmed clickable (user still testing)

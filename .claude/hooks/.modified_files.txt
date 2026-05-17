@@ -206,3 +206,6 @@ C:\Users\Saurav\CodePonting\guides\future_skills.md
 C:\Users\Saurav\CodePonting\.remember\today.md
 C:\Users\Saurav\CodePonting\.remember\handoff.md
 C:\Users\Saurav\CodePonting\.remember\remember.md
+c:\Users\Saurav\CodePonting\.remember\today.md
+c:\Users\Saurav\CodePonting\.remember\handoff.md
+c:\Users\Saurav\CodePonting\.remember\remember.md

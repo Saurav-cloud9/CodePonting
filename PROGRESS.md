@@ -4,11 +4,11 @@
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. Created guides/ folder; extracted 6 reference docs from CLAUDE.md
-2. Added "what belongs in CLAUDE.md vs guides/" rule to GUIDES section
-3. Fixed CLAUDE.md heading hierarchy: # → ## for all section headings
-4. Fixed #01/#09/#10 rendering as Obsidian tags — escaped with \#
-5. Converted guide links to [[wikilink]] format for Obsidian compatibility
+1. Added Python learning journey section to CLAUDE.md (Codecombat→Codedex→RealPython)
+2. Added `lm` shorthand to CLAUDE.md — learning mode: explain concepts, no solution code
+3. Completed Codedex CSV exercises: file modes, csv.reader/writer, try/except, append
+4. Clarified learning mode rule: no solution code, but explain concepts freely
+5. Completed packing_list.py — try/except FileNotFoundError + append pattern working
 
 ── MILESTONES (5 most important) ────────────────────────────
 1. fv2 direction locked — 3-gate system (G1/G2/G3) addressing structural gaps vs true MA bounce
