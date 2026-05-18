@@ -1,14 +1,17 @@
-# Handoff Note — 2026-05-13
+# Handoff Note — 2026-05-16
 
 ## State
-max_tb_gap added as p10, G3a→p11, G3b→p12. CSV re-exported with 12 params.
-Line-by-line review of export_h5_signals.py paused at line 46.
+CLAUDE.md housekeeping + Codedex CSV learning session complete.
+- guides/ folder created with 6 reference docs
+- CLAUDE.md: Python learning journey + `lm` shorthand added
+- Codedex CSV module done: file modes, csv.reader/writer, try/except, append
+
+Main fv2 work still paused at line 136 (p08) from previous session.
 
 ## Next
-1. Continue line-by-line review from line 47
-2. Upload new CSV to H5 Lite, validate p10 slider
-3. H5 Lite chart refinement (P1)
+1. Resume H5 Lite line-by-line review from line 136 (p08)
+2. Update H5 Lite on claude.ai: p07 slider range -1.5 to 5.0
+3. Upload updated CSVs to H5 Lite
 
 ## Known Issues
-- p03=0 for 65/100 signals — expected after T0 fix, not a bug
-- CSV column names have trailing spaces — handled in script (str.strip() on load)
+- [[wikilink]] format triggers VS Code security warning — harmless, Obsidian renders fine

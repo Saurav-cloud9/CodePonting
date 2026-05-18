@@ -22,18 +22,14 @@ P5  CC source code exploration — hooks, skills, tools, remote folders
 F1  Explore "Claude-in-Claude" Artifacts — paste raw OHLCV into React artifact,
     Claude API analyses signal quality + gate status + gives H1 verdict.
     Zero backend, runs in browser. Ref: Anthropic API in Artifacts (claude-sonnet-4-20250514)
-F2  GCP OAuth → SSD Google Drive sync
-F3  H2: per-stock comparison table
-F4  Signal replacement / position upgrade logic (post-WFA)
-F5  Oct 2022 per-stock WR% → contrast stock
-F6  YouTube Strategy Scanner (post paper-trading)
-F7  H1 bar replay mode
-F8  Insurance review
-F9  Add and manage MCP servers in VS Code
-F10 Stock mock + algo test — paper run on equity cash with full algo execution
-    Revisit before F&O go-live (post Step 8 paper trading)
-F11 Checkout VSCode Agent
-F12 TradingView AI Chart Copilot — explore when Pine dev resumes
+F2  Signal replacement / position upgrade logic (post-WFA)
+F3  YouTube Strategy Scanner (post paper-trading)
+F4  Insurance review
+F5  Add and manage MCP servers in VS Code
+F6  Stock mock + algo test — paper run on equity cash with full algo execution
+    Revisit before F&O go-live (post paper trading)
+F7  Checkout VSCode Agent
+F8  TradingView AI Chart Copilot — explore when Pine dev resumes
 
 # ── GLOSSARY ──────────────────────────────────────────────────
 # Keep this updated. Rule: any new abbreviation used in replies,

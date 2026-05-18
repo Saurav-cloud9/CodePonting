@@ -4,11 +4,11 @@
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. Line 46 bug fixed: removed hardcoded prev bar condition from T0 definition
-2. max_tb_gap added as p10 (G2 ceiling); G3a→p11, G3b→p12 across all files
-3. CSV re-exported: 100 signals, p10-p12 present, p03=0 for 65/100 (expected)
-4. H5 Lite (claude.ai) updated to match — both ends in sync
-5. CC source code explored; promoted to P5 in TODO
+1. Added Python learning journey section to CLAUDE.md (Codecombat→Codedex→RealPython)
+2. Added `lm` shorthand to CLAUDE.md — learning mode: explain concepts, no solution code
+3. Completed Codedex CSV exercises: file modes, csv.reader/writer, try/except, append
+4. Clarified learning mode rule: no solution code, but explain concepts freely
+5. Completed packing_list.py — try/except FileNotFoundError + append pattern working
 
 ── MILESTONES (5 most important) ────────────────────────────
 1. fv2 direction locked — 3-gate system (G1/G2/G3) addressing structural gaps vs true MA bounce

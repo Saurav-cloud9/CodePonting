@@ -11,7 +11,9 @@ CSV_PATH     = r"C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\hist
 OUTPUT_FILE  = r"C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\outputs\h5\powergrid_2022_h5_candles.csv"
 
 # Load OHLCV
-df = pd.read_csv(CSV_PATH, parse_dates=['datetime'])
+df = pd.read_csv(CSV_PATH)
+df.columns = df.columns.str.strip()
+df['datetime'] = pd.to_datetime(df['datetime'])
 df['date'] = df['datetime'].dt.date
 
 # Compute ATR14, vol_ma20
@@ -21,7 +23,9 @@ df['tr'] = np.maximum(df['high'] - df['low'],
 df['atr14'] = df['tr'].rolling(14, min_periods=14).mean()
 
 # Load signals
-sigs = pd.read_csv(SIGNALS_FILE, parse_dates=['datetime'])
+sigs = pd.read_csv(SIGNALS_FILE)
+sigs.columns = sigs.columns.str.strip()
+sigs['datetime'] = pd.to_datetime(sigs['datetime'])
 
 rows = []
 

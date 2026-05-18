@@ -1,20 +1,23 @@
-# Session Log — 2026-05-13
+# Session Log — 2026-05-16
 
 ## What was done
-- CCP performed — context loaded
-- Discussed CC source code: TSX/JSX/React concepts, practical value for quant workflow
-- F1 (CC source exploration) promoted to P5 in TODO.md
-- F0 (Claude-in-Claude) renumbered F1, kept parked — architecture discussed
-- Continued line-by-line review of export_h5_signals.py (lines 34–46)
-- Discussed pandas/numpy as data stack, vectorized operations, rolling windows across days
-- bounce_bar_index distribution analysed: 14/100 signals have gap > 3, WR identical above/below
-- max_tb_gap added as p10 (G2, ceiling), G3a→p11, G3b→p12
-- export_h5_signals.py, fv2_params.md, TODO.md glossary all updated
-- CSV column name trailing spaces fixed — str.strip() on load
-- CSV re-exported: 100 signals, p10-p12 present, p03=0 for 65/100 (expected after T0 fix)
-- claude.ai H5 Lite updated to match — both ends in sync
+- Saved Excel Dark Mode Setup guide → guides/excel_dark_mode_setup.md (new file)
+- Created guides/ folder as a reference library pattern for CLAUDE.md
+- Extracted 5 more sections from CLAUDE.md into guides/:
+    - transaction_costs.md (charge formula)
+    - sandbox_master_plan.md (full step history)
+    - cc_remote_setup.md (.bat command + bug fix)
+    - hackathon_ideas.md (NSE Signal Dashboard)
+    - future_skills.md (Claude Live Artifacts entry)
+- Added "what belongs in CLAUDE.md vs guides/" decision table + rule
+- Fixed CLAUDE.md heading hierarchy: all `# ── SECTION ──` → `##` so Obsidian doesn't render everything as H1
+- Fixed #01/#02/#09/#10 being picked up as Obsidian tags — escaped with \#
+- Tried markdown links then [[wikilinks]] for guides — wikilinks work in Obsidian
+- VS Code shows security warning for [[wikilinks]] — harmless, can ignore
+- Added Python learning journey section to CLAUDE.md
+- Added `lm` shorthand to CLAUDE.md
+- Codedex CSV module: file modes, csv.reader/writer, lazy eval, try/except, append pattern
 
-## Key decisions
-- max_tb_gap = p10, ceiling threshold, range 0–9, default 9 (most permissive)
-- Optuna to determine optimal ceiling — POWERGRID 2022 alone insufficient to hardcode
-- Line 46 fix confirmed: 65/100 signals now have p03=0 vs 54 before
+## Status at SS
+- CLAUDE.md housekeeping + learning session complete
+- Main work (fv2 H5 Lite) unchanged — still paused at line 136 (p08)

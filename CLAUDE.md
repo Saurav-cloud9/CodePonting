@@ -1,14 +1,12 @@
 # CLAUDE.md — CodePonting Behavioral Instructions
-# ══════════════════════════════════════════════════════════════
-# This file tells Claude Code HOW to behave in this project.
-# For project structure/map → see MEMORY.md
-# Last updated: 2026-03-27
-# For fv1 strategy config and review → see fv1_strategy_review.md in Algo_Trading/Framework_V1/ — this is the source of truth
-# ══════════════════════════════════════════════════════════════
+
+> HOW to behave in this project. For project structure/map → see MEMORY.md
+> Last updated: 2026-03-27 | fv1 strategy config → fv1_strategy_review.md in Algo_Trading/Framework_V1/
 
 ── SHORTHAND ────────────────────────────────────────────────────
 
   vsa = "very short answer" — reply in 1–2 lines max, no elaboration
+  lm  = "learning mode" — explain concepts directly, no solution code. Let user write the code himself.
 
 ── ABBREVIATION RULES ───────────────────────────────────────────
 
@@ -127,7 +125,16 @@ Execution rules:
   - .remember/          → CC memory for CCP (SS trigger)
 
 
-# ── WHO I AM ──────────────────────────────────────────────────
+## ── PYTHON LEARNING JOURNEY ──────────────────────────────────
+
+Saurav learns Python via structured platforms alongside CodePonting work.
+Past: Codecombat | Current: Codedex | Next: RealPython.com
+CC assists during learning sessions — explain concepts directly, no Socratic loops.
+"Learning mode" = no solution code. Explain the concept, let Saurav write the code.
+"Reply freely" = same rule, just more conversational tone.
+
+
+## ── WHO I AM ──────────────────────────────────────────────────
 
 Project    : CodePonting — Algorithmic Trading System
 Owner      : Saurav
@@ -137,7 +144,7 @@ IDE        : VS Code (Claude Code as agentic execution layer)
 Brokers    : Upstox (primary) · Zerodha Kite (future scaling)
 
 
-# ── FRAMEWORK STATUS — CRITICAL ───────────────────────────────
+## ── FRAMEWORK STATUS — CRITICAL ───────────────────────────────
 
 Framework_V0  →  LEGACY / ARCHIVED
                  187+ files, old live bot iterations (v0.1–v1)
@@ -162,7 +169,7 @@ Framework_V1_Sandbox → CLOSED alongside fv1.
                         Read-only reference. Do not run new experiments here.
 
 
-# ── ACTIVE STRATEGY — MA Bounce (fv2) ─────────────────────────
+## ── ACTIVE STRATEGY — MA Bounce (fv2) ─────────────────────────
 
 Status      : REDESIGN IN PROGRESS
               fv1 was a proximity detector, NOT a true MA bounce.
@@ -181,7 +188,7 @@ fv1 Signal  : CLOSED — archived for reference
               With slippage: -8.62%. After charges: net negative all filters.
 
 
-# ── DATA ARCHITECTURE ─────────────────────────────────────────
+## ── DATA ARCHITECTURE ─────────────────────────────────────────
 
 PRIMARY (fv2)      : Framework_V2/data/historical/csv/intraday_5min/
   fv2 CSV dataset    TATAMOTORS_5min.csv — 73,174 rows, 7 cols + outcome cols
@@ -209,9 +216,9 @@ Kaggle data        : Algo_Trading/Kaggle/
                      Used for validation only (NOT primary source)
 
 
-# ── SANDBOX CONFIG — CONFIRMED WINNER (Step 3.2) ──────────────
+## ── SANDBOX CONFIG — CONFIRMED WINNER (Step 3.2) ──────────────
 
-# These are the locked-in sandbox defaults. Do NOT change without instruction.
+Locked-in sandbox defaults. Do NOT change without instruction.
 
 sl_variant           = A         # fixed stop, no trailing
 use_position_guard   = True      # max 1 open trade per stock
@@ -226,15 +233,15 @@ risk_per_trade       = 0.01      # 1% of current equity
 capital              = 1,000,000
 num_stocks           = 30        # capital bucketing divisor
 
-# Slippage (Step 3.3 — merged):
+Slippage (Step 3.3 — merged):
 entry_slippage       = +0.05     # 1 tick flat on every entry
 sl_exit_slippage     = -0.05     # 1 tick below stop on SL exits
 target_slippage      = none      # limit orders — no slippage
 
 
-# ── SANDBOX BASELINES (DS3, 2022–2025, E2-A config) ───────────
+## ── SANDBOX BASELINES (DS3, 2022–2025, E2-A config) ───────────
 
-# Reference script: Framework_V1_Sandbox/scripts/run_winner.py
+Reference script: `Framework_V1_Sandbox/scripts/run_winner.py`
 
 No slippage baseline (Step 3.2 winner):
   Trade count  : 27,871
@@ -245,96 +252,22 @@ With slippage baseline (Step 3.3, used for Optuna):
   Trade count  : ~28,085
   4yr CAGR     : -8.62%   ← this is the Step 4 Optuna baseline
 
-Transaction costs (Step 3.3 — tracked but NOT used for Optuna optimization):
-  Charge formula (per trade, applied to buy_val + sell_val):
-    brokerage = min(buy_val × bkr_rate, 20.0) + min(sell_val × bkr_rate, 20.0)
-    stt       = sell_val × 0.00025              # 0.025% sell-side only
-    exchange  = (buy_val + sell_val) × 0.0000297 # 0.00297% NSE equity cash ⚠️ was 0.0000345 (F&O rate — wrong)
-    sebi      = (buy_val + sell_val) × 0.000001
-    ipft      = (buy_val + sell_val) × 0.000001  # IPFT charge ⚠️ was missing
-    gst       = (brokerage + exchange + sebi) × 0.18
-    stamp     = buy_val × 0.00003               # 0.003% buy-side only
-    total     = brokerage + stt + exchange + sebi + ipft + gst + stamp
-
-  Upstox: bkr_rate = 0.0005  (0.05%, capped Rs 20/leg)
-  Kite:   bkr_rate = 0.0003  (0.03%, capped Rs 20/leg)
-
-  fv1 observed averages (28,085 trades, DS3 2022–2025):
-    net_pnl_upstox → ~Rs 49.70/trade avg (141% of capital)
-    net_pnl_kite   → ~Rs 34.44/trade avg (98% of capital)
-
-  fv2 observed (319 trades, TATAMOTORS 2022–2025):
-    Total charges ≈ Rs 15,950 = ~1.6% of Rs 10L capital
-    Raw edge (PF 0.95) is the bottleneck — NOT charges
-    Break-even threshold: PF > ~1.01
-
-  ⚠️  fv1: charges killed every filter (3.4× best raw profit).
-      fv2: lower freq makes charges manageable — fix signal first.
+Transaction costs (Step 3.3): full formula → [guides/transaction_costs.md](guides/transaction_costs.md)
+  ⚠️  fv1: charges = 3.4× best raw profit — killed every filter.
+      fv2: charges ≈ Rs 15,950 total (~1.6% of 10L) — manageable. Fix signal first.
+      Break-even: PF > ~1.01
 
 
-# ── SANDBOX MASTER PLAN — fv1 (SCRAPPED after Step 4) ─────────
+## ── SANDBOX MASTER PLAN — fv1 (SCRAPPED after Step 4) ─────────
+Full step history + parked items → [[sandbox_master_plan]]
 
-Step 1  → fv1 code review + verdict (COMPLETE ✅)
-           13 verdicts in fv1_pending_changes.md
-
-Step 2  → Sandbox blockers implemented (COMPLETE ✅)
-           Changes 1–6 from fv1_pending_changes.md
-
-Step 3  → Sandbox feature Optuna (COMPLETE ✅)
-  Step 3.1  → 16-combo brute-force feature sweep
-  Step 3.2  → Optuna on SL variants (A/B/C/D) + 4 features
-              Winner: SL=A, PG+CP+AF, CAGR=-2.15% (DS3)
-              Merged as permanent sandbox defaults ✅
-  Step 3.3  → Transaction costs + slippage merged ✅
-              Slippage: 1-tick entry + SL exit
-              Costs: raw/upstox/kite columns tracked
-              Baseline: -8.62% raw CAGR (slippage only, no charges)
-
-Step 4  → Regime filter Optuna — COMPLETE ❌ (regime filter exhausted)
-           Script: Framework_V1_Sandbox/scripts/sb_regime_optuna.py
-           Outputs: Framework_V1_Sandbox/outputs/optuna/
-             ├── best_params.json
-             ├── top20_trials.csv
-             ├── optuna_study.db
-             ├── optimization_history.png
-             └── feature_importance.png
-
-            Step 4.1 → Regime Filter Optuna — 2022–2025 (COMPLETE ✅)
-             Best: Trial #2827, raw CAGR -4.48%, PF9+TF4, OR gate
-             Finding: overfit — zero trades in 2015–2020
-             Verdict: INVALID as general regime filter
-
-            Step 4.2 → Regime Filter Optuna — Full DS3 2015–2025 (COMPLETE ❌)
-             3000 trials, OR gate, 28 params, TPE + 28 warm-up trials
-             Baseline: -100% raw CAGR (capital wiped — every year losing)
-             Best trial #648: raw CAGR -9.43% (2021–2025 only, 34,685 trades)
-             Objective value: -119.37% (includes -110% retention penalty, 45% of baseline kept)
-             Finding: filters act as time-period selectors, not market regime detectors.
-                      Strategy loses in every year 2015–2025. No regime filter
-                      combination produces positive CAGR on full dataset.
-             Verdict: Regime filter approach exhausted with OR gate + 28 features.
-
-            Step 4.3 → Bounce Quality Score (NEXT 🔄)
-
-Step 5  → Full DS3 backtest 2015–2025 with Step 4 winner params
-           Purpose: confirm Step 4 CAGR, update confirmed baseline
-           This is a formality — sanity check only, no new Optuna run
-           Status: PENDING Step 4 completion
-STEP 6 → Python Phase 2 viewer ← AFTER backtest -> check the dedicated claude chat for tool list
-STEP 7 → WFA + Optuna
-STEP 8 → Paper trading (PENDING)
-STEP 9 → Live trading
-
-Parked for later steps:
-  SL=D (trailing, ACT=3.0, TR=0.5) → revisit Step 7
-  Fixed Fractional sizing (SB-G)   → revisit Step 7
-  dir_* TPE fix in sb_regime_optuna.py → always suggest dir_*
-  params regardless of parent use_* flag. Set
-  warn_independent_sampling=False in TPESampler().
-  Apply before next Optuna run, not mid-run."
+Steps 1–4 : COMPLETE / EXHAUSTED (fv1 closed — regime filter found no edge)
+Step 4.3   : Bounce Quality Score — NEXT 🔄
+Step 5     : Full DS3 backtest 2015–2025 — PENDING
+Steps 6–9  : Phase 2 viewer → WFA+Optuna → Paper → Live
 
 
-# ── CORE MODULES — Framework_V1 ───────────────────────────────
+## ── CORE MODULES — Framework_V1 ───────────────────────────────
 
 core/engine.py      : Main event loop — DO NOT refactor without discussion
 core/strategy.py    : BounceStrategy — generate_signals() is a pure function
@@ -346,7 +279,7 @@ adapters/           : Swap these for different environments
                       Never hardcode broker/data logic in core/
 
 
-# ── CODING CONVENTIONS ────────────────────────────────────────
+## ── CODING CONVENTIONS ────────────────────────────────────────
 
 - Adapter pattern is sacred — keep core/ broker-agnostic always
 - Strategy logic lives ONLY in core/strategy.py
@@ -357,7 +290,7 @@ adapters/           : Swap these for different environments
 - All sandbox scripts must use DS3 (intraday_5min_DS3) — never intraday_5min
 
 
-# ── WHAT TO AVOID ─────────────────────────────────────────────
+## ── WHAT TO AVOID ─────────────────────────────────────────────
 
 - DO NOT modify Framework_V0 — archived, leave as-is
 - DO NOT use fixed % stop loss — ATR-based SL only
@@ -368,8 +301,8 @@ adapters/           : Swap these for different environments
 - DO NOT use intraday_5min in sandbox scripts — DS3 only
 - DO NOT restart optuna_study.db without explicit instruction from Saurav
 
-# ── SURGICAL EDIT RULE (fv2 HTML + Pine Script) ───────────────
-# Applies to ALL files in fv2 signal viewer (HTML/Python) and ALL Pine Script files on TradingView.
+## ── SURGICAL EDIT RULE (fv2 HTML + Pine Script) ───────────────
+Applies to ALL files in fv2 signal viewer (HTML/Python) and ALL Pine Script files on TradingView.
 
 Before editing any such file:
   1. Read the task carefully
@@ -391,25 +324,23 @@ After every edit, confirm:
   ✅ What was changed
   ✅ What was deliberately left untouched
 
-# ── H1.1 CONTRACT RULES ────────────────────────────────────────
-# H1.1 (fv2_h1_1_signal_review.html) is a static file that receives
-# signal data from build_html1.py via the openReview() function.
-# The two files are coupled — changes to one can silently break the other.
+## ── H1.1 CONTRACT RULES ────────────────────────────────────────
+H1.1 (fv2_h1_1_signal_review.html) is a static file that receives signal data from build_html1.py via openReview(). The two files are coupled — changes to one can silently break the other.
 
-# CC RULE — before saving any edit to openReview() in build_html1.py:
-#   Check the H1.1 contract comment (above the signal object in openReview())
-#   and verify every field listed there is still present in the signal object.
-#   If a field is missing → stop and restore it before proceeding.
+**CC RULE** — before saving any edit to openReview() in build_html1.py:
+  Check the H1.1 contract comment (above the signal object in openReview())
+  and verify every field listed there is still present in the signal object.
+  If a field is missing → stop and restore it before proceeding.
 
-# SMOKE TEST RULE — after any H1 rebuild:
-#   Open H1.1 on one k=0 signal and one k>0 signal and confirm:
-#     - #01 shows a slope value (not "—%")
-#     - #02 shows a slope value (not "N/A", unless touch is in first 3 bars of day)
-#     - #09/#10 show "N/A / Yes" for k=0, and actual ratio / "No" for k>0
-#   Takes 30 seconds. Catches any silent regression before signal review continues.
+**SMOKE TEST RULE** — after any H1 rebuild:
+  Open H1.1 on one k=0 signal and one k>0 signal and confirm:
+  - \#01 shows a slope value (not "—%")
+  - \#02 shows a slope value (not "N/A", unless touch is in first 3 bars of day)
+  - \#09/\#10 show "N/A / Yes" for k=0, and actual ratio / "No" for k>0
+  Takes 30 seconds. Catches any silent regression before signal review continues.
 
 
-# ── OUTPUTS ───────────────────────────────────────────────────
+## ── OUTPUTS ───────────────────────────────────────────────────
 
 Sandbox outputs   : Framework_V1_Sandbox/outputs/
   Optuna results  : Framework_V1_Sandbox/outputs/optuna/
@@ -453,7 +384,7 @@ STANDING RULE — New framework scaffolding:
   optuna\reports\stats\trades\ structure.
 
 
-# ── RESEARCH TOOLS ────────────────────────────────────────────
+## ── RESEARCH TOOLS ────────────────────────────────────────────
 
 Sandbox Optuna      : Framework_V1_Sandbox/scripts/sb_regime_optuna.py
 Sandbox winner ref  : Framework_V1_Sandbox/scripts/run_winner.py
@@ -471,7 +402,7 @@ commands automatically unless I explicitly ask for approval.
 Config applied: defaultMode = bypassPermissions (set 2026-03-15)
 
 
-# ── CONTEXT FILES ─────────────────────────────────────────────
+## ── CONTEXT FILES ─────────────────────────────────────────────
 
 codeponting_structure.md: Full project structure map (factual, auto-generated)
 CLAUDE.md               : This file — behavioral instructions for Claude Code
@@ -488,7 +419,34 @@ fv2 H3-chart            : Framework_V2/outputs/reports/fv2_h3_chart.html
 fv2 CSV                 : Framework_V2/data/historical/csv/intraday_5min/TATAMOTORS_5min.csv
 
 
-# ── ADVISOR PATTERN ───────────────────────────────────────────────────────────
+## ── GUIDES ────────────────────────────────────────────────────
+Detailed reference docs. Read on demand — not loaded every session.
+
+## What belongs in CLAUDE.md vs. guides/
+
+| Stays in CLAUDE.md | Goes to guides/ |
+|---|---|
+| Behavioral rules (protocols, conventions, what to avoid) | Step-by-step setup instructions |
+| Active config values needed when writing scripts | Historical logs and completed step records |
+| Framework status (active/closed/archived) | Detailed formulas or code blocks (VBA, charge math) |
+| Critical paths Claude must follow automatically | Side projects, hackathon ideas, future skill entries |
+| Shorthand, abbreviations, clarification rules | Bug fix logs and one-time setup notes |
+
+**Rule:** If removing it from CLAUDE.md would change how CC behaves → it stays.
+If it's reference material CC only needs when pointed at it → it goes to guides/.
+When in doubt: one-line summary + link in CLAUDE.md, full detail in guides/.
+
+---
+
+Excel Dark Mode Setup   : [[excel_dark_mode_setup]]
+Transaction Costs       : [[transaction_costs]]
+Sandbox Master Plan     : [[sandbox_master_plan]]
+CC Remote Setup         : [[cc_remote_setup]]
+Hackathon Ideas         : [[hackathon_ideas]]
+Future Skills           : [[future_skills]]
+
+
+## ── ADVISOR PATTERN ───────────────────────────────────────────────────────────
 
 ## When to call Opus advisor (via Agent tool, model="opus"):
   1. Self-rated confidence < 7/10 on current approach
@@ -505,86 +463,21 @@ fv2 CSV                 : Framework_V2/data/historical/csv/intraday_5min/TATAMOT
   Pass: question + context_summary + attempt_count in the prompt
 
 
-# ── FUTURE SKILLS & PLATFORM UPDATES ─────────────────────────
-#
-# When Saurav shares a platform update/announcement (tweet, blog post, etc.),
-# add it here with: feature name, source, date spotted, and exactly WHEN to
-# flag it back during this project's pipeline. Do NOT act on these early —
-# surface them only at the specified trigger step.
-#
-# FLAG RULE: When the current task matches a "Flag at" step below, print:
-#   ⚑ FUTURE SKILL READY: <feature name> — <one-line reminder>
-# Then ask Saurav if he wants to explore it before continuing.
-# ──────────────────────────────────────────────────────────────
+## ── FUTURE SKILLS & PLATFORM UPDATES ─────────────────────────
+Full entries → [[future_skills]]
 
-## [2026-04-21] Claude Live Artifacts (Cowork)
-  Source    : @claudeai tweet, 2026-04-21
-  Feature   : Persistent dashboards built inside Claude Cowork that stay
-              connected to your files and data. Refresh live, retain version
-              history, accessible across sessions.
-  Use case  : Paper/live trading monitoring — build a live P&L dashboard,
-              daily signal tracker, or trade log viewer that auto-refreshes
-              from output CSVs/logs without rebuilding each session.
-  Flag at   : Step 8 (Paper Trading) — when setting up monitoring infra.
-              Also flag at Step 9 (Live Trading) if not adopted in Step 8.
-  Notes     : Available on all paid Claude plans. Requires Claude Cowork
-              (desktop app). Version history means we can track dashboard
-              changes alongside strategy changes.
+**FLAG RULE:** When the current task matches a "Flag at" step in the guide, print:
+`⚑ FUTURE SKILL READY: <feature name> — <one-line reminder>`
+Then ask Saurav if he wants to explore it before continuing.
 
 
-# ── HACKATHON IDEAS ───────────────────────────────────────────────────────────
-#
-# Side quests. Not on the critical path. Revisit when fv2 signal is stable.
-# ──────────────────────────────────────────────────────────────────────────────
+## ── HACKATHON IDEAS ───────────────────────────────────────────────────────────
+Side quests — revisit when fv2 signal is stable. Full details → [[hackathon_ideas]]
 
-## [2026-04-22] NSE Signal Dashboard
-
-  Name      : NSE Signal Dashboard
-  Stack     : Claude Code (backend) + Opus 4.7 (explanations)
-              + Claude Design (visual layer)
-
-  Core loop :
-    1. CC runs fv2 signal pipeline on 29 NSE stocks
-    2. Each stock screened through G1-G3 sequentially
-    3. Passing signals surface with PF, equity curve, drawdown
-    4. Opus 4.7 explains each gate verdict in plain English
-    5. User can ask follow-up questions via chat input
-
-  Differentiator : "Existing tools show WHAT. Claude shows WHY."
-                   Conversational drill-down on any signal/gate — unique.
-
-  Target user    : Systematic traders + curious non-quants who want
-                   transparent, explainable signal reasoning.
-
-  Hackathon MVP  : Backtesting data only (2022–2025, 48 months).
-                   No live trading needed for demo.
-
-  Post-hackathon :
-    → Add paper/live trade results as fv2 matures
-    → Gate toggling (interactive, Phase 2)
-    → Full dashboard once H5 + Optuna complete
-
-  Philosophy     : Not a showcase — a tool we'd actually use daily.
-                   Hackathon = side quest. CodePonting = main quest. 🏏
+NSE Signal Dashboard (2026-04-22) — CC + Opus 4.7 + Claude Design.
+Explainable G1-G3 signal screener for 29 NSE stocks. Post-fv2 stable.
 
 
-# ── CC REMOTE SETUP ───────────────────────────────────────────
-
-## Auto-launch
-  Startup .bat : C:\Users\Saurav\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\claude_remote.bat
-
-## Correct .bat command
-  @echo off
-  cd /d C:\Users\Saurav\CodePonting
-  start "Claude Code Remote" cmd /k "claude --dangerously-skip-permissions --name CodePonting"
-
-## Bug fixed (2026-05-06)
-  Broken command : claude remote-control --permission-mode bypassPermissions --name CodePonting --spawn same-dir
-  Root cause     : "remote-control" is NOT a valid subcommand in v2.1.128
-  Fix            : Remote control activates automatically on CC launch — no extra flags needed
-
-## Confirmed working clients
-  - Terminal
-  - VS Code GUI
-  - Claude.ai CC
-  - Claude Desktop
+## ── CC REMOTE SETUP ───────────────────────────────────────────
+Full setup + bug fix log → [[cc_remote_setup]]
+Status: configured and working (fixed 2026-05-06). Auto-launches on Windows startup.
