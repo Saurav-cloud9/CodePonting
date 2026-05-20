@@ -4,11 +4,11 @@
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. Added Python learning journey section to CLAUDE.md (Codecombat→Codedex→RealPython)
-2. Added `lm` shorthand to CLAUDE.md — learning mode: explain concepts, no solution code
-3. Completed Codedex CSV exercises: file modes, csv.reader/writer, try/except, append
-4. Clarified learning mode rule: no solution code, but explain concepts freely
-5. Completed packing_list.py — try/except FileNotFoundError + append pattern working
+1. Reviewed export_h5_signals.py end to end — SL/TGT multipliers corrected to 2.5/4.5
+2. Reviewed export_h5_candles.py — shift(1), ATR, candle window logic understood
+3. Notebooks folder created; explore.ipynb set up in VS Code with Python 3.14 kernel
+4. H5 Lite tested: 12/100 signals passing, WR 66.7%, PF 4.17 — sample too small to trust
+5. Codedex: higher-order functions, map/filter/reduce, list comprehensions, unittest basics
 
 ── MILESTONES (5 most important) ────────────────────────────
 1. fv2 direction locked — 3-gate system (G1/G2/G3) addressing structural gaps vs true MA bounce

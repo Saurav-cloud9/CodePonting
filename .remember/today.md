@@ -1,23 +1,13 @@
 # Session Log — 2026-05-16
 
 ## What was done
-- Saved Excel Dark Mode Setup guide → guides/excel_dark_mode_setup.md (new file)
-- Created guides/ folder as a reference library pattern for CLAUDE.md
-- Extracted 5 more sections from CLAUDE.md into guides/:
-    - transaction_costs.md (charge formula)
-    - sandbox_master_plan.md (full step history)
-    - cc_remote_setup.md (.bat command + bug fix)
-    - hackathon_ideas.md (NSE Signal Dashboard)
-    - future_skills.md (Claude Live Artifacts entry)
-- Added "what belongs in CLAUDE.md vs guides/" decision table + rule
-- Fixed CLAUDE.md heading hierarchy: all `# ── SECTION ──` → `##` so Obsidian doesn't render everything as H1
-- Fixed #01/#02/#09/#10 being picked up as Obsidian tags — escaped with \#
-- Tried markdown links then [[wikilinks]] for guides — wikilinks work in Obsidian
-- VS Code shows security warning for [[wikilinks]] — harmless, can ignore
-- Added Python learning journey section to CLAUDE.md
-- Added `lm` shorthand to CLAUDE.md
-- Codedex CSV module: file modes, csv.reader/writer, lazy eval, try/except, append pattern
+- Reviewed export_h5_signals.py line by line — understood all params p01-p12, PnL sim, for-else pattern
+- Fixed SL/TGT multipliers in export_h5_signals.py (were 1.0/1.5, corrected to 2.5/4.5)
+- Reviewed export_h5_candles.py partially — shift(1), ATR, signal loading understood
+- Created Framework_V2/Notebooks/ folder + explore.ipynb for interactive pandas exploration
+- Tested H5 Lite with updated CSVs: 12/100 passing, WR 66.7%, PF 4.17
+- Codedex: higher-order functions, map/filter/reduce, list comprehensions, classes, unittest basics
 
 ## Status at SS
-- CLAUDE.md housekeeping + learning session complete
-- Main work (fv2 H5 Lite) unchanged — still paused at line 136 (p08)
+- export_h5_candles.py candle window loop not yet reviewed
+- H5 Lite validation is next (P1), then H5 full build (P2)

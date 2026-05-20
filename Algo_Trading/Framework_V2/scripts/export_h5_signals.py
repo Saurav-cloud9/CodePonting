@@ -159,8 +159,8 @@ while i < len(df) - 2 and len(signals) < MAX_SIGNALS:
         # --- PnL + Outcome simulation ---
         entry_price = er['open']
         atr = t0r['atr14']
-        sl     = entry_price - (1.0 * atr)
-        target = entry_price + (1.5 * atr)
+        sl     = entry_price - (2.5 * atr)
+        target = entry_price + (4.5 * atr)
         outcome = None
         pnl = None
         for j in range(entry_bar, len(df)):
@@ -168,21 +168,21 @@ while i < len(df) - 2 and len(signals) < MAX_SIGNALS:
             if bar['date'] != t0_date:
                 # EOD exit on last bar of the day
                 last = df.iloc[j - 1]
-                pnl = round(last['close'] - entry_price, 4)
+                pnl = round(last['close'] - entry_price, 2)
                 outcome = 'EOD+' if last['close'] > entry_price else 'EOD-'
                 break
             if bar['low'] <= sl and bar['high'] >= target:
                 # Both hit same bar — whichever is closer to open wins
                 if abs(bar['open'] - sl) <= abs(bar['open'] - target):
-                    outcome, pnl = 'L', round(-1.0 * atr, 4)
+                    outcome, pnl = 'L', round(-2.5 * atr, 4)
                 else:
-                    outcome, pnl = 'W', round(1.5 * atr, 4)
+                    outcome, pnl = 'W', round(4.5 * atr, 4)
                 break
             if bar['low'] <= sl:
-                outcome, pnl = 'L', round(-1.0 * atr, 4)
+                outcome, pnl = 'L', round(-2.5 * atr, 4)
                 break
             if bar['high'] >= target:
-                outcome, pnl = 'W', round(1.5 * atr, 4)
+                outcome, pnl = 'W', round(4.5 * atr, 4)
                 break
         else:
             last = df.iloc[-1]
@@ -221,4 +221,4 @@ out = pd.DataFrame(signals)
 out.columns = out.columns.str.strip()
 out.to_csv(OUTPUT_FILE, index=False, encoding='utf-8', lineterminator='\n')
 print(f"Exported {len(out)} signals -> {OUTPUT_FILE}")
-print(out[['signal_id', 'datetime', 'p01', 'p05', 'p07', 'p07_na', 'p08', 'p09', 'p10', 'p11', 'p12', 'same_candle_tb']].to_string(index=False))
+print(out[['signal_id', 'datetime', 'p01', 'p02', 'p03', 'p04', 'p05', 'p07', 'p07_na', 'p08', 'p09', 'p10', 'p11', 'p12', 'same_candle_tb']].to_string(index=False))

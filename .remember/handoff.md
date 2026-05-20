@@ -1,17 +1,16 @@
-# Handoff Note — 2026-05-16
+# Handoff Note — 2026-05-19
 
 ## State
-CLAUDE.md housekeeping + Codedex CSV learning session complete.
-- guides/ folder created with 6 reference docs
-- CLAUDE.md: Python learning journey + `lm` shorthand added
-- Codedex CSV module done: file modes, csv.reader/writer, try/except, append
-
-Main fv2 work still paused at line 136 (p08) from previous session.
+- export_h5_signals.py reviewed end to end — SL/TGT multipliers corrected (2.5/4.5 ATR)
+- export_h5_candles.py partially reviewed — shift(1), ATR, signal loading done; candle window loop not yet reviewed
+- H5 Lite tested on updated CSVs: 12/100 passing, WR 66.7%, PF 4.17 (small sample, not conclusive)
+- Notebooks folder created: Framework_V2/Notebooks/explore.ipynb
 
 ## Next
-1. Resume H5 Lite line-by-line review from line 136 (p08)
-2. Update H5 Lite on claude.ai: p07 slider range -1.5 to 5.0
-3. Upload updated CSVs to H5 Lite
+1. Finish export_h5_candles.py review (candle window loop + output section)
+2. Validate H5 Lite logic is sound (P1 TODO)
+3. Then build H5 full (P2 TODO) — 30 stocks × 4 years
 
 ## Known Issues
-- [[wikilink]] format triggers VS Code security warning — harmless, Obsidian renders fine
+- 12 passing signals is too small to draw conclusions — need full dataset
+- PnL multipliers in signals CSV were wrong (1.0/1.5), now fixed to 2.5/4.5 — regenerate CSV before H5 full build

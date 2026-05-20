@@ -190,3 +190,11 @@ Step 9.4  — 2026-04-19
            ✅  Python learning journey section added to CLAUDE.md (Codecombat→Codedex→RealPython)
            ✅  `lm` shorthand added — learning mode: explain concepts, no solution code
            ✅  Codedex CSV module completed: file modes, csv.reader/writer, try/except, append pattern
+
+2026-05-19  SS ───────────────────────────────────────────────────────────
+           ✅  export_h5_signals.py reviewed end to end — all params p01-p12, PnL sim, for-else understood
+           ✅  SL/TGT multipliers fixed in export_h5_signals.py (1.0/1.5 → 2.5/4.5 ATR)
+           ✅  export_h5_candles.py partially reviewed — shift(1), ATR, signal loading done
+           ✅  Framework_V2/Notebooks/ created; explore.ipynb set up with Python 3.14 kernel in VS Code
+           ✅  H5 Lite tested: 12/100 passing, WR 66.7%, PF 4.17 — sample too small, not conclusive
+           ✅  Codedex: higher-order functions, map/filter/reduce, list comprehensions, classes, unittest basics
