@@ -196,5 +196,5 @@ Step 9.4  — 2026-04-19
            ✅  SL/TGT multipliers fixed in export_h5_signals.py (1.0/1.5 → 2.5/4.5 ATR)
            ✅  export_h5_candles.py partially reviewed — shift(1), ATR, signal loading done
            ✅  Framework_V2/Notebooks/ created; explore.ipynb set up with Python 3.14 kernel in VS Code
-           ✅  H5 Lite tested: 12/100 passing, WR 66.7%, PF 4.17 — sample too small, not conclusive
            ✅  Codedex: higher-order functions, map/filter/reduce, list comprehensions, classes, unittest basics
+2026-05-21 | Completed export_h5_candles.py full review — window loop, bar_index, output section clean

@@ -4,7 +4,7 @@
 # When done → move to PROGRESS.md as one line, delete from here.
 # ─────────────────────────────────────────────────────────────
 
-P1  Complete H5 Lite on claude.ai — chart refinement (T0/BNC/ENT labels, MA20/SL/TGT)
+P1  Signal review on H5 Lite — POWERGRID 2022, active session
         CSVs: Framework_V2/outputs/h5/powergrid_2022_h5_signals.csv + candles.csv
 
 P2  Build H5 full (Python build script + HTML viewer, 30 stocks) — after lite validated
@@ -13,12 +13,16 @@ P2  Build H5 full (Python build script + HTML viewer, 30 stocks) — after lite 
 P3  Optuna joint sweep — all 12 params, maximise PF_test
 
 P4  Opening bar framework — 9:15 signals need separate G1 evaluation (3/4 params
-        structurally N/A). Collect more data points before designing. Seen: #5, #21.
+        structurally N/A). Collect more data points before designing.
+        Seen: POWERGRID signal #5 and #21 (Obsidian review log, ~38 signals reviewed).
 
 P5  CC source code exploration — hooks, skills, tools, remote folders
         Goal: better hooks, custom slash commands, MCP design patterns
 
 # ── PARKED / FUTURE ───────────────────────────────────────────
+F0  Compare H1 build script signal scanning logic vs export_h5_signals.py —
+    check if H1 has same touch-to-entry window skip (line 227) and whether
+    position guarding is handled differently between the two.
 F1  Explore "Claude-in-Claude" Artifacts — paste raw OHLCV into React artifact,
     Claude API analyses signal quality + gate status + gives H1 verdict.
     Zero backend, runs in browser. Ref: Anthropic API in Artifacts (claude-sonnet-4-20250514)

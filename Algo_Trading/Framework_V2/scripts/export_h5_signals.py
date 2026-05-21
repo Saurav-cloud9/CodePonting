@@ -170,6 +170,7 @@ while i < len(df) - 2 and len(signals) < MAX_SIGNALS:
                 last = df.iloc[j - 1]
                 pnl = round(last['close'] - entry_price, 2)
                 outcome = 'EOD+' if last['close'] > entry_price else 'EOD-'
+                exit_bar = j - 1
                 break
             if bar['low'] <= sl and bar['high'] >= target:
                 # Both hit same bar — whichever is closer to open wins
@@ -177,17 +178,21 @@ while i < len(df) - 2 and len(signals) < MAX_SIGNALS:
                     outcome, pnl = 'L', round(-2.5 * atr, 4)
                 else:
                     outcome, pnl = 'W', round(4.5 * atr, 4)
+                exit_bar = j
                 break
             if bar['low'] <= sl:
                 outcome, pnl = 'L', round(-2.5 * atr, 4)
+                exit_bar = j
                 break
             if bar['high'] >= target:
                 outcome, pnl = 'W', round(4.5 * atr, 4)
+                exit_bar = j
                 break
         else:
             last = df.iloc[-1]
             pnl = round(last['close'] - entry_price, 4)
             outcome = 'EOD+' if last['close'] > entry_price else 'EOD-'
+            exit_bar = len(df) - 1
 
         signals.append({
             'signal_id': f"S{len(signals)+1:03d}",
@@ -209,6 +214,12 @@ while i < len(df) - 2 and len(signals) < MAX_SIGNALS:
             'same_candle_tb': same_candle,
             'bounce_bar_index': bounce_bar_index,
             'entry_bar_index':  entry_bar_index,
+            'bounce_datetime': df.iloc[bounce_bar]['datetime'],
+            'entry_datetime': df.iloc[entry_bar]['datetime'],
+            'exit_datetime': df.iloc[exit_bar]['datetime'],
+            'entry_price': entry_price,
+            'sl': sl,
+            'target': target,
             'pnl': pnl,
             'outcome': outcome,
         })

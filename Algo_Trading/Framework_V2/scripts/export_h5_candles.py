@@ -64,8 +64,8 @@ for _, sig in sigs.iterrows():
         continue
 
     entry_price = df.iloc[entry_bar]['open']
-    sl     = entry_price - (1.0 * atr)
-    target = entry_price + (1.5 * atr)
+    sl     = entry_price - (2.5 * atr)
+    target = entry_price + (4.5 * atr)
 
     # Find exit bar
     exit_bar = None

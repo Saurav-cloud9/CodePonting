@@ -4,11 +4,11 @@
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. Reviewed export_h5_signals.py end to end — SL/TGT multipliers corrected to 2.5/4.5
-2. Reviewed export_h5_candles.py — shift(1), ATR, candle window logic understood
-3. Notebooks folder created; explore.ipynb set up in VS Code with Python 3.14 kernel
-4. H5 Lite tested: 12/100 signals passing, WR 66.7%, PF 4.17 — sample too small to trust
-5. Codedex: higher-order functions, map/filter/reduce, list comprehensions, unittest basics
+1. H5 Lite chart refinement complete — T0/BNC/ENT labels, MA20/SL/TGT lines
+2. Reviewed export_h5_signals.py end to end — SL/TGT multipliers corrected to 2.5/4.5
+2. Notebooks folder created; explore.ipynb set up in VS Code with Python 3.14 kernel
+3. Codedex: higher-order functions, map/filter/reduce, list comprehensions, unittest basics
+4. Completed export_h5_candles.py full review — window loop, bar_index, output section clean
 
 ── MILESTONES (5 most important) ────────────────────────────
 1. fv2 direction locked — 3-gate system (G1/G2/G3) addressing structural gaps vs true MA bounce
