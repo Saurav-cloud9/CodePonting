@@ -16,6 +16,12 @@ def add(a, b):
 
 # Test case class for testing the add function
 class TestAddition(unittest.TestCase):
+  def test_add(self):
+    self.assertEqual(add(3,4), 7)
+
+if __name__ == '__main__':
+  unittest.main
+
 
   # Test methods
 
@@ -38,10 +44,6 @@ class TestAddition(unittest.TestCase):
 # Let's look at the code example below to understand TestCase initialization and attributes:
 
 import unittest
-
-# Function to test: add two numbers
-def add(a, b):
-  return a + b
 
 class MyTestCase(unittest.TestCase):
   def test_addition(self):
