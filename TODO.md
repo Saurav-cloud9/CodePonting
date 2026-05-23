@@ -4,8 +4,7 @@
 # When done → move to PROGRESS.md as one line, delete from here.
 # ─────────────────────────────────────────────────────────────
 
-P1  Signal review on H5 Lite — POWERGRID 2022, active session
-        CSVs: Framework_V2/outputs/h5/powergrid_2022_h5_signals.csv + candles.csv
+P1  Apply entry cutoff (≥14:40 skip) + hard EOD exit at 15:00 (use close[bar before 15:00] as exit price) to export_h5_signals.py, then re-export powergrid_2022_h5_signals.csv
 
 P2  Build H5 full (Python build script + HTML viewer, 30 stocks) — after lite validated
         Spec: Algo_Trading/Framework_V2/docs/fv2_params.md
