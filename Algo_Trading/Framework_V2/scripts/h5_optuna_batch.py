@@ -158,10 +158,10 @@ for stock in STOCKS:
         af_best = {'p01':bp['p01_on'],'p02':bp['p02_on'],'p03':bp['p03_on'],'p04':bp['p04_on'],
                    'p05':bp['p05_on'],'p06':bp['p06_on'],'p07':bp['p07_on'],'p08':bp['p08_on'],
                    'p09':bp['p09'],   'p10':bp['p10_on'],'p11':bp['p11'],   'p12':bp['p12']}
-        p_best  = {'p01':bp['p01'],'p02':bp['p02'],'p03':bp['p03'],
+        p_best  = {'p01':round(bp['p01'],4),'p02':round(bp['p02'],4),'p03':bp['p03'],
                    'p04min':bp['p04_min'],'p04max':p04_max_f,
-                   'p05min':bp['p05_min'],'p05max':p05_max_f,
-                   'p06':bp['p06'],'p07':bp['p07'],'p08':bp['p08'],'p10':bp['p10']}
+                   'p05min':round(bp['p05_min'],4),'p05max':round(p05_max_f,4),
+                   'p06':bp['p06'],'p07':round(bp['p07'],4),'p08':round(bp['p08'],4),'p10':bp['p10']}
         passing = [s for s in signals if eval_signal(s, p_best, af_best)]
         m = compute_metrics(passing)
 

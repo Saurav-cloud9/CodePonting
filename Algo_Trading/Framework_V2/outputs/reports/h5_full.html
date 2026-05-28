@@ -129,7 +129,7 @@ function parseSignalRow(r) {
     id: (r.signal_id || '').trim(),
     stock: (r.stock || '').trim(),
     dt, year: dt.slice(0, 4),
-    p01: +r.p01, p02: +r.p02, p03: +r.p03,
+    p01: r.p01==='' ? NaN : +r.p01, p02: r.p02==='' ? NaN : +r.p02, p03: +r.p03,
     pbMin: r.p04==='' ? NaN : +r.p04, pbMax: r.p04==='' ? NaN : +r.p04,
     p05: +r.p05, p06: +r.p06,
     p07: +r.p07, p07na: parseInt((r.p07_na || '').trim(), 10) === 1,
@@ -737,16 +737,16 @@ function toggleOptuna() {
     };
     // Apply best params
     const bp = S.optuna.best_params;
-    if (bp.p01 !== undefined) S.p01 = Math.round(bp.p01 * 100);
-    if (bp.p02 !== undefined) S.p02 = Math.round(bp.p02 * 100);
+    if (bp.p01 !== undefined) S.p01 = bp.p01 * 100;
+    if (bp.p02 !== undefined) S.p02 = bp.p02 * 100;
     if (bp.p03 !== undefined) S.p03 = bp.p03;
     if (bp.p04_min !== undefined) S.p04min = bp.p04_min;
     if (bp.p04_max !== undefined) S.p04max = bp.p04_max;
-    if (bp.p05_min !== undefined) S.p05min = Math.round(bp.p05_min / 0.05);
-    if (bp.p05_max !== undefined) S.p05max = Math.round(bp.p05_max / 0.05);
+    if (bp.p05_min !== undefined) S.p05min = bp.p05_min / 0.05;
+    if (bp.p05_max !== undefined) S.p05max = bp.p05_max / 0.05;
     if (bp.p06 !== undefined) S.p06 = bp.p06;
-    if (bp.p07 !== undefined) S.p07 = Math.round(bp.p07 * 10);
-    if (bp.p08 !== undefined) S.p08 = Math.round(bp.p08 * 10);
+    if (bp.p07 !== undefined) S.p07 = bp.p07 * 10;
+    if (bp.p08 !== undefined) S.p08 = bp.p08 * 10;
     if (bp.p09 !== undefined) S.act.p09 = !!bp.p09;
     if (bp.p10 !== undefined) S.p10 = bp.p10;
     if (bp.p11 !== undefined) S.act.p11 = !!bp.p11;
