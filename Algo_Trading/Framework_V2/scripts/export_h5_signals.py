@@ -75,6 +75,10 @@ while i < len(df) - 2 and len(signals) < MAX_SIGNALS:
         br = df.iloc[bounce_bar]
         er = df.iloc[entry_bar]
 
+        if er['datetime'].time() >= pd.Timestamp('14:40').time():
+            i += 1
+            continue
+
         # --- p01: slope_threshold ---
         if t0r['day_idx'] >= 5 and df.iloc[T0 - 5]['date'] == t0_date:
             p01 = ((t0r['ma20'] - df.iloc[T0 - 5]['ma20']) / t0r['ma20']) * 100
@@ -164,14 +168,7 @@ while i < len(df) - 2 and len(signals) < MAX_SIGNALS:
         outcome = None
         pnl = None
         for j in range(entry_bar, len(df)):
-            bar = df.iloc[j]
-            if bar['date'] != t0_date:
-                # EOD exit on last bar of the day
-                last = df.iloc[j - 1]
-                pnl = round(last['close'] - entry_price, 2)
-                outcome = 'EOD+' if last['close'] > entry_price else 'EOD-'
-                exit_bar = j - 1
-                break
+            bar = df.iloc[j]            
             if bar['low'] <= sl and bar['high'] >= target:
                 # Both hit same bar — whichever is closer to open wins
                 if abs(bar['open'] - sl) <= abs(bar['open'] - target):
@@ -188,6 +185,19 @@ while i < len(df) - 2 and len(signals) < MAX_SIGNALS:
                 outcome, pnl = 'W', round(4.5 * atr, 4)
                 exit_bar = j
                 break
+            if bar['datetime'].time() >= pd.Timestamp('15:00').time():
+                last = df.iloc[j]
+                pnl = round(last['open'] - entry_price, 2)
+                outcome = 'EOD+' if last['open'] > entry_price else 'EOD-'
+                exit_bar = j
+                break            
+            if bar['date'] != t0_date:
+                # EOD exit on last bar of the day
+                last = df.iloc[j - 1]
+                pnl = round(last['close'] - entry_price, 2)
+                outcome = 'EOD+' if last['close'] > entry_price else 'EOD-'
+                exit_bar = j - 1
+                break            
         else:
             last = df.iloc[-1]
             pnl = round(last['close'] - entry_price, 4)

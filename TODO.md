@@ -4,19 +4,18 @@
 # When done → move to PROGRESS.md as one line, delete from here.
 # ─────────────────────────────────────────────────────────────
 
-P1  Apply entry cutoff (≥14:40 skip) + hard EOD exit at 15:00 (use close[bar before 15:00] as exit price) to export_h5_signals.py, then re-export powergrid_2022_h5_signals.csv
+P1  Fix NTPC discrepancy — JSON=162, HTML=179; active params p05/p08/p09/p10/p11
+        Suspect: p09 (bounce_vr_rel) null check mismatch between Python and HTML
 
-P2  Build H5 full (Python build script + HTML viewer, 30 stocks) — after lite validated
-        Spec: Algo_Trading/Framework_V2/docs/fv2_params.md
+P2  Walk through h5_optuna_batch.py — understand batch structure before scaling
 
-P3  Optuna joint sweep — all 12 params, maximise PF_test
+P3  Scale to 30-stock universe (2022, tb3) — signals + Optuna batch
+        Then: walk-forward validate on 2023 → 2024 → 2025
 
 P4  Opening bar framework — 9:15 signals need separate G1 evaluation (3/4 params
         structurally N/A). Collect more data points before designing.
-        Seen: POWERGRID signal #5 and #21 (Obsidian review log, ~38 signals reviewed).
 
 P5  CC source code exploration — hooks, skills, tools, remote folders
-        Goal: better hooks, custom slash commands, MCP design patterns
 
 # ── PARKED / FUTURE ───────────────────────────────────────────
 F0  Compare H1 build script signal scanning logic vs export_h5_signals.py —
@@ -76,6 +75,8 @@ F8  TradingView AI Chart Copilot — explore when Pine dev resumes
 # SL          — stop loss
 # TGT         — price target
 # EOD         — end-of-day forced exit at 14:50
+# WFA         — walk-forward analysis: optimize on one period, validate on next
+# OOS         — out-of-sample: data not used during optimization
 
 ## Outcomes
 # Win         — target hit before 14:50

@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>H5 Full — MA20 Bounce</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; background: #0d0f11; }
+body { color: #c8cdd4; font-family: monospace; font-size: 11px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #141618; }
+::-webkit-scrollbar-thumb { background: #363b42; border-radius: 2px; }
+input[type=range] { -webkit-appearance: none; appearance: none; height: 2px; background: #363b42; outline: none; cursor: pointer; width: 100%; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #5ba3d9; cursor: pointer; }
+input[type=range]:disabled { cursor: not-allowed; opacity: 0.4; }
+input[type=range]:disabled::-webkit-slider-thumb { background: #4a5260; }
+button { font-family: monospace; cursor: pointer; }
+select { font-family: monospace; background: #1c1f22; color: #c8cdd4; border: 1px solid #363b42; border-radius: 2px; font-size: 9px; padding: 2px 5px; cursor: pointer; outline: none; }
+select:focus { border-color: #5ba3d9; }
+</style>
+</head>
+<body>
+<div id="app" style="display:grid;grid-template-columns:240px 1fr 220px;height:100vh;overflow:hidden;">
+
+  <!-- LEFT SIDEBAR -->
+  <div id="sidebar" style="background:#141618;border-right:1px solid #23272b;overflow-y:auto;display:flex;flex-direction:column;"></div>
+
+  <!-- CENTER -->
+  <div id="center" style="display:flex;flex-direction:column;overflow:hidden;min-width:0;">
+    <div id="topbar" style="background:#0d0f11;border-bottom:1px solid #23272b;padding:5px 10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex-shrink:0;"></div>
+    <div id="chart-outer" style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;">
+      <div id="signal-info-bar" style="background:#141618;border-bottom:1px solid #23272b;padding:3px 10px;display:flex;align-items:center;gap:8px;flex-shrink:0;min-height:24px;"></div>
+      <div id="chart-container" style="flex:1;min-height:0;background:#1c1f22;position:relative;"></div>
+    </div>
+    <div id="signal-list" style="height:220px;background:#141618;border-top:1px solid #23272b;overflow-y:auto;flex-shrink:0;"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div id="right-panel" style="background:#141618;border-left:1px solid #23272b;overflow-y:auto;padding:8px;"></div>
+
+</div>
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+const S = {
+  mode: 'baseline',
+  // Slider internal values (same scale as H5 Lite)
+  p01: 5, p02: 5, p03: 1, p04min: 3, p04max: 8,
+  p05min: 0, p05max: 20, p06: 50, p07: 10, p08: 12, p10: 9,
+  // Toggle values
+  p09: false, p11: false, p12: false,
+  // Per-param active flags
+  act: { p01:false, p02:false, p03:false, p04:false, p05:false, p06:false, p07:false, p08:false, p09:false, p10:false, p11:false, p12:false },
+  // Data
+  allSignals: [],
+  candles: {},
+  optuna: null, optunaLive: null, optunaOn: false, optunaSnapshot: null,
+  // Filters
+  stockFilter: 'ALL', yearFilter: 'ALL', outcomeFilter: 'ALL',
+  selectedId: null,
+  // Meta
+  sigMeta: null, sigError: null, cndMeta: null, cndError: null,
+};
+
+// ─── Params for evalGates (same scaling as H5 Lite) ──────────────────────────
+function getParams() {
+  return {
+    p01: S.p01 / 100, p02: S.p02 / 100, p03: S.p03,
+    p04min: S.p04min, p04max: S.p04max,
+    p05min: S.p05min * 0.05, p05max: S.p05max * 0.05,
+    p06: S.p06, p07: S.p07 / 10, p08: S.p08 / 10, p10: S.p10,
+  };
+}
+
+function getActiveFlags() {
+  if (S.mode === 'baseline') return Object.fromEntries(Object.keys(S.act).map(k => [k, false]));
+  return { ...S.act };
+}
+
+// ─── Gate evaluation — ported exactly from h5_lite.jsx ───────────────────────
+function evalGates(sig, p, af) {
+  const g1_01 = !af.p01 ? 'P' : isNaN(sig.p01) ? 'NA' : sig.p01 >= p.p01 ? 'P' : 'F';
+  const g1_02 = !af.p02 ? 'P' : isNaN(sig.p02) ? 'NA' : sig.p02 >= p.p02 ? 'P' : 'F';
+  const g1_03 = !af.p03 ? 'P' : sig.p03 >= p.p03 ? 'P' : 'F';
+  const g1_04 = !af.p04 ? 'P' : g1_03 === 'F' ? 'NA' : isNaN(sig.pbMin) ? 'NA' : (sig.pbMin >= p.p04min && sig.pbMax <= p.p04max ? 'P' : 'F');
+  const g1v = [g1_01, g1_02, g1_03, g1_04];
+  const g1 = g1v.every(x => x === 'NA') ? 'NA' : g1v.filter(x => x !== 'NA').every(x => x === 'P') ? 'P' : 'F';
+
+  const g2_05 = !af.p05 ? 'P' : (sig.p05 >= p.p05min && sig.p05 <= p.p05max ? 'P' : 'F');
+  const g2_06 = !af.p06 ? 'P' : sig.p06 <= p.p06 ? 'P' : 'F';
+  const g2_07 = !af.p07 ? 'P' : sig.p07na ? 'NA' : (sig.p07 >= p.p07 ? 'P' : 'F');
+  const g2_08 = !af.p08 ? 'P' : sig.p08 >= p.p08 ? 'P' : 'F';
+  const g2_09 = !af.p09 ? 'P' : sig.p09 === null ? 'NA' : sig.p09 ? 'P' : 'F';
+  const g2_10 = !af.p10 ? 'P' : (sig.bounceIdx <= p.p10 ? 'P' : 'F');
+  const g2v = [g2_05, g2_06, g2_07, g2_08, g2_09, g2_10];
+  const g2 = g2v.every(x => x === 'NA') ? 'NA' : g2v.filter(x => x !== 'NA').every(x => x === 'P') ? 'P' : 'F';
+
+  const g3_11 = !af.p11 ? 'P' : sig.p11 ? 'P' : 'F';
+  const g3_12 = !af.p12 ? 'P' : sig.p12 === null ? 'NA' : sig.p12 ? 'P' : 'F';
+  const g3v = [g3_11, g3_12];
+  const g3 = g3v.every(x => x === 'NA') ? 'NA' : g3v.filter(x => x !== 'NA').every(x => x === 'P') ? 'P' : 'F';
+
+  return { g1, g2, g3 };
+}
+
+// ─── Computed signals ─────────────────────────────────────────────────────────
+function getFilteredSignals() {
+  return S.allSignals.filter(sig => {
+    if (S.stockFilter !== 'ALL' && sig.stock !== S.stockFilter) return false;
+    if (S.yearFilter !== 'ALL' && sig.year !== S.yearFilter) return false;
+    return true;
+  });
+}
+
+function getEvaluated(filtered) {
+  const p = getParams(), af = getActiveFlags();
+  return filtered.map(sig => {
+    const gates = evalGates(sig, p, af);
+    const rejected = S.mode !== 'baseline' && (gates.g1 !== 'P' || gates.g2 !== 'P' || gates.g3 !== 'P');
+    return { ...sig, gates, rejected };
+  });
+}
+
+// ─── CSV / JSON parsing ───────────────────────────────────────────────────────
+function parseSignalRow(r) {
+  const dt = (r.datetime || '').trim();
+  return {
+    id: (r.signal_id || '').trim(),
+    stock: (r.stock || '').trim(),
+    dt, year: dt.slice(0, 4),
+    p01: +r.p01, p02: +r.p02, p03: +r.p03,
+    pbMin: r.p04==='' ? NaN : +r.p04, pbMax: r.p04==='' ? NaN : +r.p04,
+    p05: +r.p05, p06: +r.p06,
+    p07: +r.p07, p07na: parseInt((r.p07_na || '').trim(), 10) === 1,
+    p08: +r.p08,
+    p09: (s => (!s || s==='NaN') ? null : parseInt(s,10)===1)((r.p09||'').trim()),
+    bounceIdx: +r.bounce_bar_index,
+    p11: parseInt((r.p11 || '').trim(), 10) === 1,
+    p12: (s => (!s || s==='NaN') ? null : parseInt(s,10)===1)((r.p12||'').trim()),
+    pnl: +r.pnl, outcome: (r.outcome || '').trim(),
+    p10sc: parseInt((r.same_candle_tb || '').trim(), 10) === 1,
+    bounceDt: (r.bounce_datetime || '').trim(),
+    entryDt: (r.entry_datetime || '').trim(),
+    exitDt: (r.exit_datetime || '').trim(),
+    entryPrice: +r.entry_price, sl: +r.sl, target: +r.target,
+  };
+}
+
+function loadSignalCSV(file) {
+  S.sigError = null;
+  Papa.parse(file, {
+    header: true, skipEmptyLines: true, transformHeader: h => h.trim(),
+    complete: res => {
+      const rows = res.data;
+      if (!rows.length) { S.sigError = 'Empty CSV.'; render(); return; }
+      const req = ['signal_id','stock','datetime','p01','p02','p03','p04','p05','p06','p07','p07_na','p08','p09','p10','p11','p12','same_candle_tb','bounce_bar_index','pnl','outcome'];
+      const missing = req.filter(c => !(c in rows[0]));
+      if (missing.length) { S.sigError = `Missing: ${missing.join(', ')}`; render(); return; }
+      S.allSignals = rows.map(parseSignalRow);
+      S.sigMeta = { filename: file.name, count: S.allSignals.length };
+      S.stockFilter = 'ALL'; S.yearFilter = 'ALL'; S.selectedId = null;
+      render();
+    },
+    error: () => { S.sigError = 'Parse failed.'; render(); }
+  });
+}
+
+function loadCandleCSV(file) {
+  S.cndError = null;
+  Papa.parse(file, {
+    header: true, skipEmptyLines: true, transformHeader: h => h.trim(),
+    complete: res => {
+      const rows = res.data;
+      if (!rows.length) { S.cndError = 'Empty CSV.'; render(); return; }
+      const req = ['signal_id','bar_index','datetime','open','high','low','close','ma20'];
+      const missing = req.filter(c => !(c in rows[0]));
+      if (missing.length) { S.cndError = `Missing: ${missing.join(', ')}`; render(); return; }
+      const grouped = {};
+      rows.forEach(r => {
+        if (!grouped[r.signal_id]) grouped[r.signal_id] = [];
+        grouped[r.signal_id].push({
+          bar_index: +r.bar_index, datetime: (r.datetime || '').trim(),
+          open: +r.open, high: +r.high, low: +r.low, close: +r.close,
+          volume: +(r.volume || 0), ma20: +r.ma20,
+        });
+      });
+      S.candles = grouped;
+      S.cndMeta = { filename: file.name, count: rows.length };
+      if (S.selectedId) renderChart();
+      render();
+    },
+    error: () => { S.cndError = 'Parse failed.'; render(); }
+  });
+}
+
+function loadOptunaJSON(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try { S.optuna = JSON.parse(e.target.result); } catch { S.optuna = null; }
+    S.optunaOn=false; S.optunaLive=null; S.optunaSnapshot=null;
+    render();
+  };
+  reader.readAsText(file);
+}
+
+// ─── Chart (lightweight-charts v4) ───────────────────────────────────────────
+let lwChart = null, candleSeries = null, ma20Series = null, slSeries = null, tgtSeries = null;
+
+function toTs(dtStr) {
+  if (!dtStr) return null;
+  const s = dtStr.trim().replace(' ', 'T');
+  const d = (s.includes('+') || s.includes('Z')) ? new Date(s) : new Date(s + '+05:30');
+  const ts = Math.floor(d.getTime() / 1000) + 19800; // +5:30 offset so chart X-axis shows IST
+  return isNaN(ts) ? null : ts;
+}
+
+function initChart() {
+  const container = document.getElementById('chart-container');
+  if (!container) return;
+  if (lwChart) { lwChart.remove(); lwChart = null; }
+  container.innerHTML = '';
+
+  lwChart = LightweightCharts.createChart(container, {
+    autoSize: true,
+    layout: { background: { color: '#1c1f22' }, textColor: '#7a8694' },
+    grid: { vertLines: { color: '#23272b' }, horzLines: { color: '#23272b' } },
+    crosshair: { mode: 0 },
+    timeScale: { timeVisible: true, secondsVisible: false, borderColor: '#363b42', rightOffset: 0 },
+    rightPriceScale: { borderColor: '#363b42', scaleMargins: { top: 0.12, bottom: 0.12 } },
+  });
+
+  candleSeries = lwChart.addCandlestickSeries({
+    upColor: '#52b788', downColor: '#e03555',
+    borderUpColor: '#52b788', borderDownColor: '#e03555',
+    wickUpColor: '#52b788', wickDownColor: '#e03555',
+  });
+  ma20Series = lwChart.addLineSeries({
+    color: '#5ba3d9', lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false,
+  });
+  slSeries = lwChart.addLineSeries({
+    color: '#e05070', lineWidth: 1.5, lineStyle: 1,
+    priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+  });
+  tgtSeries = lwChart.addLineSeries({
+    color: '#52b788', lineWidth: 1.5, lineStyle: 1,
+    priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
+  });
+}
+
+function renderChart() {
+  if (!S.selectedId) return;
+  const evaluated = getEvaluated(getFilteredSignals());
+  const sig = evaluated.find(x => x.id === S.selectedId);
+  if (!sig) return;
+  const candles = S.candles[sig.id];
+  if (!candles || !candles.length) return;
+
+  if (!lwChart) initChart();
+  if (!lwChart) return;
+
+  const sorted = [...candles].sort((a, b) => toTs(a.datetime) - toTs(b.datetime));
+
+  const cdData = sorted.map(c => ({ time: toTs(c.datetime), open: c.open, high: c.high, low: c.low, close: c.close })).filter(c => c.time);
+  const maData = sorted.map(c => ({ time: toTs(c.datetime), value: c.ma20 })).filter(d => d.time && d.value);
+
+  candleSeries.setData(cdData);
+  ma20Series.setData(maData);
+
+  const t0Bar   = sorted.find(c => c.bar_index === 0);
+  const bncIdx  = sig.bounceIdx !== undefined ? sig.bounceIdx : 0;
+  const bncBar  = sorted.find(c => c.bar_index === bncIdx);
+  const entBar  = sorted.find(c => c.bar_index === bncIdx + 1);
+
+  const norm = dt => (dt || '').replace('T', ' ').slice(0, 16);
+  const exitBar = sig.exitDt ? sorted.find(c => norm(c.datetime) === norm(sig.exitDt)) : sorted[sorted.length - 1];
+
+  const entTs  = entBar  ? toTs(entBar.datetime)  : null;
+  const exitTs = exitBar ? toTs(exitBar.datetime) : null;
+
+  slSeries.setData(sig.sl && entTs && exitTs ? [{ time: entTs, value: sig.sl }, { time: exitTs, value: sig.sl }] : []);
+  tgtSeries.setData(sig.target && entTs && exitTs ? [{ time: entTs, value: sig.target }, { time: exitTs, value: sig.target }] : []);
+
+  const markers = [];
+  if (t0Bar) markers.push({ time: toTs(t0Bar.datetime), position: 'belowBar', color: '#c9a227', shape: 'circle', text: 'T0' });
+  if (bncBar && bncBar !== t0Bar) markers.push({ time: toTs(bncBar.datetime), position: 'belowBar', color: '#52b788', shape: 'circle', text: 'BNC' });
+  if (entBar) markers.push({ time: toTs(entBar.datetime), position: 'aboveBar', color: '#5ba3d9', shape: 'circle', text: 'ENT' });
+  if (exitBar) markers.push({ time: toTs(exitBar.datetime), position: 'aboveBar', color: '#e07191', shape: 'circle', text: 'EXIT' });
+  markers.sort((a, b) => a.time - b.time);
+  candleSeries.setMarkers(markers);
+
+  const padding = 3;
+  lwChart.timeScale().setVisibleLogicalRange({ from: -padding, to: sorted.length - 1 + padding });
+}
+
+// ─── HTML helpers ─────────────────────────────────────────────────────────────
+function gatePill(status) {
+  const s = { P:'background:#1a3d2b;color:#52b788;border:1px solid #2d6a4f', F:'background:#3d1a22;color:#e07191;border:1px solid #6b2737', NA:'background:#2d2820;color:#c9a227;border:1px solid #4a3f10' }[status] || '';
+  return `<span style="${s};font-size:9px;padding:1px 5px;border-radius:2px;font-weight:700;display:inline-block;min-width:22px;text-align:center;">${status}</span>`;
+}
+function outcomePill(o) {
+  const m = { W:'background:#1a3d2b;color:#52b788', L:'background:#3d1a22;color:#e07191', 'EOD+':'background:#1a2e3d;color:#5ba3d9', 'EOD-':'background:#2d2820;color:#c9a227' };
+  return `<span style="${m[o]||m.L};font-size:9px;padding:1px 5px;border-radius:2px;font-weight:700;display:inline-block;min-width:30px;text-align:center;">${o}</span>`;
+}
+function miniSwitch(id, on) {
+  const bg = on ? '#5ba3d9' : '#23272b';
+  return `<div class="msw" data-id="${id}" style="width:24px;height:12px;background:${bg};border:1px solid ${on?'#5ba3d9':'#363b42'};border-radius:6px;position:relative;cursor:pointer;flex-shrink:0;display:inline-block;">
+    <div style="position:absolute;top:1px;left:${on?12:1}px;width:10px;height:10px;background:${on?'#0d0f11':'#4a5260'};border-radius:50%;transition:left .12s;pointer-events:none;"></div>
+  </div>`;
+}
+function secHdr(t) {
+  return `<div style="font-size:9px;color:#4a5260;letter-spacing:.1em;text-transform:uppercase;padding:4px 0 2px;border-bottom:1px solid #23272b;margin-bottom:3px;">${t}</div>`;
+}
+function gateHdr(label, color) {
+  return `<div style="padding:5px 10px;font-size:9px;letter-spacing:.12em;font-weight:700;color:${color};border-left:3px solid ${color};background:#141618;margin-top:4px;">${label}</div>`;
+}
+function statCard(label, value, color) {
+  return `<div style="background:#1c1f22;border:1px solid #23272b;border-radius:3px;padding:5px 7px;">
+    <div style="font-size:8px;color:#4a5260;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1px;">${label}</div>
+    <div style="font-size:16px;font-weight:600;font-family:monospace;color:${color||'#c8cdd4'};">${value}</div>
+  </div>`;
+}
+
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const ib = S.mode === 'baseline';
+  const ac = Object.values(S.act).filter(Boolean).length;
+  const allOn = Object.values(S.act).every(Boolean);
+  const allOff = Object.values(S.act).every(v => !v);
+
+  const slider = (label, sub, key, min, max, step, val, disp) => {
+    const active = S.act[key] && !ib;
+    const dis = ib || !S.act[key];
+    return `<div style="padding:5px 10px 7px;border-bottom:1px solid #23272b;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+        <span style="font-size:10px;color:${active?'#c8cdd4':'#7a8694'};">${label}</span>
+        <div style="display:flex;align-items:center;gap:5px;">
+          ${sub?`<span style="font-size:9px;color:#7a8694;">${sub}</span>`:''}
+          ${!ib?miniSwitch(key, S.act[key]):''}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;opacity:${dis?0.3:1};">
+        <input type="range" data-p="${key}" min="${min}" max="${max}" step="${step}" value="${val}" ${dis?'disabled':''} style="flex:1;accent-color:#5ba3d9;">
+        <span style="background:#1c1f22;color:${!dis?'#5ba3d9':'#c8cdd4'};font-size:9px;padding:1px 5px;border-radius:2px;min-width:38px;text-align:center;">${disp}</span>
+      </div>
+    </div>`;
+  };
+
+  const rangeParam = (label, kMin, kMax, minB, maxB, step, vMin, vMax, dMin, dMax, aKey) => {
+    const active = S.act[aKey] && !ib;
+    const dis = ib || !S.act[aKey];
+    return `<div style="padding:5px 10px 7px;border-bottom:1px solid #23272b;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:10px;color:${active?'#c8cdd4':'#7a8694'};">${label}</span>
+        ${!ib?miniSwitch(aKey, S.act[aKey]):''}
+      </div>
+      <div style="opacity:${dis?0.3:1};">
+        ${[[kMin,vMin,dMin,'min'],[kMax,vMax,dMax,'max']].map(([k,v,d,l]) =>
+          `<div style="margin-bottom:4px;">
+            <div style="font-size:9px;color:#c8cdd4;margin-bottom:1px;">${l}</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input type="range" data-p="${k}" min="${minB}" max="${maxB}" step="${step}" value="${v}" ${dis?'disabled':''} style="flex:1;accent-color:#5ba3d9;">
+              <span style="background:#1c1f22;color:${!dis?'#5ba3d9':'#c8cdd4'};font-size:9px;padding:1px 5px;border-radius:2px;min-width:38px;text-align:center;">${d}</span>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  };
+
+  const toggleRow = (label, aKey) => {
+    const active = S.act[aKey] && !ib;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-bottom:1px solid #23272b;">
+      <span style="font-size:10px;color:${active?'#c8cdd4':'#7a8694'};">${label}</span>
+      ${!ib?miniSwitch(aKey, S.act[aKey]):''}
+    </div>`;
+  };
+
+  let h = `<div style="padding:7px 10px;border-bottom:1px solid #23272b;display:flex;align-items:center;gap:6px;background:#141618;position:sticky;top:0;z-index:5;">
+    <span style="font-size:9px;color:#7a8694;">MODE</span>
+    <div style="display:flex;background:#0d0f11;border:1px solid #23272b;border-radius:3px;overflow:hidden;">
+      <button data-act="mode" data-val="baseline" style="padding:3px 9px;border:none;background:${S.mode==='baseline'?'#c9a227':'transparent'};color:${S.mode==='baseline'?'#0d0f11':'#7a8694'};font-weight:${S.mode==='baseline'?700:400};font-size:10px;cursor:pointer;">H1 BASELINE</button>
+      <button data-act="mode" data-val="filter" style="padding:3px 9px;border:none;background:${S.mode==='filter'?'#5ba3d9':'transparent'};color:${S.mode==='filter'?'#0d0f11':'#7a8694'};font-weight:${S.mode==='filter'?700:400};font-size:10px;cursor:pointer;">FILTER</button>
+    </div>
+    ${!ib?`<span style="margin-left:auto;font-size:8px;color:#4a5260;">${ac} active</span>`:''}
+  </div>`;
+
+  if (ib) {
+    h += `<div style="padding:5px 10px;font-size:9px;color:#4a5260;background:#0d0f11;border-bottom:1px solid #23272b;line-height:1.5;">All params off — H1 raw view.</div>`;
+  } else {
+    h += `<div style="padding:5px 10px;border-bottom:1px solid #23272b;display:flex;align-items:center;justify-content:space-between;background:#0d0f11;">
+      <span style="font-size:9px;color:#7a8694;">MASTER</span>
+      <div style="display:flex;gap:6px;">
+        <button data-act="allOn" style="font-size:9px;padding:2px 8px;background:${allOn?'#1a2e3d':'#1c1f22'};color:${allOn?'#5ba3d9':'#7a8694'};border:1px solid ${allOn?'#5ba3d9':'#363b42'};border-radius:2px;">ALL ON</button>
+        <button data-act="allOff" style="font-size:9px;padding:2px 8px;background:${allOff?'#1a2e3d':'#1c1f22'};color:${allOff?'#5ba3d9':'#7a8694'};border:1px solid ${allOff?'#5ba3d9':'#363b42'};border-radius:2px;">ALL OFF</button>
+        <button data-act="resetVals" style="font-size:9px;padding:2px 8px;background:#1c1f22;color:#7a8694;border:1px solid #363b42;border-radius:2px;">↺ vals</button>
+      </div>
+    </div>`;
+  }
+
+  h += gateHdr('G1 — Pre-touch Regime', '#5ba3d9');
+  h += slider('#01 slope_threshold','floor','p01',0,50,1,S.p01,`${(S.p01/100).toFixed(2)}%`);
+  h += slider('#02 slope_offset','floor','p02',0,20,1,S.p02,`${(S.p02/100).toFixed(2)}%`);
+  h += slider('#03 candles_above','min','p03',1,5,1,S.p03,S.p03);
+  h += rangeParam('#04 pullback_bars','p04min','p04max',1,15,1,S.p04min,S.p04max,S.p04min,S.p04max,'p04');
+
+  h += gateHdr('G2 — Touch & Bounce Quality', '#52b788');
+  h += rangeParam('#05 shoot_depth (ATR)','p05min','p05max',0,80,1,S.p05min,S.p05max,(S.p05min*0.05).toFixed(2),(S.p05max*0.05).toFixed(2),'p05');
+  h += slider('#06 touch_body_pct','ceiling','p06',0,100,5,S.p06,`${S.p06}%`);
+  h += slider('#07 wick_defence_ratio','floor','p07',-15,50,1,S.p07,(S.p07/10).toFixed(1));
+  h += slider('#08 bounce_vr_abs','floor','p08',5,30,1,S.p08,`${(S.p08/10).toFixed(1)}x`);
+  h += toggleRow('#09 bounce_vr_rel','p09');
+  h += slider('#10 max_tb_gap','ceiling','p10',0,9,1,S.p10,S.p10);
+
+  h += gateHdr('G3 — Post-bounce Follow-through', '#c9a227');
+  h += toggleRow('#11 G3a entry_close_above','p11');
+  h += toggleRow('#12 G3b entry_vr_holds','p12');
+
+  // Optuna panel
+  h += `<div style="padding:7px 10px 4px;border-top:2px solid #23272b;margin-top:4px;">${secHdr('OPTUNA RESULTS')}</div>`;
+  if (S.optuna) {
+    const bp = S.optuna.best_params || {};
+    const live = S.optunaLive;
+    h += `<div style="padding:0 10px 4px;font-size:9px;color:#52b788;">${S.optuna.n_trials||0} trials · best params loaded</div>`;
+    h += `<div style="padding:0 10px 6px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:9px;color:#c8cdd4;">${live ? `N: <span style="color:#52b788;">${live.n}</span> &nbsp; WR: <span style="color:#52b788;">${live.wr}</span> &nbsp; PF: <span style="color:#52b788;">${live.pf}</span>` : '<span style="color:#4a5260;">not applied</span>'}</div>
+      <div id="btn-optuna-toggle" style="width:32px;height:16px;background:${S.optunaOn?'#52b788':'#23272b'};border:1px solid ${S.optunaOn?'#52b788':'#363b42'};border-radius:8px;position:relative;cursor:pointer;flex-shrink:0;">
+        <div style="position:absolute;top:2px;left:${S.optunaOn?16:2}px;width:12px;height:12px;background:${S.optunaOn?'#0d0f11':'#4a5260'};border-radius:50%;transition:left .12s;pointer-events:none;"></div>
+      </div>
+    </div>`;
+    h += `<div style="padding:0 10px 6px;font-size:8px;color:#4a5260;line-height:1.8;">${Object.entries(bp).map(([k,v])=>`<span style="color:#7a8694;">${k}:</span> <span style="color:#c9a227;">${typeof v==='boolean'?v.toString():v}</span>`).join('  ')}</div>`;
+  } else {
+    h += `<div style="padding:0 10px 4px;font-size:9px;color:#363b42;">yet to load</div>
+    <div style="padding:0 10px 8px;font-size:9px;color:#4a5260;">Upload via ↑ optuna button above</div>`;
+  }
+
+  document.getElementById('sidebar').innerHTML = h;
+
+  // Events
+  document.querySelectorAll('[data-act="mode"]').forEach(b => b.onclick = () => { S.mode = b.dataset.val; render(); });
+  document.querySelector('[data-act="allOn"]')?.addEventListener('click', () => { Object.keys(S.act).forEach(k => S.act[k]=true); render(); });
+  document.querySelector('[data-act="allOff"]')?.addEventListener('click', () => { Object.keys(S.act).forEach(k => S.act[k]=false); render(); });
+  document.querySelector('[data-act="resetVals"]')?.addEventListener('click', () => {
+    S.p01=5;S.p02=5;S.p03=1;S.p04min=3;S.p04max=8;S.p05min=0;S.p05max=20;S.p06=50;S.p07=10;S.p08=12;S.p10=9; render();
+  });
+  document.getElementById('btn-optuna-toggle')?.addEventListener('click', toggleOptuna);
+  document.querySelectorAll('.msw').forEach(sw => {
+    sw.onclick = () => { S.act[sw.dataset.id] = !S.act[sw.dataset.id]; render(); };
+  });
+  document.querySelectorAll('input[data-p]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const k = e.target.dataset.p;
+      let v = +e.target.value;
+      if (k==='p04min') { v = Math.min(v, S.p04max); S.p04min = v; }
+      else if (k==='p04max') { v = Math.max(v, S.p04min); S.p04max = v; }
+      else if (k==='p05min') { v = Math.min(v, S.p05max); S.p05min = v; }
+      else if (k==='p05max') { v = Math.max(v, S.p05min); S.p05max = v; }
+      else S[k] = v;
+      e.target.value = v;
+      const span = e.target.nextElementSibling;
+      if (span) span.textContent = sliderDisp(k, v);
+      renderPartial();
+    });
+  });
+}
+
+// ─── Topbar ───────────────────────────────────────────────────────────────────
+function renderTopbar() {
+  const stocks = ['ALL', ...[...new Set(S.allSignals.map(s=>s.stock))].sort()];
+  const years  = ['ALL', ...[...new Set(S.allSignals.map(s=>s.year))].sort()];
+  const hasSig = S.allSignals.length > 0;
+  const hasCnd = Object.keys(S.candles).length > 0;
+
+  let h = `<span style="font-size:9px;color:#4a5260;letter-spacing:.1em;">H5 FULL</span>
+    <span style="font-size:9px;color:#4a5260;">|</span>
+    <span style="font-size:9px;color:#7a8694;">MA20 Bounce · NSE · 5-min OHLCV</span>`;
+
+  if (hasSig) {
+    h += `<select id="sel-stock">${stocks.map(s=>`<option value="${s}"${S.stockFilter===s?' selected':''}>${s}</option>`).join('')}</select>`;
+    h += `<select id="sel-year">${years.map(y=>`<option value="${y}"${S.yearFilter===y?' selected':''}>${y}</option>`).join('')}</select>`;
+  }
+
+  h += `<div style="display:flex;align-items:center;gap:6px;margin-left:auto;">`;
+  if (S.sigMeta) h += `<span style="font-size:9px;color:#52b788;">✓ ${S.sigMeta.filename} (${S.sigMeta.count})</span>`;
+  if (S.sigError) h += `<span style="font-size:9px;color:#e07191;">✗ ${S.sigError}</span>`;
+  if (hasSig) h += `<button id="btn-clrsig" style="font-size:9px;padding:2px 7px;background:#3d1a22;color:#e07191;border:1px solid #6b2737;border-radius:2px;">✗ sig</button>`;
+  h += `<input type="file" id="f-sig" accept=".csv" style="display:none;">
+    <button id="btn-sig" style="font-size:9px;padding:2px 9px;background:${hasSig?'#1a2e3d':'#1c1f22'};color:${hasSig?'#5ba3d9':'#7a8694'};border:1px solid ${hasSig?'#5ba3d9':'#363b42'};border-radius:2px;">${hasSig?'↑ sig CSV':'↑ signals'}</button>`;
+
+  if (S.cndMeta) h += `<span style="font-size:9px;color:#52b788;">✓ ${S.cndMeta.filename}</span>`;
+  if (S.cndError) h += `<span style="font-size:9px;color:#e07191;">✗ ${S.cndError}</span>`;
+  if (hasCnd) h += `<button id="btn-clrcnd" style="font-size:9px;padding:2px 7px;background:#3d1a22;color:#e07191;border:1px solid #6b2737;border-radius:2px;">✗ cnd</button>`;
+  h += `<input type="file" id="f-cnd" accept=".csv" style="display:none;">
+    <button id="btn-cnd" style="font-size:9px;padding:2px 9px;background:${hasCnd?'#1a2e3d':'#1c1f22'};color:${hasCnd?'#c9a227':'#7a8694'};border:1px solid ${hasCnd?'#c9a227':'#363b42'};border-radius:2px;">${hasCnd?'↑ cnd CSV':'↑ candles'}</button>`;
+
+  h += `<input type="file" id="f-opt" accept=".json" style="display:none;">
+    ${S.optuna?`<button id="btn-clropt" style="font-size:9px;padding:2px 7px;background:#1a3d2b;color:#52b788;border:1px solid #2d6a4f;border-radius:2px;">✗ opt</button>`:''}
+    <button id="btn-opt" style="font-size:9px;padding:2px 9px;background:${S.optuna?'#1a3d2b':'#1c1f22'};color:${S.optuna?'#52b788':'#7a8694'};border:1px solid ${S.optuna?'#52b788':'#363b42'};border-radius:2px;">${S.optuna?'✓ optuna':'↑ optuna'}</button>`;
+  h += `</div>`;
+  h += `<span style="font-size:9px;color:#4a5260;width:100%;margin-top:-4px;">${S.mode==='baseline'?'H1 BASELINE — all signals visible, no params active':'FILTER — active params applied'}</span>`;
+
+  document.getElementById('topbar').innerHTML = h;
+
+  document.getElementById('f-sig')?.addEventListener('change', e => { if (e.target.files[0]) loadSignalCSV(e.target.files[0]); });
+  document.getElementById('f-cnd')?.addEventListener('change', e => { if (e.target.files[0]) loadCandleCSV(e.target.files[0]); });
+  document.getElementById('f-opt')?.addEventListener('change', e => { if (e.target.files[0]) loadOptunaJSON(e.target.files[0]); });
+  document.getElementById('btn-sig')?.addEventListener('click', () => document.getElementById('f-sig').click());
+  document.getElementById('btn-cnd')?.addEventListener('click', () => document.getElementById('f-cnd').click());
+  document.getElementById('btn-opt')?.addEventListener('click', () => document.getElementById('f-opt').click());
+  document.getElementById('btn-clropt')?.addEventListener('click', () => {
+    S.optuna=null; S.optunaLive=null; S.optunaOn=false; S.optunaSnapshot=null; render();
+  });
+  document.getElementById('btn-clrsig')?.addEventListener('click', () => {
+    S.allSignals=[]; S.sigMeta=null; S.sigError=null; S.selectedId=null; S.stockFilter='ALL'; S.yearFilter='ALL'; render();
+  });
+  document.getElementById('btn-clrcnd')?.addEventListener('click', () => {
+    S.candles={}; S.cndMeta=null; S.cndError=null; render();
+  });
+  document.getElementById('sel-stock')?.addEventListener('change', e => { S.stockFilter=e.target.value; S.selectedId=null; render(); });
+  document.getElementById('sel-year')?.addEventListener('change', e => { S.yearFilter=e.target.value; S.selectedId=null; render(); });
+}
+
+// ─── Signal info bar ──────────────────────────────────────────────────────────
+function renderInfoBar() {
+  const bar = document.getElementById('signal-info-bar');
+  if (!S.selectedId) { bar.innerHTML = ''; return; }
+  const ev = getEvaluated(getFilteredSignals());
+  const sig = ev.find(x => x.id === S.selectedId);
+  if (!sig) { bar.innerHTML = ''; return; }
+  const hasCnd = !!S.candles[sig.id];
+  bar.innerHTML = `
+    <span style="font-size:10px;color:#5ba3d9;font-weight:700;">${sig.id} · ${sig.stock}</span>
+    <span style="font-size:9px;color:#7a8694;">${sig.dt}</span>
+    <span style="font-size:8px;color:#4a5260;">G1:${gatePill(sig.gates.g1)}</span>
+    <span style="font-size:8px;color:#4a5260;">G2:${gatePill(sig.gates.g2)}</span>
+    <span style="font-size:8px;color:#4a5260;">G3:${gatePill(sig.gates.g3)}</span>
+    ${outcomePill(sig.outcome)}
+    ${!hasCnd?'<span style="font-size:8px;color:#363b42;margin-left:auto;">[ load candle CSV to view chart ]</span>':''}
+  `;
+}
+
+// ─── Chart placeholder ────────────────────────────────────────────────────────
+function showPlaceholder() {
+  if (lwChart) { lwChart.remove(); lwChart=null; candleSeries=null; ma20Series=null; slSeries=null; tgtSeries=null; }
+  const c = document.getElementById('chart-container');
+  c.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;color:#4a5260;">
+    <div style="font-size:13px;letter-spacing:.05em;margin-bottom:4px;color:#7a8694;">[ CHART ]</div>
+    <div style="font-size:10px;">${!S.allSignals.length?'Load signals CSV to begin':'Click a signal row to view'}</div>
+  </div>`;
+}
+
+// ─── Signal list ──────────────────────────────────────────────────────────────
+function renderList() {
+  const sl = document.getElementById('signal-list');
+  const scrollTop = sl.scrollTop;
+  const ev = getEvaluated(getFilteredSignals());
+  const visible = S.outcomeFilter==='ALL' ? ev : ev.filter(s => s.outcome===S.outcomeFilter);
+  const cols = '40px 70px 1fr 28px 28px 28px 42px 20px';
+  const oc = { ALL:'#7a8694', W:'#52b788', L:'#e07191', 'EOD+':'#5ba3d9', 'EOD-':'#c9a227' };
+
+  let h = `<div style="display:flex;align-items:center;justify-content:flex-end;gap:3px;padding:3px 8px;background:#0d0f11;border-bottom:1px solid #1c1f22;position:sticky;top:0;z-index:6;">
+    <span style="font-size:9px;color:#4a5260;margin-right:4px;">OUTC</span>
+    ${['ALL','W','L','EOD+','EOD-'].map(f => {
+      const a = S.outcomeFilter===f;
+      return `<button data-oc="${f}" style="font-size:8px;padding:1px 5px;border:1px solid ${a?oc[f]:'#363b42'};border-radius:2px;background:${a?'#1c1f22':'transparent'};color:${a?oc[f]:'#4a5260'};cursor:pointer;">${f}</button>`;
+    }).join('')}
+  </div>
+  <div style="display:grid;grid-template-columns:${cols};padding:3px 8px;background:#0d0f11;border-bottom:1px solid #23272b;position:sticky;top:26px;z-index:5;gap:4px;">
+    ${['ID','STOCK','DATE/TIME','G1','G2','G3','OUTC','SC'].map(x=>`<span style="font-size:9px;color:#4a5260;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;">${x}</span>`).join('')}
+  </div>`;
+
+  if (!S.allSignals.length) {
+    h += `<div style="padding:12px;font-size:9px;color:#363b42;text-align:center;">Load signals CSV to view signals</div>`;
+  } else {
+    h += visible.map(sig => {
+      const sel = S.selectedId === sig.id;
+      return `<div data-sid="${sig.id}" class="sr" style="display:grid;grid-template-columns:${cols};padding:3px 8px;border-bottom:1px solid ${sel?'#5ba3d9':'#1c1f22'};gap:4px;align-items:center;opacity:${sig.rejected?0.35:1};cursor:pointer;background:${sel?'#1a2e3d':'transparent'};">
+        <span style="font-size:9px;color:${sel?'#5ba3d9':'#4a5260'};">${sig.id}</span>
+        <span style="font-size:10px;color:#5ba3d9;font-weight:700;">${sig.stock}</span>
+        <span style="font-size:9px;color:#7a8694;">${sig.dt}</span>
+        ${gatePill(sig.gates.g1)}${gatePill(sig.gates.g2)}${gatePill(sig.gates.g3)}
+        ${outcomePill(sig.outcome)}
+        <span style="font-size:9px;color:${sig.p10sc?'#52b788':'#4a5260'};text-align:center;">${sig.p10sc?'●':'○'}</span>
+      </div>`;
+    }).join('');
+  }
+
+  sl.innerHTML = h;
+  sl.scrollTop = scrollTop;
+
+  sl.querySelectorAll('[data-oc]').forEach(b => b.onclick = () => { S.outcomeFilter=b.dataset.oc; renderList(); renderRight(); });
+  sl.querySelectorAll('.sr').forEach(row => {
+    row.onclick = () => selectSignal(row.dataset.sid);
+    row.onmouseenter = () => { if (S.selectedId!==row.dataset.sid) row.style.background='#1c1f22'; };
+    row.onmouseleave = () => { if (S.selectedId!==row.dataset.sid) row.style.background='transparent'; };
+  });
+}
+
+// ─── Right panel ──────────────────────────────────────────────────────────────
+function renderRight() {
+  const rp = document.getElementById('right-panel');
+  const scrollTop = rp.scrollTop;
+  const ev = getEvaluated(getFilteredSignals());
+  const N = ev.length;
+  const pass = ev.filter(s => !s.rejected);
+  const gp = pass.filter(s=>s.pnl>0).reduce((a,s)=>a+s.pnl,0);
+  const gl = Math.abs(pass.filter(s=>s.pnl<0).reduce((a,s)=>a+s.pnl,0));
+  const pf = gl>0?(gp/gl).toFixed(2):'∞';
+  const wins = pass.filter(s=>s.outcome==='W'||s.outcome==='EOD+').length;
+  const wr = pass.length>0?(wins/pass.length*100).toFixed(1)+'%':'—';
+  const net = pass.reduce((a,s)=>a+s.pnl,0);
+
+  const g1p=ev.filter(s=>s.gates.g1==='P').length,g1f=ev.filter(s=>s.gates.g1==='F').length,g1n=ev.filter(s=>s.gates.g1==='NA').length;
+  const g2p=ev.filter(s=>s.gates.g2==='P').length,g2f=ev.filter(s=>s.gates.g2==='F').length,g2n=ev.filter(s=>s.gates.g2==='NA').length;
+  const g3p=ev.filter(s=>s.gates.g3==='P').length,g3f=ev.filter(s=>s.gates.g3==='F').length,g3n=ev.filter(s=>s.gates.g3==='NA').length;
+
+  const bar = (lbl, col, p, f, n, tot) => {
+    const pw=tot>0?(p/tot*100).toFixed(1):0, nw=tot>0?(n/tot*100).toFixed(1):0, fw=tot>0?(f/tot*100).toFixed(1):0;
+    return `<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;">
+      <span style="font-size:9px;color:${col};width:20px;">${lbl}</span>
+      <div style="flex:1;height:6px;background:#1c1f22;border-radius:2px;overflow:hidden;display:flex;">
+        <div style="width:${pw}%;background:#52b788;"></div><div style="width:${nw}%;background:#c9a227;"></div><div style="width:${fw}%;background:#e07191;"></div>
+      </div>
+      <span style="font-size:8px;color:#4a5260;width:16px;text-align:right;">${p}</span>
+    </div>`;
+  };
+
+  let h = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+    <span style="font-size:10px;color:#7a8694;letter-spacing:.08em;">STATS</span>
+    <span style="font-size:9px;color:#4a5260;">${S.mode==='baseline'?N+' signals (H1 raw)':pass.length+' / '+N+' passing'}</span>
+  </div>`;
+
+  h += secHdr('OVERVIEW');
+  h += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;">
+    ${statCard('SIGNALS',N,'#5ba3d9')}${statCard('PASSED',S.mode==='baseline'?'—':pass.length,'#52b788')}
+    ${statCard('WIN RATE',S.mode==='baseline'?'—':wr,'#c8cdd4')}${statCard('PROF FACTOR',S.mode==='baseline'?'—':pf,'#c9a227')}
+  </div>`;
+
+  h += secHdr('GATE BREAKDOWN');
+  h += `<div style="display:flex;gap:6px;margin-bottom:4px;flex-wrap:wrap;">
+    ${[['#52b788','pass'],['#c9a227','n/a'],['#e07191','fail']].map(([c,l])=>`<div style="display:flex;align-items:center;gap:3px;font-size:8px;color:#7a8694;"><div style="width:7px;height:7px;border-radius:1px;background:${c};"></div>${l}</div>`).join('')}
+  </div><div style="margin-bottom:8px;">${bar('G1','#5ba3d9',g1p,g1f,g1n,N)}${bar('G2','#52b788',g2p,g2f,g2n,N)}${bar('G3','#c9a227',g3p,g3f,g3n,N)}</div>`;
+
+  h += secHdr('OUTCOME SPLIT');
+  h += `<div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px;">
+    ${[['W','#1a3d2b','#52b788'],['L','#3d1a22','#e07191'],['EOD+','#1a2e3d','#5ba3d9'],['EOD-','#2d2820','#c9a227']].map(([o,bg,col])=>`<span style="background:${bg};color:${col};font-size:9px;padding:2px 6px;border-radius:2px;font-weight:700;">${o} ${pass.filter(s=>s.outcome===o).length}</span>`).join('')}
+  </div>`;
+
+  const wPnls = pass.filter(s=>s.pnl>0).map(s=>s.pnl);
+  const lPnls = pass.filter(s=>s.pnl<0).map(s=>s.pnl);
+  const avgW  = wPnls.length ? wPnls.reduce((a,v)=>a+v,0)/wPnls.length : 0;
+  const avgL  = lPnls.length ? Math.abs(lPnls.reduce((a,v)=>a+v,0)/lPnls.length) : 0;
+  const rr    = avgL>0 ? (avgW/avgL).toFixed(2) : '—';
+
+  h += secHdr('PNL');
+  h += `<div style="display:flex;justify-content:space-between;align-items:flex-start;">
+    <div>
+      <div style="font-size:10px;color:#52b788;">+${gp.toFixed(2)}</div>
+      <div style="font-size:10px;color:#e07191;">${pass.filter(s=>s.pnl<0).reduce((a,s)=>a+s.pnl,0).toFixed(2)}</div>
+      <div style="font-size:10px;margin-top:3px;padding-top:3px;border-top:1px solid #23272b;color:${net>=0?'#52b788':'#e07191'};">NET ${net.toFixed(2)}</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:8px;color:#4a5260;margin-bottom:2px;">Reward/Risk</div>
+      <div style="font-size:14px;font-weight:700;color:${rr!=='—'&&+rr>=1.5?'#52b788':rr!=='—'&&+rr>=1?'#c9a227':'#e07191'};">${rr}</div>
+    </div>
+  </div>`;
+
+  // Signal detail
+  h += `<div style="margin-top:8px;">${secHdr('SIGNAL DETAIL')}</div>`;
+  if (S.selectedId) {
+    const sig = ev.find(x => x.id === S.selectedId);
+    if (sig) {
+      const row = (l,v,col) => `<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid #1c1f22;"><span style="font-size:9px;color:#4a5260;">${l}</span><span style="font-size:9px;color:${col||'#c8cdd4'};font-family:monospace;">${v}</span></div>`;
+      const oc = {W:'#52b788',L:'#e07191','EOD+':'#5ba3d9','EOD-':'#c9a227'}[sig.outcome]||'#7a8694';
+      h += `<div style="padding:3px 0 5px;"><span style="font-size:10px;color:#5ba3d9;font-weight:700;">${sig.id} · ${sig.stock}</span></div>
+        ${row('T0 datetime',sig.dt||'—')}
+        ${row('BNC datetime',sig.bounceDt||'—')}
+        ${row('ENT datetime',sig.entryDt||'—')}
+        ${row('EXIT datetime',sig.exitDt||'—')}
+        <div style="height:4px;"></div>
+        ${row('entry price',sig.entryPrice?sig.entryPrice.toFixed(2):'—')}
+        ${row('SL',sig.sl?sig.sl.toFixed(2):'—','#e07191')}
+        ${row('target',sig.target?sig.target.toFixed(2):'—','#52b788')}
+        <div style="height:4px;"></div>
+        ${row('exit type',sig.outcome==='W'?'TGT hit':sig.outcome==='L'?'SL hit':sig.outcome||'—',oc)}
+        ${row('pnl',sig.pnl!==undefined?(sig.pnl>=0?'+':'')+sig.pnl.toFixed(2):'—',sig.pnl>=0?'#52b788':'#e07191')}`;
+    }
+  } else {
+    h += `<div style="font-size:9px;color:#363b42;padding:6px 0;">Click a signal row to see details</div>`;
+  }
+
+  // Passing signals
+  h += `<div style="margin-top:8px;">${secHdr('PASSING SIGNALS ('+pass.length+')')}</div>`;
+  if (!pass.length) {
+    h += `<div style="font-size:9px;color:#363b42;padding:4px 0;">No signals passing</div>`;
+  } else {
+    h += pass.map(s => {
+      const sel = S.selectedId===s.id;
+      const oc = {W:'#52b788',L:'#e07191','EOD+':'#5ba3d9','EOD-':'#c9a227'}[s.outcome]||'#7a8694';
+      return `<div data-sid="${s.id}" class="sr" style="display:flex;align-items:center;justify-content:space-between;padding:3px 6px;margin-bottom:2px;border-radius:2px;border:1px solid ${sel?'#5ba3d9':'#23272b'};background:${sel?'#1a2e3d':'#1c1f22'};cursor:pointer;">
+        <span style="font-size:9px;color:${sel?'#5ba3d9':'#7a8694'};font-weight:${sel?700:400};">${s.id}</span>
+        <span style="font-size:9px;color:#7a8694;">${s.dt.slice(5,16)}</span>
+        <span style="font-size:9px;color:${oc};font-weight:700;">${s.outcome}</span>
+        <span style="font-size:9px;color:${s.pnl>=0?'#52b788':'#e07191'};">${s.pnl>=0?'+':''}${s.pnl.toFixed(2)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  rp.innerHTML = h;
+  rp.scrollTop = scrollTop;
+
+  rp.querySelectorAll('.sr').forEach(row => row.onclick = () => selectSignal(row.dataset.sid));
+}
+
+// ─── Signal selection ─────────────────────────────────────────────────────────
+function selectSignal(id) {
+  S.selectedId = S.selectedId === id ? null : id;
+  renderInfoBar();
+  renderList();
+  renderRight();
+  if (S.selectedId && S.candles[S.selectedId]) {
+    if (!lwChart) initChart();
+    renderChart();
+  } else if (!S.selectedId) {
+    showPlaceholder();
+  }
+}
+
+// ─── Optuna toggle ────────────────────────────────────────────────────────────
+function toggleOptuna() {
+  if (!S.optuna?.best_params) return;
+  if (!S.optunaOn) {
+    // Save current state snapshot
+    S.optunaSnapshot = {
+      mode: S.mode, act: {...S.act},
+      p01:S.p01, p02:S.p02, p03:S.p03, p04min:S.p04min, p04max:S.p04max,
+      p05min:S.p05min, p05max:S.p05max, p06:S.p06, p07:S.p07, p08:S.p08, p10:S.p10,
+    };
+    // Apply best params
+    const bp = S.optuna.best_params;
+    if (bp.p01 !== undefined) S.p01 = Math.round(bp.p01 * 100);
+    if (bp.p02 !== undefined) S.p02 = Math.round(bp.p02 * 100);
+    if (bp.p03 !== undefined) S.p03 = bp.p03;
+    if (bp.p04_min !== undefined) S.p04min = bp.p04_min;
+    if (bp.p04_max !== undefined) S.p04max = bp.p04_max;
+    if (bp.p05_min !== undefined) S.p05min = Math.round(bp.p05_min / 0.05);
+    if (bp.p05_max !== undefined) S.p05max = Math.round(bp.p05_max / 0.05);
+    if (bp.p06 !== undefined) S.p06 = bp.p06;
+    if (bp.p07 !== undefined) S.p07 = Math.round(bp.p07 * 10);
+    if (bp.p08 !== undefined) S.p08 = Math.round(bp.p08 * 10);
+    if (bp.p09 !== undefined) S.act.p09 = !!bp.p09;
+    if (bp.p10 !== undefined) S.p10 = bp.p10;
+    if (bp.p11 !== undefined) S.act.p11 = !!bp.p11;
+    if (bp.p12 !== undefined) S.act.p12 = !!bp.p12;
+    ['p01','p02','p03','p04','p05','p06','p07','p08','p10'].forEach(k => {
+      S.act[k] = bp[k + '_on'] !== undefined ? !!bp[k + '_on'] : true;
+    });
+    S.mode = 'filter';
+    S.optunaOn = true;
+    // Compute live stats
+    const _ev = getEvaluated(getFilteredSignals());
+    const _pass = _ev.filter(s => !s.rejected);
+    const _gp = _pass.filter(s=>s.pnl>0).reduce((a,s)=>a+s.pnl,0);
+    const _gl = Math.abs(_pass.filter(s=>s.pnl<0).reduce((a,s)=>a+s.pnl,0));
+    const _wins = _pass.filter(s=>s.outcome==='W'||s.outcome==='EOD+').length;
+    S.optunaLive = { n:_pass.length, wr:_pass.length>0?(_wins/_pass.length*100).toFixed(1)+'%':'—', pf:_gl>0?(_gp/_gl).toFixed(2):'∞' };
+  } else {
+    // Restore snapshot
+    if (S.optunaSnapshot) {
+      S.mode = S.optunaSnapshot.mode;
+      Object.assign(S.act, S.optunaSnapshot.act);
+      S.p01=S.optunaSnapshot.p01; S.p02=S.optunaSnapshot.p02; S.p03=S.optunaSnapshot.p03;
+      S.p04min=S.optunaSnapshot.p04min; S.p04max=S.optunaSnapshot.p04max;
+      S.p05min=S.optunaSnapshot.p05min; S.p05max=S.optunaSnapshot.p05max;
+      S.p06=S.optunaSnapshot.p06; S.p07=S.optunaSnapshot.p07;
+      S.p08=S.optunaSnapshot.p08; S.p10=S.optunaSnapshot.p10;
+    }
+    S.optunaOn = false;
+    S.optunaLive = null;
+  }
+  render();
+}
+
+// ─── Slider display helper ────────────────────────────────────────────────────
+function sliderDisp(k, v) {
+  if (k==='p01') return `${(v/100).toFixed(2)}%`;
+  if (k==='p02') return `${(v/100).toFixed(2)}%`;
+  if (k==='p03') return `${v}`;
+  if (k==='p04min'||k==='p04max') return `${v}`;
+  if (k==='p05min'||k==='p05max') return `${(v*0.05).toFixed(2)}`;
+  if (k==='p06') return `${v}%`;
+  if (k==='p07') return `${(v/10).toFixed(1)}`;
+  if (k==='p08') return `${(v/10).toFixed(1)}x`;
+  if (k==='p10') return `${v}`;
+  return `${v}`;
+}
+
+// ─── Partial render (skips sidebar — used by slider input to avoid DOM teardown) ─
+function renderPartial() {
+  renderTopbar();
+  renderInfoBar();
+  renderList();
+  renderRight();
+  const hasCnd = S.selectedId && S.candles[S.selectedId];
+  if (hasCnd) { if (!lwChart) initChart(); renderChart(); } else showPlaceholder();
+}
+
+// ─── Main render ──────────────────────────────────────────────────────────────
+function render() {
+  renderSidebar();
+  renderTopbar();
+  renderInfoBar();
+  renderList();
+  renderRight();
+  const hasCnd = S.selectedId && S.candles[S.selectedId];
+  if (hasCnd) {
+    if (!lwChart) initChart();
+    renderChart();
+  } else {
+    showPlaceholder();
+  }
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>

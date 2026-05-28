@@ -1,6 +1,6 @@
 """
 Export candle windows for each H5 signal.
-Window: T0-20 bars to exit bar+3. bar_index=0 at T0.
+Window: T0-10 bars to exit bar+3. bar_index=0 at T0.
 """
 import pandas as pd
 import numpy as np
@@ -63,6 +63,9 @@ for _, sig in sigs.iterrows():
     if df.iloc[entry_bar]['date'] != t0_date:
         continue
 
+    if df.iloc[entry_bar]['datetime'].time() >= pd.Timestamp('14:40').time():
+        continue
+
     entry_price = df.iloc[entry_bar]['open']
     sl     = entry_price - (2.5 * atr)
     target = entry_price + (4.5 * atr)
@@ -71,6 +74,9 @@ for _, sig in sigs.iterrows():
     exit_bar = None
     for j in range(entry_bar, len(df)):
         bar = df.iloc[j]
+        if bar['datetime'].time() >= pd.Timestamp('15:00').time():
+            exit_bar = j
+            break
         if bar['date'] != t0_date:
             exit_bar = j - 1
             break
@@ -82,7 +88,7 @@ for _, sig in sigs.iterrows():
     if exit_bar is None:
         exit_bar = entry_bar
 
-    # Window: T0-20 to exit+3
+    # Window: T0-10 to exit+3
     start = max(0, T0 - 10)
     end   = min(len(df) - 1, exit_bar + 3)
 

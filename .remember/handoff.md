@@ -1,15 +1,16 @@
-# Handoff Note — 2026-05-21
+# Handoff Note — 2026-05-27
 
 ## State
-- export_h5_signals.py reviewed end to end — SL/TGT multipliers corrected (2.5/4.5 ATR)
-- export_h5_candles.py fully reviewed — all sections complete, logic clean
-- Notebooks folder created: Framework_V2/Notebooks/explore.ipynb
+- h5_full.html: p04 NaN rendering bug fixed (line 133)
+- RELIANCE tb3: now shows 153 (correct) after fix
+- NTPC tb3: JSON=162, HTML=179 — bug not yet fixed, different root cause (p04 not active)
+- All 5-stock Optuna JSONs validated: tb3 wins 3-2, p11 universal across all variants
 
 ## Next
-1. Validate H5 Lite logic is sound (P1) — chart refinement: T0/BNC/ENT labels, MA20/SL/TGT
-2. Regenerate powergrid_2022_h5_signals.csv (multiplier fix changes PnL/outcomes)
-3. Build H5 full (P2) — 30 stocks × 4 years
+1. Fix NTPC discrepancy — check p05/p08/p09/p10/p11 eval logic in HTML vs Python
+2. Walk through h5_optuna_batch.py
+3. Build 30-stock signal + Optuna batch (2022, tb3)
 
 ## Known Issues
-- 12 passing signals is too small to draw conclusions — need full dataset
-- PnL multipliers in signals CSV were wrong (1.0/1.5), now fixed to 2.5/4.5 — regenerate CSV before H5 full build
+- NTPC 162 vs 179: active params are p05/p08/p09/p10/p11 — p09 (bounce_vr_rel) uses null check, possible mismatch
+- Walk-forward (2023-2025) is planned after 30-stock sweep confirms breadth generalization

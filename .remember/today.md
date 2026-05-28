@@ -1,13 +1,15 @@
-# Session Log — 2026-05-21
+# Session Log — 2026-05-27
 
 ## What was done
-- Completed export_h5_candles.py full line-by-line review (candle window loop + output section)
-- Confirmed bar_index = idx - T0 is correct (-10 at first pre-touch bar, 0 at T0)
-- Confirmed output columns: signal_id, bar_index, datetime, OHLCV, ma20
-- Confirmed to_csv params: index=False, utf-8, lineterminator='\n' (no Excel blank rows)
-- Clarified pandas .shape attribute (built-in, returns (rows, cols) tuple)
+- CCP review: confirmed 5-stock Optuna batch results (tb3 wins 3-2 PF, N 10-14% healthy)
+- Discussed visual review vs Optuna scaling — decided to scale first, visual review on failures
+- Explored all 10 Optuna JSON results: p11 ON in every single variant (universal signal)
+- Found and fixed h5_full.html rendering bug: empty-string p04 → `+''=0` → failed range check instead of NA
+  - Fix: `r.p04==='' ? NaN : +r.p04` for pbMin/pbMax in parseSignalRow (line 133)
+- Found NTPC tb3 discrepancy: JSON=162, HTML=179 — deferred to tomorrow
+- Discussed walk-forward plan: train 2022 → validate 2023/2024/2025; 2025 = most valuable OOS year
 
-## Status at SS
-- Both export scripts fully reviewed and understood
-- Signals CSV needs regenerating (multiplier fix from prior session)
-- Next: regenerate signals CSV, then H5 Lite validation (P1)
+## Tomorrow
+1. Fix NTPC 162 vs 179 discrepancy
+2. Walk through h5_optuna_batch.py
+3. Scale to 30-stock universe (2022)

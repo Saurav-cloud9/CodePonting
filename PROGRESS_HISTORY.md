@@ -198,3 +198,14 @@ Step 9.4  — 2026-04-19
            ✅  Framework_V2/Notebooks/ created; explore.ipynb set up with Python 3.14 kernel in VS Code
            ✅  Codedex: higher-order functions, map/filter/reduce, list comprehensions, classes, unittest basics
 2026-05-21 | Completed export_h5_candles.py full review — window loop, bar_index, output section clean
+
+2026-05-23 | Codedex intermediate Python complete (unittest ch): setUp/tearDown/assertRaises/BankAccount/CoffeeMenu
+2026-05-23 | export_h5_signals.py + candles.py: entry cutoff >=14:40 + hard EOD exit at 15:00 (bar open) applied
+
+2026-05-26 | export_h5_signals.py EOD loop bug fixed (S062/S078 W not EOD+); both CSVs re-exported (100 signals / 3687 rows)
+2026-05-26 | H5 Lite tuning complete — best combo p05+p08+p11: 21 signals, WR 61.9%, PF 2.43 (POWERGRID 2022)
+2026-05-26 | h5_full.html built (lightweight-charts v4, PapaParse, Optuna JSON upload, multi-stock/year)
+
+2026-05-27 | 5-stock Optuna batch explored — tb3 wins 3-2 PF (2.00-2.77), p11 active in all 10 variants
+2026-05-27 | h5_full.html: p04 NaN rendering bug fixed (empty string -> NaN in parseSignalRow line 133)
+2026-05-27 | Walk-forward plan confirmed: train 2022, validate 2023/2024/2025; 30-stock sweep is next
