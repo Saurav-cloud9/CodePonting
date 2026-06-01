@@ -100,16 +100,18 @@ Execution rules:
 
   ### When Saurav types "CCP" (Context Catch-Up / Peek):
   - Read these files in order:
-      SS-triggered (6):
+      SS-triggered (8):
         1. .remember/remember.md
         2. .remember/handoff.md
         3. .remember/today.md
-        4. PROGRESS.md
-        5. PROGRESS_HISTORY.md
-        6. TODO.md
+        4. .remember/weekly.md
+        5. PROGRESS.md
+        6. PROGRESS_HISTORY.md
+        7. TODO.md
+        8. _explore/p5_cc_source_exploration.md (only if CC tooling work is in scope)
       Auto-memory (always live):
-        7. memory/MEMORY.md
-        8. memory/ linked files (project_*, feedback_*, etc.)
+        9. memory/MEMORY.md
+       10. memory/ linked files (project_*, feedback_*, etc.)
   - Reply with a 3-part summary: (1) where we are, (2) what's next, (3) any blockers
   - No file writes. Read-only. Fast.
   - Note: Claude.ai uses CCP to read CC memory via cc-memory MCP tools — same spirit, different mechanism.

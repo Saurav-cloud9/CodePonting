@@ -49,9 +49,9 @@ const S = {
   p01: 5, p02: 5, p03: 1, p04min: 3, p04max: 8,
   p05min: 0, p05max: 20, p06: 50, p07: 10, p08: 12, p10: 9,
   // Toggle values
-  p09: false, p11: false, p12: false,
+  p09: false, p11: false,
   // Per-param active flags
-  act: { p01:false, p02:false, p03:false, p04:false, p05:false, p06:false, p07:false, p08:false, p09:false, p10:false, p11:false, p12:false },
+  act: { p01:false, p02:false, p03:false, p04:false, p05:false, p06:false, p07:false, p08:false, p09:false, p10:false, p11:false },
   // Data
   allSignals: [],
   candles: {},
@@ -96,9 +96,8 @@ function evalGates(sig, p, af) {
   const g2v = [g2_05, g2_06, g2_07, g2_08, g2_09, g2_10];
   const g2 = g2v.every(x => x === 'NA') ? 'NA' : g2v.filter(x => x !== 'NA').every(x => x === 'P') ? 'P' : 'F';
 
-  const g3_11 = !af.p11 ? 'P' : sig.p11 ? 'P' : 'F';
-  const g3_12 = !af.p12 ? 'P' : sig.p12 === null ? 'NA' : sig.p12 ? 'P' : 'F';
-  const g3v = [g3_11, g3_12];
+  const g3_11 = !af.p11 ? 'P' : sig.p11open ? 'P' : 'F';  // live-compatible: entry open > bounce close
+  const g3v = [g3_11];
   const g3 = g3v.every(x => x === 'NA') ? 'NA' : g3v.filter(x => x !== 'NA').every(x => x === 'P') ? 'P' : 'F';
 
   return { g1, g2, g3 };
@@ -137,7 +136,7 @@ function parseSignalRow(r) {
     p09: (s => (!s || s==='NaN') ? null : parseInt(s,10)===1)((r.p09||'').trim()),
     bounceIdx: +r.bounce_bar_index,
     p11: parseInt((r.p11 || '').trim(), 10) === 1,
-    p12: (s => (!s || s==='NaN') ? null : parseInt(s,10)===1)((r.p12||'').trim()),
+    p11open: parseInt((r.p11_open || '').trim(), 10) === 1,
     pnl: +r.pnl, outcome: (r.outcome || '').trim(),
     p10sc: parseInt((r.same_candle_tb || '').trim(), 10) === 1,
     bounceDt: (r.bounce_datetime || '').trim(),
@@ -154,7 +153,7 @@ function loadSignalCSV(file) {
     complete: res => {
       const rows = res.data;
       if (!rows.length) { S.sigError = 'Empty CSV.'; render(); return; }
-      const req = ['signal_id','stock','datetime','p01','p02','p03','p04','p05','p06','p07','p07_na','p08','p09','p10','p11','p12','same_candle_tb','bounce_bar_index','pnl','outcome'];
+      const req = ['signal_id','stock','datetime','p01','p02','p03','p04','p05','p06','p07','p07_na','p08','p09','p10','p11','p11_open','same_candle_tb','bounce_bar_index','pnl','outcome'];
       const missing = req.filter(c => !(c in rows[0]));
       if (missing.length) { S.sigError = `Missing: ${missing.join(', ')}`; render(); return; }
       S.allSignals = rows.map(parseSignalRow);
@@ -412,8 +411,7 @@ function renderSidebar() {
   h += slider('#10 max_tb_gap','ceiling','p10',0,9,1,S.p10,S.p10);
 
   h += gateHdr('G3 — Post-bounce Follow-through', '#c9a227');
-  h += toggleRow('#11 G3a entry_close_above','p11');
-  h += toggleRow('#12 G3b entry_vr_holds','p12');
+  h += toggleRow('#11 G3a entry_open_above','p11');
 
   // Optuna panel
   h += `<div style="padding:7px 10px 4px;border-top:2px solid #23272b;margin-top:4px;">${secHdr('OPTUNA RESULTS')}</div>`;
@@ -750,7 +748,6 @@ function toggleOptuna() {
     if (bp.p09 !== undefined) S.act.p09 = !!bp.p09;
     if (bp.p10 !== undefined) S.p10 = bp.p10;
     if (bp.p11 !== undefined) S.act.p11 = !!bp.p11;
-    if (bp.p12 !== undefined) S.act.p12 = !!bp.p12;
     ['p01','p02','p03','p04','p05','p06','p07','p08','p10'].forEach(k => {
       S.act[k] = bp[k + '_on'] !== undefined ? !!bp[k + '_on'] : true;
     });

@@ -209,3 +209,11 @@ Step 9.4  — 2026-04-19
 2026-05-27 | 5-stock Optuna batch explored — tb3 wins 3-2 PF (2.00-2.77), p11 active in all 10 variants
 2026-05-27 | h5_full.html: p04 NaN rendering bug fixed (empty string -> NaN in parseSignalRow line 133)
 2026-05-27 | Walk-forward plan confirmed: train 2022, validate 2023/2024/2025; 30-stock sweep is next
+
+2026-05-28 | p11 lookahead fixed → p11_open; p12 dropped; all scripts + HTML updated
+2026-05-28 | 30-stock Optuna (p11_open, 2022): 9/30 cleared PF≥1.3; 5 both-variant survivors
+2026-05-28 | WFA + cross-val complete: signal regime-specific; 2024 breaks all stocks
+
+2026-05-29 | HTML cleanup: #11 renamed entry_open_above, #12 removed; temp scripts moved to scripts/
+2026-05-29 | Manual WFA on PNB tb3: no single param combo holds 2022-2025; regime problem confirmed
+2026-05-29 | Regime filter concept defined: pre-condition above gates; raw bounce rate = Option 1 metric

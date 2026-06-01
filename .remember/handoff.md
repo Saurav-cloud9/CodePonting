@@ -1,16 +1,15 @@
-# Handoff Note — 2026-05-27
+# Handoff Note — 2026-05-29
 
 ## State
-- h5_full.html: p04 NaN rendering bug fixed (line 133)
-- RELIANCE tb3: now shows 153 (correct) after fix
-- NTPC tb3: JSON=162, HTML=179 — bug not yet fixed, different root cause (p04 not active)
-- All 5-stock Optuna JSONs validated: tb3 wins 3-2, p11 universal across all variants
+- HTML fully cleaned: p11 = entry_open_above, p12 removed
+- PNB manual WFA complete: regime problem confirmed, no single combo holds all 4 years
+- Cross-val JSONs exist for 2022/2023/2024/2025 for 5 stocks in outputs/h5/optuna/{year}/
+- NATIONALUM WFA not yet done (train on 2023, PF 2.26 best year)
 
 ## Next
-1. Fix NTPC discrepancy — check p05/p08/p09/p10/p11 eval logic in HTML vs Python
-2. Walk through h5_optuna_batch.py
-3. Build 30-stock signal + Optuna batch (2022, tb3)
+1. NATIONALUM manual WFA — load 2023 signals, refine params manually, test on 2022/2024/2025
+2. Regime filter — compute raw bounce success rate per year from existing CSVs across 5 stocks
 
 ## Known Issues
-- NTPC 162 vs 179: active params are p05/p08/p09/p10/p11 — p09 (bounce_vr_rel) uses null check, possible mismatch
-- Walk-forward (2023-2025) is planned after 30-stock sweep confirms breadth generalization
+- Regime problem confirmed: 2024/2025 break all param combos found on 2022/2023
+- Regime filter needed before any further Optuna re-tuning makes sense

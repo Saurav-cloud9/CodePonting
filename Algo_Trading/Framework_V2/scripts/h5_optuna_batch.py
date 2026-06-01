@@ -12,7 +12,11 @@ import json, os
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
-STOCKS      = ['POWERGRID', 'NTPC', 'RELIANCE', 'HDFCBANK', 'INFY']
+STOCKS      = ['POWERGRID','NTPC','RELIANCE','HDFCBANK','INFY','ADANIPORTS','ASHOKLEY',
+               'AXISBANK','BAJFINANCE','BANDHANBNK','BHARTIARTL','CIPLA','COALINDIA',
+               'DABUR','DIVISLAB','HINDALCO','ICICIBANK','INDUSINDBK','ITC','JSWSTEEL',
+               'NATIONALUM','ONGC','PNB','SBIN','SUNPHARMA','TATAMOTORS','TATASTEEL',
+               'TECHM','VEDL','WIPRO']
 YEAR        = 2022
 TB_VARIANTS = [3, 9]
 N_TRIALS    = 500
@@ -40,9 +44,7 @@ def eval_signal(sig, p, af):
     p09raw = sig.get('p09', '')
     p09v = None if str(p09raw).strip() in ('', 'NaN', 'nan') else int(float(p09raw))
     bounce_idx = fval('bounce_bar_index')
-    p11v = int(float(sig.get('p11', 0)))
-    p12raw = sig.get('p12', '')
-    p12v = None if str(p12raw).strip() in ('', 'NaN', 'nan') else int(float(p12raw))
+    p11v = int(float(sig.get('p11_open', 0)))   # live-compatible: entry open > bounce close
 
     g1_01 = 'P' if not af['p01'] else ('NA' if np.isnan(p01v) else ('P' if p01v >= p['p01'] else 'F'))
     g1_02 = 'P' if not af['p02'] else ('NA' if np.isnan(p02v) else ('P' if p02v >= p['p02'] else 'F'))
@@ -62,7 +64,7 @@ def eval_signal(sig, p, af):
     g2 = _agg([g2_05, g2_06, g2_07, g2_08, g2_09, g2_10])
 
     g3_11 = 'P' if not af['p11'] else ('P' if p11v == 1 else 'F')
-    g3_12 = 'P' if not af['p12'] else ('NA' if p12v is None else ('P' if p12v == 1 else 'F'))
+    g3_12 = 'P'  # p12 dropped
     g3 = _agg([g3_11, g3_12])
 
     return g1 == 'P' and g2 == 'P' and g3 == 'P'
@@ -102,7 +104,7 @@ def make_objective(signals, p10_max, n_target=20):
         p10_on  = trial.suggest_categorical('p10_on', [True, False])
         p10     = trial.suggest_int('p10', 0, p10_max)        # ← variant-aware
         p11_on  = trial.suggest_categorical('p11', [True, False])
-        p12_on  = trial.suggest_categorical('p12', [True, False])
+        p12_on  = False  # dropped — entry bar volume not available at entry open
 
         af = {'p01':p01_on,'p02':p02_on,'p03':p03_on,'p04':p04_on,
               'p05':p05_on,'p06':p06_on,'p07':p07_on,'p08':p08_on,
@@ -157,7 +159,7 @@ for stock in STOCKS:
 
         af_best = {'p01':bp['p01_on'],'p02':bp['p02_on'],'p03':bp['p03_on'],'p04':bp['p04_on'],
                    'p05':bp['p05_on'],'p06':bp['p06_on'],'p07':bp['p07_on'],'p08':bp['p08_on'],
-                   'p09':bp['p09'],   'p10':bp['p10_on'],'p11':bp['p11'],   'p12':bp['p12']}
+                   'p09':bp['p09'],   'p10':bp['p10_on'],'p11':bp['p11'],   'p12':False}
         p_best  = {'p01':round(bp['p01'],4),'p02':round(bp['p02'],4),'p03':bp['p03'],
                    'p04min':bp['p04_min'],'p04max':p04_max_f,
                    'p05min':round(bp['p05_min'],4),'p05max':round(p05_max_f,4),
@@ -182,7 +184,7 @@ for stock in STOCKS:
                 'p09':bp['p09'],
                 'p10':bp['p10'],         'p10_on':bp['p10_on'],
                 'p11':bp['p11'],
-                'p12':bp['p12'],
+                'p12':False,
             }
         }
         with open(out_file, 'w') as f:

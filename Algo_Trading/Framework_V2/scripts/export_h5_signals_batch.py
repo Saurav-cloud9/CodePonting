@@ -8,7 +8,11 @@ import pandas as pd
 import numpy as np
 import os
 
-STOCKS      = ['POWERGRID', 'NTPC', 'RELIANCE', 'HDFCBANK', 'INFY']
+STOCKS      = ['POWERGRID','NTPC','RELIANCE','HDFCBANK','INFY','ADANIPORTS','ASHOKLEY',
+               'AXISBANK','BAJFINANCE','BANDHANBNK','BHARTIARTL','CIPLA','COALINDIA',
+               'DABUR','DIVISLAB','HINDALCO','ICICIBANK','INDUSINDBK','ITC','JSWSTEEL',
+               'NATIONALUM','ONGC','PNB','SBIN','SUNPHARMA','TATAMOTORS','TATASTEEL',
+               'TECHM','VEDL','WIPRO']
 YEAR        = 2022
 TB_VARIANTS = [3, 9]
 DATA_DIR    = r"C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min"
@@ -119,9 +123,10 @@ def export_signals(stock, year, max_tb_gap):
             p09 = np.nan if (same_candle or pd.isna(br['vr']) or pd.isna(t0r['vr'])) \
                   else (1 if br['vr'] > t0r['vr'] else 0)
             p10  = bounce_bar_index
-            p11  = 1 if er['close'] > br['close'] else 0
-            p12  = (1 if er['vr'] >= br['vr'] else 0) \
-                   if (pd.notna(er['vr']) and pd.notna(br['vr'])) else np.nan
+            p11      = 1 if er['close'] > br['close'] else 0
+            p11_open = 1 if er['open']  > br['close'] else 0
+            p12      = (1 if er['vr'] >= br['vr'] else 0) \
+                       if (pd.notna(er['vr']) and pd.notna(br['vr'])) else np.nan
 
             # ── PnL simulation ───────────────────────────────────────────────
             entry_price = er['open']
@@ -172,6 +177,7 @@ def export_signals(stock, year, max_tb_gap):
                 'p09': p09,
                 'p10': p10,
                 'p11': p11,
+                'p11_open': p11_open,
                 'p12': p12,
                 'same_candle_tb': same_candle,
                 'bounce_bar_index': bounce_bar_index,

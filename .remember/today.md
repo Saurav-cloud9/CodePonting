@@ -1,15 +1,7 @@
-# Session Log — 2026-05-27
+# Session Log — 2026-05-31
 
-## What was done
-- CCP review: confirmed 5-stock Optuna batch results (tb3 wins 3-2 PF, N 10-14% healthy)
-- Discussed visual review vs Optuna scaling — decided to scale first, visual review on failures
-- Explored all 10 Optuna JSON results: p11 ON in every single variant (universal signal)
-- Found and fixed h5_full.html rendering bug: empty-string p04 → `+''=0` → failed range check instead of NA
-  - Fix: `r.p04==='' ? NaN : +r.p04` for pbMin/pbMax in parseSignalRow (line 133)
-- Found NTPC tb3 discrepancy: JSON=162, HTML=179 — deferred to tomorrow
-- Discussed walk-forward plan: train 2022 → validate 2023/2024/2025; 2025 = most valuable OOS year
+## 17:00 | main
+.remember cleanup: `today-*.md` files were unintended `/remember` skill behavior; consolidated 12 dated logs (May 19–30) → weekly.md; moved p5_cc_source_exploration.md → _explore/
 
-## Tomorrow
-1. Fix NTPC 162 vs 179 discrepancy
-2. Walk through h5_optuna_batch.py
-3. Scale to 30-stock universe (2022)
+## 18:00–22:15 | main
+Batch export/Optuna scripts (5 stocks: tb3/tb9); N_target formula 10% signals, PF objective, N_floor=N_target (degenerate fixed); H5 UI fixed (slider drag, chart align, IST times, Optuna toggle w/ Reward/Risk); built export_h5_signals_batch.py & h5_optuna_batch.py (dynamic N_TARGET=10%); validation: tb3 > tb9 (3-2), PF 2.0–2.77, N≈140–200; next: 30-stock tb3
