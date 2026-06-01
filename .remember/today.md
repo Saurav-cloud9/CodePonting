@@ -5,3 +5,6 @@
 
 ## 18:00–22:15 | main
 Batch export/Optuna scripts (5 stocks: tb3/tb9); N_target formula 10% signals, PF objective, N_floor=N_target (degenerate fixed); H5 UI fixed (slider drag, chart align, IST times, Optuna toggle w/ Reward/Risk); built export_h5_signals_batch.py & h5_optuna_batch.py (dynamic N_TARGET=10%); validation: tb3 > tb9 (3-2), PF 2.0–2.77, N≈140–200; next: 30-stock tb3
+
+## 2026-06-01 | main
+Built CodePonting Voice Bridge: voice_bridge.py (file watcher, v0.2), voice_bridge_mcp.py (MCP server using mcp.server.stdio, stdio transport, write_instruction tool). Registered in claude_desktop_config.json alongside cc-memory. Fixed two errors: Server.run() missing args → used stdio_server(); server.stdio_server() AttributeError → imported from mcp.server.stdio. CD shows voice-bridge MCP as running. End-to-end test pending.

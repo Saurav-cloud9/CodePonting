@@ -217,3 +217,5 @@ Step 9.4  — 2026-04-19
 2026-05-29 | HTML cleanup: #11 renamed entry_open_above, #12 removed; temp scripts moved to scripts/
 2026-05-29 | Manual WFA on PNB tb3: no single param combo holds 2022-2025; regime problem confirmed
 2026-05-29 | Regime filter concept defined: pre-condition above gates; raw bounce rate = Option 1 metric
+
+2026-06-01  Voice Bridge built — voice_bridge.py + MCP server; CD running ✅

@@ -5,14 +5,15 @@
 P1  NATIONALUM manual WFA — train on 2023 (PF 2.26), test on 2022/2024/2025
         Use H5 full with cross-val signal CSVs in outputs/h5/signals/
 
-P2  Regime filter — compute raw bounce success rate per year from existing signal CSVs
+P2  Voice Bridge — end-to-end test: trigger write_instruction from Claude Desktop,
+        confirm instructions.txt gets written, voice_bridge.py picks it up in CC terminal
+
+P3  Regime filter — compute raw bounce success rate per year from existing signal CSVs
         across 5 stocks; check if 2022/2023 naturally higher than 2024/2025
         Then define regime metric → plot → overlay Optuna results
 
-P3  Re-run Optuna with lower N floor (50-60 signals) after regime filter defined
+P4  Re-run Optuna with lower N floor (50-60 signals) after regime filter defined
         Goal: higher PF per stock rather than broad N coverage
-
-P4  h5_optuna_batch.py code walkthrough — learning session (low priority)
 
 P5  Opening bar framework — 9:15 signals need separate G1 evaluation
 
