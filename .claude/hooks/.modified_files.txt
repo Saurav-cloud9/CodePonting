@@ -353,3 +353,5 @@ c:\Users\Saurav\CodePonting\Algo_Trading\voice_bridge\voice_bridge_mcp.py
 c:\Users\Saurav\CodePonting\.remember\handoff.md
 c:\Users\Saurav\CodePonting\.remember\today.md
 C:\Users\Saurav\CodePonting\.remember\remember.md
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\generate_missing_signals_tb3.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\generate_missing_signals_tb3.py

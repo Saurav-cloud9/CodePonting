@@ -2,20 +2,23 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  NATIONALUM manual WFA — train on 2023 (PF 2.26), test on 2022/2024/2025
-        Use H5 full with cross-val signal CSVs in outputs/h5/signals/
+P1  Regime filter — NEXT PRIORITY
+        Step 1: Break down all 4 years (2022/2023/2024/2025) by month
+                Find best and worst months within each year across 5 stocks
+        Step 2: Compute raw bounce success rate per year and per month
+                Check if 2022/2023 naturally higher than 2024/2025
+        Step 3: Identify what is mathematically common between good periods
+                and bad periods — quantify into a measurable metric
+        Step 4: Define regime metric → plot → overlay Optuna results
+        Step 5: Translate findings into a filter formula for the live script
 
 P2  Voice Bridge — end-to-end test: trigger write_instruction from Claude Desktop,
         confirm instructions.txt gets written, voice_bridge.py picks it up in CC terminal
 
-P3  Regime filter — compute raw bounce success rate per year from existing signal CSVs
-        across 5 stocks; check if 2022/2023 naturally higher than 2024/2025
-        Then define regime metric → plot → overlay Optuna results
-
-P4  Re-run Optuna with lower N floor (50-60 signals) after regime filter defined
+P3  Re-run Optuna with lower N floor (50-60 signals) after regime filter defined
         Goal: higher PF per stock rather than broad N coverage
 
-P5  Opening bar framework — 9:15 signals need separate G1 evaluation
+P4  Opening bar framework — 9:15 signals need separate G1 evaluation
 
 # ── PARKED / FUTURE ───────────────────────────────────────────
 F0  Compare H1 vs export_h5_signals.py signal scanning logic
