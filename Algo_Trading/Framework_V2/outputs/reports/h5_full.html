@@ -47,7 +47,7 @@ const S = {
   mode: 'baseline',
   // Slider internal values (same scale as H5 Lite)
   p01: 5, p02: 5, p03: 1, p04min: 3, p04max: 8,
-  p05min: 0, p05max: 20, p06: 50, p07: 10, p08: 12, p10: 9,
+  p05min: 0, p05max: 20, p06: 50, p07: 10, p08: 12, p10: 3,
   // Toggle values
   p09: false, p11: false,
   // Per-param active flags
@@ -408,7 +408,7 @@ function renderSidebar() {
   h += slider('#07 wick_defence_ratio','floor','p07',-15,50,1,S.p07,(S.p07/10).toFixed(1));
   h += slider('#08 bounce_vr_abs','floor','p08',5,30,1,S.p08,`${(S.p08/10).toFixed(1)}x`);
   h += toggleRow('#09 bounce_vr_rel','p09');
-  h += slider('#10 max_tb_gap','ceiling','p10',0,9,1,S.p10,S.p10);
+  h += slider('#10 max_tb_gap','ceiling','p10',0,3,1,S.p10,S.p10);
 
   h += gateHdr('G3 — Post-bounce Follow-through', '#c9a227');
   h += toggleRow('#11 G3a entry_open_above','p11');
@@ -438,7 +438,7 @@ function renderSidebar() {
   document.querySelector('[data-act="allOn"]')?.addEventListener('click', () => { Object.keys(S.act).forEach(k => S.act[k]=true); render(); });
   document.querySelector('[data-act="allOff"]')?.addEventListener('click', () => { Object.keys(S.act).forEach(k => S.act[k]=false); render(); });
   document.querySelector('[data-act="resetVals"]')?.addEventListener('click', () => {
-    S.p01=5;S.p02=5;S.p03=1;S.p04min=3;S.p04max=8;S.p05min=0;S.p05max=20;S.p06=50;S.p07=10;S.p08=12;S.p10=9; render();
+    S.p01=5;S.p02=5;S.p03=1;S.p04min=3;S.p04max=8;S.p05min=0;S.p05max=20;S.p06=50;S.p07=10;S.p08=12;S.p10=3; render();
   });
   document.getElementById('btn-optuna-toggle')?.addEventListener('click', toggleOptuna);
   document.querySelectorAll('.msw').forEach(sw => {
