@@ -219,3 +219,9 @@ Step 9.4  — 2026-04-19
 2026-05-29 | Regime filter concept defined: pre-condition above gates; raw bounce rate = Option 1 metric
 
 2026-06-01  Voice Bridge built — voice_bridge.py + MCP server; CD running ✅
+
+2026-06-05 | h5_full.html p10 slider max fixed 9→3 (3 locations: slider, default state, reset)
+2026-06-05 | WFA replayed: 5 stocks × 4 years — regime degradation confirmed across all stocks
+2026-06-05 | Universal Optuna attempted (30 stocks × 4 years, 182k signals) — abandoned; baseline PF 0.924, regime makes it unsound
+2026-06-05 | Regime analysis: ATR14% and Vol_StdDev20% are strongest year-quality separators
+2026-06-05 | Regime filter WFA: ATR14%≥2.25 + Vol_StdDev20%≥65 — 3/5 worst years zero valid days; works as go/no-go gate not day filter
