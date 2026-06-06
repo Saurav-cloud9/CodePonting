@@ -2,22 +2,22 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Regime filter — Opus 5-step sequence
-        Step 1: Compute ER + MA20 run-length + VR per stock per day (2022-2025)
-                Output CSV: stock, date, ER, run_length_mean, VR — pure measurement
-        Step 2: Compute monthly bounce rate per stock as validation target (y-var only)
-        Step 3: Correlation test on 2022-2023 ONLY → lock metric + threshold, write it down
-        Step 4: Single OOS shot — 2024-2025 + 25 discarded stocks (one shot, no nudging)
-        Step 5: Wire regime_ok daily flag into backtest only if Step 4 passes
-        ⚠️  Fit threshold on 2022-23 only. Test cold on 2024-25 + 25 rejects. Single shot.
+P1  Await Claude.ai discussion outcome — next action TBD
+        Context: regime filter WFA complete; worst years are dead regimes (zero valid days)
+        Options on table: (a) year-level go/no-go gate, (b) signal redesign, (c) Optuna on regime-approved years only
+        Also in play: Opus plan — ER + MA20 run-length + VR as alternative regime metrics
 
-P2  Voice Bridge — end-to-end test: trigger write_instruction from Claude Desktop,
+P2  Regime gate implementation — define as year/month-level pre-filter using ATR14% + Vol_StdDev20%
+        Thresholds found: ATR14% >= 2.25%, Vol_StdDev20% >= 65%
+        Re-run Optuna only on approved periods
+
+P3  Voice Bridge — end-to-end test: trigger write_instruction from Claude Desktop,
         confirm instructions.txt gets written, voice_bridge.py picks it up in CC terminal
 
-P3  Re-run Optuna with lower N floor (50-60 signals) after regime filter defined
+P4  Re-run Optuna on regime-approved stock-years only (after P1/P2 resolved)
         Goal: higher PF per stock rather than broad N coverage
 
-P4  Opening bar framework — 9:15 signals need separate G1 evaluation
+P5  Opening bar framework — 9:15 signals need separate G1 evaluation
 
 # ── PARKED / FUTURE ───────────────────────────────────────────
 F0  Compare H1 vs export_h5_signals.py signal scanning logic
