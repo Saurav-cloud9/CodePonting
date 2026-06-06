@@ -1,21 +1,24 @@
-# Handoff Note — 2026-06-01
+# Handoff Note — 2026-06-05
 
 ## State
-- HTML fully cleaned: p11 = entry_open_above, p12 removed
-- PNB manual WFA complete: regime problem confirmed, no single combo holds all 4 years
-- Cross-val JSONs exist for 2022/2023/2024/2025 for 5 stocks in outputs/h5/optuna/{year}/
-- NATIONALUM WFA not yet done (train on 2023, PF 2.26 best year)
-- Voice Bridge built and confirmed running:
-    - voice_bridge.py → file watcher, run in CC terminal
-    - voice_bridge_mcp.py → MCP server, launched by Claude Desktop automatically
-    - claude_desktop_config.json updated with voice-bridge entry
-    - CD shows MCP status: running ✅
+- MA sweep complete: 10 variants (SMA10-30, EMA10-30) across 30 stocks 2022-2025
+  EMA15 best PF (0.914), EMA25 best net PNL (-4,333); all still loss-making (PF < 1.0)
+- Confirmed: MA type change does not fix regime problem
+- Opus advisor consulted — regime filter plan fully defined and documented
+- Bounce rate ruled out as live filter (circular — the fv1 trap)
+- Three independent regime metrics chosen: ER, MA20 run-length, VR
+- Shareable Claude.ai brief written (paste-ready, self-contained)
+- run_ma_sweep.py created: Framework_V2/scripts/run_ma_sweep.py
 
 ## Next
-1. NATIONALUM manual WFA — load 2023 signals, refine params manually, test on 2022/2024/2025
-2. Voice Bridge end-to-end test — trigger write_instruction from CD, confirm CC picks it up
-3. Regime filter — raw bounce success rate per year across 5 stocks
+1. Regime filter Step 1 — write analysis script: ER + MA20 run-length + VR per stock per day
+   Output: CSV with columns stock, date, ER, run_length_mean, VR
+   Pure measurement only. No filtering. No decisions.
+2. Step 2 — monthly bounce rate per stock (validation target y-var)
+3. Step 3 — correlation test on 2022-2023 only, lock threshold
 
-## Known Issues
-- Regime problem confirmed: 2024/2025 break all param combos found on 2022/2023
-- Regime filter needed before any further Optuna re-tuning makes sense
+## Known Issues / Critical Constraints
+- Regime problem: 2024/2025 break all param combos found on 2022/2023
+- Threshold must be fit ONLY on 2022-23 data, tested cold on 2024-25 + 25 discarded stocks (single shot)
+- If OOS fails → pivot to ORB strategy (reuse all fv2 infra — F9 in TODO)
+- Voice Bridge end-to-end test still pending (P2)

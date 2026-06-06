@@ -1,10 +1,31 @@
-# Session Log — 2026-05-31
+# Session Log — 2026-06-05
 
-## 17:00 | main
-.remember cleanup: `today-*.md` files were unintended `/remember` skill behavior; consolidated 12 dated logs (May 19–30) → weekly.md; moved p5_cc_source_exploration.md → _explore/
+## CCP
+Context catch-up: picked up from regime problem confirmation, Voice Bridge built, 5 survivors identified.
 
-## 18:00–22:15 | main
-Batch export/Optuna scripts (5 stocks: tb3/tb9); N_target formula 10% signals, PF objective, N_floor=N_target (degenerate fixed); H5 UI fixed (slider drag, chart align, IST times, Optuna toggle w/ Reward/Risk); built export_h5_signals_batch.py & h5_optuna_batch.py (dynamic N_TARGET=10%); validation: tb3 > tb9 (3-2), PF 2.0–2.77, N≈140–200; next: 30-stock tb3
+## MA Sweep
+- Wrote run_ma_sweep.py (Framework_V2/scripts/)
+- First version used .iloc — too slow (~2 min/stock). Rewrote with numpy arrays.
+- Results: 10 MA variants across 30 stocks, 2022-2025, best-combo params (tb3)
+- EMA15: PF 0.914 (+0.021 vs SMA20 baseline) — top by PF
+- EMA25: PF 0.912, Net PNL -4,333 (+0.020 vs SMA20) — top by net PNL
+- All MAs still loss-making (PF < 1.0) — MA type is not the fix
+- Decision: do NOT switch to EMA25 yet; fix regime first
 
-## 2026-06-01 | main
-Built CodePonting Voice Bridge: voice_bridge.py (file watcher, v0.2), voice_bridge_mcp.py (MCP server using mcp.server.stdio, stdio transport, write_instruction tool). Registered in claude_desktop_config.json alongside cc-memory. Fixed two errors: Server.run() missing args → used stdio_server(); server.stdio_server() AttributeError → imported from mcp.server.stdio. CD shows voice-bridge MCP as running. End-to-end test pending.
+## Opus Advisor — Regime Filter Plan
+Key findings from Opus call:
+- Bounce rate as live filter = circular/lagging = fv1 trap. Use only as y-variable.
+- Three independent regime metrics: ER + MA20 run-length + Variance Ratio
+- Architecture: per-stock daily pre-condition, frozen at prior day's close
+- Biggest risk: overfitting on 5 hand-picked survivor stocks (48 monthly buckets)
+- Mitigation: lock threshold on 2022-23, test cold on 2024-25 + 25 discarded stocks
+- If OOS fails → MA bounce has no edge → pivot to ORB
+
+## Shareable Brief
+Full Claude.ai context brief written (paste-ready) covering: problem, three metrics,
+architecture, 5-step sequence, risks, file paths, next task.
+
+## Strategy Discussion
+- ORB and MA bounce have opposite regime profiles — they're complements
+- Agreed: run regime filter test first (1-2 sessions), then decide
+- If regime filter fails OOS → pivot to ORB (reuse all fv2 infra)

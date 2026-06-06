@@ -362,3 +362,8 @@ C:\Users\Saurav\CodePonting\Algo_Trading\voice_bridge\voice_bridge.py
 C:\Users\Saurav\CodePonting\Algo_Trading\voice_bridge\voice_bridge.py
 c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\run_backtest_p06_55.py
 c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\run_backtest_p06_55.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\run_ma_sweep.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\run_ma_sweep.py
+C:\Users\Saurav\CodePonting\.remember\handoff.md
+C:\Users\Saurav\CodePonting\.remember\today.md
+c:\Users\Saurav\CodePonting\.remember\remember.md

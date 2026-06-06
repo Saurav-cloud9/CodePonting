@@ -219,3 +219,9 @@ Step 9.4  — 2026-04-19
 2026-05-29 | Regime filter concept defined: pre-condition above gates; raw bounce rate = Option 1 metric
 
 2026-06-01  Voice Bridge built — voice_bridge.py + MCP server; CD running ✅
+2026-06-05  SS ───────────────────────────────────────────────────────────
+           ✅  MA sweep: 10 variants (SMA/EMA 10-30) across 30 stocks 2022-2025; EMA15 best PF (0.914), EMA25 best net PNL
+           ✅  Confirmed: MA type change does not fix regime problem; all MAs still PF < 1.0
+           ✅  Opus advisor: bounce rate ruled out as filter (circular); ER + MA20 run-length + VR chosen as regime metrics
+           ✅  Regime filter 5-step sequence locked; shareable Claude.ai brief written
+           ✅  Decision: run regime filter test first; if OOS fails → pivot to ORB (reuse fv2 infra)
