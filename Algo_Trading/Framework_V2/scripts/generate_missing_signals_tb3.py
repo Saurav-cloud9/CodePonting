@@ -131,7 +131,7 @@ def export_signals(stock, year, max_tb_gap):
                   else (1 if br['vr'] > t0r['vr'] else 0)
             p10      = bounce_bar_index
             p11      = 1 if er['close'] > br['close'] else 0
-            p11_open = 1 if er['open']  > br['close'] else 0
+            p11 = 1 if er['open']  > br['close'] else 0
             p12      = (1 if er['vr'] >= br['vr'] else 0) \
                        if (pd.notna(er['vr']) and pd.notna(br['vr'])) else np.nan
 
@@ -183,7 +183,7 @@ def export_signals(stock, year, max_tb_gap):
                 'p09': p09,
                 'p10': p10,
                 'p11': p11,
-                'p11_open': p11_open,
+                'p11': p11,
                 'p12': p12,
                 'same_candle_tb': same_candle,
                 'bounce_bar_index': bounce_bar_index,

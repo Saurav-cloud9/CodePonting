@@ -1,0 +1,9 @@
+{
+  "movies": [
+    {"title": "Parasite", "year": 2019, "genre": "Thriller", "rating": 8.5},
+    {"title": "Oppenheimer", "year": 2023, "genre": "Biography", "rating": 8.6},
+    {"title": "Interstellar", "year": 2014, "genre": "Sci-Fi", "rating": 8.7},
+    {"title": "The Dark Knight", "year": 2008, "genre": "Action", "rating": 9.0},
+    {"title": "Inception", "year": 2010, "genre": "Sci-Fi", "rating": 8.8}
+  ]
+}

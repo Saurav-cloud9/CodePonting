@@ -18,7 +18,7 @@ TB_VARIANTS = [3, 9]
 DATA_DIR = r"C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min"
 OPT_DIR  = r"C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\outputs\h5\optuna\2022"
 
-# ─── Gate eval (same as batch — p11_open, p12 dropped) ────────────────────────
+# ─── Gate eval (same as batch — p11, p12 dropped) ────────────────────────
 def _agg(results):
     non_na = [r for r in results if r != 'NA']
     if not non_na: return 'NA'
@@ -34,7 +34,7 @@ def eval_signal(sig, p, af):
     p09raw=sig.get('p09','')
     p09v=None if str(p09raw).strip() in ('','NaN','nan') else int(float(p09raw))
     bounce_idx=fval('bounce_bar_index')
-    p11v=int(float(sig.get('p11_open', 0)))
+    p11v=int(float(sig.get('p11', 0)))
     g1_01='P' if not af['p01'] else ('NA' if np.isnan(p01v) else ('P' if p01v>=p['p01'] else 'F'))
     g1_02='P' if not af['p02'] else ('NA' if np.isnan(p02v) else ('P' if p02v>=p['p02'] else 'F'))
     g1_03='P' if not af['p03'] else ('P' if p03v>=p['p03'] else 'F')
@@ -139,7 +139,7 @@ def export_signals_inmem(stock, year, max_tb_gap):
             same_candle=1 if bounce_bar==T0 else 0
             p09=np.nan if (same_candle or pd.isna(br['vr']) or pd.isna(t0r['vr'])) \
                 else (1 if br['vr']>t0r['vr'] else 0)
-            p11_open=1 if er['open']>br['close'] else 0
+            p11=1 if er['open']>br['close'] else 0
 
             entry_price=er['open']; sl=entry_price-(2.5*atr); target=entry_price+(4.5*atr)
             outcome,pnl,exit_bar=None,None,None
@@ -180,7 +180,7 @@ def export_signals_inmem(stock, year, max_tb_gap):
                 'p07':p07 if pd.notna(p07) else np.nan, 'p07_na':p07_na,
                 'p08':round(float(p08),4) if pd.notna(p08) else np.nan,
                 'p09':p09, 'p10':bounce_bar_index,
-                'p11_open':p11_open,
+                'p11':p11,
                 'bounce_bar_index':bounce_bar_index,
                 'pnl':pnl, 'outcome':outcome,
             })

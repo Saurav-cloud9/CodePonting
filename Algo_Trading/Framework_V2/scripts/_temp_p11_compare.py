@@ -1,5 +1,5 @@
 """
-Temp script — compare current (p11_close, p12 as-is) vs live-compatible (p11_open, p12 off)
+Temp script — compare current (p11_close, p12 as-is) vs live-compatible (p11, p12 off)
 No file writes. Read-only.
 """
 import pandas as pd, numpy as np, json, os
@@ -89,7 +89,7 @@ for stock in STOCKS:
         # bounce_close lookup
         ohlcv_idx = ohlcv_cache[stock]
         df['bounce_close'] = df['bounce_datetime'].map(ohlcv_idx)
-        df['p11_open'] = (df['entry_price'] > df['bounce_close']).astype(int)
+        df['p11'] = (df['entry_price'] > df['bounce_close']).astype(int)
 
         signals = df.to_dict('records')
 
@@ -97,7 +97,7 @@ for stock in STOCKS:
         passing_old = [s for s in signals if eval_sig(s, p, af)]
         n_old, wr_old, pf_old = get_metrics(passing_old)
 
-        # NEW: p11_open replacing p11, p12 silenced
+        # NEW: p11 replacing p11, p12 silenced
         af_new = dict(af)
         af_new['p11'] = True   # keep p11 active but evaluate differently below
         af_new['p12'] = False  # silence p12
@@ -113,7 +113,7 @@ for stock in STOCKS:
             p09raw=sig.get('p09','')
             p09v=None if str(p09raw).strip() in ('','NaN','nan') else int(float(p09raw))
             bounce_idx=fval('bounce_bar_index')
-            p11_open_v=int(float(sig.get('p11_open',0)))  # use p11_open column
+            p11_v=int(float(sig.get('p11',0)))  # use p11 column
             p12raw=sig.get('p12','')
             p12v=None if str(p12raw).strip() in ('','NaN','nan') else int(float(p12raw))
             g1_01='P' if not af['p01'] else ('NA' if np.isnan(p01v) else ('P' if p01v>=p['p01'] else 'F'))
@@ -131,7 +131,7 @@ for stock in STOCKS:
             g2_09='P' if not af['p09'] else ('NA' if p09v is None else ('P' if p09v==1 else 'F'))
             g2_10='P' if not af['p10'] else ('P' if bounce_idx<=p['p10'] else 'F')
             g2=_agg([g2_05,g2_06,g2_07,g2_08,g2_09,g2_10])
-            g3_11='P' if not af['p11'] else ('P' if p11_open_v==1 else 'F')
+            g3_11='P' if not af['p11'] else ('P' if p11_v==1 else 'F')
             g3_12='P'  # p12 silenced
             g3=_agg([g3_11,g3_12])
             return g1=='P' and g2=='P' and g3=='P'

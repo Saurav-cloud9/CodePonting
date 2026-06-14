@@ -1,39 +1,20 @@
-# Handoff Note — 2026-06-05
+# Handoff Note — 2026-06-14
 
-## State
-- h5_full.html p10 slider fixed (max 9→3 in 3 places)
-- WFA replayed for 5 stocks — full results table available, matches prior findings
-- Universal Optuna script written (h5_universal_optuna.py) but abandoned — regime problem makes 4-year universal set structurally unsound
-- Regime analysis complete: ATR% and Vol_StdDev% are the two strongest separators between good and bad stock-years
-- Regime filter WFA complete: filters work as year-level go/no-go gates, not day-level selectors
-    - 3/5 worst years: zero valid days under both filters
-    - NATIONALUM 2024: only survivor, PF barely crosses 1.0 (1.004)
-- MA sweep complete: 10 variants (SMA10-30, EMA10-30) across 30 stocks 2022-2025
-  EMA15 best PF (0.914), EMA25 best net PNL (-4,333); all still loss-making (PF < 1.0)
-- Opus advisor consulted — regime filter plan defined: ER + MA20 run-length + VR as independent metrics (alternative approach to ATR%/Vol approach)
-- User is discussing all findings with Claude.ai — next action steps to come
+## Current State
+- Kijun Bounce strategy built and backtested on 5 stocks (Python)
+- Kijun-HL (traditional): 4/5 stocks PF>1 — ITC 55.2%, TATAMOTORS 50%, HDFCBANK 55.9%, INFY 48%
+- Kijun-Close (Pine Script): 3/5 stocks PF>1 — HDFCBANK best at 61.8%
+- RELIANCE fails both formulas — likely to exclude
+- TV ADJ mode shows PF=0.759 for ITC — signal is fragile, TV/Python gap exists
+- Key data issue: our Python CSV uses ITC Hotels demerger-adjusted prices (~11% lower than TV unadjusted)
+- Script: Algo_Trading/Framework_V2/scripts/kijun_bounce_backtest.py
 
-## Key numbers to remember
-- Baseline pooled PF (all 30 stocks, 4 years, no filters): 0.924
-- Worst year separators: ATR14% < 2.25% and Vol_StdDev20% < 65%
-- Best year avg ATR%: 2.78% | Worst year avg ATR%: 2.10%
-- Best year avg Vol_StdDev%: 83.7% | Worst year avg Vol_StdDev%: 53.1%
-
-## Next (pending Claude.ai discussion)
-- Likely: define regime as a year-level or month-level gate using ATR% + Vol metrics
-- Then: re-run Optuna only on regime-approved periods
-- Or: signal redesign if regime filter alone can't solve the problem
-
-## Files created this session
-- Framework_V2/scripts/h5_universal_optuna.py — universal Optuna (abandoned but saved)
-- Framework_V2/scripts/run_ma_sweep.py — MA type sweep (10 variants, 30 stocks)
-- Framework_V2/scripts/_temp_wfa_replay.py — WFA replay script
-- Framework_V2/scripts/_temp_regime_analysis.py — regime metric comparison
-- Framework_V2/scripts/_temp_regime_filter_wfa.py — regime filter WFA
-- Framework_V2/outputs/h5/regime_filter_wfa_20260605_*.csv — results
+## Next Step
+1. Run all 30 stocks on Python with Kijun-HL — get full universe picture
+2. Investigate TV vs Python gap further (ATR method, entry price differences)
+3. If Kijun-HL holds across 20+ stocks → port to full fv2 framework
 
 ## Known Issues
-- tb9 signal CSVs don't exist — only tb3 available
-- BAJFINANCE is the tightest stock (lowest signal density, hardest to satisfy per-stock floors)
-- No VIX data available in dataset — external data needed if VIX correlation is explored
-- Voice Bridge end-to-end test still pending (P3)
+- TV and Python prices don't align due to demerger adjustment — use TV ADJ mode for visual review
+- Trade count mismatch TV vs Python (TV Kijun-Close ITC=18, Python Kijun-Close ITC=18 ✅ but prices differ)
+- H5 signals not yet regenerated after p11 fix (30 stocks x 4 years x 2 variants) — background item

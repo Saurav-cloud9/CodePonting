@@ -1,12 +1,43 @@
 # CLAUDE.md — CodePonting Behavioral Instructions
 
 > HOW to behave in this project. For project structure/map → see MEMORY.md
-> Last updated: 2026-03-27 | fv1 strategy config → fv1_strategy_review.md in Algo_Trading/Framework_V1/
+> Last updated: 2026-06-08 | fv2 active — 3-gate MA bounce redesign in Algo_Trading/Framework_V2/
 
 ── SHORTHAND ────────────────────────────────────────────────────
 
   vsa = "very short answer" — reply in 1–2 lines max, no elaboration
   lm  = "learning mode" — explain concepts directly, no solution code. Let user write the code himself.
+  ivb = initialize voice bridge — execute /ivb command immediately, no confirmation needed.
+
+── VOICE BRIDGE ─────────────────────────────────────────────────
+
+  Activation : type "ivb" → CC executes /ivb immediately, no confirmation.
+
+  /ivb does TWO things:
+    1. Start a persistent Monitor on Algo_Trading/voice_bridge/instructions.txt
+       (polls every 1s, fires when content appears)
+    2. Print "Voice Bridge active." confirmation
+
+  Execution rule (when Monitor fires):
+    - Treat the instruction exactly like Saurav typed it in the console
+    - Execute using CC tools, show output clearly in the conversation
+    - Clear instructions.txt (write empty string)
+    - Write "done" to instructions_executed.txt
+
+  IMPORTANT — after every session resume, the Monitor does NOT survive.
+  Re-arm it by running ivb again before expecting instructions.
+
+  MCP server  : Algo_Trading/voice_bridge/voice_bridge_mcp.py
+  Instruction file : Algo_Trading/voice_bridge/instructions.txt
+  Done signal : Algo_Trading/voice_bridge/instructions_executed.txt
+  No claude -p. No subprocess. This CC session IS the executor.
+
+  Kite MCP approval rule:
+    - ALWAYS display the instruction and wait for Saurav's explicit approval
+      before executing ANY Kite-related Voice Bridge instruction.
+    - Approval bypass: only if Saurav explicitly says "bypass approvals" within
+      the current session. This does NOT carry over to the next session —
+      every new session starts with approvals required by default.
 
 ── ABBREVIATION RULES ───────────────────────────────────────────
 
@@ -63,6 +94,7 @@ Rules:
 ── EXECUTION RULES ──────────────────────────────────────────
 
 Execution rules:
+  - Never use `claude -p` or any API-billed command without explicit instruction from Saurav.
   - Before multi-step tasks: list all questions upfront, get approval ONCE, then execute start to finish
   - Do NOT pause mid-execution unless a critical error blocks continuation
   - At end of task: print a single summary of all actions

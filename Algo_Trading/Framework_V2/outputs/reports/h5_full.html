@@ -136,7 +136,6 @@ function parseSignalRow(r) {
     p09: (s => (!s || s==='NaN') ? null : parseInt(s,10)===1)((r.p09||'').trim()),
     bounceIdx: +r.bounce_bar_index,
     p11: parseInt((r.p11 || '').trim(), 10) === 1,
-    p11open: parseInt((r.p11_open || '').trim(), 10) === 1,
     pnl: +r.pnl, outcome: (r.outcome || '').trim(),
     p10sc: parseInt((r.same_candle_tb || '').trim(), 10) === 1,
     bounceDt: (r.bounce_datetime || '').trim(),
@@ -153,7 +152,7 @@ function loadSignalCSV(file) {
     complete: res => {
       const rows = res.data;
       if (!rows.length) { S.sigError = 'Empty CSV.'; render(); return; }
-      const req = ['signal_id','stock','datetime','p01','p02','p03','p04','p05','p06','p07','p07_na','p08','p09','p10','p11','p11_open','same_candle_tb','bounce_bar_index','pnl','outcome'];
+      const req = ['signal_id','stock','datetime','p01','p02','p03','p04','p05','p06','p07','p07_na','p08','p09','p10','p11','same_candle_tb','bounce_bar_index','pnl','outcome'];
       const missing = req.filter(c => !(c in rows[0]));
       if (missing.length) { S.sigError = `Missing: ${missing.join(', ')}`; render(); return; }
       S.allSignals = rows.map(parseSignalRow);
@@ -318,6 +317,26 @@ function statCard(label, value, color) {
     <div style="font-size:8px;color:#4a5260;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1px;">${label}</div>
     <div style="font-size:16px;font-weight:600;font-family:monospace;color:${color||'#c8cdd4'};">${value}</div>
   </div>`;
+}
+
+// ─── Export passing signals CSV ──────────────────────────────────────────────
+function exportPassingCSV() {
+  const ev = getEvaluated(getFilteredSignals());
+  const pass = ev.filter(s => !s.rejected);
+  if (!pass.length) return;
+  const headers = ['signal_id','stock','touch_datetime','bounce_datetime','entry_datetime','exit_datetime','entry_price','stop_loss','target','exit_type','pnl'];
+  const rows = pass.map(s => [
+    s.id, s.stock, s.dt, s.bounceDt||'', s.entryDt||'', s.exitDt||'',
+    s.entryPrice, s.sl, s.target, s.outcome, s.pnl
+  ]);
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `h5_passing_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
@@ -627,9 +646,17 @@ function renderRight() {
     <span style="font-size:9px;color:#4a5260;">${S.mode==='baseline'?N+' signals (H1 raw)':pass.length+' / '+N+' passing'}</span>
   </div>`;
 
+  const filtersActive = S.mode === 'filter' && (Object.values(S.act).some(Boolean) || S.optunaOn);
+  const passedCard = (filtersActive && pass.length > 0)
+    ? `<div id="btn-export-passing" title="Export ${pass.length} passing signals as CSV" style="background:#1c1f22;border:1px solid #2d6a4f;border-radius:3px;padding:5px 7px;cursor:pointer;">
+        <div style="font-size:8px;color:#4a5260;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1px;">PASSED ↓</div>
+        <div style="font-size:16px;font-weight:600;font-family:monospace;color:#52b788;text-decoration:underline;">${pass.length}</div>
+       </div>`
+    : statCard('PASSED', S.mode==='baseline'?'—':pass.length, '#52b788');
+
   h += secHdr('OVERVIEW');
   h += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;">
-    ${statCard('SIGNALS',N,'#5ba3d9')}${statCard('PASSED',S.mode==='baseline'?'—':pass.length,'#52b788')}
+    ${statCard('SIGNALS',N,'#5ba3d9')}${passedCard}
     ${statCard('WIN RATE',S.mode==='baseline'?'—':wr,'#c8cdd4')}${statCard('PROF FACTOR',S.mode==='baseline'?'—':pf,'#c9a227')}
   </div>`;
 
@@ -706,6 +733,7 @@ function renderRight() {
   rp.innerHTML = h;
   rp.scrollTop = scrollTop;
 
+  document.getElementById('btn-export-passing')?.addEventListener('click', exportPassingCSV);
   rp.querySelectorAll('.sr').forEach(row => row.onclick = () => selectSignal(row.dataset.sid));
 }
 

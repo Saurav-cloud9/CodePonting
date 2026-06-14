@@ -1,7 +1,7 @@
 """
 Cross-validation batch — 5 stocks × 2023/2024/2025 × tb3/tb9
 Step 1: Export signals per year (in-memory signal gen, writes CSVs)
-Step 2: Run Optuna per year (500 trials, frozen p11_open, p12 dropped)
+Step 2: Run Optuna per year (500 trials, frozen p11, p12 dropped)
 Output:
   Signals : outputs/h5/signals/{stock}_{year}_h5_signals_tb{n}.csv
   Optuna  : outputs/h5/optuna/{year}/{stock}_{year}_optuna_tb{n}.json
@@ -96,7 +96,7 @@ def export_signals(stock, year, max_tb_gap):
             p09=np.nan if (same_candle or pd.isna(br['vr']) or pd.isna(t0r['vr'])) \
                 else (1 if br['vr']>t0r['vr'] else 0)
             p11=1 if er['close']>br['close'] else 0
-            p11_open=1 if er['open']>br['close'] else 0
+            p11=1 if er['open']>br['close'] else 0
             p12=(1 if er['vr']>=br['vr'] else 0) \
                 if (pd.notna(er['vr']) and pd.notna(br['vr'])) else np.nan
 
@@ -136,7 +136,7 @@ def export_signals(stock, year, max_tb_gap):
                 'p07':p07 if pd.notna(p07) else np.nan,'p07_na':p07_na,
                 'p08':round(float(p08),4) if pd.notna(p08) else np.nan,
                 'p09':p09,'p10':bounce_bar_index,
-                'p11':p11,'p11_open':p11_open,'p12':p12,
+                'p11':p11,'p11':p11,'p12':p12,
                 'same_candle_tb':same_candle,
                 'bounce_bar_index':bounce_bar_index,
                 'entry_bar_index':bounce_bar_index+1,
@@ -169,7 +169,7 @@ def eval_signal(sig, p, af):
     p09raw=sig.get('p09','')
     p09v=None if str(p09raw).strip() in ('','NaN','nan') else int(float(p09raw))
     bounce_idx=fval('bounce_bar_index')
-    p11v=int(float(sig.get('p11_open',0)))
+    p11v=int(float(sig.get('p11',0)))
     g1_01='P' if not af['p01'] else ('NA' if np.isnan(p01v) else ('P' if p01v>=p['p01'] else 'F'))
     g1_02='P' if not af['p02'] else ('NA' if np.isnan(p02v) else ('P' if p02v>=p['p02'] else 'F'))
     g1_03='P' if not af['p03'] else ('P' if p03v>=p['p03'] else 'F')

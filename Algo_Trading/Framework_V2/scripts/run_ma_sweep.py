@@ -1,6 +1,6 @@
 """
 MA sweep — SMA10/15/20/25/30 + EMA10/15/20/25/30
-Gates: p05[0.0-1.6] | p06<=55 | p08>=0.5 | p11_open=1 | tb3 | 2022-2025
+Gates: p05[0.0-1.6] | p06<=55 | p08>=0.5 | p11=1 | tb3 | 2022-2025
 Each stock CSV is read once; all 10 MA variants share the same read.
 Uses numpy arrays for all inner loops — no .iloc overhead.
 """
@@ -140,12 +140,12 @@ def _run_ma(s, ma):
         p06  = abs(cl[i] - op[i]) / cr * 100 if cr > 0 else 100.0
         vr_b = vr[bounce_bar]
         p08  = vr_b if not np.isnan(vr_b) else np.nan
-        p11_open = 1 if op[eb] > cl[bounce_bar] else 0
+        p11 = 1 if op[eb] > cl[bounce_bar] else 0
 
         if np.isnan(p05) or not (P05_MIN <= p05 <= P05_MAX): i += 1; continue
         if p06 > P06_MAX:                                     i += 1; continue
         if np.isnan(p08) or p08 < P08_MIN:                   i += 1; continue
-        if p11_open != 1:                                     i += 1; continue
+        if p11 != 1:                                     i += 1; continue
 
         entry_price = op[eb]
         sl     = entry_price - SL_MULT  * atr_i
@@ -208,7 +208,7 @@ base_pnl = sum(baseline['pnls'])
 
 print()
 print("=" * 82)
-print(f"  MA SWEEP — 30 stocks | 2022-2025 | p05[0.0-1.6] p06<=55 p08>=0.5 p11_open | tb3")
+print(f"  MA SWEEP — 30 stocks | 2022-2025 | p05[0.0-1.6] p06<=55 p08>=0.5 p11 | tb3")
 print("=" * 82)
 print(f"  {'MA':<8} {'Signals':>8} {'WR':>7} {'Net PNL':>13} {'PF':>7}  {'vs SMA20':>9}")
 print("-" * 82)

@@ -2,56 +2,64 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Await Claude.ai discussion outcome — next action TBD
-        Context: regime filter WFA complete; worst years are dead regimes (zero valid days)
-        Options on table: (a) year-level go/no-go gate, (b) signal redesign, (c) Optuna on regime-approved years only
-        Also in play: Opus plan — ER + MA20 run-length + VR as alternative regime metrics
+P1  Kijun Bounce — run all 30 stocks on Python (Kijun-HL)
+        Script: Algo_Trading/Framework_V2/scripts/kijun_bounce_backtest.py
+        Expand STOCKS list to all 30, check which stocks hold PF>1
+        Then investigate TV vs Python gap (ATR method, entry price differences)
 
-P2  Regime gate implementation — define as year/month-level pre-filter using ATR14% + Vol_StdDev20%
-        Thresholds found: ATR14% >= 2.25%, Vol_StdDev20% >= 65%
-        Re-run Optuna only on approved periods
+P2  Kijun Bounce — resolve TV vs Python discrepancy
+        TV ADJ mode shows PF=0.759 vs Python Kijun-Close PF=1.37 for ITC
+        Likely cause: ATR smoothing method + entry price execution differences
+        Fix: match ATR method (Wilder's RMA) and verify signal count alignment
 
-P3  Voice Bridge — end-to-end test: trigger write_instruction from Claude Desktop,
-        confirm instructions.txt gets written, voice_bridge.py picks it up in CC terminal
+P3  MA Bounce — parked, not abandoned
+        Resume after Kijun Bounce investigation completes
+        Key open item: share ITC filter findings with Opus on claude.ai before resuming
 
-P4  Re-run Optuna on regime-approved stock-years only (after P1/P2 resolved)
-        Goal: higher PF per stock rather than broad N coverage
+P4  Re-export H5 signals with p11 bug fixed
+        All 30 stocks x 4 years x 2 tb variants need regeneration after p11 fix
 
-P5  Opening bar framework — 9:15 signals need separate G1 evaluation
+P5  Codedex learning track — current: Pandas (ex8 messy data); next: Matplotlib → SQL → GenAI
 
 # ── PARKED / FUTURE ───────────────────────────────────────────
-F0  Compare H1 vs export_h5_signals.py signal scanning logic
-F1  Claude-in-Claude Artifacts — paste OHLCV, get signal analysis in browser
-F2  Signal replacement / position upgrade logic (post-WFA)
+F0  Volume Spike Exhaustion — parked after Kijun Bounce pivot
+        Hypothesis: low-vol move → spike cluster (conflict) → resolution → entry
+        Resume if Kijun Bounce doesn't hold across 30 stocks
+F1  Compare H1 vs export_h5_signals.py signal scanning logic
+F2  Claude-in-Claude Artifacts — paste OHLCV, get signal analysis in browser
 F3  YouTube Strategy Scanner (post paper-trading)
 F4  Insurance review
 F5  Stock diversity analysis — check if 5 stocks fire on same days
 F6  Portfolio construction — capital allocation across 5 stocks
 F7  Checkout VSCode Agent
 F8  TradingView AI Chart Copilot
-F9  If regime filter fails OOS → pivot to ORB strategy (reuse all fv2 infra)
+F9  Nifty Futures — Beluga signal on Nifty index (post Kijun Bounce investigation)
 
 # ── GLOSSARY ──────────────────────────────────────────────────
 ## Signal Geometry
-# T0          — touch bar: candle where price touches MA20
+# T0          — touch bar: candle where price touches MA20 or Kijun
 # tb_gap      — touch-to-bounce gap: bars between T0 and bounce bar
 # diff        — bars between bounce bar and entry bar
+
+## Kijun Strategy
+# Kijun-HL    — traditional Ichimoku: (highest HIGH + lowest LOW) / 2 over 50 days
+# Kijun-Close — Pine Script variant: (highest CLOSE + lowest CLOSE) / 2 over 50 days
+# touch bar   — 5-min bar where low dips below daily Kijun, open above
+# confirm bar — next bar: low back above Kijun, close > low
+# entry bar   — bar after confirm: entry at open
 
 ## Gates & Params
 # G1          — Gate 1: pre-touch regime check
 # G2          — Gate 2: touch & bounce quality
 # G3          — Gate 3: post-bounce follow-through
-# p11_open    — G3a (live-compatible): entry bar open > bounce bar close
+# p11         — G3a (live-compatible): entry bar open > bounce bar close
 # p12         — DROPPED: entry bar volume (lookahead)
 
-## Regime
-# Regime filter  — pre-condition above G1/G2/G3; says "bounce-friendly day or not"
-# Bounce rate    — % of raw touch signals that naturally bounce (no filters applied)
-# Mean-reversion — price oscillates around MA20; suits our signal
-# Trending       — price stays above/below MA20 for extended periods; breaks our signal
-# ER             — Efficiency Ratio: |net move| / sum(|bar moves|); ER→0=chop, ER→1=trend
-# Run-length     — mean consecutive bars on same side of MA20; short=oscillating, long=trending
-# VR             — Variance Ratio: Var(30-min returns) / (6 × Var(5-min returns)); VR<1=mean-reverting
+## Regime (Big Beluga)
+# Red         — strong downtrend + above-average volume
+# Yellow      — weak downtrend + below-average volume
+# Green       — uptrend + above-average volume
+# Blue        — weak uptrend + below-average volume
 
 ## Metrics & System
 # PF          — profit factor
@@ -59,6 +67,7 @@ F9  If regime filter fails OOS → pivot to ORB strategy (reuse all fv2 infra)
 # WFA         — walk-forward analysis
 # OOS         — out-of-sample
 # R/R         — reward/risk ratio
+# BE          — breakeven W/(W+L) = SL/(SL+TGT)
 
 ## Frameworks & Data
 # fv2         — Framework V2 (active)

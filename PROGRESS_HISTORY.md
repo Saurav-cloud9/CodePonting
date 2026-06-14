@@ -231,3 +231,25 @@ Step 9.4  — 2026-04-19
            ✅  Opus advisor: bounce rate ruled out as filter (circular); ER + MA20 run-length + VR chosen as regime metrics
            ✅  Regime filter 5-step sequence locked; shareable Claude.ai brief written
            ✅  Decision: run regime filter test first; if OOS fails → pivot to ORB (reuse fv2 infra)
+2026-06-08 | Regime metrics computed (30 stocks, 29288 rows); POWERGRID monthly analysis shows no ER/run-length/VR separation; H5 export added; 30-stock correlation run is next
+2026-06-10 | Pine Script W/L markers working; MA stack analysis complete (720 configs, 182k signals, best +3.7pp lift — weak); signal-bar metrics plan locked (5 visual metrics ordered: slope→approach→BB→volume→depth)
+2026-06-11 | IS/OOS signal filter backtest: 0/11 metrics pass OOS PF > 1.01; Optuna best OOS PF 0.9616 — fails
+2026-06-11 | p11_open renamed p11 codebase-wide (120 CSVs + 12 scripts + HTML)
+2026-06-11 | TV MCP setup complete: CDP bat file, v6 fv2 MA Bounce strategy live on POWERGRID 5-min
+2026-06-11 | Big Beluga regime filter visual exploration: Red=W, Green/Blue/Yellow=L/EOD confirmed on NIFTY+POWERGRID Jan-Feb 2022
+2026-06-11 | 3-filter framework identified: regime (Red) + structure (clean G1) + time (10:00-13:30)
+2026-06-11 | Key insight: pre-touch approach direction (downtrend delivering price to MA20) = primary W predictor
+
+2026-06-12 | Big Beluga Python tagger built (beluga_tagger.py) — HMA formula replicated, signals tagged R/G/B/Y
+2026-06-12 | Top 8 Nifty stocks regime-tested (2022 tb3): no universal quadrant filter — stock-specific at best
+2026-06-12 | Opus 4.8 consulted: R:R mismatch identified — 4.5R trend-following exit on mean-reversion entry, breakeven W%=35.7%, actual=16-20%
+2026-06-12 | p11 double-assignment bug found (Opus) and fixed in export_h5_signals_batch.py
+2026-06-12 | P2 forward drift run: unconditional EOD+%=44-54% (survival bias exposed — was 60-74% conditional only)
+
+2026-06-13 | Breakeven W/(W+L)=35.7% established; ITC 2022 baseline=34.4%, working target=38-40% IS
+2026-06-13 | voltrend_touch < 4 = peak IS filter for ITC 2022 (36.8%, 1178 signals); high voltrend hurts
+2026-06-13 | ITC Beluga quadrant split: G=41.3% (only above breakeven), R=27.4% (worst)
+2026-06-13 | G+B+Y best-case OR filter: 38.8% IS, 740 signals — collapses OOS 2023-2025
+2026-06-13 | ITC W/(W+L) structural decay confirmed: 34.4->28->25.6->22% across 2022-2025
+2026-06-13 | Visual review: pre-T0 Beluga crossover = faster target hit; Green quad = cleanest Ws
+2026-06-14 | Kijun Bounce backtest built; Kijun-HL 4/5 stocks PF>1; data issue found (demerger adj ~11%); TV ADJ PF=0.759 signals fragility

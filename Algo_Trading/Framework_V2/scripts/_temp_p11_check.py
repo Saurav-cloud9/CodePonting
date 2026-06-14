@@ -1,5 +1,5 @@
 """
-Temp script — p11_open check (entry_open > bounce_close) vs p11_close (entry_close > bounce_close)
+Temp script — p11 check (entry_open > bounce_close) vs p11_close (entry_close > bounce_close)
 No file writes. Reads existing signal CSVs + OHLCV CSVs only.
 """
 import pandas as pd, numpy as np, json, os
@@ -10,7 +10,7 @@ OPT_DIR    = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\outputs\h5\
 
 STOCKS = ['POWERGRID', 'NTPC', 'RELIANCE', 'HDFCBANK', 'INFY']
 
-print(f"{'Stock/TB':20s}  {'N_pass':>6}  {'p11=1':>6}  {'p11_open=1':>10}  {'lost':>5}  {'lost%':>6}  {'lost_W':>6}  {'lost_L':>6}  {'lost_EOD+':>9}  {'lost_EOD-':>9}")
+print(f"{'Stock/TB':20s}  {'N_pass':>6}  {'p11=1':>6}  {'p11=1':>10}  {'lost':>5}  {'lost%':>6}  {'lost_W':>6}  {'lost_L':>6}  {'lost_EOD+':>9}  {'lost_EOD-':>9}")
 print('-'*105)
 
 for stock in STOCKS:
@@ -48,7 +48,7 @@ for stock in STOCKS:
                 return np.nan
 
         df['bounce_close'] = df.apply(get_bounce_close, axis=1)
-        df['p11_open'] = (df['entry_price'] > df['bounce_close']).astype(int)
+        df['p11'] = (df['entry_price'] > df['bounce_close']).astype(int)
 
         # Load passing signal IDs using exact Python eval
         def _agg(results):
@@ -106,16 +106,16 @@ for stock in STOCKS:
 
         n_pass    = len(passing)
         p11_true  = (passing['p11'] == 1).sum()
-        p11_open  = (passing['p11_open'] == 1).sum()
-        lost      = int(p11_true) - int(p11_open)  # had p11 close, lost with open
+        p11  = (passing['p11'] == 1).sum()
+        lost      = int(p11_true) - int(p11)  # had p11 close, lost with open
         lost_pct  = lost / n_pass * 100 if n_pass else 0
 
         # Breakdown of lost signals by outcome
-        lost_sigs = passing[(passing['p11']==1) & (passing['p11_open']==0)]
+        lost_sigs = passing[(passing['p11']==1) & (passing['p11']==0)]
         lost_W    = (lost_sigs['outcome']=='W').sum()
         lost_L    = (lost_sigs['outcome']=='L').sum()
         lost_Ep   = (lost_sigs['outcome']=='EOD+').sum()
         lost_Em   = (lost_sigs['outcome']=='EOD-').sum()
 
         name = f'{stock}_tb{tb}'
-        print(f"{name:20s}  {n_pass:6d}  {p11_true:6d}  {p11_open:10d}  {lost:5d}  {lost_pct:5.1f}%  {lost_W:6d}  {lost_L:6d}  {lost_Ep:9d}  {lost_Em:9d}")
+        print(f"{name:20s}  {n_pass:6d}  {p11_true:6d}  {p11:10d}  {lost:5d}  {lost_pct:5.1f}%  {lost_W:6d}  {lost_L:6d}  {lost_Ep:9d}  {lost_Em:9d}")

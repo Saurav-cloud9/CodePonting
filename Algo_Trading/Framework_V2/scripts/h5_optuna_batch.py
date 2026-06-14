@@ -44,7 +44,7 @@ def eval_signal(sig, p, af):
     p09raw = sig.get('p09', '')
     p09v = None if str(p09raw).strip() in ('', 'NaN', 'nan') else int(float(p09raw))
     bounce_idx = fval('bounce_bar_index')
-    p11v = int(float(sig.get('p11_open', 0)))   # live-compatible: entry open > bounce close
+    p11v = int(float(sig.get('p11', 0)))   # live-compatible: entry open > bounce close
 
     g1_01 = 'P' if not af['p01'] else ('NA' if np.isnan(p01v) else ('P' if p01v >= p['p01'] else 'F'))
     g1_02 = 'P' if not af['p02'] else ('NA' if np.isnan(p02v) else ('P' if p02v >= p['p02'] else 'F'))

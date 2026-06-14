@@ -1,6 +1,6 @@
 """
 fv2 backtest - 30 stocks, 2022-2025, seed defaults + p06=55.
-Active gates: p05 [0.0, 1.6] | p06 <= 55 | p08 >= 0.5 | p11_open == 1
+Active gates: p05 [0.0, 1.6] | p06 <= 55 | p08 >= 0.5 | p11 == 1
 Detection window: tb3 (max_tb_gap = 3)
 PNL unit: raw points (entry_price +/- ATR x mult)
 """
@@ -90,12 +90,12 @@ def run_stock(stock):
         p05 = (row['ma20'] - row['low']) / atr if atr > 0 else np.nan
         p06 = (abs(row['close'] - row['open']) / cr * 100) if cr > 0 else 100.0
         p08 = br['vr'] if pd.notna(br['vr']) else np.nan
-        p11_open = 1 if er['open'] > br['close'] else 0
+        p11 = 1 if er['open'] > br['close'] else 0
 
         if pd.isna(p05) or not (P05_MIN <= p05 <= P05_MAX): i += 1; continue
         if p06 > P06_MAX:                                   i += 1; continue
         if pd.isna(p08) or p08 < P08_MIN:                  i += 1; continue
-        if p11_open != 1:                                   i += 1; continue
+        if p11 != 1:                                   i += 1; continue
 
         # PNL simulation
         entry_price = er['open']
@@ -137,7 +137,7 @@ def run_stock(stock):
 
 
 # --- Run ----------------------------------------------------------------------
-print("fv2 backtest | p05[0.0-1.6] p06<=55 p08>=0.5 p11_open=1 | tb3 | 2022-2025\n")
+print("fv2 backtest | p05[0.0-1.6] p06<=55 p08>=0.5 p11=1 | tb3 | 2022-2025\n")
 print(f"{'STOCK':<14} {'N':>5} {'WR':>7} {'NET PNL':>12} {'PF':>7}")
 print("-" * 52)
 
