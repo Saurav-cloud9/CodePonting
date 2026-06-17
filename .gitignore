@@ -11,6 +11,7 @@ _explore/
 # Auto-modified by tools (not for commit)
 .obsidian/workspace.json
 .remember/remember.md
+.claude/hooks/.modified_files.txt
 *.swp
 *.swo
 
