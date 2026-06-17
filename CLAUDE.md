@@ -228,6 +228,10 @@ PRIMARY (fv2)      : Framework_V2/data/historical/csv/intraday_5min/
   fv2 CSV dataset    TATAMOTORS_5min.csv — 73,174 rows, 7 cols + outcome cols
                      Columns: signal_type, exit_reason, raw_pnl, win
                      Coverage: 2022–2025 (4 years), MA20 pre-warmed (0 NaN)
+                     ⚠️  ALL fv2 backtests must use these CSVs — including daily
+                         Kijun/indicator derivation (resample from 5-min).
+                         Do NOT use DS3 parquets or fv1 daily parquets for fv2
+                         work unless Saurav explicitly asks.
 
 PRIMARY (fv1/Sandbox): Framework_V1/data/historical/intraday_5min_DS3/
   DS3 dataset        Chunked parquet format

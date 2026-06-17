@@ -2,38 +2,46 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Kijun Bounce — run all 30 stocks on Python (Kijun-HL)
-        Script: Algo_Trading/Framework_V2/scripts/kijun_bounce_backtest.py
-        Expand STOCKS list to all 30, check which stocks hold PF>1
-        Then investigate TV vs Python gap (ATR method, entry price differences)
+P1  fv2 baseline — sort out exact formula + numbers AND reconcile trade-count discrepancy
+        Source of truth: fv2_batch_build.py (no open>MA — that's a temp-script artifact)
+        Re-verified 2026-06-16: no-vol N=51,803 PF=0.918 | with-vol N=44,823 PF=0.906
+        _temp_per_stock_baseline.py / _temp_fv2_baseline.py gave N=136,849/195,475 (3-4x off) —
+        root cause not isolated yet. Save final formula+numbers to CLAUDE.md + guides/ once resolved.
 
-P2  Kijun Bounce — resolve TV vs Python discrepancy
-        TV ADJ mode shows PF=0.759 vs Python Kijun-Close PF=1.37 for ITC
-        Likely cause: ATR smoothing method + entry price execution differences
-        Fix: match ATR method (Wilder's RMA) and verify signal count alignment
+P2  HMA Bounce — side-by-side comparison vs SMA20 baseline pending
+        hma_bounce_backtest.py exists (raw PF=0.944 vs SMA 0.918)
+        Next: per-stock table comparing HMA vs SMA with TGT-WR, PFT-WR, BE%, PF
 
-P3  MA Bounce — parked, not abandoned
-        Resume after Kijun Bounce investigation completes
-        Key open item: share ITC filter findings with Opus on claude.ai before resuming
+P3  Trading ABC — Top-9 subset found (PF=1.197, N=911) vs full-universe PF=0.849-0.878
+        Next: walk-forward test subset stability (overfit risk on 4yr in-sample stock pick)
 
-P4  Re-export H5 signals with p11 bug fixed
-        All 30 stocks x 4 years x 2 tb variants need regeneration after p11 fix
+P4  Kijun filter on top of MA20 Bounce
+        Use Kijun level as quality filter for existing fv2 MA Bounce signal
 
-P5  Codedex learning track — current: Pandas (ex8 messy data); next: Matplotlib → SQL → GenAI
+P5  RSI + MACD as signal refinement filters for fv2 / Codedex learning track
+        RSI overbought/oversold + MACD momentum to filter/confirm bounce signals
+        Codedex: current Pandas (ex8 messy data); next Matplotlib → SQL → GenAI
 
 # ── PARKED / FUTURE ───────────────────────────────────────────
-F0  Volume Spike Exhaustion — parked after Kijun Bounce pivot
-        Hypothesis: low-vol move → spike cluster (conflict) → resolution → entry
-        Resume if Kijun Bounce doesn't hold across 30 stocks
-F1  Compare H1 vs export_h5_signals.py signal scanning logic
-F2  Claude-in-Claude Artifacts — paste OHLCV, get signal analysis in browser
-F3  YouTube Strategy Scanner (post paper-trading)
-F4  Insurance review
-F5  Stock diversity analysis — check if 5 stocks fire on same days
-F6  Portfolio construction — capital allocation across 5 stocks
-F7  Checkout VSCode Agent
-F8  TradingView AI Chart Copilot
-F9  Nifty Futures — Beluga signal on Nifty index (post Kijun Bounce investigation)
+F1  Nifty Futures — Beluga signal on Nifty (post HMA Bounce investigation)
+
+F2  Volume Spike Exhaustion — hypothesis parked
+
+F3  Compare H1 vs export_h5_signals.py signal scanning logic
+
+F4  Claude-in-Claude Artifacts — paste OHLCV, get signal analysis in browser
+
+F5  YouTube Strategy Scanner (post paper-trading)
+
+F6  Insurance review
+
+F7  Stock diversity analysis — check if 5 stocks fire on same days
+
+F8  Portfolio construction — capital allocation across stocks
+
+F9  Checkout VSCode Agent
+
+F10 TradingView AI Chart Copilot
 
 # ── GLOSSARY ──────────────────────────────────────────────────
 ## Signal Geometry

@@ -253,3 +253,19 @@ Step 9.4  — 2026-04-19
 2026-06-13 | ITC W/(W+L) structural decay confirmed: 34.4->28->25.6->22% across 2022-2025
 2026-06-13 | Visual review: pre-T0 Beluga crossover = faster target hit; Green quad = cleanest Ws
 2026-06-14 | Kijun Bounce backtest built; Kijun-HL 4/5 stocks PF>1; data issue found (demerger adj ~11%); TV ADJ PF=0.759 signals fragility
+2026-06-15 | Kijun-HL backtested on 30 stocks (fv2 CSV); 11/30 PF>1; best 5-stock combo PF=1.606; ~72 trades/yr too low for standalone
+2026-06-15 | Pine Script aligned to Python logic (entry bar open, bounce bar ATR, prev-day Kijun); TV gap confirmed as data-driven
+2026-06-15 | Next: HMA Bounce exploration (P1); Trading ABD (P2); Kijun filter on MA20 (P3)
+2026-06-15 | EOD corrected 15:15→15:00; re-ran 30-stock backtest (PF 0.848); Top 6 sweet spot (PF 1.489, N=157)
+2026-06-15 | Kijun period sweep (10/20/30/40/50-day): 50-day only profitable (PF 1.378); shorter periods all fail
+2026-06-15 | Next: hma_bounce_backtest.py (separate script); HMA from Beluga oscillator; do not modify fv2 MA20 script
+2026-06-15 SS ──────────────────────────────────────────────────────────────
+           ✅  HMA20 bounce backtest built (hma_bounce_backtest.py) — 30 stocks raw PF=0.944 vs SMA20 PF=0.918
+           ✅  fv2 baseline confirmed: no volume filter better (PF 0.918, N=51,803 vs 0.906 N=44,823)
+           ✅  Per-stock baseline (no vol): BHARTIARTL(1.053) > DABUR(1.049) > ASHOKLEY(1.030) > SUNPHARMA(1.013)
+           ✅  BHARTIARTL adopted as reference stock going forward
+           ✅  TGT-WR / PFT-WR terminology locked (never plain WR); theoretical BE = 35.7%
+           ✅  Trading ABC (TV community script) fully dissected — 5-step logic: Trend Cloud → ZigZag → ABC Fib → Bounce → Signal
+           ✅  lstoch = dead code in Trading ABC (computed, never wired into signal)
+           ✅  Multiple C labels explained: abc_bar_count<=6 fires independently on each bar within 6-bar window
+           ✅  Next: P2 Trading ABC Python backtest on BHARTIARTL (Step 4 standalone vs full 5-step)

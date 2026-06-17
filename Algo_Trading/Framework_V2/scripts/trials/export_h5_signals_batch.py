@@ -176,7 +176,6 @@ def export_signals(stock, year, max_tb_gap):
                 'p09': p09,
                 'p10': p10,
                 'p11': p11,
-                'p11': p11,
                 'p12': p12,
                 'same_candle_tb': same_candle,
                 'bounce_bar_index': bounce_bar_index,
