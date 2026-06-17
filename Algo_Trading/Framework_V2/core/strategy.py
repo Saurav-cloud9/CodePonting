@@ -3,5 +3,5 @@
 def is_touch(low, ma20):
     return low <= ma20
 
-def is_bounce(close, ma20):
-    return close > ma20
+def is_bounce(close, open_, ma20):
+    return close > ma20 and open_ > ma20
