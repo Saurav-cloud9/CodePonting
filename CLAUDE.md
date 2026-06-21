@@ -326,6 +326,7 @@ adapters/           : Swap these for different environments
 - Indicators must be precomputed, not calculated inline during backtest
 - No hardcoded file paths — use configs/ YAML or relative paths
 - All sandbox scripts must use DS3 (intraday_5min_DS3) — never intraday_5min
+- All matplotlib charts use dark mode: `plt.style.use('dark_background')` at the top of every plot block
 
 
 ## ── WHAT TO AVOID ─────────────────────────────────────────────

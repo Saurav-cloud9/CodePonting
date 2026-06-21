@@ -523,3 +523,9 @@ c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\references\tv_community_st
 c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\references\tv_community_strategies\index.md
 c:\Users\Saurav\CodePonting\guides\fv2_baseline_formula.md
 c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\core\strategy.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\compute_atr14.py
+c:\Users\Saurav\CodePonting\.remember\remember.md
+c:\Users\Saurav\CodePonting\.remember\remember.md
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\ma_bounce.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\ma_bounce.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\ma_bounce.py

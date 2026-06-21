@@ -45,13 +45,13 @@ while i < len(df):
             i += 1
             continue
         entry = entry_bar['open']
-        sl = entry - SL_MULT * atr 
+        sl = entry - SL_MULT * atr
         tgt = entry + TGT_MULT * atr
         for k in range(entry_idx, len(df)):
             k_bar = df.iloc[k]
             if k_bar['hour'] >= EOD_TIME:
                 pnl = k_bar['open'] - entry
-                outcome = 'EOD+' if pnl > 0 else 'EOD-'
+                outcome = 'EOD+' if k_bar['open'] > entry else 'EOD-'               
                 break
             if k_bar['high'] >= tgt:
                 pnl = tgt - entry
