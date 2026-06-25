@@ -12,9 +12,11 @@ EOD_HOUR = 15
 
 
 def run_backtest(csv_path):
-    df = pd.read_csv(csv_path)
+    df = pd.read_csv(csv_path, low_memory=False)
     df.columns = df.columns.str.strip()
     df['datetime'] = pd.to_datetime(df['datetime'])
+    for col in ['open', 'high', 'low', 'close', 'ma20', 'atr14']:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
     df['date'] = df['datetime'].dt.date
     df['hour'] = df['datetime'].dt.hour
 
@@ -22,6 +24,8 @@ def run_backtest(csv_path):
     i = 0
     while i < len(df):
         row = df.iloc[i]
+        if pd.isna(row['ma20']) or pd.isna(row['atr14']):
+            i += 1; continue
         if row['low'] <= row['ma20']:
             if row['hour'] >= EOD_HOUR:
                 i += 1
@@ -33,6 +37,8 @@ def run_backtest(csv_path):
                 b = df.iloc[j]
                 if b['date'] != touch_date:
                     break
+                if b['hour'] >= EOD_HOUR:
+                    break
                 if b['close'] > b['ma20']:
                     bounce_bar = b
                     break
@@ -40,6 +46,7 @@ def run_backtest(csv_path):
                 i += 1
                 continue
             entry_idx = j + 1
+            if entry_idx >= len(df): i += 1; continue
             entry_bar = df.iloc[entry_idx]
             if entry_bar['date'] != touch_date:
                 i += 1
@@ -61,7 +68,7 @@ def run_backtest(csv_path):
                     pnl = sl - entry
                     outcome = 'L'
                     break
-            trades.append({'pnl': pnl, 'outcome': outcome})
+            trades.append({'pnl': pnl, 'outcome': outcome, 'exit_dt': k_bar['datetime']})
             i = k + 1
         else:
             i += 1

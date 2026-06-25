@@ -2,25 +2,24 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  fv2 baseline — sort out exact formula + numbers AND reconcile trade-count discrepancy
-        Source of truth: fv2_batch_build.py (no open>MA — that's a temp-script artifact)
-        Re-verified 2026-06-16: no-vol N=51,803 PF=0.918 | with-vol N=44,823 PF=0.906
-        _temp_per_stock_baseline.py / _temp_fv2_baseline.py gave N=136,849/195,475 (3-4x off) —
-        root cause not isolated yet. Save final formula+numbers to CLAUDE.md + guides/ once resolved.
+P1  Trading ABC — apply A/B/C stock classification filter on 30-stock baseline
+        Top-9 subset found earlier: PF=1.197, N=911 vs full-universe PF=0.922
+        Next: re-run ABC filter on ma_bounce.py baseline + walk-forward test for overfit check
 
-P2  HMA Bounce — side-by-side comparison vs SMA20 baseline pending
-        hma_bounce_backtest.py exists (raw PF=0.944 vs SMA 0.918)
-        Next: per-stock table comparing HMA vs SMA with TGT-WR, PFT-WR, BE%, PF
-
-P3  Trading ABC — Top-9 subset found (PF=1.197, N=911) vs full-universe PF=0.849-0.878
-        Next: walk-forward test subset stability (overfit risk on 4yr in-sample stock pick)
-
-P4  Kijun filter on top of MA20 Bounce
-        Use Kijun level as quality filter for existing fv2 MA Bounce signal
-
-P5  RSI + MACD as signal refinement filters for fv2 / Codedex learning track
+P2  RSI + MACD filters — apply on ma_bounce.py baseline as signal refinement
         RSI overbought/oversold + MACD momentum to filter/confirm bounce signals
         Codedex: current Pandas (ex8 messy data); next Matplotlib → SQL → GenAI
+
+P3  HMA Bounce — revisit later
+        hma_bounce_backtest.py exists (raw PF=0.944 vs SMA 0.922)
+        Parked until P1+P2 explored on SMA baseline
+
+P4  Kijun filter — may skip depending on P1+P2 results
+        Use Kijun level as quality filter for existing fv2 MA Bounce signal
+
+P5  fv2 baseline locked ✅
+        ma_bounce.py: N=49,039 | PF=0.922 | Prof_WR=41.5% | EOD hard stop 15:00
+        No slippage, no charges. 30 stocks, 2022–2025.
 
 # ── PARKED / FUTURE ───────────────────────────────────────────
 F1  Nifty Futures — Beluga signal on Nifty (post HMA Bounce investigation)

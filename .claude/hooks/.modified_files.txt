@@ -529,3 +529,13 @@ c:\Users\Saurav\CodePonting\.remember\remember.md
 c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\ma_bounce.py
 c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\ma_bounce.py
 c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\ma_bounce.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\ma_bounce.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\ma_bounce.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\ma_bounce.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\ma_bounce.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\ma_bounce.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\plot_exit_times.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\plot_exit_times.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\plot_exit_times.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\plot_exit_times.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\plot_exit_times.py
