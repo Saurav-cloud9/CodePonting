@@ -411,12 +411,12 @@ Routing rules:
   sandbox outputs → CodePonting_Mobile\sandbox\
   misc analysis   → CodePonting_Mobile\misc\
 
-STANDING RULE — Mobile copy:
+STANDING RULE — Mobile copy: [DISABLED — re-enable when Saurav asks]
   When saving ANY output file for review (Excel, CSV, PNG charts),
   ALWAYS save a copy to the corresponding CodePonting_Mobile subfolder
   in addition to the local outputs folder.
 
-STANDING RULE — New framework scaffolding:
+STANDING RULE — New framework scaffolding: [DISABLED — re-enable when Saurav asks]
   Whenever a new Framework folder is scaffolded (fv2, fv3, etc.),
   automatically create a matching subfolder inside
   C:\Users\saurav\OneDrive\CodePonting_Mobile\ with the same

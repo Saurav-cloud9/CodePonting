@@ -4,15 +4,15 @@
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. HMA20 bounce backtest created (hma_bounce_backtest.py) — 30 stocks, PF=0.944 raw
-2. fv2 baseline confirmed: no volume filter better (PF 0.918, N=51k vs 0.906 with vol)
-3. BHARTIARTL adopted as reference stock; TGT-WR/PFT-WR terminology locked
-4. Trading ABC (TV community script) explored: 5-step logic dissected, screenshot taken
-5. Trading ABC Step 4 (bounce check) identified as bounce-dedicated sub-signal
+1. RSI/MACD 4-panel analysis: RSI<30 zone PF=1.31 (n=53 tiny); MACD flat — no discriminating power
+2. fv2_baseline_formula.md updated: BHARTIARTL #1 (PF=1.092) > ASHOKLEY #2 (PF=1.054)
+3. Kite MCP fixed in CC (.mcp.json: npx mcp-remote + NODE_OPTIONS=--use-system-ca)
+4. BAJFINANCE DS3 parquet built: 127,843 candles 2015-02-02→2021-12-31 via Kite MCP (26 chunks)
+5. RSI/MACD re-run: N=49,039 NaN=0 confirmed — BAJFINANCE warmup fix complete
 
 ── MILESTONES (5 most important) ────────────────────────────
 1. fv2 direction locked — 3-gate system (G1/G2/G3) addressing structural gaps vs true MA bounce
-2. MA Bounce parked — ITC W/(W+L) decays 34.4%→22% across 2022-2025; no filter fixes it
-3. Kijun Bounce backtested — 50-day HL optimal; Top 6 PF=1.489; too low frequency for standalone
-4. Data rule established — fv2 backtests use only fv2 CSV (5-min resampled to daily); no DS3/fv1 parquets
-5. Kijun period sweep complete — 50-day confirmed optimal; shorter periods all fail (WR < BE)
+2. fv2 baseline locked — ma_bounce.py: N=49,039 | PF=0.922 | 30 stocks 2022-2025 | no slippage
+3. MFE/MAE confirmed — losers never move in your favour (median MFE 0.67 ATR vs 4.85 winners)
+4. SL×TGT heatmap exhausted — entire 5×9 grid 0.90-0.94; exit tuning cannot fix the strategy
+5. RSI<30 at bounce bar = only PF>1 zone (1.31, n=53) — RSI×MACD combo filter is next step

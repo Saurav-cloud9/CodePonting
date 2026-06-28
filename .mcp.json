@@ -1,9 +1,11 @@
 {
   "mcpServers": {
     "kite": {
-      "command": "node",
-      "args": ["--use-system-ca", "C:/Users/Saurav/AppData/Roaming/npm/node_modules/mcp-remote/dist/client.js", "https://mcp.kite.trade/mcp", "--transport", "http-only"],
-      "timeout": 60000
+      "command": "npx",
+      "args": ["mcp-remote", "https://mcp.kite.trade/mcp"],
+      "env": {
+        "NODE_OPTIONS": "--use-system-ca"
+      }
     },
     "rss-reader": {
       "command": "npx",

@@ -269,3 +269,11 @@ Step 9.4  — 2026-04-19
            ✅  lstoch = dead code in Trading ABC (computed, never wired into signal)
            ✅  Multiple C labels explained: abc_bar_count<=6 fires independently on each bar within 6-bar window
            ✅  Next: P2 Trading ABC Python backtest on BHARTIARTL (Step 4 standalone vs full 5-step)
+
+2026-06-27 SS ──────────────────────────────────────────────────────────────
+           ✅  fv2 baseline locked: ma_bounce.py N=49,039 | PF=0.922 | Prof_WR=41.5% | EOD 15:00
+           ✅  RSI/MACD 40-bar DS3 warm-up added to rsi_macd_mfe.py (29 stocks fixed)
+           ✅  RSI/MACD 4-panel chart confirmed: RSI<30 PF=1.31 (n=53 only); MACD flat (0.88-0.98)
+           ✅  fv2_baseline_formula.md corrected: BHARTIARTL ranked #1 (PF=1.092), ASHOKLEY #2 (1.054)
+           ✅  BAJFINANCE DS3 gap documented (26 trades NaN, 0.05%); fetch script created for Claude Desktop
+           ✅  Next: RSI×MACD 2D combination heatmap — find zone where both push PF>1.0

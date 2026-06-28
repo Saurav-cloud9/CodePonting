@@ -2,24 +2,21 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Trading ABC — apply A/B/C stock classification filter on 30-stock baseline
+P1  Refine fv2 MA Bounce Baseline — improve raw edge (PF 0.908 → >1.01)
+        v1 (wick-only touch) confirmed on TV; logic validated against Python (208/209 match)
+        Next: explore VWAP context filter (touch below VWAP = bearish context, consider filtering)
+
+P2  Big Beluga indicators — review and assess applicability to fv2 signal
+        Look at Beluga-based indicators on TradingView for pattern context ideas
+        Regime labels (Red/Yellow/Green/Blue) already in glossary
+
+P3  RSI×MACD combination filter — find zone where both together push PF > 1.0
+        rsi_macd_mfe.py already has both indicators; add 2D heatmap: RSI bucket × MACD zone → PF grid
+        RSI<30 alone: PF=1.31 (n=53, too small). Need combo to get sufficient sample size.
+
+P4  Trading ABC — apply A/B/C stock classification filter on 30-stock baseline
         Top-9 subset found earlier: PF=1.197, N=911 vs full-universe PF=0.922
         Next: re-run ABC filter on ma_bounce.py baseline + walk-forward test for overfit check
-
-P2  RSI + MACD filters — apply on ma_bounce.py baseline as signal refinement
-        RSI overbought/oversold + MACD momentum to filter/confirm bounce signals
-        Codedex: current Pandas (ex8 messy data); next Matplotlib → SQL → GenAI
-
-P3  HMA Bounce — revisit later
-        hma_bounce_backtest.py exists (raw PF=0.944 vs SMA 0.922)
-        Parked until P1+P2 explored on SMA baseline
-
-P4  Kijun filter — may skip depending on P1+P2 results
-        Use Kijun level as quality filter for existing fv2 MA Bounce signal
-
-P5  fv2 baseline locked ✅
-        ma_bounce.py: N=49,039 | PF=0.922 | Prof_WR=41.5% | EOD hard stop 15:00
-        No slippage, no charges. 30 stocks, 2022–2025.
 
 # ── PARKED / FUTURE ───────────────────────────────────────────
 F1  Nifty Futures — Beluga signal on Nifty (post HMA Bounce investigation)
@@ -75,8 +72,11 @@ F10 TradingView AI Chart Copilot
 # OOS         — out-of-sample
 # R/R         — reward/risk ratio
 # BE          — breakeven W/(W+L) = SL/(SL+TGT)
+# MFE         — Max Favourable Excursion (best point trade reached, in ATR units)
+# MAE         — Max Adverse Excursion (worst point trade reached, in ATR units)
 
 ## Frameworks & Data
 # fv2         — Framework V2 (active)
 # H5          — fv2 gate tuner HTML viewer
 # tb3/tb9     — bounce search window variants (3 or 9 bars)
+# DS3         — primary historical dataset (29 stocks, 2015-2025, 5-min parquet)

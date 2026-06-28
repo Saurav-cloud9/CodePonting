@@ -1,21 +1,21 @@
-# Handoff Note — 2026-06-15
+# Handoff Note — 2026-06-27
 
 ## Current State
-- HMA20 bounce backtest built and run: hma_bounce_backtest.py (30 stocks, raw PF=0.944)
-- fv2 baseline confirmed: no volume filter (PF=0.918, N=51,803). BHARTIARTL = reference stock.
-- Trading ABC (TV community script) fully dissected — 5-step logic understood, not yet backtested
-- TGT-WR / PFT-WR terminology locked. BE = 35.7% theoretical.
+- fv2 baseline locked: ma_bounce.py | N=49,039 | PF=0.922 | Prof_WR=41.5% | 30 stocks 2022-2025
+- RSI/MACD 4-panel chart built (rsi_macd_mfe.py) — RSI<30 only zone above PF=1 (n=53); MACD flat
+- BAJFINANCE DS3 gap: 26 trades NaN (0.05%); fetch_bajfinance_ds3.py ready, run from Claude Desktop
+- Codedex: ex13_The_Final_Scrub.ipynb open (pandas data cleaning, in progress)
 
 ## Next Step
-1. **P2 — Trading ABC backtest**: Port 5-step logic to Python, test on BHARTIARTL first
-   - Step 4 (lbounced) can be tested standalone vs full 5-step for comparison
-   - Use fv2 CSV (BHARTIARTL_5min.csv), same SL=2.5×ATR / TGT=4.5×ATR as baseline
-2. P1 HMA — per-stock comparison vs SMA baseline still pending (hma_bounce_backtest.py exists but no side-by-side table yet)
-3. P3 — Kijun filter on MA20 Bounce (after P2)
+1. **P2 — RSI×MACD combination filter**: find zone where both RSI<X AND MACD>Y together give PF>1.0
+   - Script: rsi_macd_mfe.py already has both indicators computed on all 49,039 trades
+   - Add 2D heatmap: RSI bucket × MACD zone → PF grid
+2. **P1 — Trading ABC filter**: apply A/B/C stock classification on ma_bounce.py baseline
+   - Top-9 subset was PF=1.197, N=911 — re-confirm on current locked baseline
+3. **BAJFINANCE DS3**: run fetch_bajfinance_ds3.py from Claude Desktop to fix 26 NaN trades
 
 ## Known Issues / Context
-- index.md still marks Top 5 as sweet spot — needs update to Top 6 (minor housekeeping)
-- _temp_fv2_baseline.py has "Eco-WR" label in code — should be renamed PFT-WR if reused
-- All temp scripts (_temp_*) in Framework_V2/scripts/ — working files, not cleaned up
-- Trading ABC: abc_bar_count window is 6 bars; multiple C signals can fire from one ABC setup
-- Scripts created this session: hma_bounce_backtest.py, _temp_hma_gated_compare.py, _temp_fv2_baseline.py, _temp_per_stock_baseline.py, _temp_ashokley_drill.py
+- BAJFINANCE DS3 not available from CC (Kite OAuth = Claude Desktop only)
+- rsi_macd_mfe.py uses `dropna(subset=['rsi','macd_hist'])` — excludes 26 BAJFINANCE warmup trades
+- fv2_baseline_formula.md: BHARTIARTL now correctly ranked #1 (was listed alphabetically before)
+- Codedex path: Learning/Codedex/pandas/exercise13_The_Final_Scrub.ipynb
