@@ -1,8 +1,16 @@
 import pandas as pd
 
 
-class MABaseline:
-    MA_COL     = 'ma20'
+class MABaselineV2:
+    """
+    v2 = Bare SHORT baseline — mirror of v0.
+    Touch:  high >= MA20 (any bar touching MA20 from below)
+    Search: MAX_TB_GAP bars for rejection bar where close < MA20
+    Entry:  SHORT at next bar open after rejection bar
+    SL:     entry + SL_MULT  * ATR14  (above entry)
+    TGT:    entry - TGT_MULT * ATR14  (below entry)
+    PnL:    entry - exit_px  (positive = profit for short)
+    """
     SL_MULT    = 2.5
     TGT_MULT   = 4.5
     MAX_TB_GAP = 3
@@ -15,20 +23,20 @@ class MABaseline:
             row = df.iloc[i]
             if pd.isna(row['ma20']) or pd.isna(row['atr14']):
                 i += 1; continue
-            if row['low'] <= row['ma20']:
+            if row['high'] >= row['ma20']:
                 if row['hour'] >= self.EOD_HOUR:
                     i += 1; continue
                 touch_date = row['date']
                 atr = row['atr14']
-                bounce_bar = None
+                rejection_bar = None
                 for j in range(i, i + self.MAX_TB_GAP + 1):
                     if j >= len(df): break
                     b = df.iloc[j]
                     if b['date'] != touch_date: break
                     if b['hour'] >= self.EOD_HOUR: break
-                    if b['close'] > b['ma20']:
-                        bounce_bar = b; break
-                if bounce_bar is None:
+                    if b['close'] < b['ma20']:
+                        rejection_bar = b; break
+                if rejection_bar is None:
                     i += 1; continue
                 entry_idx = j + 1
                 if entry_idx >= len(df): i += 1; continue
@@ -36,17 +44,17 @@ class MABaseline:
                 if entry_bar['date'] != touch_date:
                     i += 1; continue
                 entry = entry_bar['open']
-                sl  = entry - self.SL_MULT  * atr
-                tgt = entry + self.TGT_MULT * atr
+                sl  = entry + self.SL_MULT  * atr
+                tgt = entry - self.TGT_MULT * atr
                 for k in range(entry_idx, len(df)):
                     k_bar = df.iloc[k]
-                    if k_bar['hour'] >= self.EOD_HOUR:
-                        pnl = k_bar['open'] - entry
+                    if k_bar['hour'] >= self.EOD_HOUR or k_bar['date'] != touch_date:
+                        pnl = entry - k_bar['open']
                         outcome = 'EOD+' if pnl > 0 else 'EOD-'; break
-                    if k_bar['high'] >= tgt:
-                        pnl = tgt - entry; outcome = 'W'; break
-                    if k_bar['low']  <= sl:
-                        pnl = sl  - entry; outcome = 'L'; break
+                    if k_bar['low']  <= tgt:
+                        pnl = entry - tgt; outcome = 'W'; break
+                    if k_bar['high'] >= sl:
+                        pnl = entry - sl;  outcome = 'L'; break
                 trades.append({'pnl': pnl, 'outcome': outcome, 'exit_dt': k_bar['datetime']})
                 i = k + 1
             else:

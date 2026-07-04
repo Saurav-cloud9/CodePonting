@@ -4,15 +4,15 @@
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. RSI/MACD 4-panel analysis: RSI<30 zone PF=1.31 (n=53 tiny); MACD flat — no discriminating power
-2. fv2_baseline_formula.md updated: BHARTIARTL #1 (PF=1.092) > ASHOKLEY #2 (PF=1.054)
-3. Kite MCP fixed in CC (.mcp.json: npx mcp-remote + NODE_OPTIONS=--use-system-ca)
-4. BAJFINANCE DS3 parquet built: 127,843 candles 2015-02-02→2021-12-31 via Kite MCP (26 chunks)
-5. RSI/MACD re-run: N=49,039 NaN=0 confirmed — BAJFINANCE warmup fix complete
+1. Cleaned and rebuilt two standalone baselines: ma_bounce.py (LONG) + ma_rejection.py (SHORT)
+2. LONG bare confirmed: N=49,062 PF=0.922 Sharpe=-1.458
+3. SHORT bare confirmed: N=47,787 PF=1.079 Sharpe=1.455 — positive all 4 years, 27/30 stocks
+4. baseline_reserve/ma_bounce.py locked clean; CLAUDE.md rule added for folder protection
+5. Next: lock both baselines → analyse SHORT edge → build SHORT v1 (wick-only mirror)
 
 ── MILESTONES (5 most important) ────────────────────────────
-1. fv2 direction locked — 3-gate system (G1/G2/G3) addressing structural gaps vs true MA bounce
-2. fv2 baseline locked — ma_bounce.py: N=49,039 | PF=0.922 | 30 stocks 2022-2025 | no slippage
-3. MFE/MAE confirmed — losers never move in your favour (median MFE 0.67 ATR vs 4.85 winners)
-4. SL×TGT heatmap exhausted — entire 5×9 grid 0.90-0.94; exit tuning cannot fix the strategy
-5. RSI<30 at bounce bar = only PF>1 zone (1.31, n=53) — RSI×MACD combo filter is next step
+1. fv2 LONG bare locked: N=49,062 PF=0.922 | 30 stocks 2022-2025
+2. fv2 SHORT bare confirmed: PF=1.079 Sharpe=1.455 | positive edge all 4 years
+3. v1.1 (v1 + Above VWAP + Below EMA100): PF=1.010 N=8,377 — best long edge found
+4. SHORT structural direction confirmed: rejects MA more reliably than bounces — 27/30 stocks
+5. Version hierarchy: ma_bounce=LONG bare, ma_rejection=SHORT bare — two clean reference scripts

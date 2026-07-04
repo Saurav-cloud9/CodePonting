@@ -2,41 +2,34 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Refine fv2 MA Bounce Baseline — improve raw edge (PF 0.908 → >1.01)
-        v1 (wick-only touch) confirmed on TV; logic validated against Python (208/209 match)
-        Next: explore VWAP context filter (touch below VWAP = bearish context, consider filtering)
+P1  Lock both baselines into baseline_reserve/
+        Copy ma_bounce.py + ma_rejection.py from baseline_explorations/ → baseline_reserve/
+        These become the v0 LONG and SHORT locked reference files
 
-P2  Big Beluga indicators — review and assess applicability to fv2 signal
-        Look at Beluga-based indicators on TradingView for pattern context ideas
-        Regime labels (Red/Yellow/Green/Blue) already in glossary
+P2  Analyse SHORT vs LONG edge — why rejection beats bounce
+        Structural factors (price behaviour at MA), use TV visualisation
+        Document findings before building v1
 
-P3  RSI×MACD combination filter — find zone where both together push PF > 1.0
-        rsi_macd_mfe.py already has both indicators; add 2D heatmap: RSI bucket × MACD zone → PF grid
-        RSI<30 alone: PF=1.31 (n=53, too small). Need combo to get sufficient sample size.
+P3  Build SHORT v1 — wick-only SHORT (mirror of LONG v1 structural mod)
+        Proper clean build; run stockwise + yearwise; log to iteration_log.md
+        Then: equity curve, drawdown, NPF analysis
 
-P4  Trading ABC — apply A/B/C stock classification filter on 30-stock baseline
-        Top-9 subset found earlier: PF=1.197, N=911 vs full-universe PF=0.922
-        Next: re-run ABC filter on ma_bounce.py baseline + walk-forward test for overfit check
+P4  Debug runner scripts (run_baseline_v*.py)
+        Minor errors found — debug and verify all 5 run cleanly
+
+P5  Single-stock trade dump (TATAMOTORS) — verify SHORT calculations
+        Print raw trade list: entry bar, entry_px, SL, TGT, exit_px, outcome
 
 # ── PARKED / FUTURE ───────────────────────────────────────────
 F1  Nifty Futures — Beluga signal on Nifty (post HMA Bounce investigation)
-
 F2  Volume Spike Exhaustion — hypothesis parked
-
 F3  Compare H1 vs export_h5_signals.py signal scanning logic
-
 F4  Claude-in-Claude Artifacts — paste OHLCV, get signal analysis in browser
-
 F5  YouTube Strategy Scanner (post paper-trading)
-
 F6  Insurance review
-
 F7  Stock diversity analysis — check if 5 stocks fire on same days
-
 F8  Portfolio construction — capital allocation across stocks
-
 F9  Checkout VSCode Agent
-
 F10 TradingView AI Chart Copilot
 
 # ── GLOSSARY ──────────────────────────────────────────────────
@@ -66,7 +59,10 @@ F10 TradingView AI Chart Copilot
 # Blue        — weak uptrend + below-average volume
 
 ## Metrics & System
-# PF          — profit factor
+# PF          — raw profit factor (Python backtest, zero charges)
+# TPF         — TradingView Profit Factor (brokerage only, 0.05%/side)
+# NPF         — Neo Profit Factor (Kotak Neo): full real-world charges (brokerage + statutory)
+# CBQ         — Charge Break-even Qty: NPF vs qty sweep to find the quantity where charges are overcome
 # WR          — win rate
 # WFA         — walk-forward analysis
 # OOS         — out-of-sample

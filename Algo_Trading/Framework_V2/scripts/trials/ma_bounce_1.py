@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 
+
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min'
 SYMBOL = 'TATAMOTORS'
 csv = os.path.join(DATA_DIR, f'{SYMBOL}_5min.csv')

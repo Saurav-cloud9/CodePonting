@@ -175,7 +175,10 @@ Owner      : Saurav
 Domain     : NSE F&O Equity Markets (India)
 Language   : Python
 IDE        : VS Code (Claude Code as agentic execution layer)
-Brokers    : Upstox (primary) · Zerodha Kite (future scaling)
+Brokers    : Kotak Neo (primary) · Zerodha Kite (future scaling, post live validation)
+             Note: Upstox excluded (0.1%/side brokerage, 2× Kotak).
+                   Zerodha cheaper per trade (0.03%) but ₹2,000/month API fee —
+                   switch to Zerodha when live trade volume justifies the fixed cost.
 
 
 ## ── FRAMEWORK STATUS — CRITICAL ───────────────────────────────
@@ -295,6 +298,29 @@ Transaction costs (Step 3.3): full formula → [guides/transaction_costs.md](gui
       fv2: charges ≈ Rs 15,950 total (~1.6% of 10L) — manageable. Fix signal first.
       Break-even: PF > ~1.01
 
+## ── NPF — Neo Profit Factor (Kotak Neo) ──────────────────────
+NPF = real-world PF after full Kotak Neo intraday charges (qty=1).
+TV simulates brokerage only (0.05%/side). NPF adds statutory charges on top.
+
+Per-trade cost formula (at ~900 INR price ≈ ₹1.38 total):
+  brok  = (entry + exit) × 0.0005      # 0.05%/side — TV simulates this
+  stt   = exit  × 0.00025              # sell side only
+  txn   = (entry + exit) × 0.0000297   # on turnover
+  sebi  = (entry + exit) × 0.000001    # on turnover
+  stamp = entry × 0.00003              # buy side only
+  gst   = 0.18 × (brok + txn)
+  total = brok + stt + txn + sebi + stamp + gst
+
+PF hierarchy:
+  PF  = raw profit factor (Python backtest, zero charges)
+  TPF = TradingView PF   (brokerage only, 0.05%/side — understates real cost)
+  NPF = Neo Profit Factor (full Kotak Neo charges: brokerage + statutory)
+
+Rule of thumb : NPF ≈ PF − 0.3 to 0.4  (at NSE intraday ~900 INR price range)
+Primary target: PF ≥ 1.5 → NPF ≈ 1.1–1.2  (comfortably profitable after all charges)
+Reference     : HDFCBANK v1.1, 91 trades Jun2025–Jun2026: PF=1.267 → TPF=0.794 → NPF=0.626
+                v1.1 30-stock 2022-2025:                PF=1.010 → NPF=0.588
+
 
 ## ── SANDBOX MASTER PLAN — fv1 (SCRAPPED after Step 4) ─────────
 Full step history + parked items → [[sandbox_master_plan]]
@@ -332,6 +358,7 @@ adapters/           : Swap these for different environments
 ## ── WHAT TO AVOID ─────────────────────────────────────────────
 
 - DO NOT modify Framework_V0 — archived, leave as-is
+- DO NOT TOUCH Framework_V2/baseline_reserve/ unless explicitly asked by Saurav
 - DO NOT use fixed % stop loss — ATR-based SL only
 - DO NOT mix live/paper/backtest logic in core/ modules
 - DO NOT use same-day close for MA calculations (lookahead bias)

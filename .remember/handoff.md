@@ -1,21 +1,20 @@
-# Handoff Note — 2026-06-27
+# Handoff Note — 2026-07-04
 
 ## Current State
-- fv2 baseline locked: ma_bounce.py | N=49,039 | PF=0.922 | Prof_WR=41.5% | 30 stocks 2022-2025
-- RSI/MACD 4-panel chart built (rsi_macd_mfe.py) — RSI<30 only zone above PF=1 (n=53); MACD flat
-- BAJFINANCE DS3 gap: 26 trades NaN (0.05%); fetch_bajfinance_ds3.py ready, run from Claude Desktop
-- Codedex: ex13_The_Final_Scrub.ipynb open (pandas data cleaning, in progress)
+- Two clean standalone baselines in scripts/trials/baseline_explorations/:
+  - ma_bounce.py: LONG bare, N=49,062, PF=0.922, Sharpe=-1.458
+  - ma_rejection.py: SHORT bare, N=47,787, PF=1.079, Sharpe=1.455
+- Both have: bounds check in j-loop, date guard in k-loop, no dead variables
+- baseline_reserve/ma_bounce.py is clean and locked (bounce_bar=None sentinel confirmed)
+- SHORT edge confirmed across all 4 years (2022-2025), 27/30 stocks PF>1.0
 
-## Next Step
-1. **P2 — RSI×MACD combination filter**: find zone where both RSI<X AND MACD>Y together give PF>1.0
-   - Script: rsi_macd_mfe.py already has both indicators computed on all 49,039 trades
-   - Add 2D heatmap: RSI bucket × MACD zone → PF grid
-2. **P1 — Trading ABC filter**: apply A/B/C stock classification on ma_bounce.py baseline
-   - Top-9 subset was PF=1.197, N=911 — re-confirm on current locked baseline
-3. **BAJFINANCE DS3**: run fetch_bajfinance_ds3.py from Claude Desktop to fix 26 NaN trades
+## Next Step (START HERE)
+1. **Lock both baselines into baseline_reserve/** — copy ma_bounce.py + ma_rejection.py from baseline_explorations/ into baseline_reserve/ as the v0 LONG and SHORT reference files
+2. **Analyse SHORT vs LONG edge** — structural reasons why rejection beats bounce; use TV visualisation
+3. **Build SHORT v1** — wick-only SHORT (mirror of LONG v1 structural modification); proper clean build this time
+4. **Equity curve + drawdown + NPF** — on SHORT side before iterating further
 
-## Known Issues / Context
-- BAJFINANCE DS3 not available from CC (Kite OAuth = Claude Desktop only)
-- rsi_macd_mfe.py uses `dropna(subset=['rsi','macd_hist'])` — excludes 26 BAJFINANCE warmup trades
-- fv2_baseline_formula.md: BHARTIARTL now correctly ranked #1 (was listed alphabetically before)
-- Codedex path: Learning/Codedex/pandas/exercise13_The_Final_Scrub.ipynb
+## Known Issues
+- NPF for SHORT bare ~0.7 (not yet tradeable — need PF ~1.4-1.5 after filters)
+- Runner scripts (run_baseline_v*.py in scripts/) still have minor errors — parked P2
+- compare_v0_v2.py still has wrong LONG signal — parked, superseded by standalone scripts

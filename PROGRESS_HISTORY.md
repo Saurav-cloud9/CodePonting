@@ -277,3 +277,46 @@ Step 9.4  — 2026-04-19
            ✅  fv2_baseline_formula.md corrected: BHARTIARTL ranked #1 (PF=1.092), ASHOKLEY #2 (1.054)
            ✅  BAJFINANCE DS3 gap documented (26 trades NaN, 0.05%); fetch script created for Claude Desktop
            ✅  Next: RSI×MACD 2D combination heatmap — find zone where both push PF>1.0
+
+── 2026-06-28 to 2026-06-30 — v2 signal build ───────────────
+           ✅  VWAP explained; v1 gives clean VWAP split (0.090 PF gap above vs below)
+           ✅  guides/iteration_log.md created — 5 iterations tracked (#1 baseline → #5 v2)
+           ✅  EMA sweep (EMA50-250 × VWAP combos): Below EMA100 + Above VWAP = PF=1.010 N=8,377
+           ✅  Filter-at-entry vs post-hoc distinction clarified and documented in iteration log
+           ✅  TV CSV (HDFCBANK) analyzed: PF=0.616 explained by 0.05%/side commission on thin edge
+           ✅  Pine Scripts moved to core/pine/ (co-located with Python counterparts)
+           ✅  core/ma_baseline_v2.py built: v1 + Above VWAP + Below EMA100 | N=8,374 PF=1.013
+           ✅  core/pine/fv2_baseline_v2.pine built: same logic for TV visualization
+           ✅  MAX_TB_GAP removed from v1 and v2 (dead code for v1-style touch)
+           ✅  Next: TV PF cross-verification for v2 on HDFCBANK
+
+2026-07-03  SS ───────────────────────────────────────────────────────────
+           ✅  ABC short tight sweep: SL=0.3 TGT=0.3 → PF=1.842, Sharpe=4.692, WR=67% (30 stocks)
+           ✅  CBQ renamed from QVS; scripts renamed (abc_short_cbq.py, v1_1_cbq.py); glossary updated
+           ✅  ABC short CBQ: NPF asymptotes 0.646@qty=1000 — dead end; iteration #7 logged
+           ✅  v1.1 SL×TGT sweep + position guard bug fixed (N: 21,556→8,273); best SL=2.5x TGT=6.0x
+           ✅  v1.1 CBQ: PF=1.032, NPF=0.893@qty=1000 — dead end; iteration #8 logged
+           ✅  Baseline SHORT (v2) declared new structural direction: high>=MA20, open<MA20, close<MA20
+           ✅  v2 results: N=42,612, PF=1.076, Sharpe=0.833, all 4 years profitable (2023=0.999)
+           ✅  Long baseline at same params: PF=0.926 sub-1.0 every year — short foundation stronger
+           ✅  v2 CBQ: NPF=0.898@qty=1000 — same ceiling; fix raw edge first (target PF>1.3)
+           ✅  fv2_baseline_v2.pine built; guides/ma_baseline_v2_formula.md created; #9 logged
+           ✅  Pine scripts synced TV→local: fv2_baseline.pine, fv2_baseline_v1_1.pine, fv2_baseline_v2.pine
+           ✅  Next: v2 filter build (v2.1 wick-only → v2.2 VWAP → v2.3 EMA)
+
+
+2026-07-03  SS (Evening) ─────────────────────────────────────────────────────
+           ✅  Version hierarchy restructured: v2=bare SHORT (mirror v0), v3=wick-only SHORT (mirror v1)
+           ✅  ma_baseline_v2.py rewritten: bare SHORT (high>=MA20, search 3 bars for close<MA20, SL=2.5x TGT=4.5x)
+           ✅  ma_baseline_v3.py created: wick-only SHORT (formerly v2, SL=2.0x TGT=3.5x)
+           ✅  EOD date guard fixed in ma_baseline_v3.py inner loop (no overnight holds)
+           ✅  Fair comparison v0 vs v2 at default SL=2.5x TGT=4.5x: SHORT PF=1.078 vs LONG PF=0.911 — SHORT wins all years + Sharpe
+           ✅  Iteration log split: LONG (8 iterations) + SHORT (new section, #1=v2 pending, #2=v3)
+           ✅  Runner scripts created: run_baseline_v0/v1_1/v2/v3/all.py (minor errors — P2)
+           ✅  compare_v0_v2.py built for sweep — BUG: LONG uses v1 signal not v0 (fix P1 next session)
+           ✅  Next: fix LONG signal bug, write locked standalone baseline scripts, run proper sweep
+           ✅  2026-07-04: Rebuilt standalone baselines — ma_bounce.py (LONG) + ma_rejection.py (SHORT) in baseline_explorations/
+           ✅  LONG bare final: N=49,062 PF=0.922 Sharpe=-1.458 | SHORT bare final: N=47,787 PF=1.079 Sharpe=1.455
+           ✅  SHORT edge positive all 4 years (2022-2025), 27/30 stocks PF>1.0, top: TATAMOTORS PF=1.394
+           ✅  baseline_reserve/ma_bounce.py locked clean; CLAUDE.md folder protection rule added
+           ✅  Next: lock both into reserve → analyse SHORT edge → build SHORT v1 (wick-only mirror)

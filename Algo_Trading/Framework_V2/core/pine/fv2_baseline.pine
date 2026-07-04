@@ -1,0 +1,178 @@
+//@version=6
+strategy("fv2 MA Bounce Baseline", overlay=true,
+         initial_capital=1000000,
+         default_qty_type=strategy.fixed, default_qty_value=1,
+         commission_type=strategy.commission.percent, commission_value=0.05,
+         max_labels_count=500, max_lines_count=500)
+
+// ── Inputs ────────────────────────────────────────────────────────────────
+atr_mult_sl  = input.float(2.5, "ATR Mult SL",     step=0.1, group="Exit")
+atr_mult_tgt = input.float(4.5, "ATR Mult Target", step=0.1, group="Exit")
+max_gap      = input.int(3,     "Max Touch-Bounce Gap (bars)", minval=1, maxval=10, group="Signal")
+show_levels  = input.bool(true, "Show SL / Target levels")
+
+// ── Indicators ────────────────────────────────────────────────────────────
+ma20         = ta.sma(close, 20)
+atr14        = ta.atr(14)
+float atr_safe = nz(atr14, nz(atr14[1], 1.0))
+
+// ── Time helpers ──────────────────────────────────────────────────────────
+int bar_ms         = timeframe.multiplier * 60 * 1000
+int day_start_now  = time - time % (24 * 60 * 60 * 1000)
+int eod_close_time = day_start_now + 9 * 60 * 60 * 1000 + 30 * 60 * 1000  // 15:00 IST
+bool is_eod        = hour >= 15
+// fire close one bar early so strategy.close fills at 15:00 open (matches Python)
+bool trigger_eod   = time + bar_ms >= eod_close_time
+
+// ── State ─────────────────────────────────────────────────────────────────
+var bool  touching      = false
+var int   touch_idx     = 0
+var int   touch_day     = 0
+var int   touch_time_ms = 0   // saved to draw orange retroactively on bounce
+var float touch_low_px  = na
+var float saved_atr     = na
+var bool  mark_entry    = false
+var int   bounce_bar_idx = -1  // gate: entry only fires on bar > this
+
+var float active_entry_px = na
+var float[] drawn_sl   = array.new_float()
+var line[]  sl_lines   = array.new<line>()
+var float[] sl_lvls    = array.new_float()
+var label[] sl_labels  = array.new<label>()
+var line[]  tgt_lines  = array.new<line>()
+var float[] tgt_lvls   = array.new_float()
+var label[] tgt_labels = array.new<label>()
+
+// ── Reset on new day ─────────────────────────────────────────────────────
+if dayofmonth != dayofmonth[1]
+    touching      := false
+    mark_entry    := false
+    bounce_bar_idx := -1
+    array.clear(drawn_sl)
+    array.clear(sl_lines)
+    array.clear(sl_lvls)
+    array.clear(sl_labels)
+    array.clear(tgt_lines)
+    array.clear(tgt_lvls)
+    array.clear(tgt_labels)
+
+bool not_in_trade = strategy.position_size == 0
+
+// ── Signal detection — fv2 baseline ──────────────────────────────────────
+// Step 1: Touch — save state, NO marker yet (only draw if bounce follows)
+if not_in_trade and not touching and not is_eod and low <= ma20
+    touching       := true
+    touch_idx      := bar_index
+    touch_day      := dayofmonth
+    touch_time_ms  := time
+    touch_low_px   := low
+    saved_atr      := atr_safe
+
+// Step 2: Touch expiry — too many bars, EOD, or new day
+if touching and not_in_trade
+    if bar_index - touch_idx > max_gap or is_eod or dayofmonth != touch_day
+        touching := false
+
+// Step 3: Bounce — entry fires here (fills at bounce+1 open); markers drawn now + next bar
+if touching and not_in_trade and not is_eod and close > ma20
+    touching       := false
+    mark_entry     := true
+    bounce_bar_idx := bar_index
+    strategy.entry("Long", strategy.long)   // fills at bounce+1 open
+    if bar_index == touch_idx
+        // same-bar touch+bounce → purple
+        label.new(time, low - saved_atr * 0.5, "",
+                  style=label.style_triangleup, color=color.purple,
+                  size=size.tiny, xloc=xloc.bar_time)
+    else
+        // orange at touch bar (retroactive), light pink at bounce bar
+        label.new(touch_time_ms, touch_low_px - saved_atr * 0.5, "",
+                  style=label.style_triangleup, color=color.rgb(255, 251, 0),
+                  size=size.tiny, xloc=xloc.bar_time)
+        label.new(time, low - saved_atr * 0.6, "",
+                  style=label.style_triangleup, color=color.rgb(255, 0, 98),
+                  size=size.tiny, xloc=xloc.bar_time)
+
+// ── Entry bar (bounce+1) — set SL/TGT using actual open ──────────────────
+if mark_entry and bar_index > bounce_bar_idx
+    mark_entry := false
+    float entry_px = open                            // actual fill price = bounce+1 open
+    float sl_px    = entry_px - saved_atr * atr_mult_sl
+    float tgt_px   = entry_px + saved_atr * atr_mult_tgt
+    strategy.exit("Exit", "Long", stop=sl_px, limit=tgt_px)
+    active_entry_px := entry_px
+    if show_levels
+        float min_gap = saved_atr * 0.4
+        float adj_sl  = sl_px
+        if array.size(drawn_sl) > 0
+            for i = 0 to array.size(drawn_sl) - 1
+                float existing = array.get(drawn_sl, i)
+                if math.abs(adj_sl - existing) < min_gap
+                    adj_sl := existing - min_gap
+        array.push(drawn_sl, adj_sl)
+        line sl_ln    = line.new(time, adj_sl, eod_close_time, adj_sl,
+                                 color=color.red,   width=1, style=line.style_dashed, xloc=xloc.bar_time)
+        label sl_lbl  = label.new(eod_close_time, adj_sl, "SL "  + str.tostring(math.round(sl_px,  2)),
+                                  color=color.new(color.red,   80), textcolor=color.red,
+                                  style=label.style_label_left, size=size.small, xloc=xloc.bar_time)
+        line tgt_ln   = line.new(time, tgt_px, eod_close_time, tgt_px,
+                                 color=color.green, width=1, style=line.style_dashed, xloc=xloc.bar_time)
+        label tgt_lbl = label.new(eod_close_time, tgt_px, "TGT " + str.tostring(math.round(tgt_px, 2)),
+                                  color=color.new(color.green, 80), textcolor=color.green,
+                                  style=label.style_label_left, size=size.small, xloc=xloc.bar_time)
+        array.push(sl_lines,   sl_ln)
+        array.push(sl_lvls,    sl_px)
+        array.push(sl_labels,  sl_lbl)
+        array.push(tgt_lines,  tgt_ln)
+        array.push(tgt_lvls,   tgt_px)
+        array.push(tgt_labels, tgt_lbl)
+
+// ── Terminate SL/TGT lines on hit ────────────────────────────────────────
+if array.size(sl_lines) > 0
+    for i = 0 to array.size(sl_lines) - 1
+        float sl_l  = array.get(sl_lvls,  i)
+        float tgt_l = array.get(tgt_lvls, i)
+        if not na(sl_l)
+            bool sl_hit  = low  <= sl_l
+            bool tgt_hit = high >= tgt_l
+            if sl_hit or tgt_hit
+                line.set_x2(array.get(sl_lines,  i), time)
+                line.set_x2(array.get(tgt_lines, i), time)
+                label.set_x(array.get(sl_labels,  i), time)
+                label.set_x(array.get(tgt_labels, i), time)
+                array.set(sl_lvls,  i, na)
+                array.set(tgt_lvls, i, na)
+                string om = tgt_hit ? "W" : "L"
+                color  oc = tgt_hit ? color.lime : color.red
+                label.new(time, high + atr_safe * 0.6, om,
+                          style=label.style_label_down, color=color.new(oc, 60),
+                          textcolor=oc, size=size.small, xloc=xloc.bar_time)
+
+// ── EOD hard close + terminate open lines ────────────────────────────────
+if trigger_eod
+    if strategy.position_size > 0
+        strategy.close("Long", comment="EOD")
+        bool is_profit = not na(active_entry_px) and close >= active_entry_px
+        string eod_m = is_profit ? "E+" : "E-"
+        color  eod_c = is_profit ? color.aqua : color.orange
+        if array.size(sl_lvls) > 0
+            for i = 0 to array.size(sl_lvls) - 1
+                if not na(array.get(sl_lvls, i))
+                    label.set_text(array.get(sl_labels,  i), eod_m)
+                    label.set_textcolor(array.get(sl_labels,  i), eod_c)
+                    label.set_color(array.get(sl_labels,  i), color.new(eod_c, 80))
+                    label.set_text(array.get(tgt_labels, i), eod_m)
+                    label.set_textcolor(array.get(tgt_labels, i), eod_c)
+                    label.set_color(array.get(tgt_labels, i), color.new(eod_c, 80))
+    if array.size(sl_lvls) > 0
+        for i = 0 to array.size(sl_lvls) - 1
+            if not na(array.get(sl_lvls, i))
+                line.set_x2(array.get(sl_lines,  i), time)
+                line.set_x2(array.get(tgt_lines, i), time)
+                label.set_x(array.get(sl_labels,  i), time)
+                label.set_x(array.get(tgt_labels, i), time)
+                array.set(sl_lvls,  i, na)
+                array.set(tgt_lvls, i, na)
+
+// ── Plot ──────────────────────────────────────────────────────────────────
+plot(ma20, "MA20", color=color.teal, linewidth=2)
