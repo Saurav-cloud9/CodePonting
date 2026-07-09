@@ -3,12 +3,14 @@ import numpy as np
 import os
 import glob
 
-# Best combo (SL/TGT sweep): SL=2.5x · TGT=4.0x  →  PF=1.083 · Sharpe=1.583
+# v1 change: clean wick-only touch from below MA20
+# Touch bar must have: high >= ma20 AND open < ma20 AND close < ma20
+# Body stays below MA20 — only wick reaches up. Rejection window collapses to j=i.
+# SL/TGT locked from baseline sweep: SL=2.5x · TGT=4.0x  →  PF=1.080 · Sharpe=1.546 (DS3)
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\intraday_5min_DS3'
 
 SL_MULT    = 2.5
 TGT_MULT   = 4.0
-MAX_TR_GAP = 3
 EOD_HOUR   = 15
 
 
@@ -29,28 +31,14 @@ def run_backtest(csv_path):
         if pd.isna(row['ma20']) or pd.isna(row['atr14']):
             i += 1
             continue
-        if row['high'] >= row['ma20']:
+        # v1: wick-only touch — high reaches MA20 but body (open+close) stays below
+        if row['high'] >= row['ma20'] and row['open'] < row['ma20'] and row['close'] < row['ma20']:
             if row['hour'] >= EOD_HOUR:
-                i += 1 
+                i += 1
                 continue
             touch_date = row['date']
             atr = row['atr14']
-            rejection_bar = None
-            for j in range(i, i + MAX_TR_GAP + 1):
-                if j >= len(df): 
-                    break
-                b = df.iloc[j]
-                if b['date'] != touch_date: 
-                    break
-                if b['hour'] >= EOD_HOUR: 
-                    break
-                if b['close'] < b['ma20']:
-                    rejection_bar = b 
-                    break
-            if rejection_bar is None:
-                i += 1 
-                continue
-            entry_idx = j + 1
+            entry_idx = i + 1
             if entry_idx >= len(df):
                 i += 1
                 continue
@@ -79,7 +67,7 @@ def run_backtest(csv_path):
                     outcome = 'L'
                     exit_dt = k_bar['datetime']
                     break
-                if k_bar['low']  <= tgt:
+                if k_bar['low'] <= tgt:
                     pnl = entry - tgt
                     outcome = 'W'
                     exit_dt = k_bar['datetime']

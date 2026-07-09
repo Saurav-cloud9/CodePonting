@@ -3,82 +3,88 @@ import numpy as np
 import os
 import glob
 
-DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min'
+# Best combo (SL/TGT sweep): SL=2.0x · TGT=5.5x  →  PF=0.933 · Sharpe=-1.310
+DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\intraday_5min_DS3'
 
-SL_MULT    = 2.5
-TGT_MULT   = 4.5
+SL_MULT    = 2.0
+TGT_MULT   = 5.5
 MAX_TB_GAP = 3
 EOD_HOUR   = 15
 
 
 def run_backtest(csv_path):
-    df = pd.read_csv(csv_path, low_memory=False)
-    df.columns = df.columns.str.strip()
+    df = pd.read_parquet(csv_path)
     df['datetime'] = pd.to_datetime(df['datetime'])
+    if df['datetime'].dt.tz is not None:
+        df['datetime'] = df['datetime'].apply(lambda x: x.replace(tzinfo=None))
     for col in ['open', 'high', 'low', 'close', 'ma20', 'atr14']:
         df[col] = pd.to_numeric(df[col], errors='coerce')
     df['date'] = df['datetime'].dt.date
     df['hour'] = df['datetime'].dt.hour
 
-    opens  = df['open'].values
-    highs  = df['high'].values
-    lows   = df['low'].values
-    closes = df['close'].values
-    ma20s  = df['ma20'].values
-    atrs   = df['atr14'].values
-    hours  = df['hour'].values
-    dates  = df['date'].values
-    dts    = df['datetime'].values
-
     trades = []
     i = 0
-    n = len(df)
-    while i < n:
-        if pd.isna(ma20s[i]) or pd.isna(atrs[i]):
+    while i < len(df):
+        row = df.iloc[i]
+        if pd.isna(row['ma20']) or pd.isna(row['atr14']):
             i += 1
             continue
-        if lows[i] <= ma20s[i]:
-            if hours[i] >= EOD_HOUR:
+        if row['low'] <= row['ma20']:
+            if row['hour'] >= EOD_HOUR:
                 i += 1
                 continue
-            touch_date = dates[i]
-            atr = atrs[i]
-            bounce_idx = -1
-            for j in range(i, min(i + MAX_TB_GAP + 1, n)):
-                if dates[j] != touch_date:
+            touch_date = row['date']
+            atr = row['atr14']
+            bounce_bar = None
+            for j in range(i, i + MAX_TB_GAP + 1):
+                if j >= len(df):
                     break
-                if hours[j] >= EOD_HOUR:
+                b = df.iloc[j]
+                if b['date'] != touch_date:
                     break
-                if closes[j] > ma20s[j]:
-                    bounce_idx = j
+                if b['hour'] >= EOD_HOUR:
                     break
-            if bounce_idx < 0:
+                if b['close'] > b['ma20']:
+                    bounce_bar = b
+                    break
+            if bounce_bar is None:
                 i += 1
                 continue
-            entry_idx = bounce_idx + 1
-            if entry_idx >= n:
+            entry_idx = j + 1
+            if entry_idx >= len(df):
                 i += 1
                 continue
-            if dates[entry_idx] != touch_date:
+            entry_bar = df.iloc[entry_idx]
+            if entry_bar['date'] != touch_date:
                 i += 1
                 continue
-            entry = opens[entry_idx]
+            entry = entry_bar['open']
             sl  = entry - SL_MULT  * atr
             tgt = entry + TGT_MULT * atr
-            for k in range(entry_idx, n):
-                if hours[k] >= EOD_HOUR or dates[k] != touch_date:
-                    pnl = opens[k] - entry
+            for k in range(entry_idx, len(df)):
+                k_bar = df.iloc[k]
+                if k_bar['date'] != touch_date:
+                    prev = df.iloc[k - 1]
+                    pnl = prev['close'] - entry
                     outcome = 'EOD+' if pnl > 0 else 'EOD-'
+                    exit_dt = prev['datetime']
                     break
-                if highs[k] >= tgt:
-                    pnl = tgt - entry
-                    outcome = 'W'
+                if k_bar['hour'] >= EOD_HOUR:
+                    pnl = k_bar['open'] - entry
+                    outcome = 'EOD+' if pnl > 0 else 'EOD-'
+                    exit_dt = k_bar['datetime']
                     break
-                if lows[k] <= sl:
+                if k_bar['low'] <= sl:
                     pnl = sl - entry
                     outcome = 'L'
+                    exit_dt = k_bar['datetime']
                     break
-            trades.append({'pnl': pnl, 'outcome': outcome, 'exit_dt': dts[k]})
+                if k_bar['high'] >= tgt:
+                    pnl = tgt - entry
+                    outcome = 'W'
+                    exit_dt = k_bar['datetime']
+                    break
+            trades.append({'pnl': pnl, 'outcome': outcome, 'exit_dt': exit_dt})
             i = k + 1
         else:
             i += 1
@@ -93,13 +99,13 @@ def sharpe(trades):
     return round((m.mean() / m.std()) * np.sqrt(12), 3) if m.std() > 0 else 0
 
 
-csv_files = sorted(glob.glob(os.path.join(DATA_DIR, '*_5min.csv')))
+csv_files = sorted(glob.glob(os.path.join(DATA_DIR, '*.parquet')))
 
 all_trades = []
 rows = []
 
 for csv_path in csv_files:
-    symbol = os.path.basename(csv_path).replace('_5min.csv', '')
+    symbol = os.path.basename(csv_path).replace('.parquet', '')
     trades = run_backtest(csv_path)
     df_t = pd.DataFrame(trades)
     n = len(df_t)
