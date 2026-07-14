@@ -869,3 +869,5 @@ c:\Users\Saurav\CodePonting\Algo_Trading\paper_trading_bot\auth_kotak_neo.py
 c:\Users\Saurav\CodePonting\Algo_Trading\paper_trading_bot\auth_kotak_neo.py
 c:\Users\Saurav\CodePonting\Algo_Trading\paper_trading_bot\strategies\rejection_v1_short_bot.py
 c:\Users\Saurav\CodePonting\Algo_Trading\paper_trading_bot\strategies\rejection_v1_short_bot.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\smc_exploration\plan.md
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\smc_exploration\plan.md
