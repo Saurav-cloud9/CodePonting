@@ -510,6 +510,7 @@ Sandbox Master Plan     : [[sandbox_master_plan]]
 CC Remote Setup         : [[cc_remote_setup]]
 Hackathon Ideas         : [[hackathon_ideas]]
 Future Skills           : [[future_skills]]
+Backtesting Rules       : Algo_Trading/Framework_V2/backtesting_rules.md — EOD exit logic, ATR14 SL/TGT convention, NPF formula. Read before writing any fv2 backtest script.
 
 
 ## ── ADVISOR PATTERN ───────────────────────────────────────────────────────────

@@ -3,19 +3,18 @@ import numpy as np
 import os
 import glob
 
-DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\intraday_5min_DS3'
+DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min'
 
-SL_MULT    = 1.5
-TGT_MULT   = 4.0
-MAX_TR_GAP = 3
-EOD_HOUR   = 15
+SL_MULT = 2.5
+TGT_MULT = 4.5
+MAX_TB_GAP = 3
+EOD_HOUR = 15
 
 
 def run_backtest(csv_path):
-    df = pd.read_parquet(csv_path)
+    df = pd.read_csv(csv_path, low_memory=False)
+    df.columns = df.columns.str.strip()
     df['datetime'] = pd.to_datetime(df['datetime'])
-    if df['datetime'].dt.tz is not None:
-        df['datetime'] = df['datetime'].apply(lambda x: x.replace(tzinfo=None))
     for col in ['open', 'high', 'low', 'close', 'ma20', 'atr14']:
         df[col] = pd.to_numeric(df[col], errors='coerce')
     df['date'] = df['datetime'].dt.date
@@ -28,26 +27,26 @@ def run_backtest(csv_path):
         if pd.isna(row['ma20']) or pd.isna(row['atr14']):
             i += 1
             continue
-        if row['high'] >= row['ma20']:
+        if row['low'] <= row['ma20']:
             if row['hour'] >= EOD_HOUR:
-                i += 1 
+                i += 1
                 continue
             touch_date = row['date']
             atr = row['atr14']
-            rejection_bar = None
-            for j in range(i, i + MAX_TR_GAP + 1):
-                if j >= len(df): 
+            bounce_bar = None
+            for j in range(i, i + MAX_TB_GAP + 1):
+                if j >= len(df):
                     break
                 b = df.iloc[j]
-                if b['date'] != touch_date: 
+                if b['date'] != touch_date:
                     break
-                if b['hour'] >= EOD_HOUR: 
+                if b['hour'] >= EOD_HOUR:
                     break
-                if b['close'] < b['ma20']:
-                    rejection_bar = b 
+                if b['close'] > b['ma20']:
+                    bounce_bar = b
                     break
-            if rejection_bar is None:
-                i += 1 
+            if bounce_bar is None:
+                i += 1
                 continue
             entry_idx = j + 1
             if entry_idx >= len(df):
@@ -58,32 +57,23 @@ def run_backtest(csv_path):
                 i += 1
                 continue
             entry = entry_bar['open']
-            sl  = entry + SL_MULT  * atr
-            tgt = entry - TGT_MULT * atr
+            sl = entry - SL_MULT * atr
+            tgt = entry + TGT_MULT * atr
             for k in range(entry_idx, len(df)):
                 k_bar = df.iloc[k]
-                if k_bar['date'] != touch_date:
-                    prev = df.iloc[k - 1]
-                    pnl = entry - prev['close']
+                if k_bar['hour'] >= EOD_HOUR or k_bar['date'] != touch_date:
+                    pnl = k_bar['open'] - entry
                     outcome = 'EOD+' if pnl > 0 else 'EOD-'
-                    exit_dt = prev['datetime']
                     break
-                if k_bar['hour'] >= EOD_HOUR:
-                    pnl = entry - k_bar['open']
-                    outcome = 'EOD+' if pnl > 0 else 'EOD-'
-                    exit_dt = k_bar['datetime']
-                    break
-                if k_bar['high'] >= sl:
-                    pnl = entry - sl
-                    outcome = 'L'
-                    exit_dt = k_bar['datetime']
-                    break
-                if k_bar['low']  <= tgt:
-                    pnl = entry - tgt
+                if k_bar['high'] >= tgt:
+                    pnl = tgt - entry
                     outcome = 'W'
-                    exit_dt = k_bar['datetime']
                     break
-            trades.append({'pnl': pnl, 'outcome': outcome, 'exit_dt': exit_dt})
+                if k_bar['low'] <= sl:
+                    pnl = sl - entry
+                    outcome = 'L'
+                    break
+            trades.append({'pnl': pnl, 'outcome': outcome, 'exit_dt': k_bar['datetime']})
             i = k + 1
         else:
             i += 1
@@ -98,13 +88,13 @@ def sharpe(trades):
     return round((m.mean() / m.std()) * np.sqrt(12), 3) if m.std() > 0 else 0
 
 
-csv_files = sorted(glob.glob(os.path.join(DATA_DIR, '*.parquet')))
+csv_files = sorted(glob.glob(os.path.join(DATA_DIR, '*_5min.csv')))
 
 all_trades = []
 rows = []
 
 for csv_path in csv_files:
-    symbol = os.path.basename(csv_path).replace('.parquet', '')
+    symbol = os.path.basename(csv_path).replace('_5min.csv', '')
     trades = run_backtest(csv_path)
     df_t = pd.DataFrame(trades)
     n = len(df_t)
@@ -113,9 +103,9 @@ for csv_path in csv_files:
     pure_wins = (df_t['outcome'] == 'W').sum()
     prof_wr = prof_wins / n * 100 if n > 0 else 0
     pure_wr = pure_wins / n * 100 if n > 0 else 0
-    avg_win  = df_t[df_t['pnl'] > 0]['pnl'].mean() if prof_wins > 0 else 0
+    avg_win = df_t[df_t['pnl'] > 0]['pnl'].mean() if prof_wins > 0 else 0
     avg_loss = abs(df_t[df_t['pnl'] < 0]['pnl'].mean()) if (df_t['pnl'] < 0).sum() > 0 else 0
-    be_prof  = avg_loss / (avg_win + avg_loss) * 100 if (avg_win + avg_loss) > 0 else 0
+    be_prof = avg_loss / (avg_win + avg_loss) * 100 if (avg_win + avg_loss) > 0 else 0
     gp = df_t[df_t['pnl'] > 0]['pnl'].sum()
     gl = abs(df_t[df_t['pnl'] < 0]['pnl'].sum())
     pf = gp / gl if gl > 0 else 999
@@ -130,13 +120,13 @@ print(summary.to_string(index=False))
 
 print()
 all_df = pd.DataFrame(all_trades)
-n_all     = len(all_df)
-prof_all  = (all_df['pnl'] > 0).sum()
-pure_all  = (all_df['outcome'] == 'W').sum()
-avg_win_all  = all_df[all_df['pnl'] > 0]['pnl'].mean()
+n_all = len(all_df)
+prof_all = (all_df['pnl'] > 0).sum()
+pure_all = (all_df['outcome'] == 'W').sum()
+avg_win_all = all_df[all_df['pnl'] > 0]['pnl'].mean()
 avg_loss_all = abs(all_df[all_df['pnl'] < 0]['pnl'].mean())
-be_prof_all  = avg_loss_all / (avg_win_all + avg_loss_all) * 100
-be_pure      = SL_MULT / (SL_MULT + TGT_MULT) * 100
+be_prof_all = avg_loss_all / (avg_win_all + avg_loss_all) * 100
+be_pure = SL_MULT / (SL_MULT + TGT_MULT) * 100
 gp_all = all_df[all_df['pnl'] > 0]['pnl'].sum()
 gl_all = abs(all_df[all_df['pnl'] < 0]['pnl'].sum())
 pf_all = gp_all / gl_all if gl_all > 0 else 999

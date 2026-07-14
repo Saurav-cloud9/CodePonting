@@ -1,0 +1,262 @@
+[
+  {
+    "time": 1783407600,
+    "open": 836.4,
+    "high": 836.45,
+    "low": 835.1,
+    "close": 835.65,
+    "is_sweep": true,
+    "is_buy_signal": false,
+    "ref_swing_low_level": 835.4
+  },
+  {
+    "time": 1783411200,
+    "open": 830.8,
+    "high": 830.8,
+    "low": 828.9,
+    "close": 830.25,
+    "is_sweep": true,
+    "is_buy_signal": false,
+    "ref_swing_low_level": 829.0
+  },
+  {
+    "time": 1783411500,
+    "open": 830.2,
+    "high": 830.3,
+    "low": 829.25,
+    "close": 830.0,
+    "is_sweep": false,
+    "is_buy_signal": true,
+    "ref_swing_low_level": 828.9
+  },
+  {
+    "time": 1783412700,
+    "open": 828.7,
+    "high": 830.0,
+    "low": 828.5,
+    "close": 829.9,
+    "is_sweep": true,
+    "is_buy_signal": false,
+    "ref_swing_low_level": 828.9
+  },
+  {
+    "time": 1783413000,
+    "open": 829.95,
+    "high": 831.7,
+    "low": 829.15,
+    "close": 831.6,
+    "is_sweep": false,
+    "is_buy_signal": true,
+    "ref_swing_low_level": 828.5
+  },
+  {
+    "time": 1783486500,
+    "open": 827.65,
+    "high": 829.65,
+    "low": 826.8,
+    "close": 829.4,
+    "is_sweep": true,
+    "is_buy_signal": false,
+    "ref_swing_low_level": 828.5
+  },
+  {
+    "time": 1783486800,
+    "open": 829.25,
+    "high": 829.7,
+    "low": 828.7,
+    "close": 829.65,
+    "is_sweep": false,
+    "is_buy_signal": true,
+    "ref_swing_low_level": 826.8
+  },
+  {
+    "time": 1783493100,
+    "open": 826.6,
+    "high": 827.15,
+    "low": 825.55,
+    "close": 826.8,
+    "is_sweep": true,
+    "is_buy_signal": false,
+    "ref_swing_low_level": 825.85
+  },
+  {
+    "time": 1783493400,
+    "open": 826.85,
+    "high": 827.3,
+    "low": 826.45,
+    "close": 827.05,
+    "is_sweep": false,
+    "is_buy_signal": true,
+    "ref_swing_low_level": 825.55
+  },
+  {
+    "time": 1783494600,
+    "open": 825.55,
+    "high": 826.55,
+    "low": 825.4,
+    "close": 826.4,
+    "is_sweep": true,
+    "is_buy_signal": false,
+    "ref_swing_low_level": 825.55
+  },
+  {
+    "time": 1783494900,
+    "open": 826.45,
+    "high": 826.75,
+    "low": 825.85,
+    "close": 826.1,
+    "is_sweep": false,
+    "is_buy_signal": true,
+    "ref_swing_low_level": 825.55
+  },
+  {
+    "time": 1783573500,
+    "open": 814.8,
+    "high": 814.9,
+    "low": 813.35,
+    "close": 814.9,
+    "is_sweep": true,
+    "is_buy_signal": false,
+    "ref_swing_low_level": 813.85
+  },
+  {
+    "time": 1783573800,
+    "open": 814.85,
+    "high": 819.0,
+    "low": 814.6,
+    "close": 816.95,
+    "is_sweep": false,
+    "is_buy_signal": true,
+    "ref_swing_low_level": 813.35
+  },
+  {
+    "time": 1783574400,
+    "open": 814.6,
+    "high": 816.25,
+    "low": 813.0,
+    "close": 816.2,
+    "is_sweep": true,
+    "is_buy_signal": false,
+    "ref_swing_low_level": 813.35
+  },
+  {
+    "time": 1783574700,
+    "open": 816.05,
+    "high": 818.0,
+    "low": 815.9,
+    "close": 817.85,
+    "is_sweep": false,
+    "is_buy_signal": true,
+    "ref_swing_low_level": 813.0
+  },
+  {
+    "time": 1783577400,
+    "open": 818.8,
+    "high": 819.05,
+    "low": 817.5,
+    "close": 819.0,
+    "is_sweep": true,
+    "is_buy_signal": false,
+    "ref_swing_low_level": 817.7
+  },
+  {
+    "time": 1783578600,
+    "open": 817.25,
+    "high": 819.05,
+    "low": 816.7,
+    "close": 819.0,
+    "is_sweep": true,
+    "is_buy_signal": false,
+    "ref_swing_low_level": 816.75
+  },
+  {
+    "time": 1783578900,
+    "open": 819.0,
+    "high": 819.15,
+    "low": 818.0,
+    "close": 818.7,
+    "is_sweep": false,
+    "is_buy_signal": true,
+    "ref_swing_low_level": 816.7
+  },
+  {
+    "time": 1783586400,
+    "open": 820.95,
+    "high": 821.3,
+    "low": 819.95,
+    "close": 821.0,
+    "is_sweep": true,
+    "is_buy_signal": false,
+    "ref_swing_low_level": 820.0
+  },
+  {
+    "time": 1783586700,
+    "open": 820.95,
+    "high": 821.35,
+    "low": 819.8,
+    "close": 820.4,
+    "is_sweep": true,
+    "is_buy_signal": true,
+    "ref_swing_low_level": 820.0
+  },
+  {
+    "time": 1783587000,
+    "open": 820.5,
+    "high": 821.0,
+    "low": 819.75,
+    "close": 820.9,
+    "is_sweep": true,
+    "is_buy_signal": true,
+    "ref_swing_low_level": 820.0
+  },
+  {
+    "time": 1783587300,
+    "open": 821.0,
+    "high": 821.5,
+    "low": 820.3,
+    "close": 821.05,
+    "is_sweep": false,
+    "is_buy_signal": true,
+    "ref_swing_low_level": 819.75
+  },
+  {
+    "time": 1783588200,
+    "open": 820.8,
+    "high": 821.5,
+    "low": 819.25,
+    "close": 820.95,
+    "is_sweep": true,
+    "is_buy_signal": false,
+    "ref_swing_low_level": 819.75
+  },
+  {
+    "time": 1783588500,
+    "open": 821.0,
+    "high": 821.3,
+    "low": 820.3,
+    "close": 820.3,
+    "is_sweep": false,
+    "is_buy_signal": true,
+    "ref_swing_low_level": 819.25
+  },
+  {
+    "time": 1783668600,
+    "open": 823.6,
+    "high": 824.5,
+    "low": 823.2,
+    "close": 823.95,
+    "is_sweep": true,
+    "is_buy_signal": false,
+    "ref_swing_low_level": 823.3
+  },
+  {
+    "time": 1783676100,
+    "open": 825.7,
+    "high": 826.0,
+    "low": 824.85,
+    "close": 825.45,
+    "is_sweep": true,
+    "is_buy_signal": false,
+    "ref_swing_low_level": 825.0
+  }
+]

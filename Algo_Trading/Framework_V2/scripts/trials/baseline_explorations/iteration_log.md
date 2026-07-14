@@ -1,144 +1,191 @@
-# Iteration Log — MA Bounce / Rejection Baseline Explorations
-**Universe:** 30 NSE stocks · 5-min bars  
-**Signal:** MA20 touch → bounce/rejection within MAX_GAP=3 bars → entry next bar open  
-**Scripts:** ma_30_rejection.py (SHORT) · ma_30_bounce.py (LONG)
+# Iteration Log — MA Rejection / Bounce Baselines
+**Universe:** 30 NSE stocks · 5-min bars · DS3 parquets 2015–2025
 
 ---
 
-## Fixes Applied (vs initial run)
-- Next-day bleed fix — date-change exits at prev bar's close, not next bar's open
-- Timezone strip — BAJFINANCE CSV had +05:30 aware datetimes causing false 9:30 AM exits
-- BAJFINANCE CSV indicators — ma20/atr14 recomputed from DS3 parquet (pre-warmed, was blank for first 19 rows)
-- Exit priority — SL checked before TGT (conservative: same-bar ambiguity resolved to loss)
-- Naming — MAX_TB_GAP → MAX_TR_GAP in rejection file
+## Summary
+
+| Run | Signal | Direction | Locked Combo | N | PF | Sharpe | Edge? |
+|---|---|---|---|---|---|---|---|
+| 1 | Baseline (multi-bar) | SHORT | SL=1.5 · TGT=4.0 | 172,360 | 1.116 | 2.275 | ✅ |
+| 1 | Baseline (multi-bar) | LONG  | SL=1.5 · TGT=3.5 | 186,478 | 0.910 | -2.057 | ❌ |
+| 2 | v1 clean-touch        | SHORT | SL=2.0 · TGT=4.5 | 110,641 | 1.135 | 2.358 | ✅ |
+| 2 | v1 clean-touch        | LONG  | SL=1.5 · TGT=3.5 | 125,832 | 0.915 | -1.744 | ❌ |
+
+**SHORT improvement Run 1 → Run 2:** PF +0.019 · Sharpe +0.083 · N −61,719 (cleaner signal, fewer trades)
+**LONG:** no edge at either baseline or v1. Not pursued.
 
 ---
 
-## SL/TGT Sweep
-**Date:** 2026-07-09 · **Scripts:** sweep/sl_tgt_sweep_short.py · sweep/sl_tgt_sweep_long.py  
-**Range:** SL ∈ [1.5–6.0] · TGT ∈ [2.0–6.0] · 90 combinations each · Data: 4-yr CSVs (combo validated on DS3 in Run 1 — delta <0.3%)
+## Run 1 — Baseline (multi-bar touch)
+**Signal:** Any touch of MA20 → rejection/bounce confirmation within 3 bars → entry next bar open
+**Logic:** Single-pass, position guard intact (`i = k+1` after each trade)
+**Scripts:** `ma_30_rejection.py` · `ma_30_bounce.py`
+**Sweeps:** `sl_tgt_sweep_baseline_short.py` · `sl_tgt_sweep_baseline_long.py` (90 combos each)
 
-### SHORT sweep
-Grid flat (PF 1.062–1.086). TGT=4.0 consistently peaks across all SL values.
+### SHORT (Rejection)
 
-| Combo | N | PF | Sharpe | Decision |
-|---|---|---|---|---|
-| SL=2.5 · TGT=4.5 (original) | 47,933 | 1.081 | 1.516 | replaced |
-| SL=2.5 · TGT=4.0 | 49,600 | 1.083 | 1.583 | ✅ locked |
-| SL=5.0 · TGT=4.0 (grid best PF) | 39,432 | 1.086 | 1.329 | ❌ −18% trades, worst Sharpe |
+```
+SL\TGT   2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
+   1.5  1.082  1.093  1.101  1.110 1.116◆  1.115  1.120  1.121 1.122★
+   2.0  1.085  1.096  1.103  1.111  1.116  1.114  1.119  1.118  1.121
+   2.5  1.088  1.099  1.105  1.111  1.116  1.114  1.118  1.117  1.119
+   3.0  1.090  1.100  1.105  1.111  1.116  1.112  1.114  1.112  1.114
+   3.5  1.089  1.100  1.104  1.110  1.115  1.111  1.112  1.111  1.113
+   4.0  1.088  1.098  1.102  1.108  1.114  1.109  1.110  1.108  1.110
+   4.5  1.089  1.100  1.104  1.111  1.115  1.111  1.111  1.109  1.111
+   5.0  1.089  1.100  1.104  1.112  1.117  1.112  1.113  1.111  1.112
+   5.5  1.088  1.099  1.103  1.110  1.116  1.111  1.112  1.110  1.112
+   6.0  1.088  1.100  1.103  1.111  1.116  1.112  1.113  1.111  1.112
 
-### LONG sweep
-No profitable combo anywhere in the grid. Max PF = 0.933.
+◆ locked combo (elbow pick — best Sharpe/PF balance)
+★ best PF (not locked — sits at tail, lower Sharpe robustness)
+```
 
-| Combo | N | PF | Sharpe | Decision |
-|---|---|---|---|---|
-| SL=2.5 · TGT=4.5 (original) | 49,269 | 0.922 | -1.468 | replaced |
-| SL=2.0 · TGT=5.5 | 52,887 | 0.933 | -1.310 | ✅ locked (best available) |
+Grid best (max PF): SL=1.5 · TGT=6.0 → N=157,051 · PF=1.122 · Sharpe=2.124
+Locked combo (elbow): SL=1.5 · TGT=4.0 → N=172,360 · PF=1.116 · Sharpe=2.275
 
----
+Top 5 by PF:
 
-## Run 1 — 4-Year (2022–2025) · DS3 Parquets · Best Combos
-**Date:** 2026-07-09 · **Data:** intraday_5min_DS3 parquets filtered to 2022-01-01+
+| Rank | SL | TGT | N | PF | Sharpe |
+|---|---|---|---|---|---|
+| 1 | 1.5 | 6.0 | 157,051 | 1.122 | 2.124 |
+| 2 | 1.5 | 5.5 | 159,465 | 1.121 | 2.149 |
+| 3 | 2.0 | 6.0 | 134,308 | 1.121 | 1.975 |
+| 4 | 1.5 | 5.0 | 162,554 | 1.120 | 2.155 |
+| 5 | 2.5 | 6.0 | 120,930 | 1.119 | 1.897 |
 
-### SHORT — SL=2.5 · TGT=4.0
-| Metric | Value |
-|---|---|
-| N | 49,473 |
-| PF | 1.080 |
-| Sharpe | +1.546 |
-| Net (pts) | +8,263.68 |
-| Prof_WR | 45.8% |
-| Pure_WR (TGT hit) | 20.0% |
-| BE_pure needed | 38.5% |
+Year-wise (locked combo SL=1.5 · TGT=4.0):
 
-| Year | N | PF | Sharpe | Net |
-|---|---|---|---|---|
-| 2022 | 11,986 | 1.127 | +2.315 | +2,852.53 |
-| 2023 | 11,988 | 1.033 | +0.645 | +641.22 |
-| 2024 | 12,422 | 1.095 | +1.736 | +2,912.33 |
-| 2025 | 13,077 | 1.062 | +1.314 | +1,857.59 |
+| Year | N | PF | Sharpe |
+|---|---|---|---|
+| 2015 | 14,533 | 1.153 | 3.000 |
+| 2016 | 15,730 | 1.111 | 2.185 |
+| 2017 | 15,418 | 1.118 | 2.775 |
+| 2018 | 15,788 | 1.194 | 3.498 |
+| 2019 | 16,139 | 1.143 | 2.848 |
+| 2020 | 15,516 | 1.150 | 2.384 |
+| 2021 | 15,545 | 1.159 | 3.797 |
+| 2022 | 15,478 | 1.100 | 2.503 |
+| 2023 | 15,576 | 1.014 | 0.267 |
+| 2024 | 15,907 | 1.117 | 2.511 |
+| 2025 | 16,730 | 1.070 | 1.635 |
 
-### LONG — SL=2.0 · TGT=5.5
-| Metric | Value |
-|---|---|
-| N | 52,687 |
-| PF | 0.934 |
-| Sharpe | -1.319 |
-| Net (pts) | -7,176.37 |
-| Prof_WR | 37.4% |
-| Pure_WR (TGT hit) | 9.8% |
-| BE_pure needed | 26.7% |
-
-| Year | N | PF | Sharpe | Net |
-|---|---|---|---|---|
-| 2022 | 13,166 | 0.924 | -1.884 | -1,915.02 |
-| 2023 | 12,933 | 0.918 | -1.352 | -1,724.79 |
-| 2024 | 13,005 | 0.927 | -1.297 | -2,406.14 |
-| 2025 | 13,583 | 0.963 | -0.860 | -1,130.42 |
+**Note:** 2023 weak (PF≈1.0, Sharpe≈0.3). 2025 softer but still positive. All other years profitable.
 
 ---
 
-## Run 2 — 11-Year (2015–2025) · DS3 Parquets · Best Combos ✅ FINAL BASELINE
-**Date:** 2026-07-09 · **Data:** intraday_5min_DS3 parquets  
-**Why switched:** CSVs missing Dec 31 2025 · parquets identical OHLCV + 7 extra years + indicators pre-warmed
+### LONG (Bounce)
 
-### SHORT — SL=2.5 · TGT=4.0
-| Metric | Value |
-|---|---|
-| N | 133,696 |
-| PF | 1.116 |
-| Sharpe | +2.049 |
-| Net (pts) | +24,300.35 |
-| Prof_WR | 46.0% |
-| Pure_WR (TGT hit) | 20.8% |
-| BE_pure needed | 38.5% |
-| Stocks profitable | 29/30 (only HDFCBANK 0.976) |
+```
+SL\TGT   2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
+   1.5  0.897  0.902  0.908  0.910  0.907  0.907  0.907  0.909  0.907
+   2.0  0.893  0.898  0.905  0.907  0.904  0.904  0.903  0.907  0.905
+   2.5  0.889  0.893  0.898  0.901  0.898  0.898  0.897  0.900  0.898
+   3.0  0.882  0.885  0.889  0.893  0.891  0.891  0.889  0.893  0.891
+   3.5  0.878  0.880  0.885  0.888  0.887  0.887  0.884  0.888  0.887
+   4.0  0.872  0.875  0.880  0.882  0.880  0.880  0.878  0.881  0.880
+   4.5  0.871  0.875  0.882  0.882  0.880  0.880  0.877  0.880  0.880
+   5.0  0.868  0.871  0.878  0.879  0.877  0.877  0.874  0.877  0.877
+   5.5  0.867  0.870  0.877  0.878  0.876  0.876  0.873  0.876  0.876
+   6.0  0.868  0.871  0.878  0.879  0.877  0.877  0.874  0.877  0.877
+```
 
-| Year | N | PF | Sharpe | Net |
-|---|---|---|---|---|
-| 2015 | 11,163 | 1.175 | +2.818 | +1,883.06 |
-| 2016 | 12,065 | 1.137 | +2.231 | +1,455.04 |
-| 2017 | 11,944 | 1.129 | +2.438 | +1,331.86 |
-| 2018 | 12,347 | 1.180 | +2.996 | +2,701.06 |
-| 2019 | 12,495 | 1.157 | +2.653 | +2,394.48 |
-| 2020 | 12,078 | 1.137 | +1.937 | +2,772.44 |
-| 2021 | 12,131 | 1.147 | +3.326 | +3,498.71 |
-| 2022 | 11,986 | 1.127 | +2.315 | +2,852.53 |
-| 2023 | 11,988 | 1.033 | +0.645 | +641.22 |
-| 2024 | 12,422 | 1.095 | +1.736 | +2,912.33 |
-| 2025 | 13,077 | 1.062 | +1.314 | +1,857.59 |
+Grid best (max PF): SL=1.5 · TGT=3.5 → N=186,478 · PF=0.910 · Sharpe=-2.057
+Locked combo: SL=1.5 · TGT=3.5 (same — least-bad, no edge at any combo)
 
-### LONG — SL=2.0 · TGT=5.5
-| Metric | Value |
-|---|---|
-| N | 142,759 |
-| PF | 0.907 |
-| Sharpe | -1.801 |
-| Net (pts) | -21,252.88 |
-| Prof_WR | 35.9% |
-| Pure_WR (TGT hit) | 9.8% |
-| BE_pure needed | 26.7% |
-| Stocks profitable | 0/30 |
+Top 5 by PF:
 
-| Year | N | PF | Sharpe | Net |
-|---|---|---|---|---|
-| 2015 | 11,701 | 0.885 | -3.258 | -1,335.27 |
-| 2016 | 12,760 | 0.902 | -1.920 | -1,135.39 |
-| 2017 | 13,057 | 0.861 | -3.162 | -1,640.36 |
-| 2018 | 13,131 | 0.885 | -2.290 | -1,953.78 |
-| 2019 | 13,141 | 0.851 | -2.700 | -2,569.37 |
-| 2020 | 13,072 | 0.907 | -1.433 | -2,039.82 |
-| 2021 | 13,210 | 0.873 | -3.213 | -3,402.50 |
-| 2022 | 13,166 | 0.924 | -1.884 | -1,915.02 |
-| 2023 | 12,933 | 0.918 | -1.352 | -1,724.79 |
-| 2024 | 13,005 | 0.927 | -1.297 | -2,406.14 |
-| 2025 | 13,583 | 0.963 | -0.860 | -1,130.42 |
+| Rank | SL | TGT | N | PF | Sharpe |
+|---|---|---|---|---|---|
+| 1 | 1.5 | 3.5 | 186,478 | 0.910 | -2.057 |
+| 2 | 1.5 | 5.5 | 168,361 | 0.909 | -1.834 |
+| 3 | 1.5 | 3.0 | 195,012 | 0.908 | -2.244 |
+| 4 | 1.5 | 6.0 | 166,095 | 0.907 | -1.815 |
+| 5 | 1.5 | 4.5 | 174,959 | 0.907 | -1.952 |
 
-**Notes:**  
-SHORT — PF>1.0 all 11 years. Edge structural, not period-specific. 2023 weakest (1.033) but still positive.  
-LONG — PF<1.0 all 11 years. No combo profitable. MA acts as resistance in this universe, not support.
+**Verdict:** No edge at baseline. PF < 1.0 across all 90 combos. MA20 acts as resistance not support.
 
 ---
 
-## v1 — ma_30_rejection_v1.py
-*Pending.*
+## Run 2 — v1 Clean-Touch
+**Signal:** Single-bar clean touch — body stays on opposite side of MA20 (wick-only cross)
+- SHORT: `high >= MA20 AND open < MA20 AND close < MA20` → short at next bar open
+- LONG:  `low <= MA20 AND open > MA20 AND close > MA20` → long at next bar open
+**Logic:** Single-pass, position guard intact (`i = k+1` after each trade)
+**Scripts:** `ma_30_rejection_v1.py` · `ma_30_bounce_v1.py`
+**Sweeps:** `sl_tgt_sweep_v1_short.py` · `sl_tgt_sweep_v1_long.py` (90 combos each)
+
+### SHORT (Rejection v1)
+
+```
+SL\TGT   2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
+   1.5  1.089  1.102  1.113  1.121  1.123  1.129  1.132  1.136  1.137
+   2.0  1.099  1.110  1.118  1.126  1.130 1.135◆  1.137 1.139★  1.139
+   2.5  1.091  1.104  1.113  1.118  1.123  1.127  1.129  1.129  1.129
+   3.0  1.087  1.100  1.107  1.111  1.117  1.119  1.120  1.120  1.120
+   3.5  1.085  1.101  1.109  1.113  1.118  1.121  1.122  1.122  1.122
+   4.0  1.090  1.104  1.112  1.116  1.121  1.124  1.125  1.125  1.125
+   4.5  1.095  1.109  1.116  1.120  1.125  1.130  1.130  1.130  1.130
+   5.0  1.090  1.105  1.112  1.115  1.120  1.124  1.124  1.123  1.124
+   5.5  1.089  1.103  1.109  1.114  1.118  1.124  1.123  1.122  1.123
+   6.0  1.090  1.105  1.110  1.114  1.120  1.124  1.124  1.123  1.124
+
+◆ locked combo (geomean score — best combined PF/Sharpe/N)
+★ best PF (not locked — wide target, lower Sharpe)
+```
+
+Grid best (max PF): SL=2.0 · TGT=5.5 → N=106,870 · PF=1.139 · Sharpe=2.259
+Locked combo (geomean): SL=2.0 · TGT=4.5 → N=110,641 · PF=1.135 · Sharpe=2.358
+
+Top 5 by PF:
+
+| Rank | SL | TGT | N | PF | Sharpe |
+|---|---|---|---|---|---|
+| 1 | 2.0 | 5.5 | 106,870 | 1.139 | 2.259 |
+| 2 | 2.0 | 6.0 | 105,652 | 1.139 | 2.247 |
+| 3 | 2.0 | 5.0 | 108,486 | 1.137 | 2.273 |
+| 4 | 1.5 | 6.0 | 117,540 | 1.137 | 2.278 |
+| 5 | 1.5 | 5.5 | 118,779 | 1.136 | 2.284 |
+
+Top 5 by Sharpe:
+
+| Rank | SL | TGT | N | PF | Sharpe |
+|---|---|---|---|---|---|
+| 1 | 2.0 | 3.0 | 122,262 | 1.118 | 2.511 |
+| 2 | 2.0 | 2.5 | 129,222 | 1.110 | 2.501 |
+| 3 | 1.5 | 3.0 | 134,671 | 1.113 | 2.483 |
+| 4 | 1.5 | 3.5 | 129,484 | 1.121 | 2.469 |
+| 5 | 1.5 | 2.5 | 141,804 | 1.102 | 2.467 |
+
+---
+
+### LONG (Bounce v1)
+
+```
+SL\TGT   2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
+   1.5  0.897  0.904  0.909  0.911  0.913  0.910  0.911  0.915  0.914
+   2.0  0.890  0.895  0.900  0.903  0.905  0.903  0.903  0.905  0.905
+   2.5  0.881  0.885  0.888  0.892  0.893  0.892  0.892  0.894  0.894
+   3.0  0.874  0.879  0.883  0.886  0.889  0.888  0.887  0.890  0.889
+   3.5  0.868  0.872  0.877  0.880  0.881  0.881  0.879  0.882  0.881
+   4.0  0.863  0.869  0.873  0.875  0.876  0.875  0.873  0.877  0.876
+   4.5  0.863  0.868  0.873  0.875  0.876  0.875  0.873  0.877  0.877
+   5.0  0.859  0.864  0.868  0.870  0.871  0.870  0.868  0.872  0.872
+   5.5  0.857  0.862  0.866  0.869  0.870  0.868  0.867  0.870  0.870
+   6.0  0.856  0.861  0.865  0.868  0.869  0.868  0.867  0.870  0.870
+```
+
+Grid best (max PF): SL=1.5 · TGT=5.5 → N=125,832 · PF=0.915 · Sharpe=-1.744
+
+Top 5 by PF:
+
+| Rank | SL | TGT | N | PF | Sharpe |
+|---|---|---|---|---|---|
+| 1 | 1.5 | 5.5 | 125,832 | 0.915 | -1.744 |
+| 2 | 1.5 | 6.0 | 124,568 | 0.914 | -1.743 |
+| 3 | 1.5 | 4.0 | 132,266 | 0.913 | -1.958 |
+| 4 | 1.5 | 5.0 | 127,416 | 0.911 | -1.880 |
+| 5 | 1.5 | 3.5 | 136,022 | 0.911 | -2.113 |
+
+**Verdict:** No edge at v1. Marginal improvement over baseline (0.915 vs 0.910) but PF < 1.0 across all 90 combos. Not pursued.
