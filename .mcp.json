@@ -7,6 +7,16 @@
         "NODE_OPTIONS": "--use-system-ca"
       }
     },
+    "kotak-neo": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://neo.kotaksecurities.com/mcp-server/mcp"
+      ],
+      "env": {
+        "NODE_OPTIONS": "--use-system-ca"
+      }
+    },
     "rss-reader": {
       "command": "npx",
       "args": ["-y", "rss-reader-mcp"]

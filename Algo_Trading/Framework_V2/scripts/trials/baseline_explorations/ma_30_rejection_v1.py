@@ -6,11 +6,11 @@ import glob
 # v1 change: clean wick-only touch from below MA20
 # Touch bar must have: high >= ma20 AND open < ma20 AND close < ma20
 # Body stays below MA20 — only wick reaches up. Rejection window collapses to j=i.
-# SL/TGT locked from baseline sweep: SL=2.5x · TGT=4.0x  →  PF=1.080 · Sharpe=1.546 (DS3)
+# SL/TGT locked from v1 sweep (geomean pick): SL=2.0x · TGT=4.5x  →  PF=1.135 · Sharpe=2.358 (DS3, 11yr)
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\intraday_5min_DS3'
 
-SL_MULT    = 2.5
-TGT_MULT   = 4.0
+SL_MULT    = 2.0
+TGT_MULT   = 4.5
 EOD_HOUR   = 15
 
 

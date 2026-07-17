@@ -3,11 +3,10 @@ import numpy as np
 import os
 import glob
 
-# Best combo (SL/TGT sweep): SL=2.0x · TGT=5.5x  →  PF=0.933 · Sharpe=-1.310
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\intraday_5min_DS3'
 
-SL_MULT    = 2.0
-TGT_MULT   = 5.5
+SL_MULT    = 1.5
+TGT_MULT   = 3.5
 MAX_TB_GAP = 3
 EOD_HOUR   = 15
 
