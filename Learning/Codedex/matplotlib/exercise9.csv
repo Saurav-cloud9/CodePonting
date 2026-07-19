@@ -1,0 +1,13 @@
+country,continent,life_expectancy,gdp_per_capita,population
+USA,Americas,76.8,36449,282000000
+Canada,Americas,82.3,48000,38000000
+China,Asia,77.4,12000,1400000000
+India,Asia,69.7,7000,1380000000
+Germany,Europe,81.1,46000,83000000
+Nigeria,Africa,54.3,6000,210000000
+Brazil,Americas,75.9,15000,213000000
+Indonesia,Asia,71.7,12000,275000000
+Mexico,Americas,75.0,17000,128000000
+Spain,Europe,83.2,42000,47000000
+Philippines,Asia,71.0,9500,114000000
+Colombia,Americas,77.1,15000,51000000

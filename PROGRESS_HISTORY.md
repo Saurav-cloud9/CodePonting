@@ -320,3 +320,4 @@ Step 9.4  — 2026-04-19
            ✅  SHORT edge positive all 4 years (2022-2025), 27/30 stocks PF>1.0, top: TATAMOTORS PF=1.394
            ✅  baseline_reserve/ma_bounce.py locked clean; CLAUDE.md folder protection rule added
            ✅  Next: lock both into reserve → analyse SHORT edge → build SHORT v1 (wick-only mirror)
+2026-07-18 | Reviewed backtesting_rules_v2.md; aligned with CC; 2 P1 fixes identified (daily Sharpe, entry bar hour check); Zerodha/ZPF adopted; TODO reset with cloud engine as P2

@@ -1,20 +1,17 @@
-# Handoff Note — 2026-07-04
+# Handoff Note — 2026-07-18
 
 ## Current State
-- Two clean standalone baselines in scripts/trials/baseline_explorations/:
-  - ma_bounce.py: LONG bare, N=49,062, PF=0.922, Sharpe=-1.458
-  - ma_rejection.py: SHORT bare, N=47,787, PF=1.079, Sharpe=1.455
-- Both have: bounds check in j-loop, date guard in k-loop, no dead variables
-- baseline_reserve/ma_bounce.py is clean and locked (bounce_bar=None sentinel confirmed)
-- SHORT edge confirmed across all 4 years (2022-2025), 27/30 stocks PF>1.0
+- backtesting_rules_v2.md finalized and aligned; LONG charge direction note added
+- Broker switched to Zerodha; metrics are now ZPF + ZSh(D) (daily Sharpe ×√252)
+- SHORT baselines locked: baseline SL=1.5/TGT=4.0, v1 SL=2.0/TGT=4.5
+- iteration_log.md covers Run 1 (baseline) + Run 2 (v1 clean-touch); v1_vwap not swept yet
 
 ## Next Step (START HERE)
-1. **Lock both baselines into baseline_reserve/** — copy ma_bounce.py + ma_rejection.py from baseline_explorations/ into baseline_reserve/ as the v0 LONG and SHORT reference files
-2. **Analyse SHORT vs LONG edge** — structural reasons why rejection beats bounce; use TV visualisation
-3. **Build SHORT v1** — wick-only SHORT (mirror of LONG v1 structural modification); proper clean build this time
-4. **Equity curve + drawdown + NPF** — on SHORT side before iterating further
+1. **P1 — Script fixes**: (a) update Sharpe to daily in all sweep scripts; (b) add `hour[i+1] >= 15` entry skip
+2. **P2 — Cloud engine**: build backtesting REST API on Oracle Cloud for mobile/remote use
+3. **P3 — Lock baselines**: copy ma_bounce.py + ma_rejection.py → baseline_reserve/
 
 ## Known Issues
-- NPF for SHORT bare ~0.7 (not yet tradeable — need PF ~1.4-1.5 after filters)
-- Runner scripts (run_baseline_v*.py in scripts/) still have minor errors — parked P2
-- compare_v0_v2.py still has wrong LONG signal — parked, superseded by standalone scripts
+- All CC Sharpe values to date use monthly method — not comparable to ZSh(D) until scripts updated
+- v1_vwap (ma_30_rejection_v1_vwap.py) has no sweep; SL/TGT not locked
+- Old broken two-phase sweep scripts (sl_tgt_sweep_short.py, sl_tgt_sweep_long.py) still exist in sweep/ — can be deleted

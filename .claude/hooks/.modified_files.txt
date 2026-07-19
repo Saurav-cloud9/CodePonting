@@ -871,3 +871,18 @@ c:\Users\Saurav\CodePonting\Algo_Trading\paper_trading_bot\strategies\rejection_
 c:\Users\Saurav\CodePonting\Algo_Trading\paper_trading_bot\strategies\rejection_v1_short_bot.py
 C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\smc_exploration\plan.md
 C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\smc_exploration\plan.md
+C:\Users\Saurav\Downloads\files1\backtesting_rules_v2.md
+C:\Users\Saurav\CodePonting\.remember\today.md
+C:\Users\Saurav\CodePonting\.remember\handoff.md
+C:\Users\Saurav\CodePonting\.remember\remember.md
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\sl_tgt_sweep_6bce_short.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\6BCE\chart_zpf_lines_6bce.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\6BCE\chart_consistency_6bce.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\6BCE\chart_consistency_6bce.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\6BCE\chart_spaghetti_6bce.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\backtesting_rules\backtesting_rules_v2.md
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\6BCE\chart_consistency_6bce.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\6BCE\chart_consistency_6bce.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\6BCE\chart_consistency_6bce.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\6BCE\chart_consistency_6bce.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\6BCE\chart_spaghetti_zshd_6bce.py
