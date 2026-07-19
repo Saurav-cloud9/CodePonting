@@ -2,27 +2,30 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Script fixes for ZPF/ZSh(D) compliance (two changes) — older baseline scripts only
-        a) Sharpe → daily: replace monthly resample (×√12) with daily PNL agg (×√252)
-        b) Entry bar hour check: add `if hour[i+1] >= 15: skip` after signal detection
-        Note: 6BCE scripts already correct; fix needed in baseline_explorations/ scripts
-
-P2  Build cloud backtesting engine for paper trading
+P1  Build cloud backtesting engine for paper trading
         Target: run fv2 backtests from any device (mobile/remote) without local setup
         Primary: Oracle Cloud; fallback: AWS EC2
 
-P3  Lock both baselines into baseline_reserve/
+P2  Lock both baselines into baseline_reserve/
         Copy ma_bounce.py + ma_rejection.py from baseline_explorations/ → baseline_reserve/
         These become the v0 LONG and SHORT locked reference files
 
-P4  New signal sweeps — delegate to Grok CLI
+P3  New signal sweeps — delegate to Grok CLI
         Feed backtesting_rules_v2.md to Grok as context; run 90-combo sweeps on new ideas
         Filters to try: VWAP, RSI, MACD, Beluga oscillator
         Metrics to explore: max drawdown, equity curve, efficient frontier, AUC/ROC
 
-P5  v1_vwap sweep — no fresh 90-combo sweep done yet
+P4  v1_vwap sweep — no fresh 90-combo sweep done yet
         ma_30_rejection_v1_vwap.py exists but SL/TGT not swept
         Run sl_tgt_sweep for v1_vwap SHORT, log results to iteration_log.md
+
+P5  DS3 ma20/atr14 recompute — parked, only revisit if major inconsistencies appear
+        Pandas rolling mean (DS3's current method) vs deque/fresh-sum (paper bot's
+        live-shaped method) can tie-break differently at exact-tie bars (found during
+        offline engine validation: 4/110,641 trades diverged, PF/Sharpe unaffected)
+        Not worth redoing now — would invalidate all prior validated sweep results
+        for a 13th-14th decimal place difference. Revisit only if real inconsistencies
+        (not this floating-point tie-breaking) show up later.
 
 # ── PARKED / FUTURE ───────────────────────────────────────────
 F1  Single-stock trade dump (TATAMOTORS) — verify SHORT calculations
@@ -43,6 +46,9 @@ F6  Insurance review
 # G3          — Gate 3: post-bounce follow-through
 
 ## Metrics & System
+# SL/TP       — Stop Loss / Take Profit (standard shortform going forward, replaces
+#               TGT in all new scripts starting with the kite paper trading bot;
+#               existing files keep TGT, not retroactively renamed)
 # PF          — raw profit factor (Python backtest, zero charges)
 # ZPF         — Zerodha Profit Factor: PF after full Zerodha intraday charges
 # ZSh(D)      — Zerodha Daily Sharpe (annualised): daily zpnl mean/std × √252

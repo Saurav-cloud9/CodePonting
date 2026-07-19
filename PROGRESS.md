@@ -4,15 +4,15 @@
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. Reviewed backtesting_rules_v2.md — aligned with CC; LONG charge flip note added
-2. Built 6BCE SHORT 90-combo sweep; best ZPF=0.888 — strategy confirmed dead
-3. Created ZPF spaghetti chart (chart_spaghetti_6bce.py) + cache system (sweep_cache_6bce.npz)
-4. Extended cache to include yearly_zshd_grid; built ZSh(D) spaghetti chart
-5. Best consistency combo: SL=6.0/TGT=5.5 (ZPF=0.887); 6BCE dead — moving on
+1. Kite Connect auth built + validated (kite_auth.py); AVG antivirus SSL interception found and removed
+2. TATAMOTORS demerger discovered (→TMPV/TMCV, Nov 2025); DS3 data confirmed unaffected, no rebuild needed
+3. Paper-bot data architecture decided: ticks-only live engine; historical_data reserved for offline reconciliation only
+4. SL=2.0x/TP=4.5x locked (renamed SL/TGT→SL/TP going forward); re-validated against iteration_log.md
+5. Offline paper-trading engine built + validated (bar-by-bar, live-shaped): PF=1.135/Sharpe=2.358 exact match vs reference, N within 0.004% (floating-point tie-break, root cause diagnosed, corroborated by Grok)
 
 ── MILESTONES (5 most important) ────────────────────────────
-1. SHORT bare confirmed edge: PF=1.116 Sharpe=2.275 (DS3 11yr, 172k trades)
-2. v1 clean-touch improves SHORT: PF=1.135 Sharpe=2.358 (110k trades — cleaner signal)
-3. LONG confirmed dead: PF<1.0 across all 90 combos at both baseline and v1
+1. v1 clean-touch SHORT locked: SL=2.0x/TP=4.5x → PF=1.135 Sharpe=2.358 (110,641 trades, DS3 11yr) — cross-validated (array backtest + offline engine + Grok)
+2. Kite paper-trading bot architecture established: tick-based live engine + offline/reconciliation split (Algo_Trading/kite_oracle_papertrading/)
+3. LONG confirmed dead (PF<1.0 across all 90 combos, baseline and v1); SHORT is the only viable direction
 4. Zerodha adopted as primary broker metric (ZPF/ZSh(D)); NPF/Kotak archived
-5. Cloud backtesting engine (Oracle primary) identified as next major build target
+5. TATAMOTORS→TMPV corporate action resolved; DS3 dataset confirmed unaffected

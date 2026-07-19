@@ -6,11 +6,11 @@ import glob
 # v1 change: clean wick-only touch from below MA20
 # Touch bar must have: high >= ma20 AND open < ma20 AND close < ma20
 # Body stays below MA20 — only wick reaches up. Rejection window collapses to j=i.
-# SL/TGT locked from baseline sweep: SL=2.5x · TGT=4.0x  →  PF=1.080 · Sharpe=1.546 (DS3)
+# SL/TP locked from v1 sweep (geomean pick): SL=2.0x · TP=4.5x  →  PF=1.135 · Sharpe=2.358 (DS3, 11yr)
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\intraday_5min_DS3'
 
-SL_MULT    = 2.5
-TGT_MULT   = 4.0
+SL_MULT    = 2.0
+TP_MULT    = 4.5
 EOD_HOUR   = 15
 
 
@@ -47,8 +47,8 @@ def run_backtest(csv_path):
                 i += 1
                 continue
             entry = entry_bar['open']
-            sl  = entry + SL_MULT  * atr
-            tgt = entry - TGT_MULT * atr
+            sl = entry + SL_MULT * atr
+            tp = entry - TP_MULT * atr
             for k in range(entry_idx, len(df)):
                 k_bar = df.iloc[k]
                 if k_bar['date'] != touch_date:
@@ -67,8 +67,8 @@ def run_backtest(csv_path):
                     outcome = 'L'
                     exit_dt = k_bar['datetime']
                     break
-                if k_bar['low'] <= tgt:
-                    pnl = entry - tgt
+                if k_bar['low'] <= tp:
+                    pnl = entry - tp
                     outcome = 'W'
                     exit_dt = k_bar['datetime']
                     break
@@ -125,7 +125,7 @@ pure_all  = (all_df['outcome'] == 'W').sum()
 avg_win_all  = all_df[all_df['pnl'] > 0]['pnl'].mean()
 avg_loss_all = abs(all_df[all_df['pnl'] < 0]['pnl'].mean())
 be_prof_all  = avg_loss_all / (avg_win_all + avg_loss_all) * 100
-be_pure      = SL_MULT / (SL_MULT + TGT_MULT) * 100
+be_pure      = SL_MULT / (SL_MULT + TP_MULT) * 100
 gp_all = all_df[all_df['pnl'] > 0]['pnl'].sum()
 gl_all = abs(all_df[all_df['pnl'] < 0]['pnl'].sum())
 pf_all = gp_all / gl_all if gl_all > 0 else 999

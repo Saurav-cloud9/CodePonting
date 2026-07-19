@@ -328,3 +328,20 @@ Step 9.4  — 2026-04-19
            ✅  Key finding: smoothest combo (SL=2.0/TGT=2.0) = consistently bad; best by ZPF=ZSh(D)
            ✅  Best consistency: SL=6.0/TGT=5.5, cs=0.8198; only 2020 had ZPF>1.0 on any combo
            ✅  Plan: Grok CLI handles new signal sweeps; CC focuses on cloud engine build
+2026-07-19 SS (Kite paper trading bot) ───────────────────────────────────
+           ✅  kite_auth.py built + validated; AVG antivirus SSL interception found, AVG uninstalled
+           ✅  TATAMOTORS demerger discovered (→TMPV/TMCV, Nov 2025); DS3 confirmed unaffected (same
+               instrument_token as TMPV) — live bot queries TMPV going forward, no rebuild needed
+           ✅  Data architecture locked: ticks-only live engine (signal/entry/exit); historical_data
+               reserved for offline reconciliation script only (not yet built)
+           ✅  SL/TP naming convention adopted going forward (replaces TGT in new scripts only)
+           ✅  Locked combo re-validated from iteration_log.md: SL=2.0x/TP=4.5x, N=110,641, PF=1.135,
+               Sharpe=2.358 (corrects the provisional 2.5x/4.0x used earlier in planning)
+           ✅  Offline paper-trading engine built (ma_30_rejection_v1_offline.py): bar-by-bar,
+               live-shaped state, incremental MA20/ATR14 — matches reference PF/Sharpe exactly,
+               N within 0.0036% (floating-point tie-break at exact-tie bars, root cause fully
+               diagnosed and documented, not a bug); independently corroborated by Grok's review
+           ✅  Automation plan: Oracle Cloud VM deploy target (not local PC), cron scheduling,
+               manual Kite login to start (option 1), headless login automation to test later
+           ✅  Next: position sizing + shortability check in offline engine → reconciliation script
+               → live KiteTicker script → automation wrapper
