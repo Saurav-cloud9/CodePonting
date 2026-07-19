@@ -321,3 +321,10 @@ Step 9.4  — 2026-04-19
            ✅  baseline_reserve/ma_bounce.py locked clean; CLAUDE.md folder protection rule added
            ✅  Next: lock both into reserve → analyse SHORT edge → build SHORT v1 (wick-only mirror)
 2026-07-18 | Reviewed backtesting_rules_v2.md; aligned with CC; 2 P1 fixes identified (daily Sharpe, entry bar hour check); Zerodha/ZPF adopted; TODO reset with cloud engine as P2
+2026-07-19 SS ───────────────────────────────────────────────────────────
+           ✅  6BCE SHORT 90-combo sweep built + run (DS3 30 stocks 2015-2025); best ZPF=0.888 — dead
+           ✅  Cache system: sweep_cache_6bce.npz (overall_grid + yearly_grid + yearly_zshd_grid)
+           ✅  4 chart scripts: zpf_lines, consistency, spaghetti (ZPF), spaghetti (ZSh(D))
+           ✅  Key finding: smoothest combo (SL=2.0/TGT=2.0) = consistently bad; best by ZPF=ZSh(D)
+           ✅  Best consistency: SL=6.0/TGT=5.5, cs=0.8198; only 2020 had ZPF>1.0 on any combo
+           ✅  Plan: Grok CLI handles new signal sweeps; CC focuses on cloud engine build

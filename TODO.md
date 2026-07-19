@@ -2,10 +2,10 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Script fixes for ZPF/ZSh(D) compliance (two changes)
+P1  Script fixes for ZPF/ZSh(D) compliance (two changes) — older baseline scripts only
         a) Sharpe → daily: replace monthly resample (×√12) with daily PNL agg (×√252)
         b) Entry bar hour check: add `if hour[i+1] >= 15: skip` after signal detection
-        Apply to all sweep scripts in baseline_explorations/ and sweep/
+        Note: 6BCE scripts already correct; fix needed in baseline_explorations/ scripts
 
 P2  Build cloud backtesting engine for paper trading
         Target: run fv2 backtests from any device (mobile/remote) without local setup
@@ -15,8 +15,8 @@ P3  Lock both baselines into baseline_reserve/
         Copy ma_bounce.py + ma_rejection.py from baseline_explorations/ → baseline_reserve/
         These become the v0 LONG and SHORT locked reference files
 
-P4  Backtest new strategy ideas (TV, online sources)
-        Run 90-combo sweep + ZPF/ZSh(D) evaluation on each new signal
+P4  New signal sweeps — delegate to Grok CLI
+        Feed backtesting_rules_v2.md to Grok as context; run 90-combo sweeps on new ideas
         Filters to try: VWAP, RSI, MACD, Beluga oscillator
         Metrics to explore: max drawdown, equity curve, efficient frontier, AUC/ROC
 

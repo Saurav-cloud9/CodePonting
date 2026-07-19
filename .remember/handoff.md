@@ -1,17 +1,18 @@
-# Handoff Note — 2026-07-18
+# Handoff Note — 2026-07-19
 
 ## Current State
-- backtesting_rules_v2.md finalized and aligned; LONG charge direction note added
-- Broker switched to Zerodha; metrics are now ZPF + ZSh(D) (daily Sharpe ×√252)
-- SHORT baselines locked: baseline SL=1.5/TGT=4.0, v1 SL=2.0/TGT=4.5
-- iteration_log.md covers Run 1 (baseline) + Run 2 (v1 clean-touch); v1_vwap not swept yet
+- 6BCE SHORT confirmed dead (best ZPF=0.888, all 90 combos below 1.0, ZSh(D) negative everywhere)
+- Cache built: sweep_cache_6bce.npz with overall_grid + yearly_grid + yearly_zshd_grid
+- 4 chart scripts in Backtesting Extended/6BCE/ — all working, all load from cache
+- Plan: Grok CLI takes sweep/chart work; CC builds cloud backtesting engine
 
 ## Next Step (START HERE)
-1. **P1 — Script fixes**: (a) update Sharpe to daily in all sweep scripts; (b) add `hour[i+1] >= 15` entry skip
-2. **P2 — Cloud engine**: build backtesting REST API on Oracle Cloud for mobile/remote use
-3. **P3 — Lock baselines**: copy ma_bounce.py + ma_rejection.py → baseline_reserve/
+1. **P1 — Script fixes**: (a) daily Sharpe ×√252 in all sweep scripts; (b) entry bar hour check `hour[i+1] >= 15`
+   Note: 6BCE scripts already have these correct — fix needed in older baseline scripts
+2. **P2 — Cloud engine**: build backtesting REST API on Oracle Cloud (primary) / AWS (fallback)
+3. **P4 — New signals via Grok**: feed backtesting_rules_v2.md to Grok; delegate 90-combo sweeps
 
 ## Known Issues
-- All CC Sharpe values to date use monthly method — not comparable to ZSh(D) until scripts updated
-- v1_vwap (ma_30_rejection_v1_vwap.py) has no sweep; SL/TGT not locked
-- Old broken two-phase sweep scripts (sl_tgt_sweep_short.py, sl_tgt_sweep_long.py) still exist in sweep/ — can be deleted
+- Old baseline sweep scripts (baseline_explorations/) still use monthly Sharpe — not compliant with ZSh(D) standard
+- v1_vwap (ma_30_rejection_v1_vwap.py) has no 90-combo sweep done yet
+- Both baselines (ma_bounce.py + ma_rejection.py) not yet copied to baseline_reserve/

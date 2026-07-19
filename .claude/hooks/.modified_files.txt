@@ -886,3 +886,6 @@ C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting
 C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\6BCE\chart_consistency_6bce.py
 C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\6BCE\chart_consistency_6bce.py
 C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\6BCE\chart_spaghetti_zshd_6bce.py
+C:\Users\Saurav\CodePonting\.remember\today.md
+C:\Users\Saurav\CodePonting\.remember\handoff.md
+C:\Users\Saurav\CodePonting\.remember\remember.md
