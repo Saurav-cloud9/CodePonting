@@ -2,24 +2,23 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Build cloud backtesting engine for paper trading
+P1  Regime-adaptive online learning model — NEW DIRECTION
+        Buy MemLabs notebook ($5.50, patreon.com/cw/MemLabs) — card declined, retry
+        Adapt passive aggressive regressor to NSE MA rejection SHORT signal
+        Features: ATR%, vol, regime state; target: trade win/loss outcome
+
+P2  Build cloud backtesting engine for paper trading
         Target: run fv2 backtests from any device (mobile/remote) without local setup
         Primary: Oracle Cloud; fallback: AWS EC2
 
-P2  Lock both baselines into baseline_reserve/
+P3  Lock both baselines into baseline_reserve/
         Copy ma_bounce.py + ma_rejection.py from baseline_explorations/ → baseline_reserve/
-        These become the v0 LONG and SHORT locked reference files
 
-P3  New signal sweeps — delegate to Grok CLI
-        Feed backtesting_rules_v2.md to Grok as context; run 90-combo sweeps on new ideas
-        Filters to try: VWAP, RSI, MACD, Beluga oscillator
-        Metrics to explore: max drawdown, equity curve, efficient frontier, AUC/ROC
+P4  Kite bot (market hours only)
+        Confirm EOD tick-based fix live; trace reconciliation gap (48/270 bars); build CSV archival
 
-P4  v1_vwap sweep — no fresh 90-combo sweep done yet
-        ma_30_rejection_v1_vwap.py exists but SL/TGT not swept
-        Run sl_tgt_sweep for v1_vwap SHORT, log results to iteration_log.md
-
-P5  DS3 ma20/atr14 recompute — parked, only revisit if major inconsistencies appear
+P5  New signal sweeps via Grok — ongoing, lower priority until regime model built
+        VWAP done (both baseline + VWAP variant confirmed dead); next: RSI/MACD combos
         Pandas rolling mean (DS3's current method) vs deque/fresh-sum (paper bot's
         live-shaped method) can tie-break differently at exact-tie bars (found during
         offline engine validation: 4/110,641 trades diverged, PF/Sharpe unaffected)
@@ -56,8 +55,10 @@ F6  Insurance review
 # WR          — win rate
 # WFA         — walk-forward analysis
 # OOS         — out-of-sample
+# SL          — stop loss (replaces old "SL" in SL/TGT — industry standard)
+# TP          — take profit (replaces TGT — industry standard)
 # R/R         — reward/risk ratio
-# BE          — breakeven W/(W+L) = SL/(SL+TGT)
+# BE          — breakeven W/(W+L) = SL/(SL+TP)
 # MFE         — Max Favourable Excursion (best point trade reached, in ATR units)
 # MAE         — Max Adverse Excursion (worst point trade reached, in ATR units)
 

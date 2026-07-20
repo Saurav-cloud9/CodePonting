@@ -328,6 +328,15 @@ Step 9.4  — 2026-04-19
            ✅  Key finding: smoothest combo (SL=2.0/TGT=2.0) = consistently bad; best by ZPF=ZSh(D)
            ✅  Best consistency: SL=6.0/TGT=5.5, cs=0.8198; only 2020 had ZPF>1.0 on any combo
            ✅  Plan: Grok CLI handles new signal sweeps; CC focuses on cloud engine build
+
+2026-07-21 SS ───────────────────────────────────────────────────────────
+           ✅  Grok's 6BCE VWAP script validated — logic + spot-check N/ZPF exact match
+           ✅  ConsScr computed for both combos; locked SL=6.0/TP=6.0 as best consistency (-2.709)
+           ✅  Equity + drawdown chart built for 6BCE VWAP (MaxDD ₹-16,288 vs baseline ₹-28,494)
+           ✅  SL/TP terminology locked project-wide (replacing SL/TGT); glossary updated
+           ✅  Strategic pivot: regime-adaptive online learning model (MemLabs video 2)
+           ✅  6 months of static filter failures → new direction: adaptive weights, not static gates
+           ✅  MemLabs notebook purchase pending (card declined, retry tomorrow)
 2026-07-19 SS (Kite paper trading bot) ───────────────────────────────────
            ✅  kite_auth.py built + validated; AVG antivirus SSL interception found, AVG uninstalled
            ✅  TATAMOTORS demerger discovered (→TMPV/TMCV, Nov 2025); DS3 confirmed unaffected (same

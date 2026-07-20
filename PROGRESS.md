@@ -4,11 +4,11 @@
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. Shared core logic extracted (ma_rejection_v1_core.py); offline engine refactored to use it
-2. Live KiteTicker-based engine built (ma_30_rejection_v1_live.py) — tick-built bars, tick-based SL/TP exits
-3. First live connection test run during market hours (2026-07-20): auth, warm-up, ticks, bar-building, signal detection all confirmed working on real data
-4. Two real bugs found + fixed live: CSV PermissionError crash (file locked by Excel), EOD-hour exit delayed ~5min (was bar-close-based, now tick-based like SL/TP)
-5. Reconciliation script built + first real run: 270/270 bars matched in count but 48 (17.8%) had real OHLC diffs (up to ₹4.50, bigger than DS3's float-tie-break scale); trades 13 live vs 11 official-replay, 7 matched — root causes hypothesized (mid-bucket startup, ticks as periodic snapshots), not yet fully confirmed
+1. Validated Grok's 6BCE VWAP script — logic + spot-check N/ZPF exact match confirmed
+2. Computed ConsScr for both VWAP combos; locked SL=6.0/TP=6.0 as best consistency (-2.709)
+3. Built equity + drawdown chart for 6BCE VWAP (MaxDD ₹-16,288 vs baseline ₹-28,494)
+4. SL/TP terminology locked project-wide (replacing TGT); glossary updated
+5. Strategic decision: pursue regime-adaptive online learning model (MemLabs video 2) — 6 months of static filter failures, new angle needed
 
 ── MILESTONES (5 most important) ────────────────────────────
 1. v1 clean-touch SHORT locked: SL=2.0x/TP=4.5x → PF=1.135 Sharpe=2.358 (110,641 trades, DS3 11yr) — cross-validated (array backtest + offline engine + Grok)

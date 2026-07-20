@@ -889,3 +889,8 @@ C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting
 C:\Users\Saurav\CodePonting\.remember\today.md
 C:\Users\Saurav\CodePonting\.remember\handoff.md
 C:\Users\Saurav\CodePonting\.remember\remember.md
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\6BCE\chart_equity_6bce.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting Extended\6BCE\chart_equity_6bce_vwap.py
+C:\Users\Saurav\CodePonting\.remember\today.md
+C:\Users\Saurav\CodePonting\.remember\handoff.md
+C:\Users\Saurav\CodePonting\.remember\remember.md
