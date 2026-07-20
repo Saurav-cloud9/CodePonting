@@ -1,98 +1,80 @@
-# Session Log — 2026-07-19
+# Session Log — 2026-07-20
 
-## Key Work Done
+## Kite Paper Trading Bot — first live test (Algo_Trading/kite_oracle_papertrading/)
 
-### backtesting_rules_v2.md final alignment
-- Confirmed full alignment with CC scripts
-- Added LONG charge direction note: `stt = exit × 0.00025`, `stamp = entry × 0.000003`
+### Core logic extracted
+- ma_rejection_v1_core.py created: StockState, process_bar(), update_indicators(),
+  is_shortable() (stub). Data-source agnostic — used by both offline and live scripts
+- ma_30_rejection_v1_offline.py refactored to import from core module (no behavior change,
+  already-validated logic preserved)
 
-### 6BCE SHORT strategy — full sweep and analysis
-- Built sl_tgt_sweep_6bce_short.py: 90-combo sweep (SL 1.5-6.0 × TGT 2.0-6.0), Zerodha charges, DS3 30 stocks 2015-2025
-- Best ZPF = 0.888 (SL=6.0/TGT=6.0) — all 90 combos below ZPF=1.0; strategy dead
-- ZSh(D) negative all years for all combos
-- Post-2022 structural decay confirmed
+### Live engine built (ma_30_rejection_v1_live.py)
+- KiteTicker-based: builds own 5-min bars from real ticks (bucket by timestamp),
+  feeds shared core logic for signal/entry, monitors open positions tick-by-tick
+  for SL/TP (real-time, not bar-close-only)
+- Startup warm-up via historical_data (last 20 candles, wide window) — seeds
+  rolling MA20/ATR14 without triggering stale signals
+- Reconnect handling: re-runs warm-up to patch any gap (simplified full re-warm,
+  not surgical gap-only patch)
+- Fixed a path bug during setup: .env path used .parent instead of .parents[1]
+  (script lives in scripts/, .env is at the papertrading root)
 
-### Charts built (all in Backtesting Extended/6BCE/)
-- chart_zpf_lines_6bce.py — ZPF vs TGT, 10 SL lines, plasma colormap (user: "one of the better graphs")
-- chart_consistency_6bce.py — scatter + year-wise ZPF lines; cache save added
-- chart_spaghetti_6bce.py — all 90 combos overlaid; smoothest (cyan) vs volatile (red dashed)
-- chart_spaghetti_zshd_6bce.py — same format but Y-axis = ZSh(D) per year
+### First live connection test (market hours, ~12:30pm-3:10pm IST)
+- Got fresh Kite access token (daily re-auth via kite_auth.py)
+- Confirmed working end-to-end: instrument resolution (30 stocks + TMPV mapping),
+  warm-up, KiteTicker connect/subscribe, tick-based bar building, signal detection
+- Real signals fired: DABUR, WIPRO, JSWSTEEL (13:55) — first live proof the
+  wick-touch signal logic works on real market data, not just DS3 replay
+- First live trade closed: WIPRO hit SL. Manually verified the math: entry
+  176.23, exit 176.5314286 (= sl exactly), pnl -0.3014286 ✓; SL/TP distance
+  ratio = 2.25, matching TP_MULT/SL_MULT (4.5/2.0) exactly ✓
 
-### Cache system
-- sweep_cache_6bce.npz: overall_grid (10×9) + yearly_grid (10×9×11) + yearly_zshd_grid (10×9×11)
-- Downstream chart scripts load from cache — no re-run needed
+### Two real bugs found and fixed live
+1. **CSV PermissionError crash** — periodic/exit CSV save crashed the whole
+   script when live_bars.csv was open in Excel. Fixed: wrapped both save paths
+   in try/except PermissionError (skip + retry next cycle, no data lost since
+   full in-memory list is written each time)
+2. **EOD-hour exit was ~5 min late** — original design only checked
+   `hour >= EOD_HOUR` when a bar closed (needs the next bucket's first tick to
+   detect), meaning a position wouldn't exit until ~15:05 instead of ~15:00.
+   Fixed: added a tick-based EOD check (mirrors the SL/TP tick-exit design) —
+   fires the instant we cross into an hour>=15 bucket, exits at that instant's
+   price (which is that bucket's true open). Fix applied but NOT tested live
+   yet (applied after today's session was manually stopped ~15:09 rather than
+   restart mid-test) — needs live confirmation tomorrow
 
-### Key findings
-- Smoothest ≠ best: SL=2.0/TGT=2.0 (std=0.06) is consistently bad (ZPF=0.714)
-- Best ZPF = Best ZSh(D) = same combo (SL=6.0/TGT=6.0); ZSh(D) adds no new info here
-- Best consistency (mean−std): SL=6.0/TGT=5.5; only 2020 had ZPF>1.0 across any combo
-- Plan: delegate sweep/chart work to Grok CLI; CC focuses on cloud engine build
+### Reconciliation script built (ma_rejection_v1_reconcile.py)
+- Bar-level check: our live-built bars vs Kite's official historical_data for
+  the same window
+- Trade-level check: replay core logic on official bars, compare vs live_trades.csv
+- First real run (today's session, 14:25-15:10 window):
+  - Bars: 270 official = 270 live (no missing bars either side), but 48/270
+    (17.8%) had real OHLC differences up to ₹4.50 (DIVISLAB) — much bigger
+    than the DS3 floating-point tie-break scale found earlier
+  - Trades: 13 live vs 11 official-replay, only 7 matched
+  - Hypothesized causes (not yet fully confirmed with a concrete example):
+    (a) first-bar-of-session mid-bucket-start effect (many 14:25 mismatches
+    specifically on open price — bot's recorded open = first tick it saw on
+    reconnect, not the bucket's true earlier open)
+    (b) ticks may be periodic snapshots, not literal 1:1 per exchange trade
+    (matches earlier theoretical discussion) — could mean our tick-built bars
+    miss brief high/low spikes that Kite's official server-side candle caught
+  - Trade-level gap is partly expected by design: live uses tick-precise
+    SL/TP exits, official-replay uses bar-close-based checks (same as backtest)
+    — some divergence here is intentional, not purely a bug
+
+### Known gap
+- live_bars.csv / live_trades.csv get OVERWRITTEN each time the live script
+  runs — no persistence across days unless manually archived first. Today's
+  session data was NOT auto-archived; user saving it manually. Plan: build
+  CSV archival (dated folder) + recon output-to-file saving tomorrow
+
+### Deferred (reaffirmed today, unchanged)
+- Position sizing (1% risk, compounding) — still per-share PnL only
+- Shortability check — still stubbed as always-True
 
 ## Key Numbers
-- 6BCE best ZPF: 0.888 (SL=6.0/TGT=6.0)
-- 6BCE best consistency: SL=6.0/TGT=5.5, cs=0.8198
-- All combos ZSh(D) negative (mean ≈ -1.5 best case)
-
----
-
-## Kite Paper Trading Bot (CC session, Algo_Trading/kite_oracle_papertrading/)
-
-### Setup
-- kite_auth.py built: login → request_token → access_token exchange, saves to .env, re-run daily
-- AVG Internet Security found intercepting SSL (HTTPS scanning); uninstalled all 4 AVG products
-  (Internet Security, Update Helper, Driver Updater, TuneUp) — redundant with Windows Defender
-- Kite Connect auth validated end-to-end: login → instrument lookup → historical_data pull
-
-### TATAMOTORS demerger discovery
-- Tata Motors demerged Nov 2025 → TMPV (Passenger Vehicles, instrument_token 884737, continuing
-  entity) + TMCV (Commercial Vehicles, new listing, token 194504193)
-- Confirmed DS3's TATAMOTORS.parquet IS the TMPV entity (same token, price continuity verified) —
-  no rebuild needed. Live bot must query symbol TMPV, not TATAMOTORS, going forward
-- All other 29 DS3 universe stocks verified still resolve correctly against Kite's instrument list
-
-### Data architecture decided
-- Live engine: ticks only (KiteTicker) — builds own 5-min bars for signal/entry, real-time
-  monitoring for exits. No historical_data/LTP polling in the live path at all
-- historical_data reserved for a separate offline reconciliation script (script 2, not yet built) —
-  compares tick-built bars + trades against Kite's official bars, after the session
-- Compared against fv0 (legacy Upstox bot): used historical-candle (1-min→5-min manual convert
-  until v3 API, then direct 5-min) + LTP polling (5-min scan, LTP every 5s for positions) — no
-  WebSocket ticker; our approach upgrades this same hybrid idea
-
-### SL/TP naming convention
-- Established "SL/TP" (Stop Loss/Take Profit) as standard shortform going forward, replacing "TGT"
-  in all new scripts (existing files keep TGT, not retroactively renamed). Added to TODO.md glossary
-
-### Locked combo re-validated
-- Found iteration_log.md: v1 clean-touch SHORT locked combo = SL=2.0x/TP=4.5x, N=110,641,
-  PF=1.135, Sharpe=2.358 (not the 2.5x/4.0x used provisionally earlier in planning)
-- Validated by re-running 5 sample combos from the 90-combo sweep — exact match on N/PF/Sharpe
-
-### Offline paper-trading engine built (ma_30_rejection_v1_offline.py)
-- Bar-by-bar, live-shaped architecture: explicit per-stock state (position/pending_entry),
-  incrementally computed MA20/ATR14 (deque-based, not read from precomputed columns),
-  chronologically interleaved across all 30 stocks (not stock-by-stock batches)
-- Validated against ma_30_rejection_v1_reference.py (array-based backtest): PF=1.135/Sharpe=2.358
-  exact match; N=110,637 vs 110,641 reference (4 trades / 0.0036% off)
-- Root cause of the N diff fully diagnosed: exact floating-point tie at one bar (close=91.08,
-  ma20=91.08000000000001) — pandas' incremental rolling mean accumulates rounding drift over
-  11 years of updates; deque's fresh-sum-every-time doesn't. Neither is "wrong"; cascades via
-  position-guard into ~126 non-overlapping trades net-4 difference. Documented, not fixed —
-  DS3 regen parked as TODO P5 (only revisit if real inconsistencies appear, not this)
-- Independently corroborated by Grok's review (grok_review.md): identical N/PF/Sharpe/trade-level
-  breakdown, same root-cause diagnosis
-
-### Automation plan discussed (not yet built)
-- Deployment target: Oracle Cloud VM (Linux), not local PC — local is dev/test only
-- Scheduling: cron (Linux equivalent of Task Scheduler), auto-launch ~9:10-9:14am IST
-- Kite login: cron cannot automate the actual Zerodha login (requires browser + 2FA/TOTP) —
-  starting with manual login each morning (option 1); full headless automation via stored
-  credentials + pyotp (option 2) to be tested later, only switched to once fully confident
-
-### Still open / not yet built
-- Position sizing (1% risk, compounding) — not yet implemented in offline engine (currently
-  per-share PnL only, matching reference script's style)
-- Shortability check — stubbed as always-True, real MIS/ASM-GSM check not wired up
-- Reconciliation script (script 2) — not built
-- Live script (KiteTicker ingestion, warm-up pull, reconnect handling) — not built
-- Automation wrapper (cron + EOD report generation) — not built
+- WIPRO SL trade: entry=176.23, exit=176.5314286, pnl=-0.3014286
+- Locked combo: SL=2.0x/TP=4.5x
+- Today's recon: 270/270 bars matched (count), 48 with real OHLC diff (max 4.50);
+  13 live trades vs 11 official-replay, 7 matched

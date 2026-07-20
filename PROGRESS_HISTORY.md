@@ -345,3 +345,32 @@ Step 9.4  — 2026-04-19
                manual Kite login to start (option 1), headless login automation to test later
            ✅  Next: position sizing + shortability check in offline engine → reconciliation script
                → live KiteTicker script → automation wrapper
+2026-07-20 SS (Kite paper trading bot — first live test) ─────────────────
+           ✅  Shared core logic extracted (ma_rejection_v1_core.py); offline engine refactored
+               to import it, no behavior change, already-validated logic preserved
+           ✅  Live engine built (ma_30_rejection_v1_live.py): KiteTicker builds own 5-min bars
+               from real ticks, tick-based SL/TP exit monitoring, historical_data warm-up only
+           ✅  First live connection test during market hours (~12:30pm-3:10pm IST): auth,
+               instrument resolution, warm-up, tick-based bar building, signal detection all
+               confirmed working correctly on real data
+           ✅  Real signals fired live: DABUR, WIPRO, JSWSTEEL (13:55) — first live proof the
+               wick-touch signal works on real market data, not just DS3 replay
+           ✅  First live trade closed: WIPRO SL hit. Verified math by hand: entry=176.23,
+               exit=176.5314286 (=sl exactly), pnl=-0.3014286; SL/TP ratio=2.25 matches
+               TP_MULT/SL_MULT (4.5/2.0) exactly
+           ✅  Two real bugs found + fixed live: (1) CSV PermissionError crashed the script when
+               live_bars.csv was open in Excel — now caught, skip+retry, no data lost; (2)
+               EOD-hour exit was ~5min late (bar-close-based) — now tick-based like SL/TP,
+               fires the instant an hour>=15 bucket starts. Fix #2 not yet live-tested
+           ✅  Reconciliation script built (ma_rejection_v1_reconcile.py): bar-level + trade-level
+               diff vs Kite's official historical_data. First real run: 270/270 bars matched in
+               count but 48 (17.8%) had real OHLC diffs up to ₹4.50 (bigger than DS3's floating-
+               point tie-break scale); 13 live trades vs 11 official-replay, only 7 matched.
+               Causes hypothesized (mid-bucket startup effect, ticks as periodic snapshots) but
+               not yet confirmed with a concrete traced example
+           ✅  Found live_bars.csv/live_trades.csv get overwritten each run — no cross-day
+               persistence yet; today's data saved manually, archival automation planned next
+           ✅  Position sizing and shortability check remain deliberately deferred/stubbed
+           ✅  Next: confirm EOD fix live → trace one concrete reconciliation mismatch to root
+               cause → build CSV archival + recon-output-to-file → position sizing → shortability
+               → automation wrapper

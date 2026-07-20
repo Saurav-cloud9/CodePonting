@@ -38,6 +38,30 @@
    the backtest's existing trade-output columns for now (schema to expand
    once we see real output).
 
+## Build status (2026-07-20)
+
+- **Shared core logic extracted**: `ma_rejection_v1_core.py` — `StockState`,
+  `process_bar()`, `update_indicators()`, `is_shortable()` (stub, always True).
+  Data-source agnostic, used by both scripts below.
+- **Offline engine built + validated**: `ma_30_rejection_v1_offline.py` — replays
+  all 30 DS3 stocks chronologically through the core logic. Matches the array/batch
+  reference script (`ma_30_rejection_v1_reference.py`) on PF/Sharpe exactly
+  (1.135/2.358); N off by 4/110,641 (0.0036%), root cause fully diagnosed as a
+  floating-point tie-break (pandas rolling-mean drift vs deque fresh-sum) — not a
+  bug, documented, corroborated independently by Grok's review (grok_review.md).
+- **Live engine built**: `ma_30_rejection_v1_live.py` — KiteTicker-based, builds
+  5-min bars from real ticks, feeds the same core logic, monitors open positions
+  tick-by-tick for SL/TP (real-time, not bar-close-only). Startup warm-up via
+  `historical_data` (last 20 candles). Reconnect handling re-runs warm-up to
+  patch any gap (simplified: full re-warm, not a surgical gap-only patch).
+  First live connection test run 2026-07-20 ~12:30pm IST during market hours.
+- **Position sizing**: intentionally deferred — both scripts currently track
+  per-share PnL only. Decision: validate core mechanics (tick handling, signal
+  timing, exit precision) against real market behavior first; sizing is a
+  trivial bolt-on once mechanics are proven, no need to build it first.
+- **Shortability check**: stubbed as always-True in both scripts; real
+  MIS/ASM-GSM check not yet wired (not blocking today's connection test).
+
 ## Not discussed / gaps to close before building
 
 **Not discussed at all:**
