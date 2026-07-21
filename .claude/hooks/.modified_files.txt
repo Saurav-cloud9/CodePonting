@@ -894,3 +894,12 @@ C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\Backtesting
 C:\Users\Saurav\CodePonting\.remember\today.md
 C:\Users\Saurav\CodePonting\.remember\handoff.md
 C:\Users\Saurav\CodePonting\.remember\remember.md
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\baseline_explorations\baseline_reserve_lock\ma_30_rejection.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\baseline_explorations\baseline_reserve_lock\ma_30_bounce.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\baseline_explorations\baseline_reserve_lock\sl_tgt_sweep_baseline_short.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\baseline_explorations\baseline_reserve_lock\sl_tgt_sweep_baseline_long.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\baseline_explorations\baseline_reserve_lock\ma_30_rejection.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\baseline_explorations\baseline_reserve_lock\ma_30_bounce.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\baseline_explorations\baseline_reserve_lock\sl_tgt_sweep_baseline_short.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\baseline_explorations\baseline_reserve_lock\sl_tgt_sweep_baseline_long.py
+C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\baseline_explorations\baseline_reserve_lock\iteration_log_new.md

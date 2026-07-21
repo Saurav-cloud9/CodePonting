@@ -2,17 +2,17 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Regime-adaptive online learning model — NEW DIRECTION
-        Buy MemLabs notebook ($5.50, patreon.com/cw/MemLabs) — card declined, retry
-        Adapt passive aggressive regressor to NSE MA rejection SHORT signal
-        Features: ATR%, vol, regime state; target: trade win/loss outcome
+P1  Lock both baselines into baseline_reserve/
+        Copy ma_bounce.py + ma_rejection.py from baseline_explorations/ → baseline_reserve/
 
 P2  Build cloud backtesting engine for paper trading
         Target: run fv2 backtests from any device (mobile/remote) without local setup
         Primary: Oracle Cloud; fallback: AWS EC2
 
-P3  Lock both baselines into baseline_reserve/
-        Copy ma_bounce.py + ma_rejection.py from baseline_explorations/ → baseline_reserve/
+P3  Regime-adaptive online learning model — NEW DIRECTION
+        Buy MemLabs notebook ($5.50, patreon.com/cw/MemLabs) — card declined, retry
+        Adapt passive aggressive regressor to NSE MA rejection SHORT signal
+        Features: ATR%, vol, regime state; target: trade win/loss outcome
 
 P4  Kite bot (market hours only)
         Confirm EOD tick-based fix live; trace reconciliation gap (48/270 bars); build CSV archival
