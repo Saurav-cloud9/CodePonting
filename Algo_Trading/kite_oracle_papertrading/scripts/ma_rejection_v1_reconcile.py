@@ -6,6 +6,8 @@ Reconciliation script — run after a live/paper session.
    resulting trades against what the live engine actually did (live_trades.csv).
 Some divergence is expected (real tick-driven slippage vs clean official-bar
 fills) - the goal is catching structural mismatches, not zero difference.
+Saves both the fetched official bars and the findings to data/recon/, dated
+by the session being reconciled (not today's date).
 """
 import os
 from datetime import timedelta
@@ -26,8 +28,16 @@ ACCESS_TOKEN = os.getenv('KITE_ACCESS_TOKEN')
 DATA_DIR = Path(__file__).resolve().parent.parent / 'data' / 'trades'
 LIVE_BARS = DATA_DIR / 'live_bars.csv'
 LIVE_TRADES = DATA_DIR / 'live_trades.csv'
+RECON_DIR = Path(__file__).resolve().parent.parent / 'data' / 'recon'
 
 SYMBOL_MAP = {'TATAMOTORS': 'TMPV'}
+
+log_lines = []
+
+
+def log(msg=''):
+    print(msg)
+    log_lines.append(str(msg))
 
 
 def kite_symbol(display_symbol):
@@ -41,7 +51,8 @@ live_bars = pd.read_csv(LIVE_BARS, parse_dates=['datetime'])
 symbols = sorted(live_bars['symbol'].unique())
 session_start = live_bars['datetime'].min()
 session_end = live_bars['datetime'].max() + timedelta(minutes=5)
-print(f'Reconciling {len(symbols)} symbols, session window {session_start} to {session_end}')
+session_date = session_start.date()
+log(f'Reconciling {len(symbols)} symbols, session window {session_start} to {session_end}')
 
 official_bars_rows = []
 official_trades = []
@@ -70,8 +81,8 @@ for sym in symbols:
 official_bars = pd.DataFrame(official_bars_rows)
 official_trades_df = pd.DataFrame(official_trades)
 
-print(f'\nOfficial bars fetched: {len(official_bars):,}   Live bars: {len(live_bars):,}')
-print(f'Official-replay trades: {len(official_trades_df):,}')
+log(f'\nOfficial bars fetched: {len(official_bars):,}   Live bars: {len(live_bars):,}')
+log(f'Official-replay trades: {len(official_trades_df):,}')
 
 # ── Bar-level check ─────────────────────────────────────────────────────────
 merged = pd.merge(
@@ -88,27 +99,38 @@ for col in ['open', 'high', 'low', 'close']:
 max_diff = both[[f'{c}_diff' for c in ['open', 'high', 'low', 'close']]].max().max()
 mismatched = both[(both[[f'{c}_diff' for c in ['open', 'high', 'low', 'close']]] > 0.01).any(axis=1)]
 
-print(f'\n--- Bar-level ---')
-print(f'Matched bars (both sources): {len(both):,}')
-print(f'Only in live (missing from official): {len(only_live)}')
-print(f'Only in official (missing from live): {len(only_official)}')
-print(f'Max abs OHLC diff on matched bars: {max_diff:.4f}')
-print(f'Bars with OHLC diff > 0.01: {len(mismatched)}')
+log(f'\n--- Bar-level ---')
+log(f'Matched bars (both sources): {len(both):,}')
+log(f'Only in live (missing from official): {len(only_live)}')
+log(f'Only in official (missing from live): {len(only_official)}')
+log(f'Max abs OHLC diff on matched bars: {max_diff:.4f}')
+log(f'Bars with OHLC diff > 0.01: {len(mismatched)}')
 if len(mismatched) > 0:
-    print(mismatched[['symbol', 'datetime', 'open_diff', 'high_diff', 'low_diff', 'close_diff']].to_string(index=False))
+    log(mismatched[['symbol', 'datetime', 'open_diff', 'high_diff', 'low_diff', 'close_diff']].to_string(index=False))
 
 # ── Trade-level check ───────────────────────────────────────────────────────
-print(f'\n--- Trade-level ---')
+log(f'\n--- Trade-level ---')
 if LIVE_TRADES.exists():
     live_trades = pd.read_csv(LIVE_TRADES, parse_dates=['entry_dt'])
-    print(f'Live trades: {len(live_trades)}   Official-replay trades: {len(official_trades_df)}')
+    log(f'Live trades: {len(live_trades)}   Official-replay trades: {len(official_trades_df)}')
     if len(official_trades_df) > 0:
         live_keys = set(zip(live_trades['symbol'], live_trades['entry_dt']))
         off_keys = set(zip(official_trades_df['symbol'], official_trades_df['entry_dt']))
-        print(f'Matched (same symbol+entry_dt): {len(live_keys & off_keys)}')
-        print(f'Only in live: {len(live_keys - off_keys)}')
-        print(f'Only in official-replay: {len(off_keys - live_keys)}')
+        log(f'Matched (same symbol+entry_dt): {len(live_keys & off_keys)}')
+        log(f'Only in live: {len(live_keys - off_keys)}')
+        log(f'Only in official-replay: {len(off_keys - live_keys)}')
     else:
-        print('No official-replay trades to compare (no signal fired in this window).')
+        log('No official-replay trades to compare (no signal fired in this window).')
 else:
-    print('No live_trades.csv yet - no trade has exited during this session.')
+    log('No live_trades.csv yet - no trade has exited during this session.')
+
+# ── Save outputs ─────────────────────────────────────────────────────────────
+RECON_DIR.mkdir(parents=True, exist_ok=True)
+official_bars_path = RECON_DIR / f'official_bars_{session_date}.csv'
+findings_path = RECON_DIR / f'recon_{session_date}.md'
+
+official_bars.to_csv(official_bars_path, index=False)
+findings_path.write_text('\n'.join(log_lines), encoding='utf-8')
+
+print(f'\nSaved official bars to {official_bars_path}')
+print(f'Saved findings to {findings_path}')

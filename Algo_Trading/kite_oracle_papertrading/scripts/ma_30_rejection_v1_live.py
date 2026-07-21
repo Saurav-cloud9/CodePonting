@@ -27,6 +27,7 @@ ACCESS_TOKEN = os.getenv('KITE_ACCESS_TOKEN')
 DATA_DIR = Path(__file__).resolve().parent.parent / 'data' / 'trades'
 TRADE_LOG = DATA_DIR / 'live_trades.csv'
 BAR_LOG = DATA_DIR / 'live_bars.csv'
+WARMUP_LOG = DATA_DIR / 'warmup_bars.csv'
 
 UNIVERSE = ['ADANIPORTS', 'ASHOKLEY', 'AXISBANK', 'BAJFINANCE', 'BANDHANBNK', 'BHARTIARTL',
             'CIPLA', 'COALINDIA', 'DABUR', 'DIVISLAB', 'HDFCBANK', 'HINDALCO', 'ICICIBANK',
@@ -59,8 +60,10 @@ print(f'Resolved {len(symbol_to_token)} instruments.')
 states = {sym: StockState() for sym in UNIVERSE}
 trades = []
 bar_log_rows = []
+warmup_bar_rows = []
 forming_bar = {}
 lock = threading.Lock()
+eod_reached = threading.Event()
 
 
 def warmup():
@@ -75,6 +78,10 @@ def warmup():
             bar = {'datetime': dt, 'open': c['open'], 'high': c['high'],
                    'low': c['low'], 'close': c['close'], 'date': dt.date(), 'hour': dt.hour}
             update_indicators(bar, states[sym])
+            warmup_bar_rows.append({'symbol': sym, 'warmup_run_at': to_date, **bar})
+    if warmup_bar_rows:
+        pd.DataFrame(warmup_bar_rows).to_csv(WARMUP_LOG, index=False)
+        print(f'Warm-up bars saved to {WARMUP_LOG}')
     print('Warm-up complete.')
 
 
@@ -123,6 +130,9 @@ def on_ticks(ws, ticks):
         # don't wait for that bar to close (same real-time design as SL/TP below).
         # Exit price = this tick's price, which is that new bucket's open.
         if new_bucket_started and b.hour >= EOD_HOUR:
+            if not eod_reached.is_set():
+                eod_reached.set()
+                print(f"{ts}  EOD_HOUR reached ({EOD_HOUR}:00) - no more entries, bot will stop once positions are flat.")
             pos = state.position
             if pos is not None:
                 pnl = pos['entry'] - price
@@ -163,7 +173,7 @@ def on_connect(ws, response):
     print('Connected. Subscribing...')
     tokens = list(symbol_to_token.values())
     ws.subscribe(tokens)
-    ws.set_mode(ws.MODE_QUOTE, tokens)
+    ws.set_mode(ws.MODE_FULL, tokens)
 
 
 def on_close(ws, code, reason):
@@ -188,6 +198,8 @@ if __name__ == '__main__':
     print('Connecting to KiteTicker...')
     kws.connect(threaded=True)
 
+    eod_grace_cycles_left = None  # set once eod_reached fires, counts down before auto-stop
+
     try:
         while True:
             time.sleep(30)
@@ -199,13 +211,25 @@ if __name__ == '__main__':
                         pd.DataFrame(bar_log_rows).to_csv(BAR_LOG, index=False)
                 except PermissionError:
                     print('CSV save skipped - file open elsewhere (e.g. Excel). Will retry in 30s.')
+
+            if eod_reached.is_set():
+                # Grace period: give every symbol a chance to individually cross the
+                # EOD bucket and close its own position before we actually stop.
+                if eod_grace_cycles_left is None:
+                    eod_grace_cycles_left = 2
+                elif eod_grace_cycles_left <= 0:
+                    print('EOD reached and all positions flat - auto-stopping.')
+                    break
+                else:
+                    eod_grace_cycles_left -= 1
     except KeyboardInterrupt:
         print('Stopping...')
-        kws.close()
-        with lock:
-            try:
-                pd.DataFrame(trades).to_csv(TRADE_LOG, index=False)
-                pd.DataFrame(bar_log_rows).to_csv(BAR_LOG, index=False)
-            except PermissionError:
-                print('Final CSV save failed - file open elsewhere. Close it and re-save manually if needed.')
-        print(f'Saved {len(trades)} trades to {TRADE_LOG}')
+
+    kws.close()
+    with lock:
+        try:
+            pd.DataFrame(trades).to_csv(TRADE_LOG, index=False)
+            pd.DataFrame(bar_log_rows).to_csv(BAR_LOG, index=False)
+        except PermissionError:
+            print('Final CSV save failed - file open elsewhere. Close it and re-save manually if needed.')
+    print(f'Saved {len(trades)} trades to {TRADE_LOG}')

@@ -2,16 +2,25 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Regime-adaptive online learning model — NEW DIRECTION
+P1  Kite bot (market hours only) — resume during tomorrow's login
+        EOD tick-based fix + hard auto-stop CONFIRMED working live (2026-07-21, both 14:00
+        test cutoff and real 15:00); MODE_FULL timestamp fix applied, needs a longer full-day
+        run to fully validate boundary-tick reduction (short test showed no red flags)
+        Next: add MA20/ATR14 + touch-eval logging to live_bars.csv — eliminates manual
+        reconstruction needed 3x already (INFY/SUNPHARMA/NATIONALUM)
+        Reconciliation script bug: fetch window stops at session_end exclusive, never
+        captures EOD-triggered exits — needs fixing
+        Reconciliation gap root cause: partially traced (startup-corrupted first bar affects
+        signal detection — confirmed for JSWSTEEL matching, SUNPHARMA/INFY still need full
+        reconstruction-based verification, not just comparison)
+
+P2  Regime-adaptive online learning model — NEW DIRECTION
         Buy MemLabs notebook ($5.50, patreon.com/cw/MemLabs) — card declined, retry
         Adapt passive aggressive regressor to NSE MA rejection SHORT signal
         Features: ATR%, vol, regime state; target: trade win/loss outcome
 
-P2  New signal sweeps via Grok — ongoing, lower priority until regime model built
+P3  New signal sweeps via Grok — ongoing, lower priority until regime model built
         VWAP done (both baseline + VWAP variant confirmed dead); next: RSI/MACD combos
-
-P3  Kite bot (market hours only)
-        Confirm EOD tick-based fix live; trace reconciliation gap (48/270 bars); build CSV archival
 
 P4  Build cloud backtesting engine for paper trading
         Target: run fv2 backtests from any device (mobile/remote) without local setup

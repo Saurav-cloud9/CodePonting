@@ -383,3 +383,31 @@ Step 9.4  — 2026-04-19
            ✅  Next: confirm EOD fix live → trace one concrete reconciliation mismatch to root
                cause → build CSV archival + recon-output-to-file → position sizing → shortability
                → automation wrapper
+2026-07-21 SS (Kite paper trading bot — MODE_FULL fix, EOD hard-stop) ────────
+           ✅  Root cause of tick-bucketing bug found: MODE_QUOTE never provides exchange_timestamp
+               (verified in pykiteconnect source) — ticks were bucketed by local datetime.now()
+               instead of real exchange time. Fixed: subscribed in MODE_FULL instead
+           ✅  EOD hard-stop added: eod_reached event + grace period, bot fully terminates itself
+               (not just idles) once all positions are flat after EOD_HOUR is crossed
+           ✅  Confirmed live, twice: temporary EOD_HOUR=14 test (3 positions closed exactly at
+               14:00:00, auto-stopped) and the real EOD_HOUR=15 (3 positions closed at
+               15:00:00-15:00:02, auto-stopped) — both tick-based exit and hard-stop work correctly
+           ✅  Reconciliation script now saves fetched bars + findings to data/recon/ (was
+               console-only); re-run against 2026-07-20 matched the manual run exactly (deterministic)
+           ✅  Found a real bug in reconcile script: fetch window excludes the session_end bar
+               itself, so it can never capture an EOD-triggered trade — explains most of a
+               3-live-vs-0-recon-trades gap on today's short test session
+           ✅  Traced the 3-vs-0 gap to two distinct causes: fetch-window bug (JSWSTEEL — signal
+               timing actually matched exactly) and the startup-corrupted first bar affecting
+               real signal detection (INFY — suppressed a real early signal; SUNPHARMA — opposite,
+               unresolved after a reconstruction attempt didn't match live's actual behavior)
+           ✅  Added warmup_bars.csv logging to live script — future analysis uses real captured
+               warm-up data instead of error-prone after-the-fact reconstruction
+           ✅  Oracle Cloud VM setup started: SSH key found and validated, WSL confirmed not
+               installed, install deferred (needs restart) until live testing finished
+           ✅  Cron + automated login discussed: option 1 (manual login) confirmed as the path
+               forward, option 2 (headless login) technical shape covered but risks flagged
+               (stored credentials, likely bot-detection) — deferred as an experiment only
+           ✅  TODO.md reprioritized: Kite bot promoted to P1
+           ✅  Next: install WSL/Ubuntu + SSH to VM → fix reconcile fetch-window bug → add
+               MA20/ATR14+touch-eval logging → resolve SUNPHARMA mismatch → full-day live test
