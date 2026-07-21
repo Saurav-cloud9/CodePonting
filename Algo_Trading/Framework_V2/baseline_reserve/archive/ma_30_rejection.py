@@ -3,18 +3,19 @@ import numpy as np
 import os
 import glob
 
-DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min'
+DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\intraday_5min_DS3'
 
-SL_MULT    = 2.5
-TGT_MULT   = 4.5
-MAX_TB_GAP = 3
+SL_MULT    = 1.5
+TGT_MULT   = 4.0
+MAX_TR_GAP = 3
 EOD_HOUR   = 15
 
 
 def run_backtest(csv_path):
-    df = pd.read_csv(csv_path, low_memory=False)
-    df.columns = df.columns.str.strip()
+    df = pd.read_parquet(csv_path)
     df['datetime'] = pd.to_datetime(df['datetime'])
+    if df['datetime'].dt.tz is not None:
+        df['datetime'] = df['datetime'].apply(lambda x: x.replace(tzinfo=None))
     for col in ['open', 'high', 'low', 'close', 'ma20', 'atr14']:
         df[col] = pd.to_numeric(df[col], errors='coerce')
     df['date'] = df['datetime'].dt.date
@@ -34,7 +35,7 @@ def run_backtest(csv_path):
             touch_date = row['date']
             atr = row['atr14']
             rejection_bar = None
-            for j in range(i, i + MAX_TB_GAP + 1):
+            for j in range(i, i + MAX_TR_GAP + 1):
                 if j >= len(df): 
                     break
                 b = df.iloc[j]
@@ -61,19 +62,28 @@ def run_backtest(csv_path):
             tgt = entry - TGT_MULT * atr
             for k in range(entry_idx, len(df)):
                 k_bar = df.iloc[k]
-                if k_bar['hour'] >= EOD_HOUR or k_bar['date'] != touch_date:
+                if k_bar['date'] != touch_date:
+                    prev = df.iloc[k - 1]
+                    pnl = entry - prev['close']
+                    outcome = 'EOD+' if pnl > 0 else 'EOD-'
+                    exit_dt = prev['datetime']
+                    break
+                if k_bar['hour'] >= EOD_HOUR:
                     pnl = entry - k_bar['open']
                     outcome = 'EOD+' if pnl > 0 else 'EOD-'
-                    break
-                if k_bar['low']  <= tgt:
-                    pnl = entry - tgt
-                    outcome = 'W'
+                    exit_dt = k_bar['datetime']
                     break
                 if k_bar['high'] >= sl:
                     pnl = entry - sl
                     outcome = 'L'
+                    exit_dt = k_bar['datetime']
                     break
-            trades.append({'pnl': pnl, 'outcome': outcome, 'exit_dt': k_bar['datetime']})
+                if k_bar['low']  <= tgt:
+                    pnl = entry - tgt
+                    outcome = 'W'
+                    exit_dt = k_bar['datetime']
+                    break
+            trades.append({'pnl': pnl, 'outcome': outcome, 'exit_dt': exit_dt})
             i = k + 1
         else:
             i += 1
@@ -88,13 +98,13 @@ def sharpe(trades):
     return round((m.mean() / m.std()) * np.sqrt(12), 3) if m.std() > 0 else 0
 
 
-csv_files = sorted(glob.glob(os.path.join(DATA_DIR, '*_5min.csv')))
+csv_files = sorted(glob.glob(os.path.join(DATA_DIR, '*.parquet')))
 
 all_trades = []
 rows = []
 
 for csv_path in csv_files:
-    symbol = os.path.basename(csv_path).replace('_5min.csv', '')
+    symbol = os.path.basename(csv_path).replace('.parquet', '')
     trades = run_backtest(csv_path)
     df_t = pd.DataFrame(trades)
     n = len(df_t)

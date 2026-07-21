@@ -2,29 +2,20 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Lock both baselines into baseline_reserve/
-        Copy ma_bounce.py + ma_rejection.py from baseline_explorations/ → baseline_reserve/
-
-P2  Build cloud backtesting engine for paper trading
-        Target: run fv2 backtests from any device (mobile/remote) without local setup
-        Primary: Oracle Cloud; fallback: AWS EC2
-
-P3  Regime-adaptive online learning model — NEW DIRECTION
+P1  Regime-adaptive online learning model — NEW DIRECTION
         Buy MemLabs notebook ($5.50, patreon.com/cw/MemLabs) — card declined, retry
         Adapt passive aggressive regressor to NSE MA rejection SHORT signal
         Features: ATR%, vol, regime state; target: trade win/loss outcome
 
-P4  Kite bot (market hours only)
+P2  New signal sweeps via Grok — ongoing, lower priority until regime model built
+        VWAP done (both baseline + VWAP variant confirmed dead); next: RSI/MACD combos
+
+P3  Kite bot (market hours only)
         Confirm EOD tick-based fix live; trace reconciliation gap (48/270 bars); build CSV archival
 
-P5  New signal sweeps via Grok — ongoing, lower priority until regime model built
-        VWAP done (both baseline + VWAP variant confirmed dead); next: RSI/MACD combos
-        Pandas rolling mean (DS3's current method) vs deque/fresh-sum (paper bot's
-        live-shaped method) can tie-break differently at exact-tie bars (found during
-        offline engine validation: 4/110,641 trades diverged, PF/Sharpe unaffected)
-        Not worth redoing now — would invalidate all prior validated sweep results
-        for a 13th-14th decimal place difference. Revisit only if real inconsistencies
-        (not this floating-point tie-breaking) show up later.
+P4  Build cloud backtesting engine for paper trading
+        Target: run fv2 backtests from any device (mobile/remote) without local setup
+        Primary: Oracle Cloud; fallback: AWS EC2
 
 # ── PARKED / FUTURE ───────────────────────────────────────────
 F1  Single-stock trade dump (TATAMOTORS) — verify SHORT calculations
