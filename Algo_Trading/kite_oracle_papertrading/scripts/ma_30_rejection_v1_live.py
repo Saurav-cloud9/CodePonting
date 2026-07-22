@@ -49,10 +49,10 @@ kite.set_access_token(ACCESS_TOKEN)
 print('Resolving instrument tokens...')
 token_to_symbol = {}
 symbol_to_token = {}
+quotes = kite.ltp([f'NSE:{kite_symbol(sym)}' for sym in UNIVERSE])  # one batched call, not 30
 for sym in UNIVERSE:
     ksym = kite_symbol(sym)
-    quote = kite.ltp([f'NSE:{ksym}'])
-    token = quote[f'NSE:{ksym}']['instrument_token']
+    token = quotes[f'NSE:{ksym}']['instrument_token']
     token_to_symbol[token] = sym
     symbol_to_token[sym] = token
 print(f'Resolved {len(symbol_to_token)} instruments.')
@@ -79,6 +79,7 @@ def warmup():
                    'low': c['low'], 'close': c['close'], 'date': dt.date(), 'hour': dt.hour}
             update_indicators(bar, states[sym])
             warmup_bar_rows.append({'symbol': sym, 'warmup_run_at': to_date, **bar})
+        time.sleep(0.34)  # stay under Kite's ~3 req/sec rate limit - historical_data can't be batched
     if warmup_bar_rows:
         pd.DataFrame(warmup_bar_rows).to_csv(WARMUP_LOG, index=False)
         print(f'Warm-up bars saved to {WARMUP_LOG}')
