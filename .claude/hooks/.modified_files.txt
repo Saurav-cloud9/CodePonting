@@ -905,3 +905,13 @@ C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\baseline_ex
 C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\baseline_explorations\baseline_reserve_lock\iteration_log_new.md
 C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\baseline_explorations\baseline_reserve_lock\iteration_log_new.md
 C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\baseline_explorations\baseline_reserve_lock\iteration_log_new.md
+C:\Users\Saurav\CodePonting\Concept Lab\regime_model_concepts\encode_memory_concept.html
+c:\Users\Saurav\CodePonting\Algo_Trading\kite_oracle_papertrading\.env
+c:\Users\Saurav\CodePonting\Algo_Trading\kite_oracle_papertrading\scripts\ma_30_rejection_v1_live.py
+c:\Users\Saurav\CodePonting\Algo_Trading\kite_oracle_papertrading\scripts\ma_30_rejection_v1_live.py
+c:\Users\Saurav\CodePonting\Algo_Trading\kite_oracle_papertrading\scripts\ma_30_rejection_v1_live.py
+c:\Users\Saurav\CodePonting\Algo_Trading\kite_oracle_papertrading\scripts\ma_30_rejection_v1_live.py
+c:\Users\Saurav\CodePonting\Algo_Trading\kite_oracle_papertrading\scripts\ma_30_rejection_v1_live.py
+c:\Users\Saurav\CodePonting\Algo_Trading\kite_oracle_papertrading\scripts\ma_30_rejection_v1_live.py
+c:\Users\Saurav\CodePonting\Algo_Trading\kite_oracle_papertrading\scripts\ma_30_rejection_v1_live.py
+c:\Users\Saurav\CodePonting\Algo_Trading\kite_oracle_papertrading\scripts\ma_30_rejection_v1_live.py

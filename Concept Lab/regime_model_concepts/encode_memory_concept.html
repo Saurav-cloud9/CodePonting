@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encode Memory — Lag & Rolling Mean</title>
+<style>
+  :root {
+    --bg:        #0E1117;
+    --surface:   #161B27;
+    --border:    #252D40;
+    --text:      #C9D1E0;
+    --muted:     #5A6478;
+    --raw:       #5B7FD6;
+    --lag:       #F0A04B;
+    --hidden:    #3DC98A;
+    --signal-pos:#3DC98A;
+    --signal-neg:#E05C5C;
+    --accent:    #3DC98A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 28px 24px 40px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* ── header ── */
+  .eyebrow {
+    font-family: "Courier New", monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #E8EDF5;
+    margin-bottom: 4px;
+    text-wrap: balance;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+
+  /* ── legend ── */
+  .legend {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-family: "Courier New", monospace;
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── chart ── */
+  .chart-wrap {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+    cursor: crosshair;
+  }
+  canvas { display: block; width: 100%; }
+
+  /* ── tooltip ── */
+  .tooltip {
+    position: absolute;
+    background: #0A0D14;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 10px 13px;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.1s;
+    min-width: 190px;
+    z-index: 10;
+  }
+  .tooltip.visible { opacity: 1; }
+  .tt-day { color: var(--muted); margin-bottom: 6px; font-size: 11px; }
+  .tt-row { display: flex; justify-content: space-between; gap: 16px; margin: 2px 0; }
+  .tt-label { color: var(--muted); }
+  .tt-val { font-weight: 600; }
+  .tt-signal {
+    margin-top: 8px;
+    padding-top: 7px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* ── concept panels ── */
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  @media (max-width: 580px) { .panels { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 10px;
+  }
+  .panel-dot {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .panel-title {
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .panel p {
+    font-size: 13px;
+    color: #A0AABF;
+    line-height: 1.6;
+  }
+  .panel code {
+    font-family: "Courier New", monospace;
+    font-size: 11.5px;
+    background: #0A0D14;
+    border-radius: 3px;
+    padding: 1px 5px;
+    color: var(--accent);
+  }
+
+  /* ── signal panel ── */
+  .signal-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .signal-col { flex: 1; min-width: 160px; }
+  .signal-col .label { font-size: 11px; color: var(--muted); font-family: "Courier New", monospace; letter-spacing: 0.08em; margin-bottom: 5px; }
+  .signal-val { font-size: 28px; font-weight: 700; font-family: "Courier New", monospace; font-variant-numeric: tabular-nums; }
+  .formula {
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    color: var(--muted);
+    background: #0A0D14;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    flex: 2;
+    min-width: 220px;
+    line-height: 1.8;
+  }
+  .formula span { color: var(--accent); }
+  .hint {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 12px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<div class="eyebrow">Regime Model — Concept Lab</div>
+<h1>Encode Memory: Lag &amp; Rolling Mean</h1>
+<p class="subtitle">Hover over the chart to inspect any trading day. Drag to scan.</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--raw)"></div> raw return (today's actual)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--lag)"></div> lag-1 return (yesterday's actual, seen today)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--hidden); height:3px; border-radius:2px;"></div> rolling-40 mean of lag-1 (hidden state)</div>
+</div>
+
+<div class="chart-wrap" id="chartWrap">
+  <canvas id="chart"></canvas>
+  <div class="tooltip" id="tooltip">
+    <div class="tt-day" id="tt-day"></div>
+    <div class="tt-row"><span class="tt-label">raw return</span><span class="tt-val" id="tt-raw" style="color:var(--raw)"></span></div>
+    <div class="tt-row"><span class="tt-label">lag-1 return</span><span class="tt-val" id="tt-lag" style="color:var(--lag)"></span></div>
+    <div class="tt-row"><span class="tt-label">hidden state</span><span class="tt-val" id="tt-hidden" style="color:var(--hidden)"></span></div>
+    <div class="tt-signal" id="tt-signal"></div>
+  </div>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-dot" style="background:var(--lag)"></div>
+      <div class="panel-title" style="color:var(--lag)">What is lag-1?</div>
+    </div>
+    <p>
+      Every day, the model needs an <em>input</em> to make a prediction.
+      That input is <strong>yesterday's return</strong> — shifted by 1 bar.<br><br>
+      In code: <code>lag_1[i] = return[i-1]</code><br><br>
+      Why? Because today's return isn't known yet when you're placing the trade.
+      You can only use what already happened.
+    </p>
+  </div>
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-dot" style="background:var(--hidden)"></div>
+      <div class="panel-title" style="color:var(--hidden)">What is the hidden state?</div>
+    </div>
+    <p>
+      A single day's return is too noisy to trust.
+      The rolling-40 mean smooths out 40 days of lag-1 returns into one number — the <strong>regime temperature</strong>.<br><br>
+      In code: <code>rolling(40).mean()</code><br><br>
+      When it's positive: recent momentum is up → model leans long.
+      When negative: market has been falling → model leans short (or stays out).
+    </p>
+  </div>
+</div>
+
+<div class="signal-panel">
+  <div class="signal-col">
+    <div class="label">SIGNAL AT CURSOR</div>
+    <div class="signal-val" id="live-signal" style="color:var(--muted)">—</div>
+  </div>
+  <div class="formula">
+    <span>y_hat</span> = w × lag_1[i] + b<br>
+    <span>signal</span> = np.sign(y_hat)<br>
+    <span>hidden</span> = rolling(40).mean(lag_1)<br>
+    <br>
+    <span># +1 = long bet / −1 = short bet</span>
+  </div>
+  <p class="hint" style="flex:2; min-width:180px;">
+    The hidden state doesn't directly set the signal — it informs <em>w</em> and <em>b</em> during training.
+    When the model is retrained on a sliding window, it absorbs the current regime automatically.
+  </p>
+</div>
+
+<script>
+// ── synthetic data ──────────────────────────────────────────────
+const N = 160;
+const seed = 42;
+function lcg(s) { return ((s * 1664525 + 1013904223) & 0xffffffff) >>> 0; }
+
+let s = seed;
+const raw = [];
+// regime 1: slight uptrend 0-59
+// regime 2: downtrend 60-109
+// regime 3: sideways 110-159
+for (let i = 0; i < N; i++) {
+  s = lcg(s); const r1 = (s / 0xffffffff - 0.5) * 0.032;
+  s = lcg(s); const r2 = (s / 0xffffffff - 0.5) * 0.010;
+  let drift = 0;
+  if (i < 60)       drift =  0.0012;
+  else if (i < 110) drift = -0.0018;
+  else               drift =  0.0003;
+  raw.push(r1 + r2 + drift);
+}
+
+// lag-1: shift raw by 1 (index i sees raw[i-1])
+const lag1 = raw.map((_, i) => i === 0 ? null : raw[i-1]);
+
+// rolling 40 mean of lag1
+const roll40 = lag1.map((_, i) => {
+  if (i < 40) return null;
+  let sum = 0;
+  for (let j = i-40; j < i; j++) sum += lag1[j];
+  return sum / 40;
+});
+
+// ── canvas setup ────────────────────────────────────────────────
+const wrap = document.getElementById('chartWrap');
+const canvas = document.getElementById('chart');
+const ctx = canvas.getContext('2d');
+const DPR = window.devicePixelRatio || 1;
+const H = 280;
+
+function resize() {
+  const W = wrap.clientWidth - 32;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  canvas.width  = W * DPR;
+  canvas.height = H * DPR;
+  ctx.scale(DPR, DPR);
+  draw(null);
+}
+
+const PAD = { top: 16, right: 16, bottom: 36, left: 52 };
+
+function getW() { return canvas.width / DPR; }
+
+function xScale(i) {
+  return PAD.left + (i / (N - 1)) * (getW() - PAD.left - PAD.right);
+}
+
+function yScale(v, min, max) {
+  return PAD.top + (1 - (v - min) / (max - min)) * (H - PAD.top - PAD.bottom);
+}
+
+function draw(hoverIdx) {
+  const W = getW();
+  ctx.clearRect(0, 0, W, H);
+
+  // compute range
+  const vals = raw.concat(lag1.filter(v=>v!==null), roll40.filter(v=>v!==null));
+  const min = Math.min(...vals) * 1.15;
+  const max = Math.max(...vals) * 1.15;
+  const zero = yScale(0, min, max);
+
+  // ── background regime shading ──
+  const regions = [[0,59,'up'],[60,109,'dn'],[110,N-1,'flat']];
+  regions.forEach(([a,b,type]) => {
+    ctx.fillStyle = type==='up' ? 'rgba(61,201,138,0.04)' : type==='dn' ? 'rgba(224,92,92,0.04)' : 'rgba(255,255,255,0.02)';
+    ctx.fillRect(xScale(a), PAD.top, xScale(b)-xScale(a), H-PAD.top-PAD.bottom);
+  });
+
+  // regime labels
+  [['UPTREND',29],['DOWNTREND',84],['SIDEWAYS',134]].forEach(([label,i]) => {
+    ctx.fillStyle = 'rgba(90,100,120,0.55)';
+    ctx.font = '10px "Courier New"';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, xScale(i), PAD.top + 12);
+  });
+
+  // ── grid lines ──
+  ctx.strokeStyle = '#1E2535';
+  ctx.lineWidth = 1;
+  [-0.03,-0.02,-0.01,0,0.01,0.02,0.03].forEach(v => {
+    if (v < min || v > max) return;
+    const y = yScale(v, min, max);
+    ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(W - PAD.right, y); ctx.stroke();
+    ctx.fillStyle = '#3A4255';
+    ctx.font = '10px "Courier New"';
+    ctx.textAlign = 'right';
+    ctx.fillText((v*100).toFixed(1)+'%', PAD.left - 6, y + 4);
+  });
+
+  // zero line
+  ctx.strokeStyle = '#2E3A52';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(PAD.left, zero); ctx.lineTo(W - PAD.right, zero); ctx.stroke();
+
+  // ── raw return bars ──
+  const barW = Math.max(1.5, (getW() - PAD.left - PAD.right) / N - 1);
+  raw.forEach((v, i) => {
+    const x = xScale(i);
+    const y = yScale(v, min, max);
+    ctx.fillStyle = i === hoverIdx ? '#8BA8E8' : 'rgba(91,127,214,0.55)';
+    if (v >= 0) ctx.fillRect(x - barW/2, y, barW, zero - y);
+    else        ctx.fillRect(x - barW/2, zero, barW, y - zero);
+  });
+
+  // ── lag-1 bars (slightly thinner, amber) ──
+  lag1.forEach((v, i) => {
+    if (v === null) return;
+    const x = xScale(i);
+    const y = yScale(v, min, max);
+    ctx.fillStyle = i === hoverIdx ? '#F5C07A' : 'rgba(240,160,75,0.38)';
+    if (v >= 0) ctx.fillRect(x - barW/2 + barW*0.6, y, barW*0.4, zero - y);
+    else        ctx.fillRect(x - barW/2 + barW*0.6, zero, barW*0.4, y - zero);
+  });
+
+  // ── rolling-40 mean line ──
+  ctx.beginPath();
+  ctx.strokeStyle = '#3DC98A';
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  let first = true;
+  roll40.forEach((v, i) => {
+    if (v === null) return;
+    const x = xScale(i);
+    const y = yScale(v, min, max);
+    if (first) { ctx.moveTo(x, y); first = false; }
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // ── hover cursor ──
+  if (hoverIdx !== null && hoverIdx >= 0 && hoverIdx < N) {
+    const x = xScale(hoverIdx);
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(x, PAD.top); ctx.lineTo(x, H - PAD.bottom); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // dots
+    const rv = raw[hoverIdx];
+    ctx.fillStyle = '#8BA8E8';
+    ctx.beginPath(); ctx.arc(x, yScale(rv, min, max), 4, 0, Math.PI*2); ctx.fill();
+
+    const lv = lag1[hoverIdx];
+    if (lv !== null) {
+      ctx.fillStyle = '#F5C07A';
+      ctx.beginPath(); ctx.arc(x, yScale(lv, min, max), 4, 0, Math.PI*2); ctx.fill();
+    }
+
+    const hv = roll40[hoverIdx];
+    if (hv !== null) {
+      ctx.fillStyle = '#3DC98A';
+      ctx.beginPath(); ctx.arc(x, yScale(hv, min, max), 5, 0, Math.PI*2); ctx.fill();
+    }
+  }
+
+  // ── x axis labels ──
+  ctx.fillStyle = '#3A4255';
+  ctx.font = '10px "Courier New"';
+  ctx.textAlign = 'center';
+  [0, 40, 80, 120, 159].forEach(i => {
+    ctx.fillText('Day ' + (i+1), xScale(i), H - PAD.bottom + 16);
+  });
+}
+
+// ── tooltip + hover ─────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+
+function showTooltip(i, mouseX, mouseY) {
+  const rv  = raw[i];
+  const lv  = lag1[i];
+  const hv  = roll40[i];
+
+  document.getElementById('tt-day').textContent  = 'Day ' + (i+1);
+  document.getElementById('tt-raw').textContent  = (rv*100).toFixed(3) + '%';
+  document.getElementById('tt-lag').textContent  = lv !== null ? (lv*100).toFixed(3) + '%' : 'N/A (first bar)';
+  document.getElementById('tt-hidden').textContent = hv !== null ? (hv*100).toFixed(4) + '%' : 'N/A (< 40 bars)';
+
+  const sig = document.getElementById('tt-signal');
+  if (hv !== null) {
+    const direction = hv > 0 ? 'LONG +1' : 'SHORT −1';
+    sig.textContent  = 'Signal: ' + direction;
+    sig.style.color  = hv > 0 ? 'var(--signal-pos)' : 'var(--signal-neg)';
+  } else {
+    sig.textContent = 'Signal: warming up';
+    sig.style.color = 'var(--muted)';
+  }
+
+  // live signal badge
+  const live = document.getElementById('live-signal');
+  if (hv !== null) {
+    live.textContent  = hv > 0 ? '+1  LONG' : '−1  SHORT';
+    live.style.color  = hv > 0 ? 'var(--signal-pos)' : 'var(--signal-neg)';
+  } else {
+    live.textContent = '—';
+    live.style.color = 'var(--muted)';
+  }
+
+  // position tooltip
+  const wrapRect = wrap.getBoundingClientRect();
+  let tx = mouseX + 14;
+  let ty = mouseY - 20;
+  const tw = 200, th = 130;
+  if (tx + tw > wrapRect.width) tx = mouseX - tw - 10;
+  if (ty + th > wrapRect.height) ty = mouseY - th;
+  tooltip.style.left = tx + 'px';
+  tooltip.style.top  = ty + 'px';
+  tooltip.classList.add('visible');
+}
+
+function getIdx(clientX) {
+  const rect = wrap.getBoundingClientRect();
+  const mx = (clientX - rect.left - 16); // 16 = padding
+  const W = wrap.clientWidth - 32;
+  const chartW = W - PAD.left - PAD.right;
+  const idx = Math.round((mx - PAD.left) / chartW * (N - 1));
+  return Math.max(0, Math.min(N - 1, idx));
+}
+
+wrap.addEventListener('mousemove', e => {
+  const rect = wrap.getBoundingClientRect();
+  const mx = e.clientX - rect.left - 16;
+  const my = e.clientY - rect.top;
+  const i = getIdx(e.clientX);
+  draw(i);
+  showTooltip(i, mx, my);
+});
+
+wrap.addEventListener('mouseleave', () => {
+  tooltip.classList.remove('visible');
+  document.getElementById('live-signal').textContent = '—';
+  document.getElementById('live-signal').style.color = 'var(--muted)';
+  draw(null);
+});
+
+window.addEventListener('resize', resize);
+resize();
+</script>
+</body>
+</html>
