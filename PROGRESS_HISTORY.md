@@ -440,3 +440,37 @@ Step 9.4  — 2026-04-19
            ✅  Next: diagnose the silent VM process exit → fix VM timezone → re-run full-day VM
                test → recon script against VM's live_bars.csv → older open items (reconcile
                fetch-window bug, MA20/ATR14 logging, SUNPHARMA mismatch) still carried forward
+2026-07-23 SS (Kite bot — VM hardening, position-recovery, full-day validation) ─────
+           ✅  VM timezone fixed (Asia/Kolkata applied, verified via date/timedatectl)
+           ✅  Built kitebot.service (systemd) + kitebot-alert.service (OnFailure hook) - crash
+               alerts pushed via ntfy.sh (topic codeponting-kitebot-x7j2m9); enabled for
+               auto-start on VM reboot; tested end-to-end via kill -9, confirmed push landed on
+               both desktop (PWA) and phone (native app)
+           ✅  Built event-driven position-recovery: save_positions()/load_positions() snapshot
+               open_positions.json on every open/close (not polled); reconcile_gap_positions()
+               replays historical_data since entry against fixed SL/TP to check if a restored
+               position was actually hit during downtime - closes retroactively if so
+           ✅  Full real-data validation: 6 open positions, Ctrl+C, restart - all 6 restored
+               correctly, SUNPHARMA correctly gap-closed (SL hit during downtime), independently
+               re-verified against official Kite historical_data - exact match
+           ✅  EOD tick-exit validated live (clean 15:00 auto-stop, all positions closed) and via
+               standalone simulation (fires on exact boundary tick, no duplicate exits)
+           ✅  Ran 4 iterations of VM live testing today, archived to data/trades/daily
+               data/23rdJuly/ - discovered live_bars.csv/live_trades.csv only overwrite once
+               their in-memory list is non-empty (not every cycle) - explains why old trades
+               persisted across some pulls and vanished by others
+           ✅  Ran original recon script against full session - bar-level clean, trade-level
+               showed real mismatches; independently spot-verified 3 trades (SUNPHARMA, NTPC,
+               JSWSTEEL) against raw official data - all correct on price/timing
+           ✅  Built ma_rejection_v1_trade_check.py (new, separate script) - custom --start/--end
+               window + full-universe replay, to check specific known bot-uptime windows instead
+               of the whole market session
+           ✅  Key finding: ATR14 (unlike MA20) is sensitive to live-tick-bar high/low vs official
+               bar high/low, causing official-replay SL/TP to diverge from live's actual SL/TP
+               even on otherwise-correct data - explains most of today's trade-level mismatches
+               (only 2/17 checked trades matched exactly across 3 verified uptime windows)
+           ✅  Side task: pulled a save-state git commit, resolved a VS Code Settings Sync
+               conflict between desktop/laptop (merged, excluded colorTheme from sync)
+           ✅  Next: decide how to handle the ATR14 divergence for validation → dig into
+               remaining unexplained mismatches → confirm VM's live.py is the updated version →
+               fix live_trades.csv silent data-loss on restart

@@ -2,19 +2,25 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Kite bot (market hours only) — resume during tomorrow's login
-        VM deployment achieved 2026-07-22: WSL/Ubuntu + SSH to Oracle VM working, venv +
-        deps installed, live bot files copied, rate-limit bug found+fixed (batched ltp call
-        + warm-up delay)
-        Two NEW unresolved VM-specific bugs (top priority next session):
-        1) VM system timezone is UTC not IST -> bar timestamps + EOD_HOUR check both wrong
-           in real-world terms. Fix known: sudo timedatectl set-timezone Asia/Kolkata (VM)
-        2) Bot process silently exited on VM after ~2 bar cycles, no crash seen yet - check
-           original launch terminal's final output to diagnose before trusting unattended runs
-        After those: re-run full-day VM test -> recon script against VM's live_bars.csv
-        Older items still open: reconcile script's fetch-window bug (misses EOD exits, fix
-        by extending to session_end inclusive), MA20/ATR14+touch-eval logging not yet added,
-        SUNPHARMA reconstruction mismatch unresolved (needs live-captured warm-up data)
+P1  Kite bot (market hours only) — resume tomorrow during live market hours
+        2026-07-23 progress: VM timezone fixed, systemd+crash-alert (ntfy) built+tested,
+        position-recovery+gap-check built+validated on real trades, EOD exit validated,
+        new trade_check.py script built for custom-window trade validation
+        Next up:
+        1) Investigate the ATR14 divergence properly - live's real SL/TP (built from its own
+           tick-based bars) vs a pure-official-data replay's SL/TP disagree because ATR is
+           sensitive to high/low (unlike MA20 which is close-only and matches well). Decide
+           if/how to reconcile this for trade-level validation to be meaningful
+        2) Only 2/17 trades matched exactly across the 3 checked windows today - dig into the
+           remaining unexplained ones (6 unexplained "only in live", AXISBANK/HINDALCO "only
+           in official") once ATR question above is resolved
+        3) Port today's position-recovery/gap-check fix to VM's live.py permanently (already
+           pushed once for testing - confirm it's the version staying there)
+        4) Sync VM's live_trades.csv loss issue - old trades get silently dropped once a new
+           run's first save overwrites the file (the `if trades:` guard never merges old data)
+        Older items still open: reconcile script's fetch-window bug (misses EOD exits),
+        MA20/ATR14+touch-eval logging not yet added, SUNPHARMA reconstruction mismatch (local,
+        pre-VM) — likely superseded by today's live SUNPHARMA validation, re-check relevance
 
 P2  Regime-adaptive online learning model — NEW DIRECTION
         Buy MemLabs notebook ($5.50, patreon.com/cw/MemLabs) — card declined, retry

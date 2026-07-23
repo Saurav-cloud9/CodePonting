@@ -6,17 +6,18 @@ tick-by-tick for SL/TP (real-time, not bar-close-only). historical_data is
 used only for startup warm-up and reconnect gap-patching — never for live
 signal detection.
 """
+import json
 import os
 import threading
 import time
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
 from dotenv import load_dotenv
 from kiteconnect import KiteConnect, KiteTicker
 
-from ma_rejection_v1_core import StockState, process_bar, update_indicators, EOD_HOUR
+from ma_rejection_v1_core import StockState, process_bar, update_indicators, EOD_HOUR, _log_trade
 
 env_path = Path(__file__).resolve().parents[1] / '.env'
 load_dotenv(dotenv_path=env_path, override=True)
@@ -28,6 +29,7 @@ DATA_DIR = Path(__file__).resolve().parent.parent / 'data' / 'trades'
 TRADE_LOG = DATA_DIR / 'live_trades.csv'
 BAR_LOG = DATA_DIR / 'live_bars.csv'
 WARMUP_LOG = DATA_DIR / 'warmup_bars.csv'
+POSITIONS_FILE = DATA_DIR / 'open_positions.json'
 
 UNIVERSE = ['ADANIPORTS', 'ASHOKLEY', 'AXISBANK', 'BAJFINANCE', 'BANDHANBNK', 'BHARTIARTL',
             'CIPLA', 'COALINDIA', 'DABUR', 'DIVISLAB', 'HDFCBANK', 'HINDALCO', 'ICICIBANK',
@@ -41,7 +43,7 @@ SYMBOL_MAP = {'TATAMOTORS': 'TMPV'}
 
 def kite_symbol(display_symbol):
     return SYMBOL_MAP.get(display_symbol, display_symbol)
-
+ 
 
 kite = KiteConnect(api_key=API_KEY)
 kite.set_access_token(ACCESS_TOKEN)
@@ -91,10 +93,92 @@ def bucket_start(dt):
     return dt.replace(minute=minute, second=0, microsecond=0)
 
 
+def save_positions():
+    """Snapshot all currently-open positions to disk. Called under `lock`,
+    right after any state.position change, so a crash/power-cut never loses
+    more than the position that was mid-write (event-driven, not polled)."""
+    snapshot = {}
+    for sym, st in states.items():
+        if st.position is not None:
+            pos = st.position
+            snapshot[sym] = {
+                'entry': pos['entry'], 'sl': pos['sl'], 'tp': pos['tp'],
+                'entry_date': pos['entry_date'].isoformat(),
+                'entry_dt': pos['entry_dt'].isoformat(),
+            }
+    try:
+        with open(POSITIONS_FILE, 'w') as f:
+            json.dump(snapshot, f, indent=2)
+    except PermissionError:
+        print('Positions snapshot save skipped - file open elsewhere.')
+
+
+def load_positions():
+    if not POSITIONS_FILE.exists():
+        return
+    with open(POSITIONS_FILE) as f:
+        snapshot = json.load(f)
+    for sym, pos in snapshot.items():
+        if sym in states:
+            states[sym].position = {
+                'entry': pos['entry'], 'sl': pos['sl'], 'tp': pos['tp'],
+                'entry_date': date.fromisoformat(pos['entry_date']),
+                'entry_dt': datetime.fromisoformat(pos['entry_dt']),
+            }
+    if snapshot:
+        print(f'Restored {len(snapshot)} open position(s) from {POSITIONS_FILE}')
+
+
+def reconcile_gap_positions():
+    """For any position just restored via load_positions(), replay
+    historical_data since entry to check whether SL/TP was actually hit while
+    the bot was down. SL/TP are fixed at entry - no indicator dependency, so
+    this only needs raw OHLC bars, not MA20/ATR14. Exit-only: does not scan
+    for new signals during the gap, only resolves the restored position."""
+    for sym in UNIVERSE:
+        pos = states[sym].position
+        if pos is None:
+            continue
+        token = symbol_to_token[sym]
+        candles = kite.historical_data(token, from_date=pos['entry_dt'],
+                                        to_date=datetime.now(), interval='5minute')
+        prev_close = pos['entry']
+        resolved = False
+        for c in candles:
+            dt = c['date'].replace(tzinfo=None)
+            if dt <= pos['entry_dt']:
+                continue
+            if dt.date() != pos['entry_date']:
+                exit_price = prev_close
+                outcome = 'EOD+' if pos['entry'] - exit_price > 0 else 'EOD-'
+                _log_trade(trades, sym, pos, exit_price, outcome, dt)
+                resolved = True
+            elif dt.hour >= EOD_HOUR:
+                exit_price = c['open']
+                outcome = 'EOD+' if pos['entry'] - exit_price > 0 else 'EOD-'
+                _log_trade(trades, sym, pos, exit_price, outcome, dt)
+                resolved = True
+            elif c['high'] >= pos['sl']:
+                _log_trade(trades, sym, pos, pos['sl'], 'L', dt)
+                resolved = True
+            elif c['low'] <= pos['tp']:
+                _log_trade(trades, sym, pos, pos['tp'], 'W', dt)
+                resolved = True
+            if resolved:
+                states[sym].position = None
+                print(f'{sym}: gap-check found SL/TP hit during downtime - closed retroactively.')
+                break
+            prev_close = c['close']
+        if not resolved:
+            print(f'{sym}: gap-check found no SL/TP hit - position remains open.')
+    save_positions()
+
+
 def finalize_bar(sym, bar):
     with lock:
         bar_log_rows.append({'symbol': sym, **bar})
         process_bar(sym, bar, states[sym], trades)
+        save_positions()
     pos = states[sym].position
     tag = f"OPEN sl={pos['sl']:.2f} tp={pos['tp']:.2f}" if pos else 'flat'
     print(f"{bar['datetime']}  {sym:12s}  O={bar['open']:.2f} H={bar['high']:.2f} "
@@ -144,6 +228,7 @@ def on_ticks(ws, ticks):
                                     'exit_price': price, 'outcome': outcome, 'pnl': pnl})
                     state.position = None
                     state.tick_exit_pending_bar = b
+                    save_positions()
                 print(f"{ts}  {sym:12s}  TICK EXIT ({outcome}) @ {price:.2f}  pnl={pnl:.2f}")
             state.pending_entry = None  # no new entries once EOD hour is reached
 
@@ -158,6 +243,7 @@ def on_ticks(ws, ticks):
                                     'exit_price': pos['sl'], 'outcome': 'L', 'pnl': pnl})
                     state.position = None
                     state.tick_exit_pending_bar = forming_bar[sym]['bucket']
+                    save_positions()
                 print(f"{ts}  {sym:12s}  TICK EXIT (SL) @ {pos['sl']:.2f}  pnl={pnl:.2f}")
             elif price <= pos['tp']:
                 pnl = pos['entry'] - pos['tp']
@@ -167,6 +253,7 @@ def on_ticks(ws, ticks):
                                     'exit_price': pos['tp'], 'outcome': 'W', 'pnl': pnl})
                     state.position = None
                     state.tick_exit_pending_bar = forming_bar[sym]['bucket']
+                    save_positions()
                 print(f"{ts}  {sym:12s}  TICK EXIT (TP) @ {pos['tp']:.2f}  pnl={pnl:.2f}")
 
 
@@ -189,6 +276,8 @@ def on_reconnect(ws, attempts_count):
 if __name__ == '__main__':
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     warmup()
+    load_positions()
+    reconcile_gap_positions()
 
     kws = KiteTicker(API_KEY, ACCESS_TOKEN)
     kws.on_ticks = on_ticks
