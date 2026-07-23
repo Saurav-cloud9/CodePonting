@@ -1,129 +1,102 @@
-# Session Log — 2026-07-21
+# Session Log — 2026-07-22
 
-## 6BCE VWAP — validation + charts
+## Kite Paper Trading Bot — first VM deployment (Algo_Trading/kite_oracle_papertrading/)
 
-### Grok script validated
-- Logic review: VWAP formula correct (TP=(H+L+C)/3, intraday reset), strict close<VWAP, exit priority correct, Zerodha SHORT charges correct, daily ZSh(D) correct
-- Spot-check SL=4.0/TP=6.0: CC got N=71,873 / ZPF=0.895 / ZSh(D)=-1.319 — exact match with Grok
-- Minor flag: np.isnan(vwap) doesn't catch inf (if volume=0), low risk in practice
+### WSL/Ubuntu installed on laptop
+- Confirmed WSL wasn't installed (matches yesterday's finding); installed via `wsl --install`
+  (needed elevation/UAC, and a restart which we'd deferred yesterday specifically to avoid
+  interrupting live testing — no longer a concern once bot was stopped)
+- Set up default Ubuntu user, declined telemetry opt-in
+- Clarified along the way: WSL is local-only (unrelated to Oracle account, which is
+  cloud/browser-based and not device-specific); WSLg (GUI Apps) is for running Linux GUI
+  programs locally, unrelated to remote VM access, which needs actual remote-desktop
+  software (RustDesk/VNC/RDP) if ever wanted — deferred as unnecessary for this headless
+  server use case
 
-### ConsScr computed and verified
-- SL=4.0/TP=6.0 (Best ZPF): ConsScr=-2.905 — matches Grok exactly
-- SL=6.0/TP=6.0 (Best ConsScr): ConsScr=-2.709 — matches Grok exactly
-- Locked SL=6.0/TP=6.0 as best combo for 6BCE VWAP variant
+### SSH connection to Oracle Cloud VM established
+- Found and validated SSH key (Framework_V2/oracle key/ssh-key-2026-07-11.key)
+- VM: 161.118.164.160, user `ubuntu`, instance-20260712-0412
+- Copied key into WSL's native filesystem (~/.ssh/oracle_key, chmod 400) — avoids the
+  Windows-mounted-file permission issue that would make SSH refuse the key
+- First connection showed "System restart required" — rebooted via `sudo reboot`,
+  reconnected successfully after ~30s. Kernel confirmed up-to-date post-reboot
 
-### Equity + drawdown chart
-- chart_equity_6bce_vwap.py built and run
-- N=70,269 / ZPF=0.8916 / PeakEquity=₹1,122 / MaxDD=₹-16,288
-- VWAP filter nearly halves max drawdown vs baseline (₹-28,494)
-- Both still FAIL (ZPF<1.0)
+### VM environment set up
+- Found already present: Python 3.12.3, git 2.43.0. Missing: pip3
+- Installed: python3-pip, python3-venv
+- Created virtual environment (~/kite_bot_env) — needed since Ubuntu 24.04 blocks direct
+  system-wide pip installs (externally-managed-environment restriction)
+- Installed inside venv: kiteconnect, pandas, numpy, python-dotenv (explicitly skipped
+  matplotlib/plotly — those are backtest-engine-side needs, VM only executes+logs trades)
 
-## Terminology
-- SL/TP locked as standard going forward (replacing SL/TGT)
-- Glossary updated in TODO.md
+### Live bot deployed to VM
+- Only the 2 files actually needed for the live bot were copied (not the whole scripts/
+  folder — offline engine, reconcile script, reference backtest, sweep script all stay
+  local per the division of labor agreed this session): ma_30_rejection_v1_live.py,
+  ma_rejection_v1_core.py, plus .env and kite_auth.py at the papertrading root
+- First scp attempt failed silently (folders created but empty) — root cause: commands
+  were run in PowerShell using WSL-style paths (`/mnt/c/...`, `~/.ssh/oracle_key`), which
+  don't resolve in Windows' own shell. Fixed by re-running from an actual WSL Ubuntu
+  terminal (Windows Terminal → dropdown → Ubuntu), where the paths correctly matched
+- Second attempt succeeded, verified all 4 files present via `ls -la` on the VM
 
-## Strategic direction — regime adaptive model
-- 6 months of static regime filter attempts all failed OOS
-- MemLabs video 2 (How to handle Regime Changes) identified as the right approach
-  - 4 methods: sliding window, hidden states, online learning, RL+entropy
-  - Online learning (passive aggressive regressor) most directly applicable
-  - Key idea: model updates weights on every new data point, not frozen after training
-- Concept is instrument-agnostic — confirmed applicable to NSE stocks
-- MemLabs notebook ($5.50) attempted purchase — card declined, retry tomorrow
-- Decision: buy notebook as reference, adapt to NSE stocks with CC
+### Real bug found and fixed: Kite API rate limiting on the VM
+- First VM run failed immediately: `kiteconnect.exceptions.NetworkException: Too many requests`
+- Root cause: instrument-resolution loop made 30 sequential `kite.ltp()` calls with zero
+  delay; warm-up loop made 30 sequential `kite.historical_data()` calls with zero delay.
+  This worked "by accident" on the laptop because natural network latency there happened
+  to keep us under Kite's ~3 req/sec limit — the VM's lower latency to Kite's servers
+  blasted through the limit fast enough to actually trigger it
+- Fixed: batched the 30 `kite.ltp()` calls into a single request (Kite's `ltp()` accepts a
+  list natively — `kite.ltp([f'NSE:{sym}' for sym in UNIVERSE])`); added `time.sleep(0.34)`
+  between each `historical_data()` call in warm-up (that endpoint can't be batched, it's
+  inherently per-instrument)
+
+### Bot ran successfully on VM — with a significant new bug found
+- After the rate-limit fix, bot connected, warmed up, and started producing real bars
+- Temporarily bypassed EOD_HOUR to 16 (since first successful connection happened after
+  real 15:00 IST) to observe the remaining minutes before actual market close; reverted to
+  15 afterward (both locally and re-synced to VM) once testing was done for the day
+- **Timezone bug found**: bars showed timestamps like "09:35" instead of the expected
+  "15:05" IST. Root cause: Kite's tick `exchange_timestamp` gets parsed via
+  `datetime.fromtimestamp()` (both inside pykiteconnect's own code and our fallback),
+  which converts using the RUNNING MACHINE's system timezone. The laptop happened to be
+  set to IST already, masking this entirely during local testing — the VM defaults to UTC
+  (standard for cloud servers), so every bar timestamp came out 5:30 behind. This isn't
+  just cosmetic — the EOD_HOUR check (`bar['hour'] >= 15`) would fire at the wrong real
+  moment on the VM as it currently stands (3pm UTC = 8:30pm IST, not 3pm IST)
+  - Fix identified (set VM's system timezone via `timedatectl set-timezone Asia/Kolkata`)
+    but NOT YET APPLIED — first priority next session
+- **Bot silently exited**: after saving bars through 09:40 UTC (two full cycles across all
+  30 stocks), the live console stopped printing, and separately `ps aux | grep python3`
+  confirmed the bot process had fully exited — no crash/traceback captured yet. The CSV
+  data itself is intact through that point (proves it wasn't frozen mid-cycle, it fully
+  finished processing then stopped existing as a process). Needs checking the original
+  launch terminal for whatever error/exit reason is sitting there — deferred to next session
+
+### Concepts clarified along the way (useful reference)
+- scp vs sftp vs ftp: scp/sftp both SSH-based (encrypted), FTP is a separate older
+  protocol; scp is direct point-to-point transfer, not a "temp staging" copy
+- scp must run from whichever side has a reachable public IP + listening SSH server (the
+  VM), not the other way around — laptop has neither, so transfers always originate locally
+- python venv purpose: isolates this project's package versions from system Python and
+  other projects, required practically on Ubuntu 24.04 due to its system-package protection
+- WSL (Windows Subsystem for Linux) vs cloud CLI tools (oci/az/aws): WSL is an OS-level
+  compatibility layer for running an actual Linux kernel; cloud CLIs are just normal
+  programs making API calls — no "Windows Subsystem for Oracle/Azure/AWS" concept exists,
+  cloud services aren't operating systems needing that kind of integration
 
 ## Key numbers
-- 6BCE baseline best: SL=6.0/TP=6.0, ZPF=0.888, MaxDD=₹-28,494
-- 6BCE VWAP best consistency: SL=6.0/TP=6.0, ZPF=0.892, MaxDD=₹-16,288
+- VM: 161.118.164.160, ubuntu@instance-20260712-0412, Ubuntu 24.04 (noble), Python 3.12.3
+- Rate-limit fix: instrument resolution 30 calls → 1 batched call; warm-up gets 0.34s delay/symbol
+- Bot produced 2 full bar cycles (09:35, 09:40 UTC / 15:05, 15:10 IST) across all 30 stocks
+  before silently exiting — CSV confirms data integrity up to that point
 
----
-
-## Kite Paper Trading Bot (CC session, Algo_Trading/kite_oracle_papertrading/)
-
-### Root cause found: MODE_QUOTE never provides exchange_timestamp
-- Read pykiteconnect's ticker.py source directly: exchange_timestamp/last_trade_time are
-  only populated in FULL-mode packets (184 bytes), never in QUOTE-mode packets (44 bytes)
-- Live script was subscribing in MODE_QUOTE — meaning `t.get('exchange_timestamp')` was
-  silently returning None on every tick, all of yesterday, falling back to `datetime.now()`
-  (local receipt time, not the exchange's actual trade time) for bucketing ticks into bars
-- Fixed: switched to `ws.set_mode(ws.MODE_FULL, tokens)` — no other code change needed,
-  the existing `t.get('exchange_timestamp') or datetime.now()` line now gets the real value
-
-### EOD hard-stop added and confirmed live (two tests)
-- Added `eod_reached` threading.Event + grace-period logic: once any symbol crosses into an
-  hour>=EOD_HOUR bucket, wait ~60s (2 cycles) for all 30 symbols to individually close out,
-  then fully shut down (close websocket, final save, exit process) — not just idle
-- Test 1: temporarily set EOD_HOUR=14 (13:06 start, ~50min wait avoided by testing at next
-  whole hour since EOD_HOUR only supports hour-granularity). 3 positions (INFY, JSWSTEEL,
-  SUNPHARMA) open at 13:55 all closed via TICK EXIT (EOD+/EOD-) exactly at 14:00:00, then
-  bot auto-stopped cleanly
-- Test 2 (real EOD_HOUR=15, reverted after test 1): 3 positions (ICICIBANK, CIPLA,
-  NATIONALUM) open at 14:55 all closed via TICK EXIT at 15:00:00/15:00:02, bot auto-stopped
-- Both fixes confirmed working at actual market hours, not just theoretically
-
-### Reconciliation script improvements
-- Now saves both fetched bars (official_bars_<date>.csv) and findings (recon_<date>.md) to
-  new data/recon/ folder, instead of console-only output. Gitignore updated (official_bars_*.csv)
-- Re-ran against yesterday's (2026-07-20) session: identical numbers to the manual run,
-  confirms determinism
-- Ran against today's short EOD-test session (13:40-14:00, 120 bars): 32/120 mismatched,
-  but 27 of those are all at 13:40 (first bar of session, known mid-bucket-startup artifact,
-  unrelated to the MODE_FULL fix) — only 5 scattered elsewhere, smaller than yesterday's.
-  Sample too short (4 bars/stock) to confirm the timestamp fix definitively; needs a full-day run
-
-### Real bug found in reconcile script: fetch window excludes the EOD bar
-- `if dt >= session_end: continue` means the script never fetches/processes the bar at
-  session_end itself — so it can NEVER see an hour>=EOD_HOUR bar and NEVER records an
-  EOD-triggered trade, regardless of whether entry signals matched live or not
-- This alone explains most of today's "3 live trades vs 0 recon trades" gap, since ALL 3 of
-  today's live trades were EOD exits (not SL/TP hits) — needs fixing (extend fetch to
-  session_end inclusive, or one bar past it)
-
-### 3-vs-0 trade mismatch traced (two distinct causes, not one)
-- JSWSTEEL: recon's touch pattern (13:40/45/50/55 = False/True/True/False) exactly matches
-  live's actual entry (13:50 @ 1266.9, touch at 13:45) — signal timing agrees completely.
-  0-in-recon here is purely the fetch-window bug above
-- INFY: recon shows touch=True at 13:40 already (would enter at 13:45); live's corrupted
-  13:40 bar apparently didn't satisfy the touch condition, so live's engine stayed flat and
-  caught the next real touch (13:45) instead, entering one bar later at 13:50
-- SUNPHARMA: opposite direction — live's corrupted 13:40 bar appears to have produced a
-  signal that ISN'T present in a clean reconstruction. Attempted to verify by replaying
-  live's own bars with a freshly-fetched warm-up: reconstruction showed touch=True only at
-  13:50, but live's actual trade (entry_dt=13:45) implies its real engine saw the touch at
-  13:40 — meaning the reconstruction doesn't even match what live actually did. Root cause
-  NOT fully resolved — most likely the warm-up data fetched just now doesn't exactly match
-  what live's engine had at its real start time, but this needs live-captured warm-up data
-  (see next item) to confirm properly rather than more after-the-fact guessing
-
-### Warm-up bars now logged
-- Added warmup_bars.csv output to the live script (tagged with symbol + warmup_run_at) —
-  future analysis can use the actual captured warm-up data instead of error-prone
-  after-the-fact reconstruction (which is what caused the SUNPHARMA dead-end above)
-- Deferred: adding MA20/ATR14 + touch-eval columns directly to live_bars.csv — would
-  eliminate manual reconstruction entirely; planned for tomorrow's session
-
-### Automation planning (cron + login)
-- Cron mechanics discussed: launches script only, doesn't solve daily manual Kite login
-  requirement (option 1). Headless automated login (option 2) technical shape discussed
-  (Selenium/Playwright + pyotp for TOTP) but real risks flagged: storing actual account
-  credentials (bigger blast radius than API keys), and Zerodha's login flow likely has
-  fraud/bot detection (CAPTCHA etc.) since scripted login isn't the sanctioned automation
-  path (API+token flow is) — decision: stick with manual login (option 1) for now, try
-  option 2 later purely as an experiment, not for production
-- Confirmed manual login can be done entirely from phone (browser login + Termius SSH to
-  run kite_auth.py on the eventual VM) — closes the loop for cloud-only operation
-
-### Oracle Cloud VM setup — started, paused
-- Found SSH key: Framework_V2/oracle key/ssh-key-2026-07-11.key (valid RSA private key)
-- Confirmed WSL is NOT installed on this machine (`wsl --status` fails)
-- Installing WSL requires a system restart, which would have killed the live bot test in
-  progress — deferred actual WSL install until after today's live testing finished
-- Not yet done: actually installing WSL/Ubuntu and connecting to the VM — next session
-
-## Key numbers (Kite bot)
-- MODE_FULL fix: exchange_timestamp confirmed populated only in 184-byte (FULL) packets,
-  never in 44-byte (QUOTE) packets — verified directly from pykiteconnect source
-- EOD test 1: 3 trades (INFY +0.60, JSWSTEEL -0.10, SUNPHARMA +0.90) all EOD-exited at 14:00:00
-- EOD test 2 (real): 3 trades (ICICIBANK +0.00, CIPLA +1.30, NATIONALUM +0.30) all EOD-exited at 15:00:00-15:00:02
-- Recon test (13:40-14:00): 120 bars, 32 mismatched (27 at first-bar-of-session, 5 scattered)
-- TODO.md reprioritized: Kite bot now P1
+## Next session priorities
+1. Investigate the silent VM process exit — check original launch terminal for traceback
+2. Fix VM timezone: `sudo timedatectl set-timezone Asia/Kolkata`, re-verify bar timestamps show IST
+3. Re-run full-day test on VM once both above are resolved
+4. Run recon script (locally) against the VM's live_bars.csv/live_trades.csv once a clean
+   run exists, same workflow as local-PC reconciliation
+5. Older open items still carried forward: reconcile script's fetch-window bug (misses EOD
+   trades), MA20/ATR14+touch-eval logging, SUNPHARMA reconstruction mismatch unresolved

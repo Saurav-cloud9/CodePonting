@@ -3,16 +3,18 @@
 # ─────────────────────────────────────────────────────────────
 
 P1  Kite bot (market hours only) — resume during tomorrow's login
-        EOD tick-based fix + hard auto-stop CONFIRMED working live (2026-07-21, both 14:00
-        test cutoff and real 15:00); MODE_FULL timestamp fix applied, needs a longer full-day
-        run to fully validate boundary-tick reduction (short test showed no red flags)
-        Next: add MA20/ATR14 + touch-eval logging to live_bars.csv — eliminates manual
-        reconstruction needed 3x already (INFY/SUNPHARMA/NATIONALUM)
-        Reconciliation script bug: fetch window stops at session_end exclusive, never
-        captures EOD-triggered exits — needs fixing
-        Reconciliation gap root cause: partially traced (startup-corrupted first bar affects
-        signal detection — confirmed for JSWSTEEL matching, SUNPHARMA/INFY still need full
-        reconstruction-based verification, not just comparison)
+        VM deployment achieved 2026-07-22: WSL/Ubuntu + SSH to Oracle VM working, venv +
+        deps installed, live bot files copied, rate-limit bug found+fixed (batched ltp call
+        + warm-up delay)
+        Two NEW unresolved VM-specific bugs (top priority next session):
+        1) VM system timezone is UTC not IST -> bar timestamps + EOD_HOUR check both wrong
+           in real-world terms. Fix known: sudo timedatectl set-timezone Asia/Kolkata (VM)
+        2) Bot process silently exited on VM after ~2 bar cycles, no crash seen yet - check
+           original launch terminal's final output to diagnose before trusting unattended runs
+        After those: re-run full-day VM test -> recon script against VM's live_bars.csv
+        Older items still open: reconcile script's fetch-window bug (misses EOD exits, fix
+        by extending to session_end inclusive), MA20/ATR14+touch-eval logging not yet added,
+        SUNPHARMA reconstruction mismatch unresolved (needs live-captured warm-up data)
 
 P2  Regime-adaptive online learning model — NEW DIRECTION
         Buy MemLabs notebook ($5.50, patreon.com/cw/MemLabs) — card declined, retry

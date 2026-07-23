@@ -411,3 +411,32 @@ Step 9.4  — 2026-04-19
            ✅  TODO.md reprioritized: Kite bot promoted to P1
            ✅  Next: install WSL/Ubuntu + SSH to VM → fix reconcile fetch-window bug → add
                MA20/ATR14+touch-eval logging → resolve SUNPHARMA mismatch → full-day live test
+2026-07-22 SS (Kite paper trading bot — first VM deployment) ─────────────
+           ✅  WSL/Ubuntu installed on laptop; SSH to Oracle Cloud VM (161.118.164.160,
+               ubuntu@instance-20260712-0412) established using the found key file
+           ✅  VM had pending updates ("system restart required") — rebooted via sudo reboot,
+               reconnected successfully, kernel confirmed up-to-date after
+           ✅  VM environment set up: python3-pip, python3-venv, kite_bot_env virtual env with
+               kiteconnect/pandas/numpy/python-dotenv (matplotlib/plotly deliberately skipped -
+               VM only executes+logs, charting stays local)
+           ✅  Live bot deployed: only the 2 files actually needed (ma_30_rejection_v1_live.py +
+               ma_rejection_v1_core.py) plus .env + kite_auth.py, not the whole scripts/ folder
+           ✅  First scp attempt failed silently (run in PowerShell with WSL-style paths, wrong
+               shell for that path syntax) - fixed by running from an actual WSL Ubuntu terminal
+           ✅  Found + fixed a real rate-limit bug: 30 sequential unbatched kite.ltp() calls
+               worked "by accident" locally (network latency masked it) but broke on the VM's
+               faster connection - batched into 1 call; added 0.34s delay to warm-up's
+               historical_data loop (can't be batched, inherently per-instrument)
+           ✅  Bot ran successfully on VM and produced real bars - but found two NEW VM-specific
+               bugs: (1) VM's system timezone is UTC not IST, so Kite tick timestamps resolve
+               wrong (masked locally since laptop's own clock is IST) - also means EOD_HOUR
+               would fire at the wrong real-world time on the VM as-is, fix known
+               (timedatectl set-timezone Asia/Kolkata) but not applied yet; (2) bot process
+               silently exited after ~2 bar cycles, no crash visible yet, CSV data intact
+               through that point (rules out mid-cycle freeze) - root cause unknown
+           ✅  Concepts clarified: scp vs sftp vs ftp, scp's fixed transfer direction (needs the
+               reachable side, i.e. the VM with public IP, not the laptop), venv purpose, WSL
+               vs cloud-provider CLI tools (fundamentally different categories)
+           ✅  Next: diagnose the silent VM process exit → fix VM timezone → re-run full-day VM
+               test → recon script against VM's live_bars.csv → older open items (reconcile
+               fetch-window bug, MA20/ATR14 logging, SUNPHARMA mismatch) still carried forward
