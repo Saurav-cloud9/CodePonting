@@ -2,30 +2,36 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Kite bot (market hours only) — resume tomorrow during live market hours
-        2026-07-23 progress: VM timezone fixed, systemd+crash-alert (ntfy) built+tested,
-        position-recovery+gap-check built+validated on real trades, EOD exit validated,
-        new trade_check.py script built for custom-window trade validation
-        Next up:
-        1) Investigate the ATR14 divergence properly - live's real SL/TP (built from its own
-           tick-based bars) vs a pure-official-data replay's SL/TP disagree because ATR is
-           sensitive to high/low (unlike MA20 which is close-only and matches well). Decide
-           if/how to reconcile this for trade-level validation to be meaningful
-        2) Only 2/17 trades matched exactly across the 3 checked windows today - dig into the
-           remaining unexplained ones (6 unexplained "only in live", AXISBANK/HINDALCO "only
-           in official") once ATR question above is resolved
-        3) Port today's position-recovery/gap-check fix to VM's live.py permanently (already
-           pushed once for testing - confirm it's the version staying there)
-        4) Sync VM's live_trades.csv loss issue - old trades get silently dropped once a new
-           run's first save overwrites the file (the `if trades:` guard never merges old data)
+P1  Kite bot (market hours only) — resume during live market hours
+        2026-07-24 progress: found+fixed the warmup duplicate-bar bug (explained most of
+        yesterday's trade mismatches - real root cause, not just tick-vs-official noise),
+        added PnL summary line, temporarily bumped EOD_HOUR to 16 for testing (REVERT TO 15
+        before next real trading day)
+        Next up (highest priority - do FIRST next session):
+        0) REVERT EOD_HOUR back to 15 in ma_rejection_v1_core.py + push to VM (currently 16
+           for testing purposes only)
+        1) Implement the stale-first-tick fix: in on_ticks(), when starting a new forming_bar
+           for a symbol, discard the tick if its bucket is older than current_bucket (computed
+           at warmup) - closes the reconnect-stale-timestamp duplicate case found today
+        2) Yesterday's ATR14 divergence question (live tick-bar ATR vs pure-official-replay
+           ATR) - now partially explained by the warmup duplicate bug found today; re-assess
+           whether it's still a separate issue once the two fixes above are in place
+        3) Port both of today's warmup fixes to be the permanent VM version (already pushed
+           for testing - confirm staying there after revert)
+        4) Fix VM's live_trades.csv loss issue - old trades silently dropped on restart
         Older items still open: reconcile script's fetch-window bug (misses EOD exits),
-        MA20/ATR14+touch-eval logging not yet added, SUNPHARMA reconstruction mismatch (local,
-        pre-VM) — likely superseded by today's live SUNPHARMA validation, re-check relevance
+        MA20/ATR14+touch-eval logging not yet added
 
-P2  Regime-adaptive online learning model — NEW DIRECTION
+P2  MemLabs regime-model — memory encoding tested, negative result on TATAMOTORS 11yr
+        2026-07-24: built full pipeline (Framework_V2/scripts/trials/regime_model/memlabs/),
+        rolling-40-mean ATR% feature bucketed vs raw ATR% - neither shows a persistent
+        regime effect across 2015-2025 (year-wise breakdown is just noise, no bucket wins
+        consistently). Single-year (2023) "strong" results didn't replicate - overfitting.
+        Next: either (a) fit the actual OLS regression (w/b/y_hat/sign, not yet done - only
+        bucketing was tried) on the full 11yr data as a more rigorous test before giving up,
+        or (b) test across multiple stocks (single-stock signal may just be too noisy
+        regardless of feature), or (c) try a different feature entirely (not ATR%-based)
         Buy MemLabs notebook ($5.50, patreon.com/cw/MemLabs) — card declined, retry
-        Adapt passive aggressive regressor to NSE MA rejection SHORT signal
-        Features: ATR%, vol, regime state; target: trade win/loss outcome
 
 P3  New signal sweeps via Grok — ongoing, lower priority until regime model built
         VWAP done (both baseline + VWAP variant confirmed dead); next: RSI/MACD combos

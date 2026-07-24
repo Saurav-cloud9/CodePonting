@@ -353,6 +353,7 @@ adapters/           : Swap these for different environments
 - No hardcoded file paths — use configs/ YAML or relative paths
 - All sandbox scripts must use DS3 (intraday_5min_DS3) — never intraday_5min
 - All matplotlib charts use dark mode: `plt.style.use('dark_background')` at the top of every plot block
+- Multi-script pipelines/experiments (e.g. a numbered sequence of exploratory or trial scripts within a folder) use zero-padded numeric prefixes for ordering: `01_build_trade_log.py`, `02_bucket_by_feature.py`, ... `09_...`, `10_...`. Keeps run order unambiguous and sorts correctly in a file listing regardless of count.
 
 
 ## ── WHAT TO AVOID ─────────────────────────────────────────────

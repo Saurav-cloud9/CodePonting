@@ -66,22 +66,33 @@ warmup_bar_rows = []
 forming_bar = {}
 lock = threading.Lock()
 eod_reached = threading.Event()
+last_summary_bucket = None
 
 
 def warmup():
-    print('Warming up MA20/ATR14 from historical_data (last 20 candles, wide window)...')
+    print('Warming up MA20/ATR14 from historical_data (last 19 closed candles + 1 live)...')
     to_date = datetime.now()
     from_date = to_date - timedelta(days=10)
+    fetched = {}
     for sym in UNIVERSE:
         token = symbol_to_token[sym]
         candles = kite.historical_data(token, from_date=from_date, to_date=to_date, interval='5minute')
-        for c in candles[-20:]:
+        fetched[sym] = candles
+        time.sleep(0.34)  # stay under Kite's ~3 req/sec rate limit - historical_data can't be batched
+
+    # Decide the "currently forming" bucket as late as possible - right before we connect
+    # and ticks start flowing - so it matches what the live engine will actually build first.
+    # Only 19 bars are seeded here; the live engine supplies bar #20 (the current bucket)
+    # once it closes naturally, with no gap and no duplicate.
+    current_bucket = bucket_start(datetime.now())
+    for sym in UNIVERSE:
+        candles = [c for c in fetched[sym] if bucket_start(c['date'].replace(tzinfo=None)) < current_bucket]
+        for c in candles[-19:]:
             dt = c['date'].replace(tzinfo=None)
             bar = {'datetime': dt, 'open': c['open'], 'high': c['high'],
                    'low': c['low'], 'close': c['close'], 'date': dt.date(), 'hour': dt.hour}
             update_indicators(bar, states[sym])
             warmup_bar_rows.append({'symbol': sym, 'warmup_run_at': to_date, **bar})
-        time.sleep(0.34)  # stay under Kite's ~3 req/sec rate limit - historical_data can't be batched
     if warmup_bar_rows:
         pd.DataFrame(warmup_bar_rows).to_csv(WARMUP_LOG, index=False)
         print(f'Warm-up bars saved to {WARMUP_LOG}')
@@ -175,14 +186,29 @@ def reconcile_gap_positions():
 
 
 def finalize_bar(sym, bar):
+    global last_summary_bucket
     with lock:
-        bar_log_rows.append({'symbol': sym, **bar})
+        bar_log_rows.append({'symbol': sym, 'datetime': bar['datetime'], 'open': bar['open'],
+                              'high': bar['high'], 'low': bar['low'], 'close': bar['close']})
         process_bar(sym, bar, states[sym], trades)
         save_positions()
     pos = states[sym].position
     tag = f"OPEN sl={pos['sl']:.2f} tp={pos['tp']:.2f}" if pos else 'flat'
     print(f"{bar['datetime']}  {sym:12s}  O={bar['open']:.2f} H={bar['high']:.2f} "
           f"L={bar['low']:.2f} C={bar['close']:.2f}  -> {tag}")
+
+    # Once-per-5min-cycle PnL summary, printed by whichever stock's bar closes first
+    # for a new timestamp - not per-stock, to keep the log readable.
+    if bar['datetime'] != last_summary_bucket:
+        last_summary_bucket = bar['datetime']
+        with lock:
+            n_open = sum(1 for s in states.values() if s.position is not None)
+            n_trades = len(trades)
+            wins = sum(1 for t in trades if t['pnl'] > 0)
+            losses = n_trades - wins
+            total_pnl = sum(t['pnl'] for t in trades)
+        print(f"  [{bar['datetime']}] Trades={n_trades}  Open={n_open}  "
+              f"Wins={wins}  Losses={losses}  PnL={total_pnl:+.2f}")
 
 
 def on_ticks(ws, ticks):

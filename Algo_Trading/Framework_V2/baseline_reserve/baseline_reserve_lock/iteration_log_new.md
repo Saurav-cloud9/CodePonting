@@ -33,11 +33,11 @@ total = brok + stt + txn + sebi + stamp + gst
 ## Summary
 
 | Run | Signal | Direction | Locked Combo | N | PF | ZPF | ZSh(D) | Edge? |
-|---|---|---|---|---|---|---|---|---|
-| 1 | Baseline (multi-bar) | SHORT | SL=1.5 · TGT=4.0 | 172,360 | 1.116 | 0.737 | -5.596 | ❌ |
-| 1 | Baseline (multi-bar) | LONG  | SL=1.5 · TGT=3.5 | 186,478 | 0.910 | 0.592 | -10.704 | ❌ |
-| 1-sweep best ZPF | SHORT | SL=6.0 · TGT=6.0 | 91,878 | 1.112 | 0.851 | -1.894 | ❌ |
-| 1-sweep best ZPF | LONG  | SL=6.0 · TGT=6.0 | 92,356 | 0.877 | 0.672 | -4.816 | ❌ |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 1 | Baseline (multi-bar) | SHORT | SL=1.5 · TP=4.0 | 172,360 | 1.116 | 0.737 | -5.596 | ❌ |
+| 1 | Baseline (multi-bar) | LONG | SL=1.5 · TP=3.5 | 186,478 | 0.910 | 0.592 | -10.704 | ❌ |
+| 1-sweep best ZPF | Baseline (multi-bar) | SHORT | SL=6.0 · TP=6.0 | 91,878 | 1.112 | 0.851 | -1.894 | ❌ |
+| 1-sweep best ZPF | Baseline (multi-bar) | LONG | SL=6.0 · TP=6.0 | 92,356 | 0.877 | 0.672 | -4.816 | ❌ |
 
 **Key finding:** Raw PF > 1.0 for SHORT baseline, but ZPF = 0.737 after Zerodha charges.
 Charges consume ~0.38 PF points on the SHORT strategy. No combo achieves ZPF > 1.0.
@@ -47,10 +47,10 @@ Charges consume ~0.38 PF points on the SHORT strategy. No combo achieves ZPF > 1
 ## Run 1 — Baseline SHORT (MA Rejection) — ZPF Re-run
 
 **Signal:** `high >= MA20` → `close < MA20` within 3 bars → SHORT at next bar open
-**Script:** `ma_30_rejection.py` (fixed SL=1.5×ATR, TGT=4.0×ATR)
-**Sweep:** `sl_tgt_sweep_baseline_short.py` (90 combos: 10 SL × 9 TGT)
+**Script:** `ma_30_rejection.py` (fixed SL=1.5×ATR, TP=4.0×ATR)
+**Sweep:** `sl_tgt_sweep_baseline_short.py` (90 combos: 10 SL × 9 TP)
 
-### Fixed Combo (SL=1.5 · TGT=4.0) — per stock
+### Fixed Combo (SL=1.5 · TP=4.0) — per stock
 
 | Symbol | N | Prof_WR% | PF | ZPF | ZSh(D) |
 |---|---|---|---|---|---|
@@ -87,7 +87,7 @@ Charges consume ~0.38 PF points on the SHORT strategy. No combo achieves ZPF > 1
 
 **TOTAL: N=172,360  Prof_WR=36.9%  PF=1.116  ZPF=0.737  ZSh(D)=-5.596**
 
-Year-wise (fixed combo SL=1.5 · TGT=4.0):
+Year-wise (fixed combo SL=1.5 · TP=4.0):
 
 | Year | N | PF | ZPF | ZSh(D) | Flag |
 |---|---|---|---|---|---|
@@ -107,10 +107,10 @@ Year-wise (fixed combo SL=1.5 · TGT=4.0):
 
 ---
 
-### SHORT Sweep — ZPF Grid (SL rows × TGT cols)
+### SHORT Sweep — ZPF Grid (SL rows × TP cols)
 
 ```
-  SL\TGT    2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
+  SL\TP    2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
      1.5  0.645  0.682  0.707  0.724  0.737  0.742  0.749  0.752  0.755
      2.0  0.681  0.720  0.744  0.762  0.774  0.778  0.786  0.788  0.792
      2.5  0.704  0.744  0.767  0.784  0.796  0.800  0.807  0.809  0.813
@@ -122,11 +122,11 @@ Year-wise (fixed combo SL=1.5 · TGT=4.0):
      5.5  0.741  0.782  0.804  0.823  0.836  0.839  0.844  0.846  0.849
      6.0  0.743  0.784  0.806  0.825  0.838  0.841  0.846  0.848  0.851 ★
 ```
-★ Best ZPF: SL=6.0 · TGT=6.0
+★ Best ZPF: SL=6.0 · TP=6.0
 
 Top 5 by ZPF:
 
-| Rank | SL | TGT | N | PF | ZPF | ZSh(D) |
+| Rank | SL | TP | N | PF | ZPF | ZSh(D) |
 |---|---|---|---|---|---|---|
 | 1 | 6.0 | 6.0 | 91,878 | 1.112 | 0.851 | -1.894 |
 | 2 | 5.5 | 6.0 | 93,447 | 1.112 | 0.849 | -1.958 |
@@ -134,7 +134,7 @@ Top 5 by ZPF:
 | 4 | 6.0 | 5.0 | 95,826 | 1.113 | 0.846 | -2.031 |
 | 5 | 5.0 | 6.0 | 95,524 | 1.112 | 0.846 | -2.026 |
 
-Best combo (ZPF) year-wise — SL=6.0 · TGT=6.0:
+Best combo (ZPF) year-wise — SL=6.0 · TP=6.0:
 
 | Year | N | PF | ZPF | ZSh(D) | Flag |
 |---|---|---|---|---|---|
@@ -158,14 +158,14 @@ Heatmap: `outputs/reports/sl_tgt_sweep_baseline_short_zpf.png`
 ## Run 1 — Baseline LONG (MA Bounce) — ZPF Re-run
 
 **Signal:** `low <= MA20` → `close > MA20` within 3 bars → LONG at next bar open
-**Script:** `ma_30_bounce.py` (fixed SL=1.5×ATR, TGT=3.5×ATR)
-**Sweep:** `sl_tgt_sweep_baseline_long.py` (90 combos: 10 SL × 9 TGT)
+**Script:** `ma_30_bounce.py` (fixed SL=1.5×ATR, TP=3.5×ATR)
+**Sweep:** `sl_tgt_sweep_baseline_long.py` (90 combos: 10 SL × 9 TP)
 
-### Fixed Combo (SL=1.5 · TGT=3.5) — overall
+### Fixed Combo (SL=1.5 · TP=3.5) — overall
 
 **TOTAL: N=186,478  Prof_WR=33.3%  PF=0.910  ZPF=0.592  ZSh(D)=-10.704**
 
-Year-wise (fixed combo SL=1.5 · TGT=3.5):
+Year-wise (fixed combo SL=1.5 · TP=3.5):
 
 | Year | N | PF | ZPF | ZSh(D) | Flag |
 |---|---|---|---|---|---|
@@ -181,10 +181,10 @@ Year-wise (fixed combo SL=1.5 · TGT=3.5):
 | 2024 | 16,931 | 0.914 | 0.588 | -10.777 | ❌ |
 | 2025 | 17,746 | 0.957 | 0.570 | -13.879 | ❌ |
 
-### LONG Sweep — ZPF Grid (SL rows × TGT cols)
+### LONG Sweep — ZPF Grid (SL rows × TP cols)
 
 ```
-  SL\TGT    2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
+  SL\TP    2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
      1.5  0.533  0.561  0.581  0.592  0.596  0.601  0.603  0.608  0.608
      2.0  0.561  0.589  0.609  0.620  0.625  0.630  0.632  0.637  0.637
      2.5  0.575  0.603  0.623  0.635  0.639  0.644  0.645  0.650  0.651
@@ -196,11 +196,11 @@ Year-wise (fixed combo SL=1.5 · TGT=3.5):
      5.5  0.593  0.621  0.642  0.652  0.657  0.662  0.663  0.668  0.670
      6.0  0.595  0.622  0.643  0.655  0.660  0.664  0.665  0.670  0.672 ★
 ```
-★ Best ZPF: SL=6.0 · TGT=6.0
+★ Best ZPF: SL=6.0 · TP=6.0
 
 Top 5 by ZPF:
 
-| Rank | SL | TGT | N | PF | ZPF | ZSh(D) |
+| Rank | SL | TP | N | PF | ZPF | ZSh(D) |
 |---|---|---|---|---|---|---|
 | 1 | 6.0 | 6.0 | 92,356 | 0.877 | 0.672 | -4.816 |
 | 2 | 6.0 | 5.5 | 93,927 | 0.877 | 0.670 | -4.922 |
@@ -208,7 +208,7 @@ Top 5 by ZPF:
 | 4 | 5.0 | 6.0 | 96,564 | 0.877 | 0.668 | -5.075 |
 | 5 | 5.5 | 5.5 | 95,806 | 0.876 | 0.668 | -5.052 |
 
-Best combo (ZPF) year-wise — SL=6.0 · TGT=6.0:
+Best combo (ZPF) year-wise — SL=6.0 · TP=6.0:
 
 | Year | N | PF | ZPF | ZSh(D) | Flag |
 |---|---|---|---|---|---|
@@ -231,8 +231,8 @@ Heatmap: `outputs/reports/sl_tgt_sweep_baseline_long_zpf.png`
 
 ## Key Takeaways
 
-1. **Charges crush the SHORT edge:** PF=1.116 → ZPF=0.737 at SL=1.5/TGT=4.0. ~0.38 ZPF gap.
+1. **Charges crush the SHORT edge:** PF=1.116 → ZPF=0.737 at SL=1.5/TP=4.0. ~0.38 ZPF gap.
 2. **LONG has no raw edge either:** PF=0.910 → ZPF=0.592. Doubly dead.
-3. **Best combo by ZPF (SHORT):** SL=6.0/TGT=6.0 → ZPF=0.851. Still well below 1.0.
-4. **ZPF gap narrows with wider SL/TGT:** ZPF rises from 0.645 (SL=1.5/TGT=2.0) to 0.851 (SL=6.0/TGT=6.0). Charges are fixed per trade but wider combos capture more pnl per win.
+3. **Best combo by ZPF (SHORT):** SL=6.0/TP=6.0 → ZPF=0.851. Still well below 1.0.
+4. **ZPF gap narrows with wider SL/TP:** ZPF rises from 0.645 (SL=1.5/TP=2.0) to 0.851 (SL=6.0/TP=6.0). Charges are fixed per trade but wider combos capture more pnl per win.
 5. **Signal redesign required:** Even the best combo needs +0.15 ZPF to break even. No filter will close this gap — the signal needs genuine edge.

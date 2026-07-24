@@ -474,3 +474,38 @@ Step 9.4  — 2026-04-19
            ✅  Next: decide how to handle the ATR14 divergence for validation → dig into
                remaining unexplained mismatches → confirm VM's live.py is the updated version →
                fix live_trades.csv silent data-loss on restart
+2026-07-24 SS (baseline_reserve_lock cleanup + MemLabs regime-model real implementation) ─────
+           ✅  Renamed TGT→TP across all 4 files in baseline_reserve_lock/ for terminology
+               consistency (explicit permission given despite folder normally being locked) -
+               variables/labels/docstrings only, case-sensitive replace correctly skipped the
+               two lowercase filename references; all 4 scripts verified to still parse cleanly
+           ✅  Fixed markdown table alignment in iteration_log_new.md (center-aligned columns)
+           ✅  Started MemLabs regime-model work for real: new
+               Framework_V2/scripts/trials/regime_model/memlabs/ folder, built full pipeline
+               reusing the live v1 signal logic (ma_rejection_v1_core.py) against the correct
+               DS3 parquet source
+           ✅  Built the "memory encoding" feature (rolling-40-mean of ATR% at touch bar, no
+               lookahead) exactly matching the MemLabs video's technique, applied to ATR%
+               instead of returns; added ZPF/ZSh(D) metrics (Zerodha charge formula reused
+               from baseline_reserve_lock/ma_30_rejection.py)
+           ✅  TATAMOTORS 2023 baseline: N=316, PF=1.415, ZPF=0.894, ZSh(D)=-0.835. Tertile
+               bucketing by the memory-encoded feature showed a striking-looking regime split
+               (Low-vol ZPF≈0.997 vs Mid/High ~0.86); raw (non-smoothed) ATR% showed an even
+               stronger, opposite-direction split (High-vol ZPF=1.442) on 2023 alone
+           ✅  Extended to full DS3 range (2015-2025, N=3,697) to validate - neither 2023
+               pattern held up. Year-wise breakdown (05_bucket_yearwise.py) showed every
+               bucket, for both features, swinging between good and bad years with no
+               consistent winner - the 2023 numbers were overfitting to one year, not a real
+               stable regime effect. Honest negative result, properly documented
+           ✅  Built a small OLS demo (10-trade sample, plotted scatter+fitted-line chart) to
+               clarify that memory encoding (feature engineering, done correctly) and the
+               actual prediction model (fitting w/b, generating y_hat, sign() as signal) are
+               two separate steps - only the first has been done so far, bucketing stood in
+               for the second but isn't the same thing
+           ✅  Confirmed Grok CLI is installed and invocable via Bash (agentic tool, -p flag
+               for headless single-turn mode, cost confirmed not a concern) - deferred actually
+               using it for independent trade-log validation to next session
+           ✅  Next: decide whether to fit the actual OLS regression, test across multiple
+               stocks instead of just TATAMOTORS, or try a different feature entirely → use
+               Grok CLI to independently validate the memlabs trade log build → Kite bot P1
+               items carried forward unchanged from 2026-07-23

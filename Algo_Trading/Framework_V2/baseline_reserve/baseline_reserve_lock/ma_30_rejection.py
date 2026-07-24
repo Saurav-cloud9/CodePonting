@@ -1,6 +1,6 @@
 """
 MA Rejection SHORT — 30 stocks · 2015-2025 · DS3
-Fixed params: SL=1.5x ATR, TGT=4.0x ATR
+Fixed params: SL=1.5x ATR, TP=4.0x ATR
 Metrics: PF + ZPF (Zerodha charges) + ZSh(D) (daily Sharpe after charges)
 Per-stock breakdown + overall + year-wise
 """
@@ -12,7 +12,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 DATA_DIR   = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\intraday_5min_DS3'
 SL_MULT    = 1.5
-TGT_MULT   = 4.0
+TP_MULT    = 4.0
 MAX_TR_GAP = 3
 EOD_HOUR   = 15
 
@@ -64,7 +64,7 @@ def run_stock(arr):
             if rej < 0: i += 1; continue
             ei = rej + 1
             if ei >= n or date[ei] != touch_date: i += 1; continue
-            entry = open_[ei]; sl = entry + SL_MULT * atr; tgt = entry - TGT_MULT * atr
+            entry = open_[ei]; sl = entry + SL_MULT * atr; tp = entry - TP_MULT * atr
             k = ei
             for k in range(ei, n):
                 if date[k] != touch_date:
@@ -73,8 +73,8 @@ def run_stock(arr):
                     exit_px = open_[k]; pnl = entry - exit_px; break
                 if high[k] >= sl:
                     exit_px = sl; pnl = entry - exit_px; break
-                if low[k] <= tgt:
-                    exit_px = tgt; pnl = entry - exit_px; break
+                if low[k] <= tp:
+                    exit_px = tp; pnl = entry - exit_px; break
             trades.append({'pnl': pnl, 'entry': entry, 'exit_px': exit_px,
                            'year': year[ei], 'date': pd.Timestamp(date[ei])})
             i = k + 1

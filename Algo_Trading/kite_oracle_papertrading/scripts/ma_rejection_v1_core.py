@@ -8,7 +8,7 @@ from collections import deque
 
 SL_MULT    = 2.0
 TP_MULT    = 4.5
-EOD_HOUR   = 15
+EOD_HOUR   = 16  # TEMP: bumped from 15 for warmup-boundary-fix testing, revert after
 MA_PERIOD  = 20
 ATR_PERIOD = 14
 
