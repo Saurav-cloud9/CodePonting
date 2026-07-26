@@ -2,35 +2,32 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Kite bot (market hours only) — resume during live market hours
-        2026-07-24 progress: found+fixed the warmup duplicate-bar bug (explained most of
-        yesterday's trade mismatches - real root cause, not just tick-vs-official noise),
-        added PnL summary line, temporarily bumped EOD_HOUR to 16 for testing (REVERT TO 15
-        before next real trading day)
-        Next up (highest priority - do FIRST next session):
-        0) REVERT EOD_HOUR back to 15 in ma_rejection_v1_core.py + push to VM (currently 16
-           for testing purposes only)
-        1) Implement the stale-first-tick fix: in on_ticks(), when starting a new forming_bar
-           for a symbol, discard the tick if its bucket is older than current_bucket (computed
-           at warmup) - closes the reconnect-stale-timestamp duplicate case found today
-        2) Yesterday's ATR14 divergence question (live tick-bar ATR vs pure-official-replay
-           ATR) - now partially explained by the warmup duplicate bug found today; re-assess
-           whether it's still a separate issue once the two fixes above are in place
-        3) Port both of today's warmup fixes to be the permanent VM version (already pushed
-           for testing - confirm staying there after revert)
-        4) Fix VM's live_trades.csv loss issue - old trades silently dropped on restart
-        Older items still open: reconcile script's fetch-window bug (misses EOD exits),
-        MA20/ATR14+touch-eval logging not yet added
+P1  Kite bot (market hours only) — resume during live market hours (Monday)
+        2026-07-26 progress: 24th July fully reconciled (39 trades stitched across the
+        restart, recon script's EOD off-by-one fixed (`>=`->`>` + fetch buffer, applied to
+        the real ma_rejection_v1_reconcile.py too), full bar+trade recon run - 09:15
+        login-warmup mess and 13:05 skipped-bucket both confirmed real at the bar level;
+        of 17 trade mismatches, most are ordinary tick-vs-official noise near-misses;
+        RELIANCE/TATAMOTORS/PNB are genuine no-nearby-match exceptions, parked (not worth
+        chasing against bugs already fixed) - tomorrow's clean live run is the real judge.
+        Validation on the 24th's data is CONCLUDED.
+        Next up (Monday market hours):
+        1) Watch the bot's first real restart under the new catch-up/discard logic - confirm
+           no duplicate, no gap, and the catch-up bar gets a genuine touch-check
+        2) If spare time (EOD today or before Monday login): revisit RELIANCE/TATAMOTORS/PNB
+           specifically, otherwise let Monday's clean run be the judge
+        3) Confirm VM's live.py is the fully updated version permanently
+        4) Re-assess the ATR14 divergence question now that the warmup bug is fixed
+        Older items still open: MA20/ATR14+touch-eval logging not yet added
 
-P2  MemLabs regime-model — memory encoding tested, negative result on TATAMOTORS 11yr
-        2026-07-24: built full pipeline (Framework_V2/scripts/trials/regime_model/memlabs/),
-        rolling-40-mean ATR% feature bucketed vs raw ATR% - neither shows a persistent
-        regime effect across 2015-2025 (year-wise breakdown is just noise, no bucket wins
-        consistently). Single-year (2023) "strong" results didn't replicate - overfitting.
-        Next: either (a) fit the actual OLS regression (w/b/y_hat/sign, not yet done - only
-        bucketing was tried) on the full 11yr data as a more rigorous test before giving up,
-        or (b) test across multiple stocks (single-stock signal may just be too noisy
-        regardless of feature), or (c) try a different feature entirely (not ATR%-based)
+P2  MemLabs regime-model — 3 methods tried, all negative on TATAMOTORS 11yr ATR%-based
+        2026-07-24/25: tertile bucketing, single-feature OLS, and online-learning
+        (SGDRegressor) all independently show the same thing - no persistent regime effect,
+        promising-looking averages are just masking year-to-year noise in every case
+        Next: (a) test across multiple stocks (single-stock signal may just be too noisy
+        regardless of method), or (b) try a feature other than ATR%-based, or (c) use Grok
+        CLI (~/.grok/bin/grok, confirmed available) to independently validate the trade-log
+        build itself before trying more variations
         Buy MemLabs notebook ($5.50, patreon.com/cw/MemLabs) — card declined, retry
 
 P3  New signal sweeps via Grok — ongoing, lower priority until regime model built

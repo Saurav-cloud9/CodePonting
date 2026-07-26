@@ -1,95 +1,103 @@
-# Session Log — 2026-07-24
+# Session Log — 2026-07-25/26 (weekend session, spanned midnight)
 
-## baseline_reserve_lock terminology cleanup
-- Renamed TGT→TP across all 4 files in the locked folder (ma_30_rejection.py, ma_30_bounce.py,
-  sl_tgt_sweep_baseline_short.py, sl_tgt_sweep_baseline_long.py, iteration_log_new.md) for
-  consistency with the project's SL/TP naming standard - variables, print labels, table
-  headers/docstrings only. Case-sensitive replace (TGT uppercase = metric label, tgt
-  lowercase = filenames) meant the two script filenames and two output PNG filenames were
-  left untouched automatically/deliberately, since renaming those would require updating
-  cross-references in other folders (archive/, scripts/trials/baseline_explorations/) that
-  weren't in scope. All 4 .py files verified to still parse cleanly (ast.parse check) after
-  the rename - confirmed it's purely cosmetic, no behavior change (standalone scripts, no
-  external imports of these variable names).
-- Also fixed the markdown table alignment in iteration_log_new.md (center-aligned all
-  columns via `:---:` - right-align alone still looked off given header/value length
-  mismatches).
+## Kite bot: EOD_HOUR revert + warmup fix completion
+- Reverted EOD_HOUR from the temporary 16 (Friday's testing value) back to 15 - both
+  locally (ma_rejection_v1_core.py) and pushed to the VM. Confirmed via `date` that this
+  was Saturday, so no live-trading-day risk either way, but cleaned up regardless.
+- Continued the stale-first-tick discussion from Friday (deferred implementation until
+  today, per explicit request to discuss first) - walked through the exact chronological
+  sequence (script start -> historical_data loop -> KiteTicker object creation -> connect()
+  -> first tick arrival) to pin down precisely where the "which bucket to exclude" decision
+  gets made, and confirmed it currently happens too early (right after the historical_data
+  loop, before connect()).
+- Landed on a MORE COMPLETE fix than originally scoped, through back-and-forth: instead of
+  just discarding stale ticks, the bot now (a) discards ALL ticks belonging to the
+  connect-time "current bucket" or older, (b) schedules a one-shot catch-up fetch
+  (`catchup_current_bucket()`, via `threading.Timer`) to fire exactly 5 minutes later - by
+  which point that bucket has genuinely closed - fetching it and running it through the
+  FULL `process_bar()` (not just indicator-seeding), so it gets a real touch-check too, not
+  just a silent MA20 contribution. This closes both problems: no duplicate, no permanently
+  skipped bar, no missed signal opportunity on the transition bucket.
+- Implemented in ma_30_rejection_v1_live.py: new module-level `current_bucket` (set by
+  warmup()), new `catchup_current_bucket()` function, `on_ticks()` now discards ticks with
+  `bucket <= current_bucket`, and the catch-up timer is scheduled in `__main__` right after
+  warmup/position-recovery. Verified via `ast.parse` syntax check. NOT yet tested live -
+  market was closed all weekend, so this needs its first real test Monday.
+- Also fixed the separately-flagged live_trades.csv/live_bars.csv data-loss bug: added
+  `load_existing_logs()`, called at the very start of `__main__`, which reads any existing
+  CSV data into the in-memory `trades`/`bar_log_rows` lists before the periodic save loop
+  begins - so a restart no longer silently drops whatever was already recorded. Verified via
+  a standalone simulation (old + new trade both survived a resave). Pushed to VM.
+- Both fixes pushed to the VM while the bot was confirmed inactive (safe, no live process
+  disrupted).
 
-## MemLabs regime-model work (first real implementation, not just concept)
-- New folder: Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/ (separate
-  "memlabs" subfolder under regime_model, since more regime-based video ideas may come later)
-- **01_build_trade_log.py**: generates a trade log for a chosen symbol/year-range using the
-  exact same signal logic as the live Kite bot (imports StockState/process_bar directly from
-  ma_rejection_v1_core.py, not a reimplementation), reading from the correct DS3 parquet
-  source (Framework_V2/data/historical/intraday_5min_DS3/ - NOT the fv2 CSV folder, caught
-  and corrected this early). For each trade, reconstructs the touch bar (positionally, one
-  row before entry_dt - not a blind 5-min subtract, to be safe against gaps) and attaches two
-  features: atr_pct_at_touch (raw, instantaneous ATR% reading) and hidden_atr_pct_rollmean40
-  (rolling-40-mean of that ATR% series - the actual MemLabs "memory encoding" technique,
-  computed with no lookahead). Also added ZPF/ZSh(D) metrics (borrowed the exact Zerodha
-  charge formula from baseline_reserve_lock/ma_30_rejection.py, adapted field names).
-  TATAMOTORS 2023: N=316, PF=1.415, ZPF=0.894, ZSh(D)=-0.835, win rate 44.6%.
-- **02_bucket_by_memory_feature.py**: splits trades into tertiles (Low/Mid/High) by the
-  memory-encoded feature value, reports PF/ZPF/ZSh(D)/win-rate per bucket - same idea as an
-  SL/TGT sweep table, just sweeping across the feature's value range instead of strategy
-  params. On 2023 alone: Low-vol bucket showed ZPF≈0.997 vs ~0.86 for Mid/High - looked like a
-  real regime effect at first.
-- **03_compare_raw_vs_memory_encoded.py**: direct raw-vs-memory-encoded comparison (same
-  bucketing, but on atr_pct_at_touch instead of the rolled version) to test whether the
-  40-bar smoothing actually adds value over the raw instantaneous reading. Surprising 2023
-  result: raw ATR% showed a MUCH stronger split (ZPF spread 0.943 vs memory-encoded's 0.142),
-  with the High-vol bucket hitting ZPF=1.442, PF=2.004, win rate 54.7% - stronger and in the
-  OPPOSITE direction (high vol wins, not low vol) from what memory encoding suggested.
-- **04_build_trade_log_full_range.py**: same pipeline, widened to the full DS3 range
-  (2015-2025) to test whether either 2023 pattern was real or a single-year fluke.
-  N=3,697 trades, PF=1.324, win rate 45.7%.
-- Reran 03's comparison on the full range: BOTH patterns weakened dramatically. Raw ATR%'s
-  best bucket became Mid (ZPF=1.042), not High (which dropped to 0.944). Memory-encoded
-  spread shrank to 0.066 (basically flat, no bucket meaningfully different).
-- **05_bucket_yearwise.py**: year-by-year breakdown per bucket, fixed cutoffs from the
-  full-sample tertiles. This was the real verdict - every single bucket (raw and
-  memory-encoded) swings wildly between good (ZPF>1.5) and bad (ZPF<0.6) years with no
-  consistent winner. The full-sample averages were just smoothing over high year-to-year
-  variance, not reflecting a real persistent effect. One artifact caught and flagged:
-  memory-encoded Low bucket, 2020, showed ZPF=6.446 but only N=5 trades - pure noise, not
-  a real result, explicitly called out as such.
-- **Conclusion so far**: neither raw ATR% nor its 40-bar-smoothed version shows a robust,
-  persistent single-stock regime effect on TATAMOTORS across 11 years. Honest negative
-  result - the promising 2023-only numbers were overfitting to one year, not a real pattern.
-- **06_ols_demo_small_sample.py**: built to explain the concept, not for research value - a
-  10-trade OLS fit (X=hidden feature, y=pnl) with a plotted scatter+fitted-line chart
-  (dark_background per convention), to walk through w/b/y_hat mechanics concretely. Used to
-  clarify that memory encoding (the feature) and the actual prediction model (fitting
-  w/b via regression, generating y_hat, taking sign() as a signal) are two separate steps -
-  we've only done the first (feature engineering); bucketing was a descriptive stand-in for
-  the second (the model), not the model itself.
-- Clarified along the way: "regime prediction" is a loose phrase - the memory-encoding step
-  measures the regime directly (a computed indicator), it doesn't predict it; what actually
-  gets predicted (via the regression) is the future outcome/return, using the regime as
-  context, not the regime itself.
+## MemLabs: online-learning year-wise check (closing out the online-learning thread)
+- Built 13_online_learning_yearwise.py - checked whether the earlier promising-looking
+  online-learning filtered result (N=479, ZPF=1.01 overall) holds up year by year.
+- It doesn't: 6 years pass (ZPF>=1.0), 4 fail (<0.9), 1 borderline - same instability pattern
+  as the static bucketing found the day before. Also noticed the filtered N per year grows
+  from single digits (2015-2017) to 100+ (2024-2025) - the model isn't staying selectively
+  adaptive, it's drifting toward "take almost everything" as more data accumulates.
+- This closes out all three approaches tried so far (static bucketing, single-feature OLS,
+  online-learning) with the same honest negative conclusion - no persistent ATR%-based
+  regime effect found on TATAMOTORS alone, regardless of method.
+- Confirmed all memlabs work (scripts 01-13 + output CSVs/PNGs) is committed and pushed to
+  git (verified via `git log`/`git status` - clean, up to date with origin/main).
 
-## Grok CLI note (deferred, not yet used)
-- Confirmed grok CLI is installed (~/.grok/bin/grok) and can be invoked via Bash directly in
-  the same terminal (not a separate environment) - it's actually an agentic coding tool
-  ("Grok Build TUI"), not a simple one-shot Q&A API, with a `-p`/`--single` flag for headless
-  single-turn prompts if we want non-interactive output. Confirmed cost isn't a concern
-  ($700/mo flat, already committed). Deferred actually using it for independent validation of
-  the memlabs trade log - to be picked up next session.
+## VM backtesting environment (side quest, via a separate mobile CC session on the VM)
+- User set up ~/backtesting/ on the VM themselves (via phone SSH + a separate Claude Code
+  instance running directly on the VM, not this session) - folder structure
+  (data/scripts/outputs), backtest_env venv (pandas, numpy, numba, scikit-learn, pyarrow).
+- From this session: copied Framework_V2/backtesting_rules/ (backtesting_rules.md,
+  project_instructions.md) into ~/backtesting/backtesting_rules/; created and pushed a
+  VM-scoped CLAUDE.md + PROGRESS.md (session-start/end rules, hard rule to never touch
+  ~/kite_oracle_papertrading/ unless explicitly asked, vsa/SS/CCP shorthand, and a hard rule
+  to always read+follow backtesting_rules.md before any backtest work); copied two reference
+  scripts (ma_30_rejection.py, sl_tgt_sweep_baseline_short.py) into ~/backtesting/scripts/;
+  copied the full DS3 dataset (160MB, 30 parquet files) into ~/backtesting/data/DS3/.
+- Deliberately did NOT set up a `.remember/`-style deep memory system for this VM
+  environment - agreed a single PROGRESS.md is enough for a smaller, single-purpose project;
+  the richer split only earns its keep on the main desktop project's multiple concurrent
+  threads.
+- Deliberately decided NOT to turn the VM folders into a git repo - `CodePonting` (desktop)
+  remains the single source of truth, both local and on GitHub; VM stays plain folders synced
+  via scp/manual pulls, avoiding the complexity of keeping secrets (.env) and constantly-
+  changing data files out of a VM-side git history.
 
-## Key numbers
-- TATAMOTORS 2023 baseline (v1 signal, DS3): N=316, PF=1.415, ZPF=0.894, ZSh(D)=-0.835
-- TATAMOTORS full 2015-2025: N=3,697, PF=1.324, win rate=45.7%
-- Bucket tertile cutoffs (full range) - raw ATR%: [0.052, 0.219, 0.322, 3.930]; memory-encoded:
-  [0.075, 0.234, 0.329, 2.169]
-- No bucket (either feature) sustained ZPF≥1.0 across most years - no persistent effect found
+## VS Code Remote-SSH setup (for direct VM file access from desktop)
+- Installed the official Microsoft "Remote - SSH" extension (ms-vscode.remote-ssh).
+- Set up a Windows-side SSH config (previously only existed inside WSL, not natively
+  accessible to Windows' own OpenSSH client that VS Code's extension uses): copied the
+  private key to C:\Users\Saurav\.ssh\oracle_key, restricted its permissions via `icacls`
+  (Windows equivalent of chmod 400), and created C:\Users\Saurav\.ssh\config with a
+  `Host oracle-vm` entry. Verified the connection works via native Windows ssh before
+  handing off to VS Code. Confirmed working end-to-end.
+- Also set `remote.SSH.remotePlatform: {"oracle-vm": "linux"}` in settings.json (VS Code
+  asked once, now remembered).
 
-## Next session priorities
-1. MemLabs thread: either fit the actual OLS regression (w/b/y_hat/sign - the step we
-   skipped, only bucketed so far) as a more rigorous test, or test across multiple stocks
-   (single-stock may just be too noisy), or try a different feature entirely
-2. Grok CLI: use it to independently validate the memlabs trade log build (offline-vs-offline
-   cross-check, same pattern as the earlier Kite bot grok_review.md)
-3. Kite bot thread (carried from 2026-07-23, still P1): ATR14 divergence question, remaining
-   unexplained trade mismatches, confirm VM's live.py version, fix live_trades.csv data loss
-4. Older carried-forward items: reconcile script's fetch-window bug, MA20/ATR14+touch-eval
-   logging not yet added to live_bars.csv
+## CSV viewer preference
+- Compared Data Wrangler (already used for .parquet) vs a simpler grid viewer for .csv.
+  Landed on the already-installed "Spreadsheet Viewer" (GrapeCity.gc-excelviewer, formerly
+  "Excel Viewer") for plain CSV viewing - Data Wrangler is better suited to genuine deep-dive
+  cleaning/transformation work, not quick reads. Set via
+  workbench.editorAssociations: "*.csv": "gc-excelviewer-csv-editor" (auto-written by VS
+  Code's own "Configure default editor" picker, not guessed).
+
+## Side note (informational, no action taken)
+- Clarified "headless" (no GUI installed at all, vs. Windows always having a GUI regardless
+  of monitor state) - and in the process discovered/confirmed a genuinely different past
+  setup: an old EC2 instance (Algo_Trading/paper_trading_bot_ec2_backup/) had a
+  `~/start_desktop.sh` script referenced from a local .bat file, meaning a desktop
+  environment WAS deliberately installed there for RustDesk-style remote viewing - unlike
+  the current Oracle VM, which was built headless from the start on purpose. That old EC2
+  instance is presumably no longer active; no follow-up planned, just a clarified memory.
+
+## Next session priorities (explicitly agreed with the user)
+1. Kite bot: watch Monday's first live restart under the new catch-up/discard logic
+2. Review 24th July's PnL logs + validate against recon, specifically:
+   (a) quantify how many of that day's trades were actually affected by the stale-tick bug
+   (b) consolidate the day's fragmented iteration snapshots into one clean picture
+   (c) remember today's 2 new fixes can only be tested against Monday's fresh data, not
+       retroactively against the 24th
+3. Resume MemLabs work after the above - likely multi-stock test or a different feature,
+   possibly bring in Grok CLI for independent validation first

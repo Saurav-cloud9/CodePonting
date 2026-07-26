@@ -13,6 +13,8 @@ import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
+CATCHUP_DELAY_MIN = 5  # how long after connect-time bucket to fetch its now-closed candle
+
 import pandas as pd
 from dotenv import load_dotenv
 from kiteconnect import KiteConnect, KiteTicker
@@ -67,10 +69,12 @@ forming_bar = {}
 lock = threading.Lock()
 eod_reached = threading.Event()
 last_summary_bucket = None
+current_bucket = None  # set by warmup() - the bucket excluded from warm-up (not yet closed at connect time)
 
 
 def warmup():
-    print('Warming up MA20/ATR14 from historical_data (last 19 closed candles + 1 live)...')
+    global current_bucket
+    print('Warming up MA20/ATR14 from historical_data (last 19 closed candles)...')
     to_date = datetime.now()
     from_date = to_date - timedelta(days=10)
     fetched = {}
@@ -82,8 +86,10 @@ def warmup():
 
     # Decide the "currently forming" bucket as late as possible - right before we connect
     # and ticks start flowing - so it matches what the live engine will actually build first.
-    # Only 19 bars are seeded here; the live engine supplies bar #20 (the current bucket)
-    # once it closes naturally, with no gap and no duplicate.
+    # Only 19 bars are seeded here (indicators only, no touch-check - these are already-old
+    # bars). The currently-forming bucket itself is deliberately excluded (may still be
+    # incomplete/unsettled in historical_data) - catchup_current_bucket() picks it up once
+    # it has genuinely closed, running it through the FULL signal logic (not just indicators).
     current_bucket = bucket_start(datetime.now())
     for sym in UNIVERSE:
         candles = [c for c in fetched[sym] if bucket_start(c['date'].replace(tzinfo=None)) < current_bucket]
@@ -96,12 +102,56 @@ def warmup():
     if warmup_bar_rows:
         pd.DataFrame(warmup_bar_rows).to_csv(WARMUP_LOG, index=False)
         print(f'Warm-up bars saved to {WARMUP_LOG}')
-    print('Warm-up complete.')
+    print(f'Warm-up complete. Excluded bucket (still forming at connect time): {current_bucket}')
+
+
+def catchup_current_bucket():
+    """Runs once, ~CATCHUP_DELAY_MIN after warm-up's excluded bucket started - by then
+    that bucket has genuinely closed, so it's safe to fetch. Feeds it through the FULL
+    process_bar() (not just update_indicators()) so it gets a real touch-check too, not
+    just silently seeded - this is bar #20 for MA20, and it's evaluated exactly like any
+    other live bar would be, just sourced from historical_data instead of ticks."""
+    target_bucket = current_bucket
+    print(f'Catch-up: fetching now-closed bucket {target_bucket} for all 30 stocks...')
+    for sym in UNIVERSE:
+        token = symbol_to_token[sym]
+        candles = kite.historical_data(token, from_date=target_bucket,
+                                        to_date=target_bucket + timedelta(minutes=5), interval='5minute')
+        match = next((c for c in candles if bucket_start(c['date'].replace(tzinfo=None)) == target_bucket), None)
+        if match is not None:
+            dt = match['date'].replace(tzinfo=None)
+            bar = {'datetime': dt, 'open': match['open'], 'high': match['high'],
+                   'low': match['low'], 'close': match['close'], 'date': dt.date(), 'hour': dt.hour}
+            with lock:
+                bar_log_rows.append({'symbol': sym, 'datetime': bar['datetime'], 'open': bar['open'],
+                                      'high': bar['high'], 'low': bar['low'], 'close': bar['close']})
+                process_bar(sym, bar, states[sym], trades)
+                save_positions()
+            pos = states[sym].position
+            tag = f"OPEN sl={pos['sl']:.2f} tp={pos['tp']:.2f}" if pos else 'flat'
+            print(f"{bar['datetime']}  {sym:12s}  O={bar['open']:.2f} H={bar['high']:.2f} "
+                  f"L={bar['low']:.2f} C={bar['close']:.2f}  -> {tag}  [catch-up]")
+        time.sleep(0.34)  # same rate-limit courtesy as warmup()
+    print('Catch-up complete.')
 
 
 def bucket_start(dt):
     minute = (dt.minute // 5) * 5
     return dt.replace(minute=minute, second=0, microsecond=0)
+
+
+def load_existing_logs():
+    """Load any existing live_trades.csv/live_bars.csv from a previous run today
+    into the in-memory lists, so the periodic save cycle writes old+new data
+    instead of starting empty and overwriting whatever was already there."""
+    if TRADE_LOG.exists():
+        existing = pd.read_csv(TRADE_LOG).to_dict('records')
+        trades.extend(existing)
+        print(f'Loaded {len(existing)} existing trade(s) from {TRADE_LOG}')
+    if BAR_LOG.exists():
+        existing = pd.read_csv(BAR_LOG).to_dict('records')
+        bar_log_rows.extend(existing)
+        print(f'Loaded {len(existing)} existing bar(s) from {BAR_LOG}')
 
 
 def save_positions():
@@ -220,6 +270,13 @@ def on_ticks(ws, ticks):
         ts = t.get('exchange_timestamp') or datetime.now()
         b = bucket_start(ts)
 
+        # Discard any tick still belonging to (or older than) the bucket that was
+        # forming at connect time - that bucket is handled by catchup_current_bucket()
+        # once it genuinely closes, not by live ticks (avoids building a partial bar
+        # from incomplete tick coverage, and avoids double-counting it).
+        if current_bucket is not None and b <= current_bucket:
+            continue
+
         state = states[sym]
         fb = forming_bar.get(sym)
         new_bucket_started = fb is None or b != fb['bucket']
@@ -301,9 +358,15 @@ def on_reconnect(ws, attempts_count):
 
 if __name__ == '__main__':
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+    load_existing_logs()
     warmup()
     load_positions()
     reconcile_gap_positions()
+
+    catchup_at = current_bucket + timedelta(minutes=CATCHUP_DELAY_MIN)
+    catchup_delay = max(0, (catchup_at - datetime.now()).total_seconds())
+    print(f'Catch-up for bucket {current_bucket} scheduled at {catchup_at} ({catchup_delay:.0f}s from now).')
+    threading.Timer(catchup_delay, catchup_current_bucket).start()
 
     kws = KiteTicker(API_KEY, ACCESS_TOKEN)
     kws.on_ticks = on_ticks

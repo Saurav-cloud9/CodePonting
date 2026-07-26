@@ -509,3 +509,45 @@ Step 9.4  — 2026-04-19
                stocks instead of just TATAMOTORS, or try a different feature entirely → use
                Grok CLI to independently validate the memlabs trade log build → Kite bot P1
                items carried forward unchanged from 2026-07-23
+2026-07-25/26 SS (Kite bot warmup fix completed, data-loss bug fixed, MemLabs online-learning
+closed out, VM backtesting env + VS Code Remote-SSH set up) ─────
+           ✅  Reverted temporary EOD_HOUR=16 (Friday's testing value) back to 15, local + VM
+           ✅  Completed the warmup-boundary fix properly: traced the exact chronological
+               sequence (script start → historical_data loop → KiteTicker creation → connect()
+               → first tick) to find where "which bucket to exclude" gets decided (too early -
+               right after the historical_data loop, before connect()); landed on a more
+               complete design than originally scoped - on_ticks() discards any tick belonging
+               to the connect-time bucket or older, and a scheduled one-shot
+               catchup_current_bucket() (threading.Timer, fires 5 min later) fetches that
+               bucket once genuinely closed and runs it through FULL process_bar() - giving it
+               a real touch-check, not just silent MA20 seeding. Closes both the duplicate and
+               the "permanently skipped bar" problem at once. Implemented, syntax-verified,
+               pushed to VM - NOT yet tested live, market was closed all weekend
+           ✅  Fixed the live_trades.csv/live_bars.csv data-loss bug: added
+               load_existing_logs(), called at startup, loading any existing CSV data into
+               memory before the periodic save cycle begins - old trades survive a restart
+               instead of being silently overwritten. Verified via simulation, pushed to VM
+           ✅  MemLabs: built 13_online_learning_yearwise.py - the earlier promising overall
+               online-learning result (N=479, ZPF=1.01) does NOT hold up year-by-year (6 pass,
+               4 fail, 1 borderline) - same instability as the static bucketing found the day
+               before. Also noticed the model's filter drifts toward "take almost everything"
+               over time rather than staying selectively adaptive. Closes out all 3 tested
+               approaches (bucketing, OLS, online-learning) with the same negative verdict.
+               Confirmed all memlabs work (scripts 01-13) committed + pushed to git
+           ✅  Set up ~/backtesting/ on the VM (side quest, initiated via a separate mobile CC
+               session): own venv, scoped CLAUDE.md + PROGRESS.md (deliberately no full
+               .remember/ system - overkill for this scope), backtesting_rules/ copied in with
+               a hard "always follow it" rule, 2 reference scripts, full DS3 dataset (160MB)
+               copied in. Fully independent from kite_oracle_papertrading/, with a hard rule
+               never to touch that folder unless explicitly asked. Decided NOT to make the VM
+               a git repo - CodePonting (desktop) stays the single source of truth
+           ✅  Set up VS Code Remote-SSH end-to-end (oracle-vm host config on the Windows
+               side, key permissions fixed via icacls) - direct live VM file access without
+               manual scp round-trips. Also set CSV default viewer to the already-installed
+               Spreadsheet Viewer (GrapeCity.gc-excelviewer) instead of Data Wrangler, which
+               stays for .parquet (better suited to deep-dive work, not quick reads)
+           ✅  Next (explicitly agreed): Monday market hours - watch the bot's first restart
+               under the new fix → review 24th July's PnL logs + validate against recon
+               (quantify stale-tick bug impact, consolidate fragmented iterations, remember
+               today's fixes are untested against old data) → resume MemLabs (multi-stock or
+               different feature, possibly bring in Grok CLI first)
