@@ -27,7 +27,10 @@
       "mcp__tradingview__ui_click",
       "mcp__tradingview__data_get_trades",
       "mcp__tradingview__data_get_pine_labels",
-      "Bash(py -c ' *)"
+      "Bash(py -c ' *)",
+      "Bash(mkdir -p /tmp/claude-0/-home-user-CodePonting/98d1ffbb-c964-5ab7-9623-e1ce6b0f0a81/scratchpad)",
+      "Bash(cp \"/root/.claude/uploads/98d1ffbb-c964-5ab7-9623-e1ce6b0f0a81/3645fe64-sshkey20260711.key\" /tmp/claude-0/-home-user-CodePonting/98d1ffbb-c964-5ab7-9623-e1ce6b0f0a81/scratchpad/oracle_vm_key)",
+      "Bash(chmod 600 /tmp/claude-0/-home-user-CodePonting/98d1ffbb-c964-5ab7-9623-e1ce6b0f0a81/scratchpad/oracle_vm_key)"
     ],
     "defaultMode": "bypassPermissions"
   },
