@@ -13,6 +13,19 @@ MA_PERIOD  = 20
 ATR_PERIOD = 14
 
 
+def zerodha_short(entry, exit_price):
+    """Full Zerodha intraday SHORT charges: brokerage (capped 20/side) + STT (sell
+    side, i.e. entry here) + transaction + SEBI + stamp (buy side, i.e. exit here)
+    + GST on brokerage/txn/sebi. Same formula used throughout recon/MemLabs."""
+    brok = min(0.0003 * entry, 20) + min(0.0003 * exit_price, 20)
+    stt = entry * 0.00025
+    txn = (entry + exit_price) * 0.0000307
+    sebi = (entry + exit_price) * 0.000001
+    stamp = exit_price * 0.000003
+    gst = 0.18 * (brok + txn + sebi)
+    return brok + stt + txn + sebi + stamp + gst
+
+
 class StockState:
     def __init__(self):
         self.closes = deque(maxlen=MA_PERIOD)
@@ -120,8 +133,9 @@ def process_bar(symbol, bar, state, trades):
 
 def _log_trade(trades, symbol, pos, exit_price, outcome, exit_dt):
     pnl = pos['entry'] - exit_price
+    zpnl = pnl - zerodha_short(pos['entry'], exit_price)
     trades.append({
         'symbol': symbol, 'entry_dt': pos['entry_dt'], 'entry': pos['entry'],
         'sl': pos['sl'], 'tp': pos['tp'], 'exit_dt': exit_dt,
-        'exit_price': exit_price, 'outcome': outcome, 'pnl': pnl,
+        'exit_price': exit_price, 'outcome': outcome, 'pnl': pnl, 'zpnl': zpnl,
     })

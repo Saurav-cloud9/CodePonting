@@ -2,32 +2,40 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Kite bot (market hours only) — resume during live market hours (Monday)
-        2026-07-26 progress: 24th July fully reconciled (39 trades stitched across the
-        restart, recon script's EOD off-by-one fixed (`>=`->`>` + fetch buffer, applied to
-        the real ma_rejection_v1_reconcile.py too), full bar+trade recon run - 09:15
-        login-warmup mess and 13:05 skipped-bucket both confirmed real at the bar level;
-        of 17 trade mismatches, most are ordinary tick-vs-official noise near-misses;
-        RELIANCE/TATAMOTORS/PNB are genuine no-nearby-match exceptions, parked (not worth
-        chasing against bugs already fixed) - tomorrow's clean live run is the real judge.
-        Validation on the 24th's data is CONCLUDED.
-        Next up (Monday market hours):
-        1) Watch the bot's first real restart under the new catch-up/discard logic - confirm
-           no duplicate, no gap, and the catch-up bar gets a genuine touch-check
-        2) If spare time (EOD today or before Monday login): revisit RELIANCE/TATAMOTORS/PNB
-           specifically, otherwise let Monday's clean run be the judge
-        3) Confirm VM's live.py is the fully updated version permanently
-        4) Re-assess the ATR14 divergence question now that the warmup bug is fixed
+P1  Kite bot (market hours only) — running live daily, resume next market session
+        2026-07-28 progress: 3 real mid-session restarts today (09:51/10:14/10:35) with open
+        positions live - all successful, fully validates the weekend's catch-up/discard fix
+        under real conditions (not just morning startup). archive_daily_logs() added - bot
+        now auto-archives its own CSVs on EOD, no more manual archiving each morning. PnL
+        summary fixed: trailing footer after all 30 stocks (was buried at top after just the
+        first), catch-up buckets now get a summary too (never had one before), fields
+        expanded to Trades(total)/Closed/Open/Wins/Losses/PnL. kbccp/kbss moved into
+        CLAUDE.md itself (auto-loads every session, TODO.md glossary doesn't).
+        Next up: continue watching daily runs; re-assess ATR14 divergence question;
+        revisit RELIANCE/TATAMOTORS/PNB from 24th July recon only if spare time
         Older items still open: MA20/ATR14+touch-eval logging not yet added
 
-P2  MemLabs regime-model — 3 methods tried, all negative on TATAMOTORS 11yr ATR%-based
-        2026-07-24/25: tertile bucketing, single-feature OLS, and online-learning
-        (SGDRegressor) all independently show the same thing - no persistent regime effect,
-        promising-looking averages are just masking year-to-year noise in every case
-        Next: (a) test across multiple stocks (single-stock signal may just be too noisy
-        regardless of method), or (b) try a feature other than ATR%-based, or (c) use Grok
-        CLI (~/.grok/bin/grok, confirmed available) to independently validate the trade-log
-        build itself before trying more variations
+P2  MemLabs regime-model — single-feature linear approaches now exhausted (6 features tested)
+        2026-07-28: computed DIRECT Pearson r (not inferred) for ATR%-rollmean40 vs PnL/win-
+        loss - confirmed negligible (-0.015/-0.022). Extended to 5 more candidates (RSI14,
+        MACD%, EMA100/HMA100/VWAP-relative-position) - ALL SIX show negligible correlation,
+        raw or 40-bar-smoothed. This is a stronger finding than "ATR% lacks direction" -
+        NO single-feature linear relationship exists at all for this strategy on TATAMOTORS,
+        magnitude-only or genuinely directional. Also confirmed eta0 sweep (0.01-10.0) and a
+        joint epsilon x eta0 sweep don't rescue the online-learning model either - every
+        cell's ZPF stays at or below ~1.0, and the "best" cell's year-wise breakdown still
+        shows 6 of 11 years failing badly. ZSh(D) confirms the same instability at the
+        Sharpe level (year-wise swings from -7.4 to +2.4).
+        Next (agreed):
+        1) Test across multiple stocks (single-stock TATAMOTORS noise floor may be too high
+           to see anything real, regardless of feature or method)
+        2) If multi-stock also shows nothing: accept single-feature linear methods are
+           exhausted, consider feature COMBINATIONS or a genuinely non-linear approach
+        3) Rebuild the memory-encoding models directly against the author's video code
+           snapshots and retest
+        Standing rule: once any ML model here is properly tested/validated, bring in
+        Opus 5/Fable 5 for an independent gap-check on our computation/code before trusting
+        the result
         Buy MemLabs notebook ($5.50, patreon.com/cw/MemLabs) — card declined, retry
 
 P3  New signal sweeps via Grok — ongoing, lower priority until regime model built
@@ -76,3 +84,6 @@ F6  Insurance review
 ## Frameworks & Data
 # fv2         — Framework V2 (active)
 # DS3         — primary historical dataset (30 stocks, 2015-2025, 5-min parquet)
+
+# Note: kbccp/kbss (kite bot scoped CCP/SS) moved to CLAUDE.md SHORTHAND section -
+# action-triggering shorthand lives there (auto-loaded every session), not here.

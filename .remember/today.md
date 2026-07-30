@@ -1,103 +1,85 @@
-# Session Log — 2026-07-25/26 (weekend session, spanned midnight)
+# Session Log — 2026-07-28
 
-## Kite bot: EOD_HOUR revert + warmup fix completion
-- Reverted EOD_HOUR from the temporary 16 (Friday's testing value) back to 15 - both
-  locally (ma_rejection_v1_core.py) and pushed to the VM. Confirmed via `date` that this
-  was Saturday, so no live-trading-day risk either way, but cleaned up regardless.
-- Continued the stale-first-tick discussion from Friday (deferred implementation until
-  today, per explicit request to discuss first) - walked through the exact chronological
-  sequence (script start -> historical_data loop -> KiteTicker object creation -> connect()
-  -> first tick arrival) to pin down precisely where the "which bucket to exclude" decision
-  gets made, and confirmed it currently happens too early (right after the historical_data
-  loop, before connect()).
-- Landed on a MORE COMPLETE fix than originally scoped, through back-and-forth: instead of
-  just discarding stale ticks, the bot now (a) discards ALL ticks belonging to the
-  connect-time "current bucket" or older, (b) schedules a one-shot catch-up fetch
-  (`catchup_current_bucket()`, via `threading.Timer`) to fire exactly 5 minutes later - by
-  which point that bucket has genuinely closed - fetching it and running it through the
-  FULL `process_bar()` (not just indicator-seeding), so it gets a real touch-check too, not
-  just a silent MA20 contribution. This closes both problems: no duplicate, no permanently
-  skipped bar, no missed signal opportunity on the transition bucket.
-- Implemented in ma_30_rejection_v1_live.py: new module-level `current_bucket` (set by
-  warmup()), new `catchup_current_bucket()` function, `on_ticks()` now discards ticks with
-  `bucket <= current_bucket`, and the catch-up timer is scheduled in `__main__` right after
-  warmup/position-recovery. Verified via `ast.parse` syntax check. NOT yet tested live -
-  market was closed all weekend, so this needs its first real test Monday.
-- Also fixed the separately-flagged live_trades.csv/live_bars.csv data-loss bug: added
-  `load_existing_logs()`, called at the very start of `__main__`, which reads any existing
-  CSV data into the in-memory `trades`/`bar_log_rows` lists before the periodic save loop
-  begins - so a restart no longer silently drops whatever was already recorded. Verified via
-  a standalone simulation (old + new trade both survived a resave). Pushed to VM.
-- Both fixes pushed to the VM while the bot was confirmed inactive (safe, no live process
-  disrupted).
+## Kite bot: live-daily operation hardened, restart fix fully validated
+- Morning routine: refreshed Kite access token, archived Monday's leftover top-level files
+  (both VM and local - load_existing_logs() would otherwise merge them into today's run),
+  confirmed local/VM scripts in sync (including yesterday's pre-open-tick fix, found by the
+  user's separate phone CC session and synced back), started the bot for the day.
+- Deliberately triggered 3 real mid-session restarts today (09:51, 10:14, 10:35), each with
+  genuinely open positions live (up to 6 at once by the 3rd) - specifically to validate the
+  weekend's catch-up/discard fix under real conditions, since Monday's uninterrupted run
+  never exercised it. All 3 fully successful: excluded bucket correctly identified each time,
+  catch-up fired exactly on schedule, all 30 stocks got a real touch-check via the [catch-up]
+  tag (not just silent indicator seeding), existing open positions correctly re-evaluated
+  with zero duplication, live tick processing resumed cleanly afterward every time. This
+  closes out the last untested piece of the weekend's fix.
+- Added `archive_daily_logs()`: the bot now archives its own live_trades.csv/live_bars.csv/
+  warmup_bars.csv/open_positions.json into a dated 'daily data/<Nth><Month>' folder
+  automatically, firing only on a genuine EOD auto-stop (not manual Ctrl+C restarts, which
+  still need same-day append behavior to keep working). No more manual archiving needed
+  before starting the bot each morning going forward.
+- Fixed the PnL summary line, in two passes (user noticed it "wasn't showing up," then
+  caught it still wasn't quite right after the first fix):
+  1. It was firing after the FIRST stock's bar closed each bucket - buried at the top of a
+     30-line block instead of acting as a clean bucket-complete marker. Moved to a trailing
+     "===" footer that only prints once all 30 stocks (UNIVERSE) have finalized their bar
+     for that bucket, tracked via a new `bucket_stocks_seen` set.
+  2. The catch-up code path (a separate function, not routed through the same per-tick
+     logic) never printed a summary at all - true from day one, not a regression. Added one
+     call to a new shared `print_pnl_summary()` right after catch-up's loop finishes.
+  3. Also fixed a naming ambiguity the user caught: "Trades" looked like it should mean
+     total positions taken, but was actually just closed-trade count. Expanded to
+     Trades(total=closed+open) / Closed / Open / Wins / Losses / PnL.
+  All verified working correctly on real data across both live buckets and catch-up buckets.
+- Moved `kbccp`/`kbss` shorthand from TODO.md's glossary into CLAUDE.md's own SHORTHAND
+  section, per the user's correct observation: CLAUDE.md auto-loads into every new session's
+  context automatically, TODO.md's glossary doesn't unless a session explicitly reads it.
+  TODO.md now holds only terminology definitions, not action-triggering commands.
 
-## MemLabs: online-learning year-wise check (closing out the online-learning thread)
-- Built 13_online_learning_yearwise.py - checked whether the earlier promising-looking
-  online-learning filtered result (N=479, ZPF=1.01 overall) holds up year by year.
-- It doesn't: 6 years pass (ZPF>=1.0), 4 fail (<0.9), 1 borderline - same instability pattern
-  as the static bucketing found the day before. Also noticed the filtered N per year grows
-  from single digits (2015-2017) to 100+ (2024-2025) - the model isn't staying selectively
-  adaptive, it's drifting toward "take almost everything" as more data accumulates.
-- This closes out all three approaches tried so far (static bucketing, single-feature OLS,
-  online-learning) with the same honest negative conclusion - no persistent ATR%-based
-  regime effect found on TATAMOTORS alone, regardless of method.
-- Confirmed all memlabs work (scripts 01-13 + output CSVs/PNGs) is committed and pushed to
-  git (verified via `git log`/`git status` - clean, up to date with origin/main).
-
-## VM backtesting environment (side quest, via a separate mobile CC session on the VM)
-- User set up ~/backtesting/ on the VM themselves (via phone SSH + a separate Claude Code
-  instance running directly on the VM, not this session) - folder structure
-  (data/scripts/outputs), backtest_env venv (pandas, numpy, numba, scikit-learn, pyarrow).
-- From this session: copied Framework_V2/backtesting_rules/ (backtesting_rules.md,
-  project_instructions.md) into ~/backtesting/backtesting_rules/; created and pushed a
-  VM-scoped CLAUDE.md + PROGRESS.md (session-start/end rules, hard rule to never touch
-  ~/kite_oracle_papertrading/ unless explicitly asked, vsa/SS/CCP shorthand, and a hard rule
-  to always read+follow backtesting_rules.md before any backtest work); copied two reference
-  scripts (ma_30_rejection.py, sl_tgt_sweep_baseline_short.py) into ~/backtesting/scripts/;
-  copied the full DS3 dataset (160MB, 30 parquet files) into ~/backtesting/data/DS3/.
-- Deliberately did NOT set up a `.remember/`-style deep memory system for this VM
-  environment - agreed a single PROGRESS.md is enough for a smaller, single-purpose project;
-  the richer split only earns its keep on the main desktop project's multiple concurrent
-  threads.
-- Deliberately decided NOT to turn the VM folders into a git repo - `CodePonting` (desktop)
-  remains the single source of truth, both local and on GitHub; VM stays plain folders synced
-  via scp/manual pulls, avoiding the complexity of keeping secrets (.env) and constantly-
-  changing data files out of a VM-side git history.
-
-## VS Code Remote-SSH setup (for direct VM file access from desktop)
-- Installed the official Microsoft "Remote - SSH" extension (ms-vscode.remote-ssh).
-- Set up a Windows-side SSH config (previously only existed inside WSL, not natively
-  accessible to Windows' own OpenSSH client that VS Code's extension uses): copied the
-  private key to C:\Users\Saurav\.ssh\oracle_key, restricted its permissions via `icacls`
-  (Windows equivalent of chmod 400), and created C:\Users\Saurav\.ssh\config with a
-  `Host oracle-vm` entry. Verified the connection works via native Windows ssh before
-  handing off to VS Code. Confirmed working end-to-end.
-- Also set `remote.SSH.remotePlatform: {"oracle-vm": "linux"}` in settings.json (VS Code
-  asked once, now remembered).
-
-## CSV viewer preference
-- Compared Data Wrangler (already used for .parquet) vs a simpler grid viewer for .csv.
-  Landed on the already-installed "Spreadsheet Viewer" (GrapeCity.gc-excelviewer, formerly
-  "Excel Viewer") for plain CSV viewing - Data Wrangler is better suited to genuine deep-dive
-  cleaning/transformation work, not quick reads. Set via
-  workbench.editorAssociations: "*.csv": "gc-excelviewer-csv-editor" (auto-written by VS
-  Code's own "Configure default editor" picker, not guessed).
-
-## Side note (informational, no action taken)
-- Clarified "headless" (no GUI installed at all, vs. Windows always having a GUI regardless
-  of monitor state) - and in the process discovered/confirmed a genuinely different past
-  setup: an old EC2 instance (Algo_Trading/paper_trading_bot_ec2_backup/) had a
-  `~/start_desktop.sh` script referenced from a local .bat file, meaning a desktop
-  environment WAS deliberately installed there for RustDesk-style remote viewing - unlike
-  the current Oracle VM, which was built headless from the start on purpose. That old EC2
-  instance is presumably no longer active; no follow-up planned, just a clarified memory.
+## MemLabs: direct correlation check across 6 features - single-feature linear methods now more comprehensively exhausted
+- Computed the actual, direct Pearson r (not inferred from the online-learning model's noisy
+  weight range, which was the earlier approach) between ATR%-rollmean40 and both PnL and
+  win/loss - confirmed genuinely negligible (-0.0149, -0.0225), both deep in the "no real
+  relationship" band (|r| < 0.1 threshold).
+- Extended the same direct-correlation methodology to 5 more candidate features: RSI14,
+  MACD% ((EMA12-EMA26)/close, a price-scale-normalized version to avoid the same "raw
+  price-level" confound that would make raw EMA/HMA values spuriously correlate with PnL
+  purely from 11 years of stock price drift), EMA100-relative-position, HMA100-relative-
+  position (Hull MA, lower-lag alternative), and VWAP-relative-position (daily-reset VWAP,
+  using DS3's volume column). Deliberately did NOT use MA20 for the "relative position"
+  candidates, since the existing touch condition already requires close<MA20 at every touch
+  bar by construction - that would give zero variance and a meaningless correlation.
+- ALL SIX candidates showed negligible correlation (max |r| ~0.02 raw, ~0.04 when all six
+  consistently 40-bar-smoothed for a fair apples-to-apples comparison, script 17 vs 16).
+  This reframes the working theory: it's not "ATR% specifically lacks direction, directional
+  features will work better" - none of the 6 tested features show ANY linear relationship
+  with outcome, whether pure-magnitude (ATR%) or genuinely directional (RSI/MACD/MA-family/
+  VWAP). Single-feature linear approaches (bucketing/OLS/online-learning) are now more
+  comprehensively exhausted than the ATR%-only theory suggested.
+- Traced and fully explained a real discrepancy between two correlation runs (-0.0148 vs
+  -0.0401 for the identical ATR feature, script 16 vs 17) down to one single outlier trade
+  (2025-10-14, pnl=17.2, ~7.4 standard deviations from typical) being included in one run but
+  excluded from the other, purely because the other 5 features' smoothing needs slightly
+  more warmup bars than ATR% alone needs. Confirmed via direct value diffing (bit-identical
+  on the matched subset) that this was not a computation bug - just illustrates how
+  sensitive/fragile a near-zero correlation reading is to single data points.
+- Side investigation into the online-learning model's hyperparameters: found the model is
+  capped at its eta0 step-size ceiling 96.4% of the time at eta0=0.01, meaning it barely
+  behaves like genuine Passive-Aggressive learning at all (nearly identical to the old,
+  already-broken constant-rate model). Swept eta0 up to 10.0 - doesn't help, ZPF stays below
+  1.0 at every value, and weight-sign-flip count explodes from 10 to 1100+, confirming bigger
+  steps just chase noise more aggressively rather than adapting more accurately. A joint
+  epsilon x eta0 sweep's single best cell (eta0=0.05, epsilon=0.5, aggregate ZPF=1.048) still
+  fails under scrutiny - 6 of 11 years below breakeven, and ZSh(D) (Zerodha daily Sharpe)
+  swings wildly year to year (-7.4 to +2.4), confirming the instability at the Sharpe level
+  too, not just PF/ZPF.
 
 ## Next session priorities (explicitly agreed with the user)
-1. Kite bot: watch Monday's first live restart under the new catch-up/discard logic
-2. Review 24th July's PnL logs + validate against recon, specifically:
-   (a) quantify how many of that day's trades were actually affected by the stale-tick bug
-   (b) consolidate the day's fragmented iteration snapshots into one clean picture
-   (c) remember today's 2 new fixes can only be tested against Monday's fresh data, not
-       retroactively against the 24th
-3. Resume MemLabs work after the above - likely multi-stock test or a different feature,
-   possibly bring in Grok CLI for independent validation first
+1. Test across multiple stocks - single-stock TATAMOTORS noise floor may simply be too high
+   to see anything real, regardless of feature choice or fitting method
+2. If multi-stock also shows nothing: accept single-feature linear methods are exhausted,
+   consider feature combinations (not single-variable) or a genuinely non-linear approach
+3. Rebuild the memory-encoding models directly against the author's actual video code
+   snapshots and retest
+4. Standing rule: once any ML model here is properly tested/validated, bring in Opus 5 or
+   Fable 5 for an independent gap-check on the computation/code before trusting the result

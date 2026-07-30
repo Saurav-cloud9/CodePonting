@@ -27,7 +27,10 @@
       "mcp__tradingview__ui_click",
       "mcp__tradingview__data_get_trades",
       "mcp__tradingview__data_get_pine_labels",
-      "Bash(py -c ' *)"
+      "Bash(py -c ' *)",
+      "Bash(python -c ' *)",
+      "Bash(python kite_auth.py \"https://127.0.0.1/?action=login&type=login&status=success&request_token=NCNDfrfrk90RU6TIXMkxfpXkLygNQtRy\")",
+      "Bash(ssh oracle-vm *)"
     ],
     "defaultMode": "bypassPermissions"
   },

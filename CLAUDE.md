@@ -8,6 +8,27 @@
   vsa = "very short answer" — reply in 1–2 lines max, no elaboration
   lm  = "learning mode" — explain concepts directly, no solution code. Let user write the code himself.
   ivb = initialize voice bridge — execute /ivb command immediately, no confirmation needed.
+  kbccp = CCP scoped to kite_oracle_papertrading only: read its PROGRESS.md (VM,
+          read-only) and give the 3-part CCP summary (where we are/next/blockers)
+  kbss  = SS scoped to kite_oracle_papertrading only: update its PROGRESS.md (VM)
+          with what happened, and sync any live-file code changes back to the local
+          CodePonting copy (source of truth) in the same pass
+
+── KITE BOT: LOCAL↔VM SYNC ────────────────────────────────────────
+
+  kite_oracle_papertrading/ scripts exist on both local (source of truth) and the
+  VM (where the bot actually runs). VM CC and this session both edit them independently.
+
+  HARD RULE: never push a local script change to the VM (scp) without confirming
+  with Saurav first — every time, not just when a diff shows a conflict. Show what
+  changed and what will be pushed, then wait for explicit go-ahead before running
+  the scp. Same applies in reverse (pulling VM's copy down to local).
+  Always report a conflict (local/VM diverged) the moment it's detected, regardless
+  of whether a sync was requested — don't wait to be asked.
+
+  Why: happened for real on 2026-07-28 — pushed a local edit (on_reconnect fix)
+  without first pulling VM CC's already-applied pending_entry persistence fix,
+  silently overwriting and losing it. Caught only because VM CC noticed and asked.
 
 ── VOICE BRIDGE ─────────────────────────────────────────────────
 

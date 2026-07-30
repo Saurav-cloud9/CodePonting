@@ -551,3 +551,99 @@ closed out, VM backtesting env + VS Code Remote-SSH set up) ─────
                (quantify stale-tick bug impact, consolidate fragmented iterations, remember
                today's fixes are untested against old data) → resume MemLabs (multi-stock or
                different feature, possibly bring in Grok CLI first)
+2026-07-26/27  Kite bot: 24th July fully reconciled - stitched the day's 2 real runs (39
+               trades across the 13:05 restart) into one combined view; found + fixed a
+               recon-script-only off-by-one (session_end excluded the EOD bar via `>=`, now
+               `>` + a 10min fetch buffer), applied to both the real reconcile script and a
+               one-time 24th-July script. Full bar+trade recon confirmed the 09:15 login-
+               warmup mess and 13:05 skipped-bucket as real; most of 17 trade mismatches are
+               ordinary tick-vs-official noise; RELIANCE/TATAMOTORS/PNB flagged as genuine
+               no-nearby-match exceptions, parked pending tomorrow's clean live run rather
+               than chased against already-fixed bugs. 24th's validation CONCLUDED
+           ✅  MemLabs: found and fixed 2 real bugs in the online-learning script vs the
+               author's actual code (confirmed via his screenshots) - (1) static one-time
+               scaler fit (also had lookahead bias in the warm-up window) replaced with
+               scaler.partial_fit() every trade, matching his incremental approach; (2)
+               learning_rate="constant" (fixed eta0 step regardless of error size) replaced
+               with "pa1" (Passive-Aggressive: step size scales with loss, capped at eta0).
+               Rebuilt as script 15 (corrected PA1 version) - result: same negative verdict,
+               if anything worse in aggregate (ZPF=0.942 filtered vs old buggy 1.01), and the
+               "N_filt keeps growing over the years" drift persists (just less extreme).
+               Swept epsilon (0.05-3.0): only 0.25 cleared ZPF>1.0 (1.106), but year-wise
+               breakdown showed 66% of its trades concentrated in 2024-2025 alone with most
+               2015-2023 years below breakeven or near-zero N - same "good average hides bad
+               years" trap as every other method, confirmed as noise not a real finding.
+               Working theory going forward: ATR%-based features carry no directional
+               information at all (pure volatility magnitude, unlike RSI/MACD/MA-position
+               which all encode some direction/momentum) - likely explains why all 3 methods
+               (bucketing, OLS, online-learning) failed the same way regardless of technique
+           ✅  Next (explicitly agreed, post market-hours tomorrow): (1) dig into why the
+               online-learning N_filt keeps climbing every year, (2) compare ATR vs RSI/MACD/
+               MA-position on whether they actually carry directional info, (3) revisit the
+               online-learning math for what could improve results with a different feature,
+               (4) rebuild the memory-encoding models directly against the author's video
+               code snapshots and retest
+2026-07-28 SS (Kite bot live-daily hardening + MemLabs single-feature correlation sweep) ──
+           ✅  Kite bot: refreshed access token, archived Monday's leftover top-level files
+               (both VM and local - load_existing_logs() would otherwise merge them into
+               today's run), confirmed local/VM scripts in sync, started the bot for the day
+           ✅  Deliberately tested 3 real mid-session restarts today (09:51, 10:14, 10:35)
+               with genuinely open positions live at each one - all fully successful: excluded
+               bucket correctly identified each time, catch-up fired on schedule, all 30
+               stocks got a real touch-check via [catch-up] tag, existing open positions
+               (up to 6 at once) correctly re-evaluated with no duplication, live processing
+               resumed cleanly each time. Fully validates the weekend's catch-up/discard fix
+               under real mid-session conditions, not just morning startup - closes this out
+           ✅  Added archive_daily_logs(): bot now auto-archives live_trades.csv/live_bars.csv/
+               warmup_bars.csv/open_positions.json into a dated folder on a genuine EOD
+               auto-stop only (not manual Ctrl+C restarts) - no more manual archiving needed
+               each morning before starting the bot
+           ✅  Fixed the PnL summary line (found via user noticing it "wasn't showing up"):
+               (1) was firing after the FIRST stock's bar per bucket (buried at the top of
+               each 30-stock block) - moved to a trailing "===" footer after all 30 stocks
+               (UNIVERSE) have finalized, via a new bucket_stocks_seen tracking set; (2) the
+               catch-up path never printed a summary at all (separate code path, bypassed the
+               counting logic entirely) - added one call to a new shared print_pnl_summary()
+               right after catch-up's loop completes; (3) expanded fields from just "Trades"
+               (which actually meant closed-only) to Trades(total=closed+open)/Closed/Open/
+               Wins/Losses/PnL - removes the ambiguity that caused the original confusion
+           ✅  Moved kbccp/kbss shorthand from TODO.md's glossary into CLAUDE.md's SHORTHAND
+               section itself - CLAUDE.md auto-loads into every new session's context,
+               TODO.md doesn't unless explicitly read; TODO.md now holds only terminology,
+               not action-triggering commands
+           ✅  MemLabs: computed the DIRECT Pearson r (not inferred from a noisy online-model
+               weight range) between ATR%-rollmean40 and both PnL and win/loss - confirmed
+               genuinely negligible (-0.0149, -0.0225), both well inside the "no real
+               relationship" band (|r|<0.1)
+           ✅  Extended the same direct-correlation check to 5 more candidate features:
+               RSI14, MACD% ((EMA12-EMA26)/close), EMA100-relative-position, HMA100-relative-
+               position, VWAP-relative-position (all touch-bar snapshots, script 16). ALL SIX
+               showed negligible correlation (max |r| ~0.02) - not just ATR%. Re-ran with all
+               six consistently 40-bar-smoothed for a fair apples-to-apples comparison
+               (script 17) - same conclusion holds (max |r| ~0.04)
+           ✅  This reframes the working theory: it's not "ATR% lacks direction, directional
+               features will work" - NONE of the 6 tested features (magnitude-only or
+               genuinely directional) show any linear relationship with outcome at all, on
+               TATAMOTORS. Single-feature linear methods (bucketing/OLS/online-learning) are
+               now more comprehensively exhausted than before
+           ✅  Traced a real discrepancy between two correlation runs (-0.0148 vs -0.0401 for
+               the same ATR feature) down to a single outlier trade (2025-10-14, pnl=17.2,
+               ~7.4 std devs from typical) being included/excluded due to differing warmup
+               requirements between scripts - confirmed no computation bug (values bit-
+               identical on the matched subset), and a useful illustration of how fragile
+               near-zero correlations are to single data points
+           ✅  Also confirmed (side thread): eta0 sweep (0.01-10.0) shows the model is capped
+               96.4% of the time at eta0=0.01 (barely PA1 at all, nearly identical to the old
+               broken constant-rate model) - but raising eta0 doesn't help, ZPF stays <1.0 at
+               every tested value and weight-flip count explodes (10->1100+), confirming
+               bigger steps just chase noise more aggressively, not more accurately. A joint
+               epsilon x eta0 sweep's best cell (eta0=0.05, eps=0.5, ZPF=1.048) still fails
+               year-wise (6/11 years below breakeven) and at the Sharpe level (ZSh(D) swings
+               -7.4 to +2.4 year to year)
+           ✅  Next (explicitly agreed): (1) test across multiple stocks - single-stock
+               TATAMOTORS noise floor may be too high to see anything regardless of feature/
+               method, (2) if multi-stock also shows nothing, accept single-feature linear
+               methods are exhausted and consider feature combinations or non-linear methods,
+               (3) rebuild the memory-encoding models against the author's actual video code
+               and retest, (4) standing rule: bring in Opus 5/Fable 5 for an independent
+               gap-check once any model here is properly validated
