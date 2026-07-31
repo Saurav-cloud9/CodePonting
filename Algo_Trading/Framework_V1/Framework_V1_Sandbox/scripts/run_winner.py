@@ -244,7 +244,7 @@ win_pct  = n_wins / n_trades * 100 if n_trades else 0
 print(f"\n{'='*60}")
 print(f"  STEP 3.2 WINNER CONFIRMATION")
 print(f"{'='*60}")
-print(f"  Config    : Extreme-2  (sl=2.5 ATR, tgt=1.8R)")
+print(f"  Config    : Extreme-2  (sl=2.5 ATR, tp=1.8R)")
 print(f"  Features  : SL=A  PG=True  CP=True  AF=True  EC=False  FF=False")
 print(f"  Stocks    : {len(stock_arrays)}")
 print(f"  Period    : 2022-2025  ({YEARS} yr)")

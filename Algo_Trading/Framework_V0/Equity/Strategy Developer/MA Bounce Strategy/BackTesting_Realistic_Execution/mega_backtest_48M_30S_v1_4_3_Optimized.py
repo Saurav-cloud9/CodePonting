@@ -61,10 +61,10 @@ STOP_LOSS = 0.005
 VOLUME_MULTIPLIER = 1.2
 
 ATR_CONFIGS = {
-    'Sideways': {'sl_mult': 1.0, 'tgt_mult': 1.5},
-    'Regular-1': {'sl_mult': 1.5, 'tgt_mult': 2.0},
-    'Regular-2': {'sl_mult': 2.0, 'tgt_mult': 3.0},
-    'Extreme': {'sl_mult': 2.5, 'tgt_mult': 4.0}
+    'Sideways': {'sl_mult': 1.0, 'tp_mult': 1.5},
+    'Regular-1': {'sl_mult': 1.5, 'tp_mult': 2.0},
+    'Regular-2': {'sl_mult': 2.0, 'tp_mult': 3.0},
+    'Extreme': {'sl_mult': 2.5, 'tp_mult': 4.0}
 }
 
 FILTERS = {
@@ -237,7 +237,7 @@ def simulate_trades(df, signals, atr_config, stock_name="", filter_name="", atr_
         if pd.isna(entry_atr): continue
 
         stop_price = entry_price - (entry_atr * atr_config['sl_mult'])
-        target_price = entry_price + (entry_atr * atr_config['tgt_mult'])
+        target_price = entry_price + (entry_atr * atr_config['tp_mult'])
 
         exit_price = None
         exit_time = None

@@ -52,10 +52,10 @@ STOCKS = {
 
 VOLUME_MULTIPLIER = 1.2
 ATR_CONFIGS = {
-    'Sideways': {'sl_mult': 1.0, 'tgt_mult': 1.5},
-    'Regular-1': {'sl_mult': 1.5, 'tgt_mult': 2.0},
-    'Regular-2': {'sl_mult': 2.0, 'tgt_mult': 3.0},
-    'Extreme': {'sl_mult': 2.5, 'tgt_mult': 4.0}
+    'Sideways': {'sl_mult': 1.0, 'tp_mult': 1.5},
+    'Regular-1': {'sl_mult': 1.5, 'tp_mult': 2.0},
+    'Regular-2': {'sl_mult': 2.0, 'tp_mult': 3.0},
+    'Extreme': {'sl_mult': 2.5, 'tp_mult': 4.0}
 }
 FILTERS = {
     'No Filter': [],
@@ -308,7 +308,7 @@ def simulate_trades_optimized(df, signals, atr_config, nifty_regimes):
             continue
 
         stop_price = entry_price - (entry_atr * atr_config['sl_mult'])
-        target_price = entry_price + (entry_atr * atr_config['tgt_mult'])
+        target_price = entry_price + (entry_atr * atr_config['tp_mult'])
 
         # OPTIMIZED: Vectorized exit check for window
         end_idx = min(entry_idx + 80, len(df))
@@ -322,8 +322,8 @@ def simulate_trades_optimized(df, signals, atr_config, nifty_regimes):
 
         # Find first SL/Target hit (vectorized)
         sl_hit_bull = bullish & (window_low <= stop_price)
-        tgt_hit_bull = bullish & (window_high >= target_price)
-        tgt_hit_bear = ~bullish & (window_high >= target_price)
+        tp_hit_bull = bullish & (window_high >= target_price)
+        tp_hit_bear = ~bullish & (window_high >= target_price)
         sl_hit_bear = ~bullish & (window_low <= stop_price)
 
         # Combine conditions
@@ -331,39 +331,39 @@ def simulate_trades_optimized(df, signals, atr_config, nifty_regimes):
 
         # Check bullish candles (SL before target)
         sl_indices_bull = np.where(sl_hit_bull)[0]
-        tgt_indices_bull = np.where(tgt_hit_bull)[0]
+        tp_indices_bull = np.where(tp_hit_bull)[0]
 
-        if len(sl_indices_bull) > 0 or len(tgt_indices_bull) > 0:
+        if len(sl_indices_bull) > 0 or len(tp_indices_bull) > 0:
             first_sl_bull = sl_indices_bull[0] if len(sl_indices_bull) > 0 else 999999
-            first_tgt_bull = tgt_indices_bull[0] if len(tgt_indices_bull) > 0 else 999999
+            first_tp_bull = tp_indices_bull[0] if len(tp_indices_bull) > 0 else 999999
 
-            if first_sl_bull < first_tgt_bull:
+            if first_sl_bull < first_tp_bull:
                 exit_idx = entry_idx + 1 + first_sl_bull
                 exit_price = stop_price
                 exit_reason = 'SL'
                 exit_found = True
-            elif first_tgt_bull < first_sl_bull:
-                exit_idx = entry_idx + 1 + first_tgt_bull
+            elif first_tp_bull < first_sl_bull:
+                exit_idx = entry_idx + 1 + first_tp_bull
                 exit_price = target_price
                 exit_reason = 'Target'
                 exit_found = True
         # Check bearish candles (Target before SL)
         if not exit_found:
-            tgt_indices_bear = np.where(tgt_hit_bear)[0]
+            tp_indices_bear = np.where(tp_hit_bear)[0]
             sl_indices_bear = np.where(sl_hit_bear)[0]
 
-            if len(tgt_indices_bear) > 0 or len(sl_indices_bear) > 0:
-                first_tgt_bear = tgt_indices_bear[0] if len(tgt_indices_bear) > 0 else 999999
+            if len(tp_indices_bear) > 0 or len(sl_indices_bear) > 0:
+                first_tp_bear = tp_indices_bear[0] if len(tp_indices_bear) > 0 else 999999
                 first_sl_bear = sl_indices_bear[0] if len(sl_indices_bear) > 0 else 999999
 
-                if first_tgt_bear < first_sl_bear:
-                    exit_idx = entry_idx + 1 + first_tgt_bear
+                if first_tp_bear < first_sl_bear:
+                    exit_idx = entry_idx + 1 + first_tp_bear
                     exit_price = target_price
                     exit_reason = 'Target'
                     exit_found = True
-                elif first_sl_bear < first_tgt_bear:
+                elif first_sl_bear < first_tp_bear:
                     exit_found = True
-                elif first_sl_bear < first_tgt_bear:
+                elif first_sl_bear < first_tp_bear:
                     exit_idx = entry_idx + 1 + first_sl_bear
                     exit_price = stop_price
                     exit_reason = 'SL'

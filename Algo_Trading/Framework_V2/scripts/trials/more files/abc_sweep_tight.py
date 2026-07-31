@@ -1,5 +1,5 @@
 """
-Trading ABC — tight SL x TGT sweep (0.3–1.5 SL, 0.3–2.0 TGT)
+Trading ABC — tight SL x TP sweep (0.3–1.5 SL, 0.3–2.0 TP)
 First upward triangle per ABC, long only, all 30 stocks 2022-2025
 """
 import sys, io, glob, pandas as pd, numpy as np
@@ -15,7 +15,7 @@ MA_SPANS = [50,100,150,200]; EMA_SPANS = [20,40]
 FIB_LO_EFF = FIB_LO*(1-ERR_RATE); FIB_HI_EFF = FIB_HI*(1+ERR_RATE)
 
 SL_VALS  = [0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5]
-TGT_VALS = [0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5, 1.7, 2.0]
+TP_VALS = [0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5, 1.7, 2.0]
 
 def load(f):
     df = pd.read_csv(f, low_memory=False)
@@ -96,17 +96,17 @@ def get_signals(df):
                 last_abc_id=None
     return signals
 
-def simulate(df, signals, sl_m, tgt_m):
+def simulate(df, signals, sl_m, tp_m):
     trades=[]; high=df['high'].values; low=df['low'].values
     open_=df['open'].values; n=len(df)
     for sig in signals:
         entry=sig['entry_px']; atr=sig['atr']
-        sl=entry-sl_m*atr; tgt=entry+tgt_m*atr
+        sl=entry-sl_m*atr; tp=entry+tp_m*atr
         entry_date=sig['date']
         for k in range(sig['entry_i'],n):
             kb=df.iloc[k]
             if kb['hour']>=EOD_HOUR or kb['date']!=entry_date: pnl=open_[k]-entry; break
-            if high[k]>=tgt: pnl=tgt-entry; break
+            if high[k]>=tp: pnl=tp-entry; break
             if low[k]<=sl:   pnl=sl-entry;  break
         trades.append({'pnl':pnl,'year':sig['year'],'date':pd.Timestamp(sig['date'])})
     return trades
@@ -124,18 +124,18 @@ all_data = [(df, get_signals(df)) for df, _ in all_data]
 total = sum(len(s) for _,s in all_data)
 print(f'Total signals: {total}')
 
-print('Running tight SL x TGT sweep...')
-grid = np.zeros((len(SL_VALS), len(TGT_VALS)))
+print('Running tight SL x TP sweep...')
+grid = np.zeros((len(SL_VALS), len(TP_VALS)))
 for si, sl_m in enumerate(SL_VALS):
-    for ti, tgt_m in enumerate(TGT_VALS):
+    for ti, tp_m in enumerate(TP_VALS):
         all_t = []
-        for df,sigs in all_data: all_t.extend(simulate(df,sigs,sl_m,tgt_m))
+        for df,sigs in all_data: all_t.extend(simulate(df,sigs,sl_m,tp_m))
         grid[si,ti] = pf(all_t)
 
 # Best combo
 best_idx = np.unravel_index(np.argmax(grid), grid.shape)
-best_sl=SL_VALS[best_idx[0]]; best_tgt=TGT_VALS[best_idx[1]]
-print(f'\nBest combo: SL={best_sl}x  TGT={best_tgt}x  PF={grid[best_idx]:.3f}')
+best_sl=SL_VALS[best_idx[0]]; best_tp=TP_VALS[best_idx[1]]
+print(f'\nBest combo: SL={best_sl}x  TP={best_tp}x  PF={grid[best_idx]:.3f}')
 
 # Heatmap — SL ascending from bottom
 grid_flipped = np.flipud(grid)
@@ -146,15 +146,15 @@ fig, ax = plt.subplots(figsize=(11, 7))
 fig.patch.set_facecolor('#0d1117'); ax.set_facecolor('#0d1117')
 
 im = ax.imshow(grid_flipped, cmap='RdYlGn', vmin=0.7, vmax=1.3, aspect='auto')
-ax.set_xticks(range(len(TGT_VALS))); ax.set_xticklabels(TGT_VALS, color='#aaa')
+ax.set_xticks(range(len(TP_VALS))); ax.set_xticklabels(TP_VALS, color='#aaa')
 ax.set_yticks(range(len(SL_VALS)));  ax.set_yticklabels(sl_labels, color='#aaa')
-ax.set_xlabel('TGT Multiplier', color='#aaa', fontsize=11)
+ax.set_xlabel('TP Multiplier', color='#aaa', fontsize=11)
 ax.set_ylabel('SL Multiplier',  color='#aaa', fontsize=11)
-ax.set_title(f'PF Heatmap -- Trading ABC Tight Range (SL 0.3-1.5 x TGT 0.3-2.0)\n30 Stocks | 2022-2025 | N={total}',
+ax.set_title(f'PF Heatmap -- Trading ABC Tight Range (SL 0.3-1.5 x TP 0.3-2.0)\n30 Stocks | 2022-2025 | N={total}',
              color='white', fontsize=13, pad=12)
 
 for si in range(len(SL_VALS)):
-    for ti in range(len(TGT_VALS)):
+    for ti in range(len(TP_VALS)):
         v = grid_flipped[si,ti]
         ax.text(ti, si, f'{v:.3f}', ha='center', va='center',
                 fontsize=8, color='black' if 0.85<v<1.15 else 'white')
@@ -165,6 +165,6 @@ cbar.ax.yaxis.set_tick_params(color='#aaa')
 plt.setp(cbar.ax.yaxis.get_ticklabels(), color='#aaa')
 
 plt.tight_layout()
-out = f'{OUT_DIR}/abc_sl_tgt_heatmap_tight.png'
+out = f'{OUT_DIR}/abc_sl_tp_heatmap_tight.png'
 plt.savefig(out, dpi=150, bbox_inches='tight', facecolor=fig.get_facecolor())
 print(f'Saved: {out}')

@@ -159,12 +159,12 @@ class Portfolio:
                     pos["stop"] = pos["trailing_stop"]
                     # target remains fixed (set in open_position) — only stop trails
 
-                # v1.4.5 intra-bar sequence logic: check SL/TGT based on candle direction
+                # v1.4.5 intra-bar sequence logic: check SL/TP based on candle direction
                 # All variants (A, B, C, D) use the same candle-direction priority.
                 # B/C: stop value may have changed to entry_price (breakeven), but logic is identical.
                 # D: stop trails, target remains fixed — same logic applies.
                 # Bullish candle likely went: Open -> Low -> High -> Close (check SL first)
-                # Bearish candle likely went: Open -> High -> Low -> Close (check TGT first)
+                # Bearish candle likely went: Open -> High -> Low -> Close (check TP first)
                 is_bullish = bar.close > bar.open
 
                 if is_bullish:
@@ -176,7 +176,7 @@ class Portfolio:
                         exit_price = pos["target"]
                         reason = "target"
                 else:
-                    # Bearish: rallied first, then dropped — check TGT first
+                    # Bearish: rallied first, then dropped — check TP first
                     if bar.high >= pos["target"]:
                         exit_price = pos["target"]
                         reason = "target"

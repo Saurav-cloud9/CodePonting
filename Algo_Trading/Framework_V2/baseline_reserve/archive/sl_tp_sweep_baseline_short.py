@@ -1,5 +1,5 @@
 """
-SL x TGT grid sweep — MA Rejection (SHORT) baseline
+SL x TP grid sweep — MA Rejection (SHORT) baseline
 30 stocks · 2015-2025 · DS3 parquets (11-year full run)
 Signal : high >= MA20 → close < MA20 within MAX_TR_GAP=3 → short at next bar open
 Logic  : single-pass (i = k+1 after each trade) — position guard intact
@@ -17,7 +17,7 @@ EOD_HOUR   = 15
 MAX_TR_GAP = 3
 
 SL_VALS  = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
-TGT_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
+TP_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
 
 
 def load(f):
@@ -33,7 +33,7 @@ def load(f):
     return df.reset_index(drop=True)
 
 
-def run_combo(arrays, sl_m, tgt_m):
+def run_combo(arrays, sl_m, tp_m):
     high, low, open_, close = arrays['high'], arrays['low'], arrays['open_'], arrays['close']
     ma20, atr14             = arrays['ma20'],  arrays['atr14']
     hour, date, year        = arrays['hour'],  arrays['date'], arrays['year']
@@ -51,7 +51,7 @@ def run_combo(arrays, sl_m, tgt_m):
             if rej < 0: i += 1; continue
             ei = rej + 1
             if ei >= n or date[ei] != touch_date: i += 1; continue
-            entry = open_[ei]; sl = entry + sl_m * atr; tgt = entry - tgt_m * atr
+            entry = open_[ei]; sl = entry + sl_m * atr; tp = entry - tp_m * atr
             k = ei
             for k in range(ei, n):
                 if date[k] != touch_date:
@@ -60,8 +60,8 @@ def run_combo(arrays, sl_m, tgt_m):
                     pnl = entry - open_[k]; break
                 if high[k] >= sl:
                     pnl = entry - sl; break
-                if low[k] <= tgt:
-                    pnl = entry - tgt; break
+                if low[k] <= tp:
+                    pnl = entry - tp; break
             trades.append({'pnl': pnl, 'year': year[ei],
                            'date': pd.Timestamp(date[ei])})
             i = k + 1
@@ -97,42 +97,42 @@ for f in files:
         'hour':  df['hour'].values,  'date':  df['date'].values,
         'year':  df['year'].values,  'n':     len(df),
     })
-print(f'Loaded. Running {len(SL_VALS)} x {len(TGT_VALS)} grid sweep...')
+print(f'Loaded. Running {len(SL_VALS)} x {len(TP_VALS)} grid sweep...')
 
 # ── Grid sweep ─────────────────────────────────────────────────────────────────
-results = {}   # (sl, tgt) -> trades
-pf_grid = np.zeros((len(SL_VALS), len(TGT_VALS)))
+results = {}   # (sl, tp) -> trades
+pf_grid = np.zeros((len(SL_VALS), len(TP_VALS)))
 
 for si, sl_m in enumerate(SL_VALS):
-    for ti, tgt_m in enumerate(TGT_VALS):
+    for ti, tp_m in enumerate(TP_VALS):
         all_t = []
         for arr in stock_arrays:
-            all_t.extend(run_combo(arr, sl_m, tgt_m))
-        results[(sl_m, tgt_m)] = all_t
+            all_t.extend(run_combo(arr, sl_m, tp_m))
+        results[(sl_m, tp_m)] = all_t
         pf_grid[si, ti] = calc_pf(all_t)
 
 # ── Print PF grid ──────────────────────────────────────────────────────────────
-print(f'\nPF Grid (rows=SL, cols=TGT):')
-print(f"{'SL\\TGT':>8}" + ''.join(f'{t:>7.1f}' for t in TGT_VALS))
+print(f'\nPF Grid (rows=SL, cols=TP):')
+print(f"{'SL\\TP':>8}" + ''.join(f'{t:>7.1f}' for t in TP_VALS))
 for si, sl_m in enumerate(SL_VALS):
-    print(f'{sl_m:>8.1f}' + ''.join(f'{pf_grid[si, ti]:>7.3f}' for ti in range(len(TGT_VALS))))
+    print(f'{sl_m:>8.1f}' + ''.join(f'{pf_grid[si, ti]:>7.3f}' for ti in range(len(TP_VALS))))
 
 # ── Top 5 by PF ───────────────────────────────────────────────────────────────
 flat = sorted(
-    [(pf_grid[si, ti], SL_VALS[si], TGT_VALS[ti])
-     for si in range(len(SL_VALS)) for ti in range(len(TGT_VALS))],
+    [(pf_grid[si, ti], SL_VALS[si], TP_VALS[ti])
+     for si in range(len(SL_VALS)) for ti in range(len(TP_VALS))],
     reverse=True
 )
 print(f'\nTop 5 by PF:')
-print(f"  {'SL':>4}  {'TGT':>4}  {'N':>7}  {'PF':>6}  {'Sharpe':>7}")
-for pf, sl_m, tgt_m in flat[:5]:
-    t = results[(sl_m, tgt_m)]
-    print(f"  {sl_m:>4.1f}  {tgt_m:>4.1f}  {len(t):>7,}  {pf:>6.3f}  {calc_sharpe(t):>7.3f}")
+print(f"  {'SL':>4}  {'TP':>4}  {'N':>7}  {'PF':>6}  {'Sharpe':>7}")
+for pf, sl_m, tp_m in flat[:5]:
+    t = results[(sl_m, tp_m)]
+    print(f"  {sl_m:>4.1f}  {tp_m:>4.1f}  {len(t):>7,}  {pf:>6.3f}  {calc_sharpe(t):>7.3f}")
 
 # ── Best combo detail ──────────────────────────────────────────────────────────
-best_pf, best_sl, best_tgt = flat[0]
-best_t = results[(best_sl, best_tgt)]
-print(f'\nBest combo: SL={best_sl}x  TGT={best_tgt}x')
+best_pf, best_sl, best_tp = flat[0]
+best_t = results[(best_sl, best_tp)]
+print(f'\nBest combo: SL={best_sl}x  TP={best_tp}x')
 print(f'Overall: N={len(best_t):,}  PF={best_pf:.3f}  Sharpe={calc_sharpe(best_t):.3f}')
 
 print(f'\n{"Year":<6} {"N":>5}  {"PF":>6}  {"Sharpe":>7}')
@@ -151,15 +151,15 @@ fig, ax = plt.subplots(figsize=(11, 6))
 fig.patch.set_facecolor('#0d1117')
 ax.set_facecolor('#0d1117')
 im = ax.imshow(grid_flipped, cmap='RdYlGn', vmin=0.85, vmax=1.25, aspect='auto')
-ax.set_xticks(range(len(TGT_VALS))); ax.set_xticklabels(TGT_VALS, color='#aaa')
+ax.set_xticks(range(len(TP_VALS))); ax.set_xticklabels(TP_VALS, color='#aaa')
 ax.set_yticks(range(len(SL_VALS)));  ax.set_yticklabels(sl_labels, color='#aaa')
-ax.set_xlabel('TGT Multiplier', color='#aaa', fontsize=11)
+ax.set_xlabel('TP Multiplier', color='#aaa', fontsize=11)
 ax.set_ylabel('SL Multiplier', color='#aaa', fontsize=11)
-total_n = sum(len(results[(SL_VALS[0], TGT_VALS[0])]) for _ in [1])
+total_n = sum(len(results[(SL_VALS[0], TP_VALS[0])]) for _ in [1])
 ax.set_title(f'PF Heatmap — MA Rejection SHORT baseline  |  30 Stocks · 2015-2025',
              color='white', fontsize=13, pad=12)
 for si in range(len(SL_VALS)):
-    for ti in range(len(TGT_VALS)):
+    for ti in range(len(TP_VALS)):
         v = grid_flipped[si, ti]
         ax.text(ti, si, f'{v:.3f}', ha='center', va='center',
                 fontsize=9, color='black' if 0.90 < v < 1.15 else 'white')
@@ -168,7 +168,7 @@ cbar.set_label('Profit Factor', color='#aaa')
 cbar.ax.yaxis.set_tick_params(color='#aaa')
 plt.setp(cbar.ax.yaxis.get_ticklabels(), color='#aaa')
 plt.tight_layout()
-out = os.path.join(OUT_DIR, 'sl_tgt_sweep_baseline_short.png')
+out = os.path.join(OUT_DIR, 'sl_tp_sweep_baseline_short.png')
 plt.savefig(out, dpi=150, bbox_inches='tight', facecolor=fig.get_facecolor())
 plt.close()
 print(f'\nHeatmap saved: {out}')

@@ -4,11 +4,11 @@ import os
 import glob
 
 # v1 + VWAP filter: wick-only touch from above MA20, AND close >= intraday VWAP at touch bar
-# SL/TGT locked from baseline sweep: SL=2.0x · TGT=5.5x
+# SL/TP locked from baseline sweep: SL=2.0x · TP=5.5x
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\intraday_5min_DS3'
 
 SL_MULT   = 2.0
-TGT_MULT  = 5.5
+TP_MULT  = 5.5
 EOD_HOUR  = 15
 
 
@@ -58,7 +58,7 @@ def run_backtest(csv_path):
                 continue
             entry = entry_bar['open']
             sl  = entry - SL_MULT  * atr
-            tgt = entry + TGT_MULT * atr
+            tp = entry + TP_MULT * atr
             for k in range(entry_idx, len(df)):
                 k_bar = df.iloc[k]
                 if k_bar['date'] != touch_date:
@@ -77,8 +77,8 @@ def run_backtest(csv_path):
                     outcome = 'L'
                     exit_dt = k_bar['datetime']
                     break
-                if k_bar['high'] >= tgt:
-                    pnl = tgt - entry
+                if k_bar['high'] >= tp:
+                    pnl = tp - entry
                     outcome = 'W'
                     exit_dt = k_bar['datetime']
                     break
@@ -135,7 +135,7 @@ pure_all  = (all_df['outcome'] == 'W').sum()
 avg_win_all  = all_df[all_df['pnl'] > 0]['pnl'].mean()
 avg_loss_all = abs(all_df[all_df['pnl'] < 0]['pnl'].mean())
 be_prof_all  = avg_loss_all / (avg_win_all + avg_loss_all) * 100
-be_pure      = SL_MULT / (SL_MULT + TGT_MULT) * 100
+be_pure      = SL_MULT / (SL_MULT + TP_MULT) * 100
 gp_all = all_df[all_df['pnl'] > 0]['pnl'].sum()
 gl_all = abs(all_df[all_df['pnl'] < 0]['pnl'].sum())
 pf_all = gp_all / gl_all if gl_all > 0 else 999

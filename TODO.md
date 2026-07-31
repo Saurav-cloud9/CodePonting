@@ -65,8 +65,8 @@ F6  Insurance review
 
 ## Metrics & System
 # SL/TP       — Stop Loss / Take Profit (standard shortform going forward, replaces
-#               TGT in all new scripts starting with the kite paper trading bot;
-#               existing files keep TGT, not retroactively renamed)
+#               TP in all new scripts starting with the kite paper trading bot;
+#               existing files keep TP, not retroactively renamed)
 # PF          — raw profit factor (Python backtest, zero charges)
 # ZPF         — Zerodha Profit Factor: PF after full Zerodha intraday charges
 # ZSh(D)      — Zerodha Daily Sharpe (annualised): daily zpnl mean/std × √252
@@ -74,8 +74,8 @@ F6  Insurance review
 # WR          — win rate
 # WFA         — walk-forward analysis
 # OOS         — out-of-sample
-# SL          — stop loss (replaces old "SL" in SL/TGT — industry standard)
-# TP          — take profit (replaces TGT — industry standard)
+# SL          — stop loss (replaces old "SL" in SL/TP — industry standard)
+# TP          — take profit (replaces TP — industry standard)
 # R/R         — reward/risk ratio
 # BE          — breakeven W/(W+L) = SL/(SL+TP)
 # MFE         — Max Favourable Excursion (best point trade reached, in ATR units)

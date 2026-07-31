@@ -4,14 +4,14 @@
 # Entry : bounce+1 bar open, same day
 # ATR   : from touch bar
 # SL    : entry - 2.5 x ATR14
-# TGT   : entry + 4.5 x ATR14  (checked before SL on same bar)
+# TP   : entry + 4.5 x ATR14  (checked before SL on same bar)
 # EOD   : last bar of entry day, exit at close
 
 import pandas as pd, numpy as np, os, sys, io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min'
-SL_MULT = 2.5; TGT_MULT = 4.5; MAX_TB_GAP = 3
+SL_MULT = 2.5; TP_MULT = 4.5; MAX_TB_GAP = 3
 
 STOCKS = [
     'ADANIPORTS','ASHOKLEY','AXISBANK','BAJFINANCE','BANDHANBNK',
@@ -22,7 +22,7 @@ STOCKS = [
     'TATAMOTORS','TATASTEEL','TECHM','VEDL','WIPRO',
 ]
 
-all_pnls = []; all_wins_tgt = 0; all_wins_pnl = 0
+all_pnls = []; all_wins_tp = 0; all_wins_pnl = 0
 stock_rows = []
 
 for stock in STOCKS:
@@ -41,7 +41,7 @@ for stock in STOCKS:
 
     eod_dts = set(df.groupby('date')['datetime'].last())
 
-    n = len(df); i = 0; pnls = []; wins_tgt = 0; wins_pnl = 0
+    n = len(df); i = 0; pnls = []; wins_tp = 0; wins_pnl = 0
     while i < n:
         row = df.iloc[i]
         if pd.isna(row['ma20']) or pd.isna(row['atr14']) or pd.isna(row['vol_ma20']):
@@ -68,15 +68,15 @@ for stock in STOCKS:
 
         entry = entry_row['open']
         sl    = entry - SL_MULT  * atr
-        tgt   = entry + TGT_MULT * atr
+        tp   = entry + TP_MULT * atr
 
         exit_reason = None; pnl = 0.0
         for k in range(entry_idx, n):
             krow = df.iloc[k]
             if krow['date'] != touch_date:
                 pnl = df.iloc[k-1]['close'] - entry; exit_reason = 'EOD'; break
-            if krow['high'] >= tgt:
-                pnl = tgt - entry; exit_reason = 'TGT'; break
+            if krow['high'] >= tp:
+                pnl = tp - entry; exit_reason = 'TP'; break
             if krow['low'] <= sl:
                 pnl = sl - entry; exit_reason = 'SL'; break
             if krow['datetime'] in eod_dts:
@@ -87,7 +87,7 @@ for stock in STOCKS:
 
         pnl = round(pnl, 4)
         pnls.append(pnl)
-        wins_tgt += (1 if exit_reason == 'TGT' else 0)
+        wins_tp += (1 if exit_reason == 'TP' else 0)
         wins_pnl += (1 if pnl > 0 else 0)
         i = k + 1
 
@@ -97,10 +97,10 @@ for stock in STOCKS:
     aw = arr[arr>0].mean() if (arr>0).any() else 0
     al = arr[arr<0].mean() if (arr<0).any() else 0
     be = (-al)/(aw-al)*100 if (aw>0 and al<0) else 0
-    tgt_wr = wins_tgt/sn*100 if sn>0 else 0
+    tp_wr = wins_tp/sn*100 if sn>0 else 0
     eco_wr = wins_pnl/sn*100 if sn>0 else 0
-    stock_rows.append((stock, sn, tgt_wr, eco_wr, be, arr.sum(), pf))
-    all_pnls.extend(pnls); all_wins_tgt += wins_tgt; all_wins_pnl += wins_pnl
+    stock_rows.append((stock, sn, tp_wr, eco_wr, be, arr.sum(), pf))
+    all_pnls.extend(pnls); all_wins_tp += wins_tp; all_wins_pnl += wins_pnl
 
 # Portfolio totals
 arr = np.asarray(all_pnls); n = len(arr)
@@ -115,13 +115,13 @@ stock_rows.sort(key=lambda x: x[6], reverse=True)
 
 print('\nfv2 Baseline — no volume filter | 30 stocks | 2022-2025 | sorted by PF')
 print('='*78)
-print(f"  {'Stock':<13} {'N':>5}  {'TGT-WR':>7}  {'Eco-WR':>7}  {'BE%':>6}  {'Net PnL':>11}  {'PF':>7}")
+print(f"  {'Stock':<13} {'N':>5}  {'TP-WR':>7}  {'Eco-WR':>7}  {'BE%':>6}  {'Net PnL':>11}  {'PF':>7}")
 print('-'*78)
 for i,(stock,sn,twr,ewr,be,net,pf) in enumerate(stock_rows):
     mk = '+' if pf>=1.0 else ' '
     marker = ' ← TOP 10' if i < 10 else ''
     print(f"  {mk}{stock:<12} {sn:>5,}  {twr:>6.1f}%  {ewr:>6.1f}%  {be:>5.1f}%  {net:>11,.1f}  {pf:>7.3f}{marker}")
 print('='*78)
-print(f"  {'TOTAL':<13} {n:>5,}  {all_wins_tgt/n*100:>6.1f}%  {all_wins_pnl/n*100:>6.1f}%  {be:>5.1f}%  {arr.sum():>11,.1f}  {pf:>7.3f}")
+print(f"  {'TOTAL':<13} {n:>5,}  {all_wins_tp/n*100:>6.1f}%  {all_wins_pnl/n*100:>6.1f}%  {be:>5.1f}%  {arr.sum():>11,.1f}  {pf:>7.3f}")
 print('='*78)
-print('  TGT-WR = target hit only | Eco-WR = pnl>0 | BE% = empirical breakeven')
+print('  TP-WR = target hit only | Eco-WR = pnl>0 | BE% = empirical breakeven')

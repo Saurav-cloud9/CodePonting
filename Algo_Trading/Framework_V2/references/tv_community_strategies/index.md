@@ -7,7 +7,7 @@ Strategies sourced from TradingView community for study and adaptation into fv2.
 ## 0. Baseline (Reference Point)
 - **Signal**: MA20 Bounce, no volume filter — touch (low≤MA20, open>MA20) → bounce (close>MA20 within tb3) → entry bounce+1 open
 - **Script**: Algo_Trading/Framework_V2/scripts/_temp_per_stock_baseline.py
-- **Backtest** (fv2 CSV, 30 stocks, 2022–2025, SL=2.5×ATR, TGT=4.5×ATR, EOD=15:00):
+- **Backtest** (fv2 CSV, 30 stocks, 2022–2025, SL=2.5×ATR, TP=4.5×ATR, EOD=15:00):
   N=136,849 | WR=42.6% | BE=45.0% | **PF=0.932** | Net PnL=-16,525.7
 - Every TV community strategy below is compared against this baseline.
 
@@ -47,7 +47,7 @@ Top 6 is the sweet spot — peak net PnL, PF holds just above breakeven, before 
 - **Python backtest**: Algo_Trading/Framework_V2/scripts/kijun_bounce_backtest.py
 - **Subset analysis**: Algo_Trading/Framework_V2/scripts/_kijun_subset_analysis.py
 
-### Backtest Results (fv2 CSV, 2022–2025, SL=2.5× ATR, TGT=3.0× ATR, EOD=15:00)
+### Backtest Results (fv2 CSV, 2022–2025, SL=2.5× ATR, TP=3.0× ATR, EOD=15:00)
 
 **Full 30-stock universe (Kijun-HL):**
 - Total trades: 790 | WR: 45.6% | PF: 0.848 | Net PnL: -321.01
@@ -121,9 +121,9 @@ Top 6 is the sweet spot — peak net PnL, PF holds just above breakeven, before 
 
 ### Backtest Results (fv2 CSV, 2022–2025, EOD=15:00)
 
-**BHARTIARTL only — SL/TGT sweep:**
+**BHARTIARTL only — SL/TP sweep:**
 
-| SL | TGT | R:R | N | PFT-WR | TGT-WR | BE% | PF | NetPnL |
+| SL | TP | R:R | N | PFT-WR | TP-WR | BE% | PF | NetPnL |
 |---|---|---|---|---|---|---|---|---|
 | 2.0 | 3.0 | 1.50 | 99 | 45.5% | 33.3% | 44.4% | 1.045 | 11.27 |
 | 2.0 | 4.0 | 2.00 | 96 | 43.8% | 25.0% | 41.0% | 1.119 | 29.87 |
@@ -133,16 +133,16 @@ Top 6 is the sweet spot — peak net PnL, PF holds just above breakeven, before 
 | 3.0 | 4.5 | 1.50 | 94 | 50.0% | 18.1% | 48.8% | 1.050 | 14.03 |
 | 1.5 | 3.0 | 2.00 | 104 | 40.4% | 30.8% | 37.9% | 1.108 | 24.12 |
 
-BHARTIARTL year-by-year (SL=2.5/TGT=3.5, best combo): 2022 PF=1.571, 2023 PF=2.479, 2024 PF=1.438, **2025 PF=0.558** (regime break, not target-distance related — held even after tightening target).
+BHARTIARTL year-by-year (SL=2.5/TP=3.5, best combo): 2022 PF=1.571, 2023 PF=2.479, 2024 PF=1.438, **2025 PF=0.558** (regime break, not target-distance related — held even after tightening target).
 
 **Full 30-stock universe:**
 
-| Combo | N | PFT-WR | TGT-WR | BE% | PF | NetPnL |
+| Combo | N | PFT-WR | TP-WR | BE% | PF | NetPnL |
 |---|---|---|---|---|---|---|
 | 2.5/4.5 (1.8R) | 3,006 | 41.7% | 13.3% | 45.7% | 0.849 | -901.64 |
 | 2.5/3.5 (1.4R) | 3,049 | 43.2% | 20.8% | 46.4% | 0.878 | -725.95 |
 
-**Per-stock (SL=2.5/TGT=3.5, sorted by PF) — 9/30 stocks PF≥1:**
+**Per-stock (SL=2.5/TP=3.5, sorted by PF) — 9/30 stocks PF≥1:**
 
 | Stock | N | WR% | BE% | PF | Net PnL |
 |---|---|---|---|---|---|

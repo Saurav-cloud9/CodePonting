@@ -1,11 +1,11 @@
-"""One-combo detail: MA Rejection v1 SHORT, SL=2.0, TGT=4.5"""
+"""One-combo detail: MA Rejection v1 SHORT, SL=2.0, TP=4.5"""
 import glob, os
 import pandas as pd
 import numpy as np
 
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\intraday_5min_DS3'
 EOD_HOUR = 15
-SL_M, TGT_M = 2.0, 4.5
+SL_M, TP_M = 2.0, 4.5
 
 
 def zerodha_vec_short(entry, exit_px):
@@ -31,7 +31,7 @@ def load(f):
     return df.reset_index(drop=True)
 
 
-def run_combo(arrays, sl_m, tgt_m):
+def run_combo(arrays, sl_m, tp_m):
     high, low, open_, close = arrays['high'], arrays['low'], arrays['open_'], arrays['close']
     ma20, atr14 = arrays['ma20'], arrays['atr14']
     hour, date, year = arrays['hour'], arrays['date'], arrays['year']
@@ -47,7 +47,7 @@ def run_combo(arrays, sl_m, tgt_m):
             if ei >= n or date[ei] != date[i] or hour[ei] >= EOD_HOUR:
                 i += 1; continue
             entry = open_[ei]; atr = atr14[i]
-            sl = entry + sl_m * atr; tgt = entry - tgt_m * atr
+            sl = entry + sl_m * atr; tp = entry - tp_m * atr
             signal_date = date[i]
             k = ei
             for k in range(ei, n):
@@ -57,8 +57,8 @@ def run_combo(arrays, sl_m, tgt_m):
                     exit_px = open_[k]; break
                 if high[k] >= sl:
                     exit_px = sl; break
-                if low[k] <= tgt:
-                    exit_px = tgt; break
+                if low[k] <= tp:
+                    exit_px = tp; break
             pnl_out.append(entry - exit_px)
             entry_out.append(entry); exit_out.append(exit_px)
             yr_out.append(year[ei]); dt_out.append(pd.Timestamp(date[ei]))
@@ -102,7 +102,7 @@ for f in files:
 
 all_pnl = []; all_entry = []; all_exit = []; all_yr = []; all_dt = []
 for arr in stock_arrays:
-    p, e, x, y, d = run_combo(arr, SL_M, TGT_M)
+    p, e, x, y, d = run_combo(arr, SL_M, TP_M)
     all_pnl.extend(p); all_entry.extend(e); all_exit.extend(x)
     all_yr.extend(y); all_dt.extend(d)
 
@@ -117,7 +117,7 @@ daily = tdf.set_index('date').resample('D')['zpnl'].sum()
 daily = daily[daily != 0]
 pct = round(float((daily > 0).mean() * 100), 1) if len(daily) else 0.0
 
-print(f'Combo: SL={SL_M}x  TGT={TGT_M}x')
+print(f'Combo: SL={SL_M}x  TP={TP_M}x')
 print(f'Overall: N={len(pnl):,}  Days={len(daily):,}  '
       f'PF={pf_from(pnl):.3f}  ZPF={zpf_from(zpnl):.3f}  '
       f'Sh(D)={shd(pnl, all_dt):.3f}  ZSh(D)={shd(zpnl, all_dt):.3f}  '

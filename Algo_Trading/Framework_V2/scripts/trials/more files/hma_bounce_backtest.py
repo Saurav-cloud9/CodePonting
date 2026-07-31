@@ -1,7 +1,7 @@
 # HMA Bounce Backtest — fv2
 # Replaces SMA20 with HMA20 (Hull Moving Average, period=20)
 # Raw signal only — no gate filters. tb3 touch->bounce->entry.
-# SL=2.5x ATR14  TGT=4.5x ATR14  EOD=15:00  2022-2025
+# SL=2.5x ATR14  TP=4.5x ATR14  EOD=15:00  2022-2025
 
 import pandas as pd
 import numpy as np
@@ -12,7 +12,7 @@ DATA_DIR  = r"C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\histori
 HMA_N     = 20
 MAX_TB_GAP = 3
 SL_MULT   = 2.5
-TGT_MULT  = 4.5
+TP_MULT  = 4.5
 CUT_EXIT  = 15 * 60        # 15:00 in minutes
 
 STOCKS = [
@@ -124,7 +124,7 @@ def _run(s):
         # entry
         entry = op[eb]
         sl    = entry - SL_MULT  * atr_i
-        tgt   = entry + TGT_MULT * atr_i
+        tp   = entry + TP_MULT * atr_i
         pnl   = cl[eb] - entry
         outcome = 'EOD-'
 
@@ -137,16 +137,16 @@ def _run(s):
                 pnl = op[j] - entry
                 outcome = 'EOD+' if pnl > 0 else 'EOD-'
                 break
-            if lo[j] <= sl and hi[j] >= tgt:
-                if abs(op[j] - sl) <= abs(op[j] - tgt):
+            if lo[j] <= sl and hi[j] >= tp:
+                if abs(op[j] - sl) <= abs(op[j] - tp):
                     outcome = 'L'; pnl = -SL_MULT  * atr_i
                 else:
-                    outcome = 'W'; pnl =  TGT_MULT * atr_i
+                    outcome = 'W'; pnl =  TP_MULT * atr_i
                 break
             if lo[j] <= sl:
                 outcome = 'L'; pnl = -SL_MULT  * atr_i; break
-            if hi[j] >= tgt:
-                outcome = 'W'; pnl =  TGT_MULT * atr_i; break
+            if hi[j] >= tp:
+                outcome = 'W'; pnl =  TP_MULT * atr_i; break
 
         pnls.append(round(pnl, 4))
         if outcome in ('W', 'EOD+'):
@@ -157,7 +157,7 @@ def _run(s):
 
 
 # ── Run all stocks ────────────────────────────────────────────────────────────
-print(f"\nHMA{HMA_N} Bounce  SL={SL_MULT}x  TGT={TGT_MULT}x  ATR14  EOD=15:00  tb{MAX_TB_GAP}  raw (no gates)")
+print(f"\nHMA{HMA_N} Bounce  SL={SL_MULT}x  TP={TP_MULT}x  ATR14  EOD=15:00  tb{MAX_TB_GAP}  raw (no gates)")
 print("=" * 62)
 print(f"  {'Stock':<12} {'N':>5}  {'WR':>7}  {'Net PnL':>12}  {'PF':>7}")
 print("-" * 62)

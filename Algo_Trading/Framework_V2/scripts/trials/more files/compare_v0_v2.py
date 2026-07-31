@@ -1,6 +1,6 @@
 """
 Fair comparison: v0 LONG bare vs v2 SHORT bare
-Each swept for best SL×TGT, then yearwise PF + Sharpe at best config.
+Each swept for best SL×TP, then yearwise PF + Sharpe at best config.
 """
 import sys, io, glob
 import pandas as pd, numpy as np
@@ -10,7 +10,7 @@ CSV_DIR  = 'Algo_Trading/Framework_V2/data/historical/csv/intraday_5min'
 EOD_HOUR = 15; ATR_LEN = 14; MA_LEN = 20
 
 SL_VALS  = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
-TGT_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
+TP_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
 
 def load(f):
     df = pd.read_csv(f, low_memory=False)
@@ -74,33 +74,33 @@ def get_short_signals(df):
             i+=1
     return sigs
 
-def sim_long(df, sigs, sl_m, tgt_m):
+def sim_long(df, sigs, sl_m, tp_m):
     high=df['high'].values; low=df['low'].values
     open_=df['open'].values; hour=df['hour'].values; date=df['date'].values; n=len(df)
     trades=[]; next_allowed=0
     for s in sigs:
         if s['ei']<next_allowed: continue
         entry=s['entry_px']; atr=s['atr']
-        sl=entry-sl_m*atr; tgt=entry+tgt_m*atr; ed=s['date']
+        sl=entry-sl_m*atr; tp=entry+tp_m*atr; ed=s['date']
         for k in range(s['ei'],n):
             if hour[k]>=EOD_HOUR or date[k]!=ed: pnl=open_[k]-entry; break
-            if high[k]>=tgt: pnl=tgt-entry; break
+            if high[k]>=tp: pnl=tp-entry; break
             if low[k]<=sl:   pnl=sl-entry;  break
         next_allowed=k+1
         trades.append({'pnl':pnl,'date':pd.Timestamp(s['date']),'year':s['year']})
     return trades
 
-def sim_short(df, sigs, sl_m, tgt_m):
+def sim_short(df, sigs, sl_m, tp_m):
     high=df['high'].values; low=df['low'].values
     open_=df['open'].values; hour=df['hour'].values; date=df['date'].values; n=len(df)
     trades=[]; next_allowed=0
     for s in sigs:
         if s['ei']<next_allowed: continue
         entry=s['entry_px']; atr=s['atr']
-        sl=entry+sl_m*atr; tgt=entry-tgt_m*atr; ed=s['date']
+        sl=entry+sl_m*atr; tp=entry-tp_m*atr; ed=s['date']
         for k in range(s['ei'],n):
             if hour[k]>=EOD_HOUR or date[k]!=ed: pnl=entry-open_[k]; break
-            if low[k]<=tgt:  pnl=entry-tgt; break
+            if low[k]<=tp:  pnl=entry-tp; break
             if high[k]>=sl:  pnl=entry-sl;  break
         next_allowed=k+1
         trades.append({'pnl':pnl,'date':pd.Timestamp(s['date']),'year':s['year']})
@@ -128,33 +128,33 @@ for f in files:
 
 # ── Sweep LONG ────────────────────────────────────────────────────────────────
 print('Sweeping LONG...')
-best_long_pf=0; best_long_sl=0; best_long_tgt=0
+best_long_pf=0; best_long_sl=0; best_long_tp=0
 for sl_m in SL_VALS:
-    for tgt_m in TGT_VALS:
-        t=[]; [t.extend(sim_long(df,s,sl_m,tgt_m)) for df,s in long_data]
+    for tp_m in TP_VALS:
+        t=[]; [t.extend(sim_long(df,s,sl_m,tp_m)) for df,s in long_data]
         p=pf(t)
-        if p>best_long_pf: best_long_pf=p; best_long_sl=sl_m; best_long_tgt=tgt_m
+        if p>best_long_pf: best_long_pf=p; best_long_sl=sl_m; best_long_tp=tp_m
 
 # ── Sweep SHORT ───────────────────────────────────────────────────────────────
 print('Sweeping SHORT...')
-best_short_pf=0; best_short_sl=0; best_short_tgt=0
+best_short_pf=0; best_short_sl=0; best_short_tp=0
 for sl_m in SL_VALS:
-    for tgt_m in TGT_VALS:
-        t=[]; [t.extend(sim_short(df,s,sl_m,tgt_m)) for df,s in short_data]
+    for tp_m in TP_VALS:
+        t=[]; [t.extend(sim_short(df,s,sl_m,tp_m)) for df,s in short_data]
         p=pf(t)
-        if p>best_short_pf: best_short_pf=p; best_short_sl=sl_m; best_short_tgt=tgt_m
+        if p>best_short_pf: best_short_pf=p; best_short_sl=sl_m; best_short_tp=tp_m
 
-print(f'\nBest LONG:  SL={best_long_sl}x  TGT={best_long_tgt}x  PF={best_long_pf:.4f}')
-print(f'Best SHORT: SL={best_short_sl}x  TGT={best_short_tgt}x  PF={best_short_pf:.4f}')
+print(f'\nBest LONG:  SL={best_long_sl}x  TP={best_long_tp}x  PF={best_long_pf:.4f}')
+print(f'Best SHORT: SL={best_short_sl}x  TP={best_short_tp}x  PF={best_short_pf:.4f}')
 
 # ── Run at best configs ───────────────────────────────────────────────────────
-long_best=[]; [long_best.extend(sim_long(df,s,best_long_sl,best_long_tgt)) for df,s in long_data]
-short_best=[]; [short_best.extend(sim_short(df,s,best_short_sl,best_short_tgt)) for df,s in short_data]
+long_best=[]; [long_best.extend(sim_long(df,s,best_long_sl,best_long_tp)) for df,s in long_data]
+short_best=[]; [short_best.extend(sim_short(df,s,best_short_sl,best_short_tp)) for df,s in short_data]
 
 # ── Print ─────────────────────────────────────────────────────────────────────
 print(f'\n{"="*60}')
-print(f'v0 LONG  best: SL={best_long_sl}x TGT={best_long_tgt}x  |  N={len(long_best)}  PF={pf(long_best):.4f}  Sharpe={sharpe(long_best):.3f}')
-print(f'v2 SHORT best: SL={best_short_sl}x TGT={best_short_tgt}x  |  N={len(short_best)}  PF={pf(short_best):.4f}  Sharpe={sharpe(short_best):.3f}')
+print(f'v0 LONG  best: SL={best_long_sl}x TP={best_long_tp}x  |  N={len(long_best)}  PF={pf(long_best):.4f}  Sharpe={sharpe(long_best):.3f}')
+print(f'v2 SHORT best: SL={best_short_sl}x TP={best_short_tp}x  |  N={len(short_best)}  PF={pf(short_best):.4f}  Sharpe={sharpe(short_best):.3f}')
 print(f'{"="*60}')
 
 print(f'\n  {"Year":<6} {"v0 PF":>8} {"v0 Sharpe":>10} {"v2 PF":>8} {"v2 Sharpe":>10}')

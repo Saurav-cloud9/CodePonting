@@ -1,5 +1,5 @@
 """
-v1.1 SL x TGT grid sweep — find best combo before CBQ
+v1.1 SL x TP grid sweep — find best combo before CBQ
 v1.1 = v1 (wick-only) + Above VWAP + Below EMA100 | 30 stocks 2022-2025
 """
 import sys, io, glob, pandas as pd, numpy as np
@@ -11,7 +11,7 @@ OUT_DIR  = 'Algo_Trading/Framework_V2/outputs/reports/screenshots'
 ATR_LEN  = 14; MA_LEN = 20; EMA_SPAN = 100; EOD_HOUR = 15
 
 SL_VALS  = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
-TGT_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
+TP_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
 
 def load(f):
     df = pd.read_csv(f, low_memory=False); df.columns = df.columns.str.strip()
@@ -55,7 +55,7 @@ def get_signals(df):
                                  'entry_px': open_[ei]})
     return signals
 
-def simulate(df, signals, sl_m, tgt_m):
+def simulate(df, signals, sl_m, tp_m):
     trades=[]; high=df['high'].values; low=df['low'].values
     open_=df['open'].values; hour=df['hour'].values; date=df['date'].values; n=len(df)
     next_entry_allowed = 0  # position guard: skip signals until previous trade exits
@@ -64,13 +64,13 @@ def simulate(df, signals, sl_m, tgt_m):
             continue
         entry=sig['entry_px']; atr=sig['atr']
         sl  = entry - sl_m  * atr
-        tgt = entry + tgt_m * atr
+        tp = entry + tp_m * atr
         entry_date=sig['date']
         pnl = entry  # fallback
         for k in range(sig['entry_i'], n):
             if hour[k] >= EOD_HOUR or date[k] != entry_date:
                 pnl = open_[k] - entry; break
-            if high[k] >= tgt: pnl = tgt - entry; break
+            if high[k] >= tp: pnl = tp - entry; break
             if low[k]  <= sl:  pnl = sl  - entry; break
         next_entry_allowed = k + 1
         trades.append({'pnl': pnl, 'year': sig['year'], 'date': pd.Timestamp(sig['date'])})
@@ -96,20 +96,20 @@ all_data=[(df, get_signals(df)) for df,_ in all_data]
 total=sum(len(s) for _,s in all_data)
 print(f'Total v1.1 signals: {total}')
 
-print('Running SL x TGT grid sweep...')
-grid=np.zeros((len(SL_VALS), len(TGT_VALS)))
+print('Running SL x TP grid sweep...')
+grid=np.zeros((len(SL_VALS), len(TP_VALS)))
 for si,sl_m in enumerate(SL_VALS):
-    for ti,tgt_m in enumerate(TGT_VALS):
+    for ti,tp_m in enumerate(TP_VALS):
         all_t=[]
-        for df,sigs in all_data: all_t.extend(simulate(df,sigs,sl_m,tgt_m))
+        for df,sigs in all_data: all_t.extend(simulate(df,sigs,sl_m,tp_m))
         grid[si,ti]=pf(all_t)
 
 best_idx=np.unravel_index(np.argmax(grid),grid.shape)
-best_sl=SL_VALS[best_idx[0]]; best_tgt=TGT_VALS[best_idx[1]]
+best_sl=SL_VALS[best_idx[0]]; best_tp=TP_VALS[best_idx[1]]
 all_best=[]
-for df,sigs in all_data: all_best.extend(simulate(df,sigs,best_sl,best_tgt))
+for df,sigs in all_data: all_best.extend(simulate(df,sigs,best_sl,best_tp))
 
-print(f'\nBest combo: SL={best_sl}x  TGT={best_tgt}x')
+print(f'\nBest combo: SL={best_sl}x  TP={best_tp}x')
 print(f'Overall: N={len(all_best)}  PF={grid[best_idx]:.3f}  Sharpe={sharpe(all_best):.3f}')
 print(f"\n{'Year':<6} {'N':>5}  {'PF':>6}  {'Sharpe':>7}  {'WR%':>6}")
 for yr in [2022,2023,2024,2025]:
@@ -120,11 +120,11 @@ for yr in [2022,2023,2024,2025]:
     print(f"  {yr}  {len(g):>5}  {gp/gl if gl>0 else 0:>6.3f}  {sharpe(g):>7.3f}  {wr:>5.1f}%")
 
 print(f'\nTop 5 combos:')
-flat=[(grid[si,ti],SL_VALS[si],TGT_VALS[ti])
-      for si in range(len(SL_VALS)) for ti in range(len(TGT_VALS))]
+flat=[(grid[si,ti],SL_VALS[si],TP_VALS[ti])
+      for si in range(len(SL_VALS)) for ti in range(len(TP_VALS))]
 flat.sort(reverse=True)
 for v,s,t in flat[:5]:
-    print(f'  SL={s}x TGT={t}x  PF={v:.3f}')
+    print(f'  SL={s}x TP={t}x  PF={v:.3f}')
 
 # Heatmap
 grid_flipped=np.flipud(grid); sl_labels=SL_VALS[::-1]
@@ -132,14 +132,14 @@ plt.style.use('dark_background')
 fig,ax=plt.subplots(figsize=(11,7))
 fig.patch.set_facecolor('#0d1117'); ax.set_facecolor('#0d1117')
 im=ax.imshow(grid_flipped,cmap='RdYlGn',vmin=0.7,vmax=1.3,aspect='auto')
-ax.set_xticks(range(len(TGT_VALS))); ax.set_xticklabels(TGT_VALS,color='#aaa')
+ax.set_xticks(range(len(TP_VALS))); ax.set_xticklabels(TP_VALS,color='#aaa')
 ax.set_yticks(range(len(SL_VALS)));  ax.set_yticklabels(sl_labels,color='#aaa')
-ax.set_xlabel('TGT Multiplier',color='#aaa',fontsize=11)
+ax.set_xlabel('TP Multiplier',color='#aaa',fontsize=11)
 ax.set_ylabel('SL Multiplier',color='#aaa',fontsize=11)
 ax.set_title(f'PF Heatmap — v1.1 (wick + VWAP + EMA100)\n30 Stocks | 2022-2025 | N={total}',
              color='white',fontsize=13,pad=12)
 for si in range(len(SL_VALS)):
-    for ti in range(len(TGT_VALS)):
+    for ti in range(len(TP_VALS)):
         v=grid_flipped[si,ti]
         ax.text(ti,si,f'{v:.3f}',ha='center',va='center',
                 fontsize=8,color='black' if 0.85<v<1.15 else 'white')
@@ -148,7 +148,7 @@ cbar.set_label('Profit Factor',color='#aaa')
 cbar.ax.yaxis.set_tick_params(color='#aaa')
 plt.setp(cbar.ax.yaxis.get_ticklabels(),color='#aaa')
 plt.tight_layout()
-out=f'{OUT_DIR}/v1_1_sl_tgt_heatmap.png'
+out=f'{OUT_DIR}/v1_1_sl_tp_heatmap.png'
 plt.savefig(out,dpi=150,bbox_inches='tight',facecolor=fig.get_facecolor())
 plt.close()
 print(f'\nHeatmap saved: {out}')

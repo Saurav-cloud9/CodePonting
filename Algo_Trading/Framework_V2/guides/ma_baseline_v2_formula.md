@@ -13,7 +13,7 @@ close <  MA20   # rejected — closed back below MA
 
 Entry: next bar open (SHORT)
 SL:    entry + 2.0 × ATR14  (above entry)
-TGT:   entry − 3.5 × ATR14  (below entry)
+TP:   entry − 3.5 × ATR14  (below entry)
 
 ## Why v2 (not v1.2 or filter extension)
 
@@ -31,7 +31,7 @@ TGT:   entry − 3.5 × ATR14  (below entry)
 | 2025 | 11,027 | 1.093 | 0.943  | 43.2% |
 | ALL  | 42,612 | 1.076 | 0.833  | 43.7% |
 
-Best combo: SL=2.0x, TGT=3.5x (from SL×TGT grid sweep)
+Best combo: SL=2.0x, TP=3.5x (from SL×TP grid sweep)
 
 ## CBQ (Charge Break-even Qty)
 
@@ -44,7 +44,7 @@ Best combo: SL=2.0x, TGT=3.5x (from SL×TGT grid sweep)
 NPF never crosses 1.0 — same structural charge problem as v1.x long.
 Fix signal edge first (target PF > 1.3) before revisiting CBQ.
 
-## vs Long Baseline (same SL=2.0x, TGT=3.5x)
+## vs Long Baseline (same SL=2.0x, TP=3.5x)
 
 | | Long | Short |
 |---|---|---|
@@ -64,4 +64,4 @@ Apply mirror of v1.x filter progression to short side:
 Script : `Framework_V2/core/pine/fv2_baseline_v2.pine`
 Python : `Framework_V2/scripts/baseline_short_sweep.py`
 CBQ    : `Framework_V2/scripts/baseline_short_cbq.py`
-Heatmap: `Framework_V2/outputs/reports/screenshots/baseline_short_sl_tgt_heatmap.png`
+Heatmap: `Framework_V2/outputs/reports/screenshots/baseline_short_sl_tp_heatmap.png`

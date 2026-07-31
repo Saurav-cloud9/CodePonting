@@ -2,7 +2,7 @@ import pandas as pd, numpy as np, os, sys, io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 DATA_DIR   = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min'
-MAX_TB_GAP = 3; SL_MULT = 2.5; TGT_MULT = 4.5; CUT_EXIT = 15 * 60
+MAX_TB_GAP = 3; SL_MULT = 2.5; TP_MULT = 4.5; CUT_EXIT = 15 * 60
 P05_MIN, P05_MAX = 0.0, 1.6; P06_MAX = 55; P08_MIN = 0.5
 STOCK = 'ASHOKLEY'
 
@@ -62,16 +62,16 @@ def run(open_f=False, p05_f=False, p06_f=False, p08_f=False, p11_f=False):
             if np.isnan(p08) or p08<P08_MIN: i+=1; continue
         if p11_f:
             if op[eb]<=cl[bb]: i+=1; continue
-        entry=op[eb]; sl=entry-SL_MULT*a; tgt=entry+TGT_MULT*a; pnl=cl[eb]-entry; oc='EOD-'
+        entry=op[eb]; sl=entry-SL_MULT*a; tp=entry+TP_MULT*a; pnl=cl[eb]-entry; oc='EOD-'
         for j in range(eb,N):
             if dates[j]!=d0: pnl=cl[j-1]-entry; oc='EOD+' if pnl>0 else 'EOD-'; break
             if mins[j]>=CUT_EXIT: pnl=op[j]-entry; oc='EOD+' if pnl>0 else 'EOD-'; break
-            if lo[j]<=sl and hi[j]>=tgt:
-                if abs(op[j]-sl)<=abs(op[j]-tgt): oc='L'; pnl=-SL_MULT*a
-                else: oc='W'; pnl=TGT_MULT*a
+            if lo[j]<=sl and hi[j]>=tp:
+                if abs(op[j]-sl)<=abs(op[j]-tp): oc='L'; pnl=-SL_MULT*a
+                else: oc='W'; pnl=TP_MULT*a
                 break
             if lo[j]<=sl: oc='L'; pnl=-SL_MULT*a; break
-            if hi[j]>=tgt: oc='W'; pnl=TGT_MULT*a; break
+            if hi[j]>=tp: oc='W'; pnl=TP_MULT*a; break
         pnls.append(round(pnl,4)); wins+=(1 if oc in('W','EOD+') else 0); i=eb+1
     return pnls, wins
 

@@ -66,10 +66,10 @@ VOLUME_MULTIPLIER = 1.2
 
 # ATR-based SL/Target configurations ---> mega_backtest_48M_30S_v1_4_4
 ATR_CONFIGS = {
-    'Extreme-1': {'sl_mult': 2.5, 'tgt_mult': 4.0},  # v1_4_3_DATA proven winner
-    'Extreme-2': {'sl_mult': 2.5, 'tgt_mult': 4.5},  # Wider target, same SL
-    'Extreme-3': {'sl_mult': 3.0, 'tgt_mult': 4.5},  # Both wider
-    'Extreme-4': {'sl_mult': 3.0, 'tgt_mult': 5.0}   # Maximum aggression
+    'Extreme-1': {'sl_mult': 2.5, 'tp_mult': 4.0},  # v1_4_3_DATA proven winner
+    'Extreme-2': {'sl_mult': 2.5, 'tp_mult': 4.5},  # Wider target, same SL
+    'Extreme-3': {'sl_mult': 3.0, 'tp_mult': 4.5},  # Both wider
+    'Extreme-4': {'sl_mult': 3.0, 'tp_mult': 5.0}   # Maximum aggression
 }
 
 FILTERS = {
@@ -242,7 +242,7 @@ def simulate_trades(df, signals, atr_config, stock_name="", filter_name="", atr_
         if pd.isna(entry_atr): continue
 
         stop_price = entry_price - (entry_atr * atr_config['sl_mult'])
-        target_price = entry_price + (entry_atr * atr_config['tgt_mult'])
+        target_price = entry_price + (entry_atr * atr_config['tp_mult'])
 
         exit_price = None
         exit_time = None

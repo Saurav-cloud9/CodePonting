@@ -14,7 +14,7 @@ df['hour'] = df['datetime'].dt.hour
 
 MA_COL = 'ma20'
 SL_MULT = 2.5
-TGT_MULT = 4.5
+TP_MULT = 4.5
 MAX_TB_GAP = 3
 EOD_TIME = 15
 
@@ -47,15 +47,15 @@ while i < len(df):
             continue
         entry = entry_bar['open']
         sl = entry - SL_MULT * atr
-        tgt = entry + TGT_MULT * atr
+        tp = entry + TP_MULT * atr
         for k in range(entry_idx, len(df)):
             k_bar = df.iloc[k]
             if k_bar['hour'] >= EOD_TIME:
                 pnl = k_bar['open'] - entry
                 outcome = 'EOD+' if k_bar['open'] > entry else 'EOD-'               
                 break
-            if k_bar['high'] >= tgt:
-                pnl = tgt - entry
+            if k_bar['high'] >= tp:
+                pnl = tp - entry
                 outcome = 'W'
                 break
             if k_bar['low'] <= sl:

@@ -17,7 +17,7 @@ print('Post-1500 count:', (df['exit_hhmm'] >= 1500).sum())
 
 # Fixed full NSE timeline 09:15 to 15:30 (5-min bars)
 all_times = [h*100+m for h in range(9,16) for m in range(0,60,5) if h*100+m >= 915 and h*100+m <= 1530]
-tgt_c = [((df['exit_hhmm']==t) & (df['outcome']=='W')).sum() for t in all_times]
+tp_c = [((df['exit_hhmm']==t) & (df['outcome']=='W')).sum() for t in all_times]
 sl_c  = [((df['exit_hhmm']==t) & (df['outcome']=='L')).sum() for t in all_times]
 eod_c = [((df['exit_hhmm']==t) & df['outcome'].isin(['EOD+','EOD-'])).sum() for t in all_times]
 
@@ -26,9 +26,9 @@ x = range(len(all_times))
 
 plt.style.use('dark_background')
 fig, ax = plt.subplots(figsize=(16, 6))
-ax.bar(x, tgt_c, color='#00ff88', label='TGT')
-ax.bar(x, sl_c,  bottom=tgt_c, color='#ff4444', label='SL')
-ax.bar(x, eod_c, bottom=[t+s for t,s in zip(tgt_c, sl_c)], color='#ff9900', label='EOD')
+ax.bar(x, tp_c, color='#00ff88', label='TP')
+ax.bar(x, sl_c,  bottom=tp_c, color='#ff4444', label='SL')
+ax.bar(x, eod_c, bottom=[t+s for t,s in zip(tp_c, sl_c)], color='#ff9900', label='EOD')
 ax.set_xticks(list(x))
 ax.set_xticklabels(xlabels, rotation=90, fontsize=8)
 ax.set_title('Exit Time Distribution — 30 Stocks (Fixed: no post-15:00)', fontsize=14)

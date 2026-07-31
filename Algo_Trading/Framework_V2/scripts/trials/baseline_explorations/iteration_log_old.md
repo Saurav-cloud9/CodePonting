@@ -9,38 +9,38 @@
 - Next-day bleed fix — date-change exits at prev bar's close, not next bar's open
 - Timezone strip — BAJFINANCE CSV had +05:30 aware datetimes causing false 9:30 AM exits
 - BAJFINANCE CSV indicators — ma20/atr14 recomputed from DS3 parquet (pre-warmed, was blank for first 19 rows)
-- Exit priority — SL checked before TGT (conservative: same-bar ambiguity resolved to loss)
+- Exit priority — SL checked before TP (conservative: same-bar ambiguity resolved to loss)
 - Naming — MAX_TB_GAP → MAX_TR_GAP in rejection file
 
 ---
 
-## SL/TGT Sweep
-**Date:** 2026-07-09 · **Scripts:** sweep/sl_tgt_sweep_short.py · sweep/sl_tgt_sweep_long.py  
-**Range:** SL ∈ [1.5–6.0] · TGT ∈ [2.0–6.0] · 90 combinations each · Data: 4-yr CSVs (combo validated on DS3 in Run 1 — delta <0.3%)
+## SL/TP Sweep
+**Date:** 2026-07-09 · **Scripts:** sweep/sl_tp_sweep_short.py · sweep/sl_tp_sweep_long.py  
+**Range:** SL ∈ [1.5–6.0] · TP ∈ [2.0–6.0] · 90 combinations each · Data: 4-yr CSVs (combo validated on DS3 in Run 1 — delta <0.3%)
 
 ### SHORT sweep
-Grid flat (PF 1.062–1.086). TGT=4.0 consistently peaks across all SL values.
+Grid flat (PF 1.062–1.086). TP=4.0 consistently peaks across all SL values.
 
 | Combo | N | PF | Sharpe | Decision |
 |---|---|---|---|---|
-| SL=2.5 · TGT=4.5 (original) | 47,933 | 1.081 | 1.516 | replaced |
-| SL=2.5 · TGT=4.0 | 49,600 | 1.083 | 1.583 | ✅ locked |
-| SL=5.0 · TGT=4.0 (grid best PF) | 39,432 | 1.086 | 1.329 | ❌ −18% trades, worst Sharpe |
+| SL=2.5 · TP=4.5 (original) | 47,933 | 1.081 | 1.516 | replaced |
+| SL=2.5 · TP=4.0 | 49,600 | 1.083 | 1.583 | ✅ locked |
+| SL=5.0 · TP=4.0 (grid best PF) | 39,432 | 1.086 | 1.329 | ❌ −18% trades, worst Sharpe |
 
 ### LONG sweep
 No profitable combo anywhere in the grid. Max PF = 0.933.
 
 | Combo | N | PF | Sharpe | Decision |
 |---|---|---|---|---|
-| SL=2.5 · TGT=4.5 (original) | 49,269 | 0.922 | -1.468 | replaced |
-| SL=2.0 · TGT=5.5 | 52,887 | 0.933 | -1.310 | ✅ locked (best available) |
+| SL=2.5 · TP=4.5 (original) | 49,269 | 0.922 | -1.468 | replaced |
+| SL=2.0 · TP=5.5 | 52,887 | 0.933 | -1.310 | ✅ locked (best available) |
 
 ---
 
 ## Run 1 — 4-Year (2022–2025) · DS3 Parquets · Best Combos
 **Date:** 2026-07-09 · **Data:** intraday_5min_DS3 parquets filtered to 2022-01-01+
 
-### SHORT — SL=2.5 · TGT=4.0
+### SHORT — SL=2.5 · TP=4.0
 | Metric | Value |
 |---|---|
 | N | 49,473 |
@@ -48,7 +48,7 @@ No profitable combo anywhere in the grid. Max PF = 0.933.
 | Sharpe | +1.546 |
 | Net (pts) | +8,263.68 |
 | Prof_WR | 45.8% |
-| Pure_WR (TGT hit) | 20.0% |
+| Pure_WR (TP hit) | 20.0% |
 | BE_pure needed | 38.5% |
 
 | Year | N | PF | Sharpe | Net |
@@ -58,7 +58,7 @@ No profitable combo anywhere in the grid. Max PF = 0.933.
 | 2024 | 12,422 | 1.095 | +1.736 | +2,912.33 |
 | 2025 | 13,077 | 1.062 | +1.314 | +1,857.59 |
 
-### LONG — SL=2.0 · TGT=5.5
+### LONG — SL=2.0 · TP=5.5
 | Metric | Value |
 |---|---|
 | N | 52,687 |
@@ -66,7 +66,7 @@ No profitable combo anywhere in the grid. Max PF = 0.933.
 | Sharpe | -1.319 |
 | Net (pts) | -7,176.37 |
 | Prof_WR | 37.4% |
-| Pure_WR (TGT hit) | 9.8% |
+| Pure_WR (TP hit) | 9.8% |
 | BE_pure needed | 26.7% |
 
 | Year | N | PF | Sharpe | Net |
@@ -82,7 +82,7 @@ No profitable combo anywhere in the grid. Max PF = 0.933.
 **Date:** 2026-07-09 · **Data:** intraday_5min_DS3 parquets  
 **Why switched:** CSVs missing Dec 31 2025 · parquets identical OHLCV + 7 extra years + indicators pre-warmed
 
-### SHORT — SL=2.5 · TGT=4.0
+### SHORT — SL=2.5 · TP=4.0
 | Metric | Value |
 |---|---|
 | N | 133,696 |
@@ -90,7 +90,7 @@ No profitable combo anywhere in the grid. Max PF = 0.933.
 | Sharpe | +2.049 |
 | Net (pts) | +24,300.35 |
 | Prof_WR | 46.0% |
-| Pure_WR (TGT hit) | 20.8% |
+| Pure_WR (TP hit) | 20.8% |
 | BE_pure needed | 38.5% |
 | Stocks profitable | 29/30 (only HDFCBANK 0.976) |
 
@@ -108,7 +108,7 @@ No profitable combo anywhere in the grid. Max PF = 0.933.
 | 2024 | 12,422 | 1.095 | +1.736 | +2,912.33 |
 | 2025 | 13,077 | 1.062 | +1.314 | +1,857.59 |
 
-### LONG — SL=2.0 · TGT=5.5
+### LONG — SL=2.0 · TP=5.5
 | Metric | Value |
 |---|---|
 | N | 142,759 |
@@ -116,7 +116,7 @@ No profitable combo anywhere in the grid. Max PF = 0.933.
 | Sharpe | -1.801 |
 | Net (pts) | -21,252.88 |
 | Prof_WR | 35.9% |
-| Pure_WR (TGT hit) | 9.8% |
+| Pure_WR (TP hit) | 9.8% |
 | BE_pure needed | 26.7% |
 | Stocks profitable | 0/30 |
 

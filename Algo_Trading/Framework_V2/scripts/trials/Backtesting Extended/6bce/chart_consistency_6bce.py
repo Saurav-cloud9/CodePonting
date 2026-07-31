@@ -16,7 +16,7 @@ WINDOW   = 6
 YEARS    = list(range(2015, 2026))
 
 SL_VALS  = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
-TGT_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
+TP_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
 
 
 def zerodha_charge(entry, exit_px):
@@ -55,7 +55,7 @@ def load_stocks():
     return stocks
 
 
-def run_combo(stocks, sl_m, tgt_m):
+def run_combo(stocks, sl_m, tp_m):
     """Single-pass sweep collecting overall + year-wise zpnl buckets + daily zpnl for ZSh(D)."""
     overall_gp = 0.0;  overall_gl = 0.0
     yr_gp = {yr: 0.0 for yr in YEARS}
@@ -81,7 +81,7 @@ def run_combo(stocks, sl_m, tgt_m):
 
             entry_px   = open_[ei]
             sl         = entry_px + sl_m * atr[i]
-            tgt        = entry_px - tgt_m * atr[i]
+            tp        = entry_px - tp_m * atr[i]
             trade_date = date[i]
             exit_year  = year[i]
             exit_dt    = date[i]
@@ -95,8 +95,8 @@ def run_combo(stocks, sl_m, tgt_m):
                     exit_px = open_[k]; exit_year = year[k]; exit_dt = date[k]; break
                 if high[k] >= sl:
                     exit_px = sl; exit_year = year[k]; exit_dt = date[k]; break
-                if low[k] <= tgt:
-                    exit_px = tgt; exit_year = year[k]; exit_dt = date[k]; break
+                if low[k] <= tp:
+                    exit_px = tp; exit_year = year[k]; exit_dt = date[k]; break
                 k += 1
             else:
                 exit_px = close[k - 1]; exit_year = year[k - 1]; exit_dt = date[k - 1]
@@ -135,13 +135,13 @@ print('Loading stocks...')
 stocks = load_stocks()
 print(f'{len(stocks)} stocks. Running 90 combos with year-wise tracking...\n')
 
-overall_grid    = np.zeros((len(SL_VALS), len(TGT_VALS)))
-yearly_grid     = np.zeros((len(SL_VALS), len(TGT_VALS), len(YEARS)))
-yearly_zshd_grid = np.zeros((len(SL_VALS), len(TGT_VALS), len(YEARS)))
+overall_grid    = np.zeros((len(SL_VALS), len(TP_VALS)))
+yearly_grid     = np.zeros((len(SL_VALS), len(TP_VALS), len(YEARS)))
+yearly_zshd_grid = np.zeros((len(SL_VALS), len(TP_VALS), len(YEARS)))
 
 for si, sl in enumerate(SL_VALS):
-    for ti, tgt in enumerate(TGT_VALS):
-        ozpf, yr_zpf, yr_zshd = run_combo(stocks, sl, tgt)
+    for ti, tp in enumerate(TP_VALS):
+        ozpf, yr_zpf, yr_zshd = run_combo(stocks, sl, tp)
         overall_grid[si, ti] = ozpf
         for yi, yr in enumerate(YEARS):
             yearly_grid[si, ti, yi]      = yr_zpf[yr]
@@ -155,9 +155,9 @@ consistency = yearly_grid.mean(axis=2) - yearly_grid.std(axis=2)
 best_cs_idx  = np.unravel_index(np.argmax(consistency),   consistency.shape)
 best_zpf_idx = np.unravel_index(np.argmax(overall_grid),  overall_grid.shape)
 
-print(f'\nBest by consistency : SL={SL_VALS[best_cs_idx[0]]} / TGT={TGT_VALS[best_cs_idx[1]]}  '
+print(f'\nBest by consistency : SL={SL_VALS[best_cs_idx[0]]} / TP={TP_VALS[best_cs_idx[1]]}  '
       f'cs={consistency[best_cs_idx]:.4f}  ZPF={overall_grid[best_cs_idx]:.4f}')
-print(f'Best by overall ZPF : SL={SL_VALS[best_zpf_idx[0]]} / TGT={TGT_VALS[best_zpf_idx[1]]}  '
+print(f'Best by overall ZPF : SL={SL_VALS[best_zpf_idx[0]]} / TP={TP_VALS[best_zpf_idx[1]]}  '
       f'cs={consistency[best_zpf_idx]:.4f}  ZPF={overall_grid[best_zpf_idx]:.4f}')
 
 # Save cache for downstream chart scripts
@@ -180,10 +180,10 @@ for si, sl in enumerate(SL_VALS):
 
 ax1.scatter(overall_grid[best_cs_idx],  consistency[best_cs_idx],
             color='#00ffcc', s=180, zorder=6, marker='*',
-            label=f'★ Best consistency  SL={SL_VALS[best_cs_idx[0]]}/TGT={TGT_VALS[best_cs_idx[1]]}')
+            label=f'★ Best consistency  SL={SL_VALS[best_cs_idx[0]]}/TP={TP_VALS[best_cs_idx[1]]}')
 ax1.scatter(overall_grid[best_zpf_idx], consistency[best_zpf_idx],
             color='#ff6b35', s=150, zorder=6, marker='D',
-            label=f'◆ Best overall ZPF  SL={SL_VALS[best_zpf_idx[0]]}/TGT={TGT_VALS[best_zpf_idx[1]]}')
+            label=f'◆ Best overall ZPF  SL={SL_VALS[best_zpf_idx[0]]}/TP={TP_VALS[best_zpf_idx[1]]}')
 
 ax1.axvline(1.0, color='#ff4444', linewidth=1.2, linestyle='--', alpha=0.7, label='ZPF = 1.0 target')
 ax1.set_xlabel('Overall ZPF', fontsize=11, labelpad=8)
@@ -203,12 +203,12 @@ if best_zpf_idx not in plot_combos:
 line_colors = ['#00ffcc', '#44ddaa', '#88bb77', '#ff6b35']
 line_styles = ['-', '-', '-', '--']
 for ci, idx in enumerate(plot_combos):
-    sl_v  = SL_VALS[idx[0]]; tgt_v = TGT_VALS[idx[1]]
+    sl_v  = SL_VALS[idx[0]]; tp_v = TP_VALS[idx[1]]
     yr_vals = yearly_grid[idx[0], idx[1], :]
     cs_val  = consistency[idx[0], idx[1]]
     tag = '★ ' if ci < 3 else '◆ '
     kind = 'cons' if ci < 3 else 'ZPF'
-    lbl = f'{tag}SL={sl_v}/TGT={tgt_v}  [{kind}={cs_val:.3f}]'
+    lbl = f'{tag}SL={sl_v}/TP={tp_v}  [{kind}={cs_val:.3f}]'
     ax2.plot(YEARS, yr_vals, color=line_colors[ci], linewidth=2.0 if ci == 0 else 1.5,
              linestyle=line_styles[ci], marker='o', markersize=4.5, label=lbl)
 

@@ -1,12 +1,12 @@
 """
-CBQ — v1.1 best combo SL=2.5x TGT=6.0x
+CBQ — v1.1 best combo SL=2.5x TP=6.0x
 """
 import sys, io, glob, pandas as pd, numpy as np
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 CSV_DIR='Algo_Trading/Framework_V2/data/historical/csv/intraday_5min'
 ATR_LEN=14; MA_LEN=20; EMA_SPAN=100; EOD_HOUR=15
-SL_M=2.5; TGT_M=6.0
+SL_M=2.5; TP_M=6.0
 
 def load(f):
     df=pd.read_csv(f,low_memory=False); df.columns=df.columns.str.strip()
@@ -25,7 +25,7 @@ def load(f):
     df['atr']=tr.ewm(alpha=1/ATR_LEN,adjust=False).mean()
     return df.dropna(subset=['ma20','ema100','vwap','atr']).reset_index(drop=True)
 
-def get_trades(df, sl_m, tgt_m):
+def get_trades(df, sl_m, tp_m):
     high=df['high'].values; low=df['low'].values; close=df['close'].values
     open_=df['open'].values; ma=df['ma20'].values; ema=df['ema100'].values
     vwap=df['vwap'].values; atr=df['atr'].values
@@ -37,10 +37,10 @@ def get_trades(df, sl_m, tgt_m):
                 and close[i]>=vwap[i] and close[i]<ema[i] and hour[i]<EOD_HOUR):
             ei=i+1
             if date[ei]!=date[i]: continue
-            entry=open_[ei]; sl=entry-sl_m*atr[i]; tgt=entry+tgt_m*atr[i]
+            entry=open_[ei]; sl=entry-sl_m*atr[i]; tp=entry+tp_m*atr[i]
             for k in range(ei,n):
                 if hour[k]>=EOD_HOUR or date[k]!=date[i]: pnl=open_[k]-entry; break
-                if high[k]>=tgt: pnl=tgt-entry; break
+                if high[k]>=tp: pnl=tp-entry; break
                 if low[k]<=sl:   pnl=sl-entry;  break
             next_allowed=k+1
             trades.append({'pnl':pnl,'year':df.iloc[ei]['datetime'].year,'entry':entry,'exit':entry+pnl})
@@ -72,6 +72,6 @@ for df in dfs:
     t_best.extend(get_trades(df, 2.5, 6.0))
     t_default.extend(get_trades(df, 2.5, 4.5))
 
-run_cbq(t_default, 'DEFAULT SL=2.5x TGT=4.5x')
+run_cbq(t_default, 'DEFAULT SL=2.5x TP=4.5x')
 print()
-run_cbq(t_best,    'BEST    SL=2.5x TGT=6.0x')
+run_cbq(t_best,    'BEST    SL=2.5x TP=6.0x')

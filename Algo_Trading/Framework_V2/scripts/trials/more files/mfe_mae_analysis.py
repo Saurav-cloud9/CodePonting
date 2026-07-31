@@ -3,7 +3,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min'
-BASE_SL=2.5; BASE_TGT=4.5; MAX_TB_GAP=3; EOD_HOUR=15
+BASE_SL=2.5; BASE_TP=4.5; MAX_TB_GAP=3; EOD_HOUR=15
 
 def run_backtest_mfe_mae(csv_path):
     df = pd.read_csv(csv_path, low_memory=False)
@@ -47,7 +47,7 @@ def run_backtest_mfe_mae(csv_path):
                 if kb['hour'] >= EOD_HOUR:
                     pnl = (kb['open'] - entry) / atr
                     outcome = 'EOD+' if pnl > 0 else 'EOD-'; k += 1; break
-                if kb['high'] >= entry + BASE_TGT * atr:
+                if kb['high'] >= entry + BASE_TP * atr:
                     outcome = 'W'; k += 1; break
                 if kb['low'] <= entry - BASE_SL * atr:
                     outcome = 'L'; k += 1; break
@@ -92,7 +92,7 @@ x_mae = np.linspace(0, 6, 500)
 plt.style.use('dark_background')
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 8))
 fig.suptitle('Max Favourable Excursion (MFE)  vs  Max Adverse Excursion (MAE)\n'
-             'Smooth density curves — all exit types overlaid for comparison   |   Baseline: SL=2.5x ATR,  TGT=4.5x ATR',
+             'Smooth density curves — all exit types overlaid for comparison   |   Baseline: SL=2.5x ATR,  TP=4.5x ATR',
              fontsize=13, y=1.01)
 
 for grp, color, label, n in groups:
@@ -107,7 +107,7 @@ for grp, color, label, n in groups:
     ax2.fill_between(x_mae, y_mae, alpha=0.12, color=color)
 
 # reference lines
-ax1.axvline(BASE_TGT, color='white', linewidth=2, linestyle='--', label=f'Target = {BASE_TGT}x ATR')
+ax1.axvline(BASE_TP, color='white', linewidth=2, linestyle='--', label=f'Target = {BASE_TP}x ATR')
 ax2.axvline(BASE_SL,  color='white', linewidth=2, linestyle='--', label=f'Stop Loss = {BASE_SL}x ATR')
 
 ax1.set_title('MFE — Best point each trade reached before exit', fontsize=12, pad=10)
@@ -130,5 +130,5 @@ print(f'Saved: {out}')
 # summary stats
 print(f'\nMFE medians — W:{winners["mfe"].median():.2f}  EOD+:{eod_pos["mfe"].median():.2f}  EOD-:{eod_neg["mfe"].median():.2f}  L:{losers["mfe"].median():.2f}')
 print(f'MAE medians — W:{winners["mae"].median():.2f}  EOD+:{eod_pos["mae"].median():.2f}  EOD-:{eod_neg["mae"].median():.2f}  L:{losers["mae"].median():.2f}')
-print(f'\nMFE % reaching >3x TGT: W={( winners["mfe"]>=3).mean()*100:.1f}%  L={( losers["mfe"]>=3).mean()*100:.1f}%  EOD-={(eod_neg["mfe"]>=3).mean()*100:.1f}%')
+print(f'\nMFE % reaching >3x TP: W={( winners["mfe"]>=3).mean()*100:.1f}%  L={( losers["mfe"]>=3).mean()*100:.1f}%  EOD-={(eod_neg["mfe"]>=3).mean()*100:.1f}%')
 print(f'MAE % staying <1x SL:  W={(winners["mae"]<1).mean()*100:.1f}%  EOD+={(eod_pos["mae"]<1).mean()*100:.1f}%')

@@ -48,7 +48,7 @@ Charges consume ~0.38 PF points on the SHORT strategy. No combo achieves ZPF > 1
 
 **Signal:** `high >= MA20` → `close < MA20` within 3 bars → SHORT at next bar open
 **Script:** `ma_30_rejection.py` (fixed SL=1.5×ATR, TP=4.0×ATR)
-**Sweep:** `sl_tgt_sweep_baseline_short.py` (90 combos: 10 SL × 9 TP)
+**Sweep:** `sl_tp_sweep_baseline_short.py` (90 combos: 10 SL × 9 TP)
 
 ### Fixed Combo (SL=1.5 · TP=4.0) — per stock
 
@@ -151,7 +151,7 @@ Best combo (ZPF) year-wise — SL=6.0 · TP=6.0:
 | 2025 | 8,743 | 1.061 | 0.764 | -3.463 | ❌ |
 
 **Verdict:** Best ZPF = 0.851. No combo achieves ZPF ≥ 1.0. 5 of 11 years hit ZPF ≥ 0.9 but none ≥ 1.0.
-Heatmap: `outputs/reports/sl_tgt_sweep_baseline_short_zpf.png`
+Heatmap: `outputs/reports/sl_tp_sweep_baseline_short_zpf.png`
 
 ---
 
@@ -159,7 +159,7 @@ Heatmap: `outputs/reports/sl_tgt_sweep_baseline_short_zpf.png`
 
 **Signal:** `low <= MA20` → `close > MA20` within 3 bars → LONG at next bar open
 **Script:** `ma_30_bounce.py` (fixed SL=1.5×ATR, TP=3.5×ATR)
-**Sweep:** `sl_tgt_sweep_baseline_long.py` (90 combos: 10 SL × 9 TP)
+**Sweep:** `sl_tp_sweep_baseline_long.py` (90 combos: 10 SL × 9 TP)
 
 ### Fixed Combo (SL=1.5 · TP=3.5) — overall
 
@@ -225,7 +225,7 @@ Best combo (ZPF) year-wise — SL=6.0 · TP=6.0:
 | 2025 | 8,793 | 0.936 | 0.675 | -5.282 | ❌ |
 
 **Verdict:** Best ZPF = 0.672. No combo achieves ZPF ≥ 1.0 across all 90 combos or any single year.
-Heatmap: `outputs/reports/sl_tgt_sweep_baseline_long_zpf.png`
+Heatmap: `outputs/reports/sl_tp_sweep_baseline_long_zpf.png`
 
 ---
 

@@ -37,10 +37,10 @@ EXCLUDE         = {"NIFTY50"}
 
 # ─── CONFIGS ───────────────────────────────────────────────────────────────────
 ATR_CONFIGS = {
-    "Extreme-1": {"sl_mult": 2.5, "tgt_mult": 4.0},
-    "Extreme-2": {"sl_mult": 2.5, "tgt_mult": 4.5},
-    "Extreme-3": {"sl_mult": 3.0, "tgt_mult": 4.5},
-    "Extreme-4": {"sl_mult": 3.0, "tgt_mult": 5.0},
+    "Extreme-1": {"sl_mult": 2.5, "tp_mult": 4.0},
+    "Extreme-2": {"sl_mult": 2.5, "tp_mult": 4.5},
+    "Extreme-3": {"sl_mult": 3.0, "tp_mult": 4.5},
+    "Extreme-4": {"sl_mult": 3.0, "tp_mult": 5.0},
 }
 
 VARIANTS = {
@@ -105,7 +105,7 @@ for stock_path in stock_files:
             try:
                 portfolio = Portfolio(
                     atr_mult_stop     = atr_cfg["sl_mult"],
-                    rr_target         = atr_cfg["tgt_mult"] / atr_cfg["sl_mult"],
+                    rr_target         = atr_cfg["tp_mult"] / atr_cfg["sl_mult"],
                     sl_variant        = var_cfg["sl_variant"],
                     breakeven_trigger = var_cfg["breakeven_trigger"],
                     trailing_dist     = var_cfg["trailing_dist"],

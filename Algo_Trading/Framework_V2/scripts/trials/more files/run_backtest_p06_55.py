@@ -14,7 +14,7 @@ P05_MIN, P05_MAX = 0.0, 1.6
 P06_MAX  = 55
 P08_MIN  = 0.5
 SL_MULT  = 2.5
-TGT_MULT = 4.5
+TP_MULT = 4.5
 
 STOCKS = [
     'ADANIPORTS','ASHOKLEY','AXISBANK','BAJFINANCE','BANDHANBNK',
@@ -100,7 +100,7 @@ def run_stock(stock):
         # PNL simulation
         entry_price = er['open']
         sl     = entry_price - SL_MULT  * atr
-        target = entry_price + TGT_MULT * atr
+        target = entry_price + TP_MULT * atr
         outcome, pnl = 'EOD-', round(df.iloc[-1]['close'] - entry_price, 4)
 
         for j in range(entry_bar, len(df)):
@@ -109,12 +109,12 @@ def run_stock(stock):
                 if abs(bar['open'] - sl) <= abs(bar['open'] - target):
                     outcome, pnl = 'L', round(-SL_MULT  * atr, 4)
                 else:
-                    outcome, pnl = 'W', round( TGT_MULT * atr, 4)
+                    outcome, pnl = 'W', round( TP_MULT * atr, 4)
                 break
             if bar['low'] <= sl:
                 outcome, pnl = 'L', round(-SL_MULT  * atr, 4); break
             if bar['high'] >= target:
-                outcome, pnl = 'W', round( TGT_MULT * atr, 4); break
+                outcome, pnl = 'W', round( TP_MULT * atr, 4); break
             if bar['datetime'].time() >= pd.Timestamp('15:00').time():
                 pnl = round(bar['open'] - entry_price, 2)
                 outcome = 'EOD+' if bar['open'] > entry_price else 'EOD-'

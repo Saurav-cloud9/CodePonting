@@ -1,5 +1,5 @@
 """
-Trading ABC — SL x TGT grid sweep, all 30 stocks, 2022-2025
+Trading ABC — SL x TP grid sweep, all 30 stocks, 2022-2025
 First upward triangle per ABC setup only, long side.
 Outputs: PF heatmap PNG + best combo details (year-wise PF + Sharpe)
 """
@@ -22,7 +22,7 @@ MA_SPANS = [50, 100, 150, 200]
 EMA_SPANS= [20, 40]
 
 SL_VALS  = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
-TGT_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
+TP_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
 
 FIB_LO_EFF = FIB_LO * (1 - ERR_RATE)
 FIB_HI_EFF = FIB_HI * (1 + ERR_RATE)
@@ -152,8 +152,8 @@ def get_signals(df):
 
     return signals
 
-# ── Simulate with given SL/TGT mult ──────────────────────────────────────────
-def simulate(df, signals, sl_m, tgt_m):
+# ── Simulate with given SL/TP mult ──────────────────────────────────────────
+def simulate(df, signals, sl_m, tp_m):
     trades = []
     high = df['high'].values; low = df['low'].values
     open_ = df['open'].values
@@ -161,13 +161,13 @@ def simulate(df, signals, sl_m, tgt_m):
     for sig in signals:
         entry = sig['entry_px']; atr = sig['atr']
         sl  = entry - sl_m  * atr
-        tgt = entry + tgt_m * atr
+        tp = entry + tp_m * atr
         entry_date = sig['date']
         for k in range(sig['entry_i'], n):
             k_bar = df.iloc[k]
             if k_bar['hour'] >= EOD_HOUR or k_bar['date'] != entry_date:
                 pnl = open_[k] - entry; break
-            if high[k] >= tgt: pnl = tgt - entry; break
+            if high[k] >= tp: pnl = tp - entry; break
             if low[k]  <= sl:  pnl = sl  - entry; break
         trades.append({'pnl': pnl, 'year': sig['year'],
                        'date': pd.Timestamp(sig['date'])})
@@ -202,14 +202,14 @@ total_trades = sum(len(s) for _, s in all_signals_per_file)
 print(f'Total first-triangle signals: {total_trades}')
 
 # ── Grid sweep ───────────────────────────────────────────────────────────────
-print('Running SL x TGT grid sweep...')
-grid = np.zeros((len(SL_VALS), len(TGT_VALS)))
+print('Running SL x TP grid sweep...')
+grid = np.zeros((len(SL_VALS), len(TP_VALS)))
 
 for si, sl_m in enumerate(SL_VALS):
-    for ti, tgt_m in enumerate(TGT_VALS):
+    for ti, tp_m in enumerate(TP_VALS):
         all_trades = []
         for df, sigs in all_signals_per_file:
-            all_trades.extend(simulate(df, sigs, sl_m, tgt_m))
+            all_trades.extend(simulate(df, sigs, sl_m, tp_m))
         grid[si, ti] = pf(all_trades)
 
 # ── Heatmap ──────────────────────────────────────────────────────────────────
@@ -219,15 +219,15 @@ fig.patch.set_facecolor('#0d1117')
 ax.set_facecolor('#0d1117')
 
 im = ax.imshow(grid, cmap='RdYlGn', vmin=0.7, vmax=1.3, aspect='auto')
-ax.set_xticks(range(len(TGT_VALS))); ax.set_xticklabels(TGT_VALS, color='#aaa')
+ax.set_xticks(range(len(TP_VALS))); ax.set_xticklabels(TP_VALS, color='#aaa')
 ax.set_yticks(range(len(SL_VALS)));  ax.set_yticklabels(SL_VALS,  color='#aaa')
-ax.set_xlabel('TGT Multiplier', color='#aaa', fontsize=11)
+ax.set_xlabel('TP Multiplier', color='#aaa', fontsize=11)
 ax.set_ylabel('SL Multiplier',  color='#aaa', fontsize=11)
 ax.set_title(f'PF Heatmap -- Trading ABC (First Triangle, Long)\n30 Stocks | 2022-2025 | N={total_trades}',
              color='white', fontsize=13, pad=12)
 
 for si in range(len(SL_VALS)):
-    for ti in range(len(TGT_VALS)):
+    for ti in range(len(TP_VALS)):
         ax.text(ti, si, f'{grid[si,ti]:.3f}', ha='center', va='center',
                 fontsize=8, color='black' if 0.85 < grid[si,ti] < 1.15 else 'white')
 
@@ -236,7 +236,7 @@ cbar.set_label('Profit Factor', color='#aaa'); cbar.ax.yaxis.set_tick_params(col
 plt.setp(cbar.ax.yaxis.get_ticklabels(), color='#aaa')
 
 plt.tight_layout()
-heatmap_path = f'{OUT_DIR}/abc_sl_tgt_heatmap.png'
+heatmap_path = f'{OUT_DIR}/abc_sl_tp_heatmap.png'
 plt.savefig(heatmap_path, dpi=150, bbox_inches='tight', facecolor=fig.get_facecolor())
 plt.close()
 print(f'Heatmap saved: {heatmap_path}')
@@ -244,14 +244,14 @@ print(f'Heatmap saved: {heatmap_path}')
 # ── Best combo ───────────────────────────────────────────────────────────────
 best_idx = np.unravel_index(np.argmax(grid), grid.shape)
 best_sl  = SL_VALS[best_idx[0]]
-best_tgt = TGT_VALS[best_idx[1]]
+best_tp = TP_VALS[best_idx[1]]
 best_pf  = grid[best_idx]
 
 all_best = []
 for df, sigs in all_signals_per_file:
-    all_best.extend(simulate(df, sigs, best_sl, best_tgt))
+    all_best.extend(simulate(df, sigs, best_sl, best_tp))
 
-print(f'\nBest combo: SL={best_sl}x  TGT={best_tgt}x')
+print(f'\nBest combo: SL={best_sl}x  TP={best_tp}x')
 print(f'Overall  : N={len(all_best)}  PF={best_pf:.3f}  Sharpe={sharpe(all_best):.3f}')
 print(f'\nYear-wise:')
 print(f"{'Year':<6} {'N':>5}  {'PF':>6}  {'Sharpe':>7}  {'WR%':>6}")

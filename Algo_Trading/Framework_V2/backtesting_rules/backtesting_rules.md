@@ -25,17 +25,17 @@ ATR = rolling 14-period mean of TR
 
 ---
 
-## 3. SL / TGT Sizing
+## 3. SL / TP Sizing
 
-SL and TGT are ATR-based and computed at the entry bar:
+SL and TP are ATR-based and computed at the entry bar:
 ```
 SHORT:
   sl  = entry + SL_MULT  × ATR14
-  tgt = entry - TGT_MULT × ATR14
+  tp = entry - TP_MULT × ATR14
 
 LONG:
   sl  = entry - SL_MULT  × ATR14
-  tgt = entry + TGT_MULT × ATR14
+  tp = entry + TP_MULT × ATR14
 ```
 
 ---
@@ -49,9 +49,9 @@ Checked in strict priority order on each bar after entry:
 | 1 | Date change (next bar is a new day) | Previous bar's close `C[k-1]` | EOD+ / EOD- |
 | 2 | `hour[k] >= 15` | Current bar's open `O[k]` | EOD+ / EOD- |
 | 3 | SL hit — SHORT: `high[k] >= sl` / LONG: `low[k] <= sl` | SL price | L |
-| 4 | TGT hit — SHORT: `low[k] <= tgt` / LONG: `high[k] >= tgt` | TGT price | W |
+| 4 | TP hit — SHORT: `low[k] <= tp` / LONG: `high[k] >= tp` | TP price | W |
 
-**SL is always checked before TGT on the same bar.**
+**SL is always checked before TP on the same bar.**
 No overnight carry. Same-day exits only enforced via date change check.
 
 ---
@@ -69,7 +69,7 @@ No overnight carry. Same-day exits only enforced via date change check.
 
 ```
 SL_MULT  : 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0  (10 values, step 0.5)
-TGT_MULT : 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0        (9 values,  step 0.5)
+TP_MULT : 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0        (9 values,  step 0.5)
 Total    : 90 combinations
 ```
 
@@ -143,7 +143,7 @@ Every backtest result must include:
 - Flag each year: ✅ ZPF≥1.0 / 🟡 ZPF 0.90–0.99 / ❌ ZPF<0.90
 
 **90-combo sweep table:**
-- All 90 SL/TGT combos with N, PF, ZPF, Sh(D), ZSh(D)
+- All 90 SL/TP combos with N, PF, ZPF, Sh(D), ZSh(D)
 - Highlight best ZPF and best ZSh(D) combo
 
 ---
@@ -151,10 +151,10 @@ Every backtest result must include:
 ## 10. Iteration Methodology
 
 ```
-Step 1: Run baseline strategy → 90-combo sweep → identify best SL/TGT by ZPF
+Step 1: Run baseline strategy → 90-combo sweep → identify best SL/TP by ZPF
 Step 2: Add filter or structural modification → re-run 90-combo sweep
 Step 3: Compare ZPF and ZSh(D) vs baseline → accept if improvement is meaningful
-Step 4: Further refine (e.g. secondary filter sweep at locked SL/TGT)
+Step 4: Further refine (e.g. secondary filter sweep at locked SL/TP)
 Step 5: Repeat until ZPF > 1.0 AND ZSh(D) > 0, or rule out the strategy
 ```
 

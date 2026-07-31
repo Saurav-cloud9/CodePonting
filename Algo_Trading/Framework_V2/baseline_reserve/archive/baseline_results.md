@@ -1,7 +1,7 @@
 # fv2 Baseline Results — Locked Reference
 **Date locked:** 2026-07-04  
 **Universe:** 30 stocks · 2022–2025 (4 years) · 5-min data  
-**Params:** SL=2.5×ATR · TGT=4.5×ATR · MAX_TB_GAP=3 · EOD_HOUR=15  
+**Params:** SL=2.5×ATR · TP=4.5×ATR · MAX_TB_GAP=3 · EOD_HOUR=15  
 **Source scripts:** baseline_reserve/ma_bounce.py (LONG) · baseline_reserve/ma_rejection.py (SHORT)  
 **Raw only — no slippage, no charges.**
 

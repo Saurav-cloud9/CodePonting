@@ -15,8 +15,8 @@ Break-even target: PF > 1.01
 | 4 | v1 + Below EMA (no VWAP) | EMA50–250 standalone on v1 | — | — | Below EMA consistently better than above across all lengths (PF 0.932–0.958). None cross 1.0 alone. Detail in EMA sweep table. |
 | 5 | **v1.1** (v1 + Above VWAP + Below EMA100) | Built on #3 — add below EMA100 filter | 8,377 | 1.010 | Top combo: EMA100 wins. NPF=0.588 (Kotak Neo full charges). Detail in sweep table below. |
 | 6 | **v1.2** (v1.1 + MACD state filter) | MACD vs Signal at touch bar (4 states A/B/C/D) | 8,377 | 1.010 | Dead end — no new version. State A=1.059, C=1.149 but C has N=538 (too thin). VWAP+EMA100 doing the work, not MACD state. Detail in sweep section below. |
-| 7 | **ABC standalone** (long + short) | Trading ABC indicator — ZigZag + Fibonacci 38.2-61.8% + trend cloud + MA bounce | — | — | Dead end. Long best CBQ: SL=0.3 TGT=1.5 (PF=1.039) → NPF=0.547 at qty=1000, never crosses 1.0. Short best CBQ: SL=0.3 TGT=0.7 (PF=1.403, Sharpe=2.700) → NPF=0.646 at qty=1000, never crosses 1.0. Signal quality real, trade economics broken — 5-min ATR exits too small to overcome statutory charges at any scale. |
-| 8 | **v1.1 CBQ** (best SL/TGT sweep) | SL×TGT grid on v1.1 signals — find best combo then run CBQ | 8,271 | 1.032 | Best combo: SL=2.5x TGT=6.0x. CBQ: NPF=0.608 at qty=1, asymptotes at 0.893 at qty=1000 — never crosses 1.0. Default SL=2.5 TGT=4.5 (N=8,304, PF=1.026) NPF=0.886 at qty=1000 — marginal difference. Raw edge PF=1.032 too thin to overcome charges at any scale. |
+| 7 | **ABC standalone** (long + short) | Trading ABC indicator — ZigZag + Fibonacci 38.2-61.8% + trend cloud + MA bounce | — | — | Dead end. Long best CBQ: SL=0.3 TP=1.5 (PF=1.039) → NPF=0.547 at qty=1000, never crosses 1.0. Short best CBQ: SL=0.3 TP=0.7 (PF=1.403, Sharpe=2.700) → NPF=0.646 at qty=1000, never crosses 1.0. Signal quality real, trade economics broken — 5-min ATR exits too small to overcome statutory charges at any scale. |
+| 8 | **v1.1 CBQ** (best SL/TP sweep) | SL×TP grid on v1.1 signals — find best combo then run CBQ | 8,271 | 1.032 | Best combo: SL=2.5x TP=6.0x. CBQ: NPF=0.608 at qty=1, asymptotes at 0.893 at qty=1000 — never crosses 1.0. Default SL=2.5 TP=4.5 (N=8,304, PF=1.026) NPF=0.886 at qty=1000 — marginal difference. Raw edge PF=1.032 too thin to overcome charges at any scale. |
 
 ---
 
@@ -24,8 +24,8 @@ Break-even target: PF > 1.01
 
 | # | Label | Change from previous | N | PF | Note |
 |---|---|---|---|---|---|
-| 1 | **v2** (Bare SHORT baseline) | Mirror of v0 — touch: high≥MA20, search MAX_TB_GAP=3 for close<MA20, entry SHORT next bar. SL=2.5x TGT=4.5x | — | — | Pending run. |
-| 2 | **v3** (SHORT wick-only) | Mirror of v1 — single bar: high≥MA20, open<MA20, close<MA20. SL=2.0x TGT=3.5x | 42,612 | 1.076 | Best combo: SL=2.0x TGT=3.5x, Sharpe=0.833. All 4 years profitable (2023=0.999). Stronger raw edge than LONG v1 (0.908) at the same structural level. CBQ: NPF=0.559@qty=1, asymptotes 0.898@qty=1000. |
+| 1 | **v2** (Bare SHORT baseline) | Mirror of v0 — touch: high≥MA20, search MAX_TB_GAP=3 for close<MA20, entry SHORT next bar. SL=2.5x TP=4.5x | — | — | Pending run. |
+| 2 | **v3** (SHORT wick-only) | Mirror of v1 — single bar: high≥MA20, open<MA20, close<MA20. SL=2.0x TP=3.5x | 42,612 | 1.076 | Best combo: SL=2.0x TP=3.5x, Sharpe=0.833. All 4 years profitable (2023=0.999). Stronger raw edge than LONG v1 (0.908) at the same structural level. CBQ: NPF=0.559@qty=1, asymptotes 0.898@qty=1000. |
 
 ---
 

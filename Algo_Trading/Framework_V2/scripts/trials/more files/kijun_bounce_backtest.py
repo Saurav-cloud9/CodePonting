@@ -1,6 +1,6 @@
 # Kijun fv2 Bounce — Python Backtest
 # Signal : Daily Kijun (50-day) 2-bar bounce, long only
-# SL     : 2.5x ATR14   TGT : 3.0x ATR14   EOD : 15:00
+# SL     : 2.5x ATR14   TP : 3.0x ATR14   EOD : 15:00
 
 import sys, io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -20,7 +20,7 @@ STOCKS     = [
 KIJUN_LEN  = 50
 ATR_LEN    = 14
 SL_MULT    = 2.5
-TGT_MULT   = 3.0
+TP_MULT   = 3.0
 EOD        = dt_time(15, 0)
 
 DATA_5MIN  = 'Algo_Trading/Framework_V2/data/historical/csv/intraday_5min'
@@ -75,7 +75,7 @@ def run(symbol, kijun_mode='hl'):
     # ── Simulation ───────────────────────────────────────────
     results = []
     in_trade = False
-    ep = sl = tgt = entry_date = None
+    ep = sl = tp = entry_date = None
 
     for i in range(2, len(df)):
         row  = df.iloc[i]
@@ -83,13 +83,13 @@ def run(symbol, kijun_mode='hl'):
 
         if in_trade:
             hit_sl  = row['low']  <= sl
-            hit_tgt = row['high'] >= tgt
+            hit_tp = row['high'] >= tp
             is_eod  = row['t'] >= EOD or row['date'] != entry_date
 
-            if hit_sl and hit_tgt:
+            if hit_sl and hit_tp:
                 pnl, ex = sl - ep, 'SL'
-            elif hit_tgt:
-                pnl, ex = tgt - ep, 'TGT'
+            elif hit_tp:
+                pnl, ex = tp - ep, 'TP'
             elif hit_sl:
                 pnl, ex = sl - ep, 'SL'
             elif is_eod:
@@ -107,7 +107,7 @@ def run(symbol, kijun_mode='hl'):
             ep         = row['open']
             atr_val    = prev['atr']
             sl         = ep - SL_MULT  * atr_val
-            tgt        = ep + TGT_MULT * atr_val
+            tp        = ep + TP_MULT * atr_val
             entry_date = row['date']
             in_trade   = True
 
@@ -131,7 +131,7 @@ def summarise(results_list):
 
 
 # ── Run both modes ────────────────────────────────────────────
-print(f"\nKijun fv2 Bounce  SL={SL_MULT}x  TGT={TGT_MULT}x  ATR{ATR_LEN}  Theoretical BE={SL_MULT/(SL_MULT+TGT_MULT)*100:.1f}%")
+print(f"\nKijun fv2 Bounce  SL={SL_MULT}x  TP={TP_MULT}x  ATR{ATR_LEN}  Theoretical BE={SL_MULT/(SL_MULT+TP_MULT)*100:.1f}%")
 
 res_hl  = [run(s, 'hl')   for s in STOCKS]
 res_cc  = [run(s, 'cc')   for s in STOCKS]

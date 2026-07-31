@@ -11,7 +11,7 @@ We are developing, backtesting, and validating intraday SHORT strategies with su
 
 The process is iterative:
 1. Define an entry signal (strategy hypothesis)
-2. Run a 90-combo parameter sweep to find the best SL/TGT combination
+2. Run a 90-combo parameter sweep to find the best SL/TP combination
 3. Evaluate results using ZPF and ZSh(D) as primary metrics
 4. Add filters or structural modifications to improve signal quality
 5. Re-sweep and compare against baseline

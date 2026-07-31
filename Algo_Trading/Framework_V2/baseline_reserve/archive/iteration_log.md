@@ -7,12 +7,12 @@
 **Signal:** Any touch of MA20 → rejection/bounce confirmation within 3 bars → entry next bar open
 **Logic:** Single-pass, position guard intact (`i = k+1` after each trade)
 **Scripts:** `ma_30_rejection.py` · `ma_30_bounce.py`
-**Sweeps:** `sl_tgt_sweep_baseline_short.py` · `sl_tgt_sweep_baseline_long.py` (90 combos each)
+**Sweeps:** `sl_tp_sweep_baseline_short.py` · `sl_tp_sweep_baseline_long.py` (90 combos each)
 
 ### SHORT (Rejection)
 
 ```
-SL\TGT   2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
+SL\TP   2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
    1.5  1.082  1.093  1.101  1.110 1.116◆  1.115  1.120  1.121 1.122★
    2.0  1.085  1.096  1.103  1.111  1.116  1.114  1.119  1.118  1.121
    2.5  1.088  1.099  1.105  1.111  1.116  1.114  1.118  1.117  1.119
@@ -28,12 +28,12 @@ SL\TGT   2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
 ★ best PF (not locked — sits at tail, lower Sharpe robustness)
 ```
 
-Grid best (max PF): SL=1.5 · TGT=6.0 → N=157,051 · PF=1.122 · Sharpe=2.124
-Locked combo (elbow): SL=1.5 · TGT=4.0 → N=172,360 · PF=1.116 · Sharpe=2.275
+Grid best (max PF): SL=1.5 · TP=6.0 → N=157,051 · PF=1.122 · Sharpe=2.124
+Locked combo (elbow): SL=1.5 · TP=4.0 → N=172,360 · PF=1.116 · Sharpe=2.275
 
 Top 5 by PF:
 
-| Rank | SL | TGT | N | PF | Sharpe |
+| Rank | SL | TP | N | PF | Sharpe |
 |---|---|---|---|---|---|
 | 1 | 1.5 | 6.0 | 157,051 | 1.122 | 2.124 |
 | 2 | 1.5 | 5.5 | 159,465 | 1.121 | 2.149 |
@@ -41,7 +41,7 @@ Top 5 by PF:
 | 4 | 1.5 | 5.0 | 162,554 | 1.120 | 2.155 |
 | 5 | 2.5 | 6.0 | 120,930 | 1.119 | 1.897 |
 
-Year-wise (locked combo SL=1.5 · TGT=4.0):
+Year-wise (locked combo SL=1.5 · TP=4.0):
 
 | Year | N | PF | Sharpe |
 |---|---|---|---|
@@ -64,7 +64,7 @@ Year-wise (locked combo SL=1.5 · TGT=4.0):
 ### LONG (Bounce)
 
 ```
-SL\TGT   2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
+SL\TP   2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
    1.5  0.897  0.902  0.908  0.910  0.907  0.907  0.907  0.909  0.907
    2.0  0.893  0.898  0.905  0.907  0.904  0.904  0.903  0.907  0.905
    2.5  0.889  0.893  0.898  0.901  0.898  0.898  0.897  0.900  0.898
@@ -77,12 +77,12 @@ SL\TGT   2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
    6.0  0.868  0.871  0.878  0.879  0.877  0.877  0.874  0.877  0.877
 ```
 
-Grid best (max PF): SL=1.5 · TGT=3.5 → N=186,478 · PF=0.910 · Sharpe=-2.057
-Locked combo: SL=1.5 · TGT=3.5 (same — least-bad, no edge at any combo)
+Grid best (max PF): SL=1.5 · TP=3.5 → N=186,478 · PF=0.910 · Sharpe=-2.057
+Locked combo: SL=1.5 · TP=3.5 (same — least-bad, no edge at any combo)
 
 Top 5 by PF:
 
-| Rank | SL | TGT | N | PF | Sharpe |
+| Rank | SL | TP | N | PF | Sharpe |
 |---|---|---|---|---|---|
 | 1 | 1.5 | 3.5 | 186,478 | 0.910 | -2.057 |
 | 2 | 1.5 | 5.5 | 168,361 | 0.909 | -1.834 |

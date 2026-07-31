@@ -9,7 +9,7 @@ Context:
   Slippage   : entry +0.05 tick, SL exit -0.05 tick
   Raw CAGR   : TBD (2015-2025 baseline — full DS3)
   Trades     : TBD (full DS3 2015-2025)
-  Data       : DS3, 29 stocks, 2015-2025, Extreme-2  (sl=2.5 ATR, tgt=4.5 ATR)
+  Data       : DS3, 29 stocks, 2015-2025, Extreme-2  (sl=2.5 ATR, tp=4.5 ATR)
 
 Param space (28 filters total = 23 original + 5 new):
   Original 23  :  PF1..PF9, VF1..VF3, TF1..TF4, VL1..VL2, MF1..MF5

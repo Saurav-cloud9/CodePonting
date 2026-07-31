@@ -6,7 +6,7 @@ activation_threshold search range: 1.5 – 3.0 ATR  (step 0.5)
 trailing_dist         search range: 0.5 – 3.0 ATR  (step 0.5)
 FF: ENABLED (trial parameter)
 
-Base config  : Extreme-2 (sl_mult=2.5, tgt_mult=4.5)
+Base config  : Extreme-2 (sl_mult=2.5, tp_mult=4.5)
 Stocks       : 29 (VI excluded)
 Data window  : 2022-2025
 Trials       : 200

@@ -378,7 +378,7 @@ if self.sl_variant == "D":
 | F | Entry cutoff 14:45 | Change 9 (entry_cutoff=14:45) |
 | G | Fixed fractional sizing | Change 11 (sizing_mode="fixed_fractional", risk_per_trade=0.002–0.003) |
 
-ATR configs: Extreme-1 (SL=2.5, TGT=4.0), Extreme-2 (2.5/4.5), Extreme-3 (3.0/4.5), Extreme-4 (3.0/5.0)
+ATR configs: Extreme-1 (SL=2.5, TP=4.0), Extreme-2 (2.5/4.5), Extreme-3 (3.0/4.5), Extreme-4 (3.0/5.0)
 
 ---
 

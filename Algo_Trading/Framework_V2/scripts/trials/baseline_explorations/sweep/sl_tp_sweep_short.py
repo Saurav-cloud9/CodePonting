@@ -1,5 +1,5 @@
 """
-SL x TGT grid sweep — MA Rejection (SHORT) baseline
+SL x TP grid sweep — MA Rejection (SHORT) baseline
 30 stocks · 2015-2025 · DS3 parquets (11-year full run)
 Signal: high >= MA20 → close < MA20 within MAX_TR_GAP=3 → short at next bar open
 """
@@ -16,7 +16,7 @@ EOD_HOUR = 15
 MAX_TR_GAP = 3
 
 SL_VALS  = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
-TGT_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
+TP_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
 
 
 def load(f):
@@ -71,7 +71,7 @@ def get_signals(df):
     return signals
 
 
-def simulate(df, signals, sl_m, tgt_m):
+def simulate(df, signals, sl_m, tp_m):
     high  = df['high'].values;  low   = df['low'].values
     open_ = df['open'].values;  close = df['close'].values
     hour  = df['hour'].values;  date  = df['date'].values
@@ -84,7 +84,7 @@ def simulate(df, signals, sl_m, tgt_m):
         entry      = sig['entry_px']
         atr        = sig['atr']
         sl         = entry + sl_m  * atr
-        tgt        = entry - tgt_m * atr
+        tp        = entry - tp_m * atr
         entry_date = sig['date']
         pnl = 0.0
         for k in range(sig['entry_i'], n):
@@ -94,8 +94,8 @@ def simulate(df, signals, sl_m, tgt_m):
                 pnl = entry - open_[k]; break
             if high[k] >= sl:
                 pnl = entry - sl; break
-            if low[k] <= tgt:
-                pnl = entry - tgt; break
+            if low[k] <= tp:
+                pnl = entry - tp; break
         next_allowed = k + 1
         trades.append({'pnl': pnl, 'year': sig['year'],
                        'date': pd.Timestamp(sig['date'])})
@@ -124,32 +124,32 @@ all_data = [(df, get_signals(df)) for df, _ in all_data]
 total = sum(len(s) for _, s in all_data)
 print(f'Total signals: {total}')
 
-print(f'Running {len(SL_VALS)} x {len(TGT_VALS)} grid sweep...')
-pf_grid = np.zeros((len(SL_VALS), len(TGT_VALS)))
+print(f'Running {len(SL_VALS)} x {len(TP_VALS)} grid sweep...')
+pf_grid = np.zeros((len(SL_VALS), len(TP_VALS)))
 for si, sl_m in enumerate(SL_VALS):
-    for ti, tgt_m in enumerate(TGT_VALS):
+    for ti, tp_m in enumerate(TP_VALS):
         all_t = []
         for df, sigs in all_data:
-            all_t.extend(simulate(df, sigs, sl_m, tgt_m))
+            all_t.extend(simulate(df, sigs, sl_m, tp_m))
         pf_grid[si, ti] = calc_pf(all_t)
 
 # Print PF grid
-print(f'\nPF Grid (rows=SL, cols=TGT):')
-header = f"{'SL\\TGT':>8}" + ''.join(f'{t:>7.1f}' for t in TGT_VALS)
+print(f'\nPF Grid (rows=SL, cols=TP):')
+header = f"{'SL\\TP':>8}" + ''.join(f'{t:>7.1f}' for t in TP_VALS)
 print(header)
 for si, sl_m in enumerate(SL_VALS):
-    row = f'{sl_m:>8.1f}' + ''.join(f'{pf_grid[si, ti]:>7.3f}' for ti in range(len(TGT_VALS)))
+    row = f'{sl_m:>8.1f}' + ''.join(f'{pf_grid[si, ti]:>7.3f}' for ti in range(len(TP_VALS)))
     print(row)
 
 # Best combo
 best_idx = np.unravel_index(np.argmax(pf_grid), pf_grid.shape)
 best_sl  = SL_VALS[best_idx[0]]
-best_tgt = TGT_VALS[best_idx[1]]
+best_tp = TP_VALS[best_idx[1]]
 all_best = []
 for df, sigs in all_data:
-    all_best.extend(simulate(df, sigs, best_sl, best_tgt))
+    all_best.extend(simulate(df, sigs, best_sl, best_tp))
 
-print(f'\nBest combo: SL={best_sl}x  TGT={best_tgt}x')
+print(f'\nBest combo: SL={best_sl}x  TP={best_tp}x')
 print(f'Overall: N={len(all_best)}  PF={pf_grid[best_idx]:.3f}  Sharpe={calc_sharpe(all_best):.3f}')
 
 print(f'\n{"Year":<6} {"N":>5}  {"PF":>6}  {"Sharpe":>7}')
@@ -161,11 +161,11 @@ for yr in range(2015, 2026):
     print(f'  {yr}  {len(g):>5}  {gp/gl if gl>0 else 0:>6.3f}  {calc_sharpe(g):>7.3f}')
 
 print(f'\nTop 5 combos:')
-flat = [(pf_grid[si, ti], SL_VALS[si], TGT_VALS[ti])
-        for si in range(len(SL_VALS)) for ti in range(len(TGT_VALS))]
+flat = [(pf_grid[si, ti], SL_VALS[si], TP_VALS[ti])
+        for si in range(len(SL_VALS)) for ti in range(len(TP_VALS))]
 flat.sort(reverse=True)
 for v, s, t in flat[:5]:
-    print(f'  SL={s}x  TGT={t}x  PF={v:.3f}')
+    print(f'  SL={s}x  TP={t}x  PF={v:.3f}')
 
 # Heatmap
 grid_flipped = np.flipud(pf_grid)
@@ -175,14 +175,14 @@ fig, ax = plt.subplots(figsize=(11, 6))
 fig.patch.set_facecolor('#0d1117')
 ax.set_facecolor('#0d1117')
 im = ax.imshow(grid_flipped, cmap='RdYlGn', vmin=0.85, vmax=1.25, aspect='auto')
-ax.set_xticks(range(len(TGT_VALS))); ax.set_xticklabels(TGT_VALS, color='#aaa')
+ax.set_xticks(range(len(TP_VALS))); ax.set_xticklabels(TP_VALS, color='#aaa')
 ax.set_yticks(range(len(SL_VALS)));  ax.set_yticklabels(sl_labels, color='#aaa')
-ax.set_xlabel('TGT Multiplier', color='#aaa', fontsize=11)
+ax.set_xlabel('TP Multiplier', color='#aaa', fontsize=11)
 ax.set_ylabel('SL Multiplier', color='#aaa', fontsize=11)
 ax.set_title(f'PF Heatmap — MA Rejection SHORT  |  30 Stocks · 2015-2025  |  N={total}',
              color='white', fontsize=13, pad=12)
 for si in range(len(SL_VALS)):
-    for ti in range(len(TGT_VALS)):
+    for ti in range(len(TP_VALS)):
         v = grid_flipped[si, ti]
         ax.text(ti, si, f'{v:.3f}', ha='center', va='center',
                 fontsize=9, color='black' if 0.90 < v < 1.15 else 'white')
@@ -191,7 +191,7 @@ cbar.set_label('Profit Factor', color='#aaa')
 cbar.ax.yaxis.set_tick_params(color='#aaa')
 plt.setp(cbar.ax.yaxis.get_ticklabels(), color='#aaa')
 plt.tight_layout()
-out = os.path.join(OUT_DIR, 'sl_tgt_sweep_short.png')
+out = os.path.join(OUT_DIR, 'sl_tp_sweep_short.png')
 plt.savefig(out, dpi=150, bbox_inches='tight', facecolor=fig.get_facecolor())
 plt.close()
 print(f'\nHeatmap saved: {out}')

@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from datetime import time as dt_time
 
-ATR_LEN=14; SL_MULT=2.5; TGT_MULT=3.0; EOD=dt_time(15,0)
+ATR_LEN=14; SL_MULT=2.5; TP_MULT=3.0; EOD=dt_time(15,0)
 DATA_5MIN='Algo_Trading/Framework_V2/data/historical/csv/intraday_5min'
 
 WINNERS = ['VEDL','SBIN','NTPC','BHARTIARTL','ICICIBANK',
@@ -41,15 +41,15 @@ def run(symbol, kijun_len):
                        (df['low'] < df['kijun']) & (df['open'] > df['kijun']))
     df['confirmed'] = (df['touch'].shift(1) &
                        (df['low'] > df['kijun']) & (df['close'] > df['low']))
-    results = []; in_trade = False; ep = sl = tgt = entry_date = None
+    results = []; in_trade = False; ep = sl = tp = entry_date = None
     for i in range(2, len(df)):
         row = df.iloc[i]; prev = df.iloc[i-1]
         if in_trade:
             hit_sl  = row['low']  <= sl
-            hit_tgt = row['high'] >= tgt
+            hit_tp = row['high'] >= tp
             is_eod  = row['t'] >= EOD or row['date'] != entry_date
-            if hit_sl and hit_tgt: pnl, ex = sl-ep, 'SL'
-            elif hit_tgt:          pnl, ex = tgt-ep, 'TGT'
+            if hit_sl and hit_tp: pnl, ex = sl-ep, 'SL'
+            elif hit_tp:          pnl, ex = tp-ep, 'TP'
             elif hit_sl:           pnl, ex = sl-ep, 'SL'
             elif is_eod:           pnl, ex = row['close']-ep, 'EOD'
             else: continue
@@ -59,7 +59,7 @@ def run(symbol, kijun_len):
         elif not in_trade and prev['confirmed']:
             if row['t'] >= EOD: continue
             ep = row['open']; atr_val = prev['atr']
-            sl = ep - SL_MULT*atr_val; tgt = ep + TGT_MULT*atr_val
+            sl = ep - SL_MULT*atr_val; tp = ep + TP_MULT*atr_val
             entry_date = row['date']; in_trade = True
     return pd.DataFrame(results) if results else pd.DataFrame(columns=['symbol','pnl','win','year'])
 

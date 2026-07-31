@@ -7,11 +7,11 @@ class MABaselineV3:
     Signal: high >= MA20, open < MA20, close < MA20 (single bar rejection)
     Entry: SHORT at next bar open
     SL:    entry + SL_MULT  * ATR14  (above entry)
-    TGT:   entry - TGT_MULT * ATR14  (below entry)
+    TP:   entry - TP_MULT * ATR14  (below entry)
     PnL:   entry - exit_px  (positive = profit for short)
     """
     SL_MULT  = 2.0
-    TGT_MULT = 3.5
+    TP_MULT = 3.5
     EOD_HOUR = 15
 
     def run(self, df):
@@ -43,14 +43,14 @@ class MABaselineV3:
 
                 entry = opens[entry_idx]
                 sl  = entry + self.SL_MULT  * atr
-                tgt = entry - self.TGT_MULT * atr
+                tp = entry - self.TP_MULT * atr
 
                 for k in range(entry_idx, len(df)):
                     if hours[k] >= self.EOD_HOUR or dates[k] != signal_date:
                         pnl = entry - opens[k]
                         outcome = 'EOD+' if pnl > 0 else 'EOD-'; break
-                    if lows[k]  <= tgt:
-                        pnl = entry - tgt; outcome = 'W'; break
+                    if lows[k]  <= tp:
+                        pnl = entry - tp; outcome = 'W'; break
                     if highs[k] >= sl:
                         pnl = entry - sl;  outcome = 'L'; break
 

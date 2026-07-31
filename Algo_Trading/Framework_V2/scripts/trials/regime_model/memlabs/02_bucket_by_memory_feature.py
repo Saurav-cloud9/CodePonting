@@ -2,7 +2,7 @@
 Step 2 — MemLabs memory-encoding experiment on MA rejection SHORT.
 Buckets the trade log (from 01_build_trade_log.py) into tertiles by the
 memory-encoded feature (rolling-40-mean of ATR% at touch) and compares
-win rate / PF / ZPF per bucket - same spirit as the SL/TGT sweep tables,
+win rate / PF / ZPF per bucket - same spirit as the SL/TP sweep tables,
 just sweeping across the feature's value range instead of strategy params.
 """
 from pathlib import Path

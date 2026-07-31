@@ -44,7 +44,7 @@
 | Stop Loss | `entry - 2.5 × ATR14` |
 | Target | `entry + 4.5 × ATR14` |
 | EOD exit | Exit at open of first bar where `hour >= 15` |
-| Exit order | EOD checked first, then TGT, then SL |
+| Exit order | EOD checked first, then TP, then SL |
 | Position guard | `i = k + 1` — no new trade until current trade exits |
 
 ---
@@ -56,7 +56,7 @@
 | MA | MA20 (simple moving average, 20 bars) |
 | ATR | ATR14 (precomputed, fv2 CSV) |
 | SL multiplier | 2.5 |
-| TGT multiplier | 4.5 |
+| TP multiplier | 4.5 |
 | Max bounce window | 3 bars (not used — always same-bar in v1) |
 | EOD hard stop | 15:00 bar open |
 | Slippage | None |
@@ -70,7 +70,7 @@
 |---|---|---|---|
 | Total Trades (N) | 49,039 | 39,589 | -9,450 (-19.3%) |
 | Profit Factor | 0.922 | 0.908 | -0.014 |
-| Pure WR (TGT hits) | 15.0% | 12.7% | -2.3pp |
+| Pure WR (TP hits) | 15.0% | 12.7% | -2.3pp |
 
 ### Removed Trades Breakdown (Baseline → v1)
 

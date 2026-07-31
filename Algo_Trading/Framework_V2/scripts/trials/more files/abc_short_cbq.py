@@ -1,5 +1,5 @@
 """
-ABC SHORT SL=0.3 TGT=0.3 — NPF qty sweep
+ABC SHORT SL=0.3 TP=0.3 — NPF qty sweep
 """
 import sys, io, glob, pandas as pd, numpy as np
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
@@ -9,7 +9,7 @@ ZZ_LEN=8; FIB_LO=0.382; FIB_HI=0.618; ERR_RATE=0.05
 MAX_BARS=6; ATR_LEN=14; EOD_HOUR=15
 MA_SPANS=[50,100,150,200]; EMA_SPANS=[20,40]
 FIB_LO_EFF=FIB_LO*(1-ERR_RATE); FIB_HI_EFF=FIB_HI*(1+ERR_RATE)
-SL_M=0.3; TGT_M=0.3
+SL_M=0.3; TP_M=0.3
 
 def load(f):
     df=pd.read_csv(f,low_memory=False); df.columns=df.columns.str.strip()
@@ -91,13 +91,13 @@ def simulate(df, signals):
     open_=df['open'].values; n=len(df)
     for sig in signals:
         entry=sig['entry_px']; atr=sig['atr']
-        sl=entry+SL_M*atr; tgt=entry-TGT_M*atr
+        sl=entry+SL_M*atr; tp=entry-TP_M*atr
         entry_date=sig['date']
         for k in range(sig['entry_i'],n):
             kb=df.iloc[k]
             if kb['hour']>=EOD_HOUR or kb['date']!=entry_date:
                 pnl=entry-open_[k]; break
-            if low[k]<=tgt:  pnl=entry-tgt; break
+            if low[k]<=tp:  pnl=entry-tp; break
             if high[k]>=sl:  pnl=entry-sl;  break
         trades.append({'pnl':pnl,'year':sig['year'],
                        'entry':entry,'exit':entry-pnl})

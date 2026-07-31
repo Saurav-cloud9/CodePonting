@@ -8,7 +8,7 @@ import pandas as pd, glob, os, sys
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min'
 
 SL_MULT  = 2.5
-TGT_MULT = 4.5
+TP_MULT = 4.5
 EOD_HOUR = 15
 
 def compute_indicators(df):
@@ -58,7 +58,7 @@ def run(df, v1=True):
 
             entry = df.iloc[entry_idx]['open']
             sl    = entry - SL_MULT * atr
-            tgt   = entry + TGT_MULT * atr
+            tp   = entry + TP_MULT * atr
             pnl   = None; outcome = None
 
             for k in range(entry_idx, len(df)):
@@ -67,7 +67,7 @@ def run(df, v1=True):
                     pnl = b['open'] - entry
                     outcome = 'EOD+' if pnl > 0 else 'EOD-'
                     break
-                if b['high'] >= tgt: pnl = tgt - entry;  outcome = 'W'; break
+                if b['high'] >= tp: pnl = tp - entry;  outcome = 'W'; break
                 if b['low']  <= sl:  pnl = sl  - entry;  outcome = 'L'; break
 
             if pnl is not None:

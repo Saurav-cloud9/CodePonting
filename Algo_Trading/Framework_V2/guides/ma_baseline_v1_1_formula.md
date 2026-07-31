@@ -45,7 +45,7 @@
 | ATR | ATR14 (precomputed, fv2 CSV) |
 | EMA span | 100 bars |
 | SL multiplier | 2.5 |
-| TGT multiplier | 4.5 |
+| TP multiplier | 4.5 |
 | EOD hard stop | 15:00 bar open |
 | Slippage | None |
 | Charges | None |

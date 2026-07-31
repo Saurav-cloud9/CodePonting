@@ -1,13 +1,13 @@
 """
 CBQ — Baseline SHORT mirror (high>=MA20, open<MA20, close<MA20)
-Best combo: SL=2.0x TGT=3.5x | 30 stocks 2022-2025
+Best combo: SL=2.0x TP=3.5x | 30 stocks 2022-2025
 """
 import sys, io, glob, pandas as pd, numpy as np
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 CSV_DIR='Algo_Trading/Framework_V2/data/historical/csv/intraday_5min'
 ATR_LEN=14; MA_LEN=20; EOD_HOUR=15
-SL_M=2.0; TGT_M=3.5
+SL_M=2.0; TP_M=3.5
 
 def load(f):
     df=pd.read_csv(f,low_memory=False); df.columns=df.columns.str.strip()
@@ -33,10 +33,10 @@ def get_trades(df):
             if date[ei]!=date[i]: continue
             entry=open_[ei]
             sl  = entry + SL_M  * atr[i]   # SL above entry
-            tgt = entry - TGT_M * atr[i]   # TGT below entry
+            tp = entry - TP_M * atr[i]   # TP below entry
             for k in range(ei,n):
                 if hour[k]>=EOD_HOUR or date[k]!=date[i]: pnl=entry-open_[k]; break
-                if low[k]<=tgt:  pnl=entry-tgt; break
+                if low[k]<=tp:  pnl=entry-tp; break
                 if high[k]>=sl:  pnl=entry-sl;  break
             next_allowed=k+1
             trades.append({'pnl':pnl,'year':df.iloc[ei]['datetime'].year,
@@ -51,7 +51,7 @@ for f in files:
 
 raw_w=sum(t['pnl'] for t in all_trades if t['pnl']>0)
 raw_l=sum(-t['pnl'] for t in all_trades if t['pnl']<0)
-print(f'Baseline SHORT CBQ -- SL={SL_M}x TGT={TGT_M}x  N={len(all_trades)}  Raw PF={raw_w/raw_l:.3f}')
+print(f'Baseline SHORT CBQ -- SL={SL_M}x TP={TP_M}x  N={len(all_trades)}  Raw PF={raw_w/raw_l:.3f}')
 print()
 print(f"{'Qty':>6}  {'NPF':>6}  {'Net PnL':>10}  {'Avg charge':>11}")
 print('-'*45)

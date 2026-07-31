@@ -49,7 +49,7 @@ class MABaselineV2Verbose(MABaselineV2):
 
         trades = []; n = len(df); count = 0
         print(f"{'#':<4} {'Signal Bar':<20} {'H':>7} {'O':>7} {'C':>7} {'MA20':>7} "
-              f"{'Entry':>7} {'SL':>7} {'TGT':>7} {'Exit':>7} {'Reason':<6} {'RawPnL':>8}")
+              f"{'Entry':>7} {'SL':>7} {'TP':>7} {'Exit':>7} {'Reason':<6} {'RawPnL':>8}")
         print('-' * 100)
 
         i = 0
@@ -67,12 +67,12 @@ class MABaselineV2Verbose(MABaselineV2):
 
                 entry = opens[entry_idx]
                 sl    = entry + self.SL_MULT  * atr
-                tgt   = entry - self.TGT_MULT * atr
+                tp   = entry - self.TP_MULT * atr
 
                 for k in range(entry_idx, n):
                     if hours[k] >= self.EOD_HOUR or dates[k] != signal_date:
                         pnl = entry - opens[k]; outcome = 'EOD+' if pnl > 0 else 'EOD-'; break
-                    if lows[k]  <= tgt: pnl = entry - tgt; outcome = 'W'; break
+                    if lows[k]  <= tp: pnl = entry - tp; outcome = 'W'; break
                     if highs[k] >= sl:  pnl = entry - sl;  outcome = 'L'; break
 
                 count += 1
@@ -80,7 +80,7 @@ class MABaselineV2Verbose(MABaselineV2):
                 exit_dt = df.iloc[k]['datetime']
                 print(f"{count:<4} {str(sig_dt):<20} {highs[i]:>7.2f} {opens[i]:>7.2f} "
                       f"{closes[i]:>7.2f} {ma20s[i]:>7.2f} "
-                      f"{entry:>7.2f} {sl:>7.2f} {tgt:>7.2f} "
+                      f"{entry:>7.2f} {sl:>7.2f} {tp:>7.2f} "
                       f"{exit_dt} {outcome:<6} {pnl:>8.2f}")
 
                 trades.append({'pnl': pnl, 'outcome': outcome})
@@ -103,5 +103,5 @@ eods  = [t for t in trades if 'EOD' in t['outcome']]
 print(f"\nFirst {len(trades)} trades: {len(wins)} W  {len(losses)} L  {len(eods)} EOD")
 print(f"Verify signal: high>=MA20, open<MA20, close<MA20  ✓")
 print(f"Verify SL > Entry (SHORT stop above)              ✓")
-print(f"Verify TGT < Entry (SHORT target below)           ✓")
+print(f"Verify TP < Entry (SHORT target below)           ✓")
 print(f"Verify PnL = Entry - Exit (positive = price fell) ✓")

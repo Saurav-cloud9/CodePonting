@@ -1,5 +1,5 @@
 """
-SL x TGT grid sweep — MA Rejection v1 (SHORT) clean-touch
+SL x TP grid sweep — MA Rejection v1 (SHORT) clean-touch
 30 stocks · 2015-2025 · DS3 parquets (11-year full run)
 Signal : single bar where high>=MA20 AND open<MA20 AND close<MA20 → short at next bar open
 Logic  : single-pass (i = k+1 after each trade) — position guard intact
@@ -17,7 +17,7 @@ OUT_DIR  = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\outputs\repor
 EOD_HOUR = 15
 
 SL_VALS  = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
-TGT_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
+TP_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
 
 
 def zerodha_vec_short(entry, exit_px):
@@ -44,7 +44,7 @@ def load(f):
     return df.reset_index(drop=True)
 
 
-def run_combo(arrays, sl_m, tgt_m):
+def run_combo(arrays, sl_m, tp_m):
     """Returns lists: pnl, entry, exit_px, year, date."""
     high, low, open_, close = arrays['high'], arrays['low'], arrays['open_'], arrays['close']
     ma20, atr14             = arrays['ma20'],  arrays['atr14']
@@ -63,7 +63,7 @@ def run_combo(arrays, sl_m, tgt_m):
             if ei >= n or date[ei] != date[i] or hour[ei] >= EOD_HOUR:
                 i += 1; continue
             entry = open_[ei]; atr = atr14[i]
-            sl = entry + sl_m * atr; tgt = entry - tgt_m * atr
+            sl = entry + sl_m * atr; tp = entry - tp_m * atr
             signal_date = date[i]
             k = ei
             for k in range(ei, n):
@@ -73,8 +73,8 @@ def run_combo(arrays, sl_m, tgt_m):
                     exit_px = open_[k]; break
                 if high[k] >= sl:
                     exit_px = sl; break
-                if low[k] <= tgt:
-                    exit_px = tgt; break
+                if low[k] <= tp:
+                    exit_px = tp; break
             pnl_out.append(entry - exit_px)
             entry_out.append(entry); exit_out.append(exit_px)
             yr_out.append(year[ei]); dt_out.append(pd.Timestamp(date[ei]))
@@ -130,21 +130,21 @@ for f in files:
         'hour':  df['hour'].values,  'date':  df['date'].values,
         'year':  df['year'].values,  'n':     len(df),
     })
-print(f'Loaded. Running {len(SL_VALS)} x {len(TGT_VALS)} = {len(SL_VALS)*len(TGT_VALS)} combo grid sweep...')
+print(f'Loaded. Running {len(SL_VALS)} x {len(TP_VALS)} = {len(SL_VALS)*len(TP_VALS)} combo grid sweep...')
 
 # ── Grid sweep ─────────────────────────────────────────────────────────────────
 combo_data = {}
-pf_grid   = np.zeros((len(SL_VALS), len(TGT_VALS)))
-zpf_grid  = np.zeros((len(SL_VALS), len(TGT_VALS)))
-shd_grid  = np.zeros((len(SL_VALS), len(TGT_VALS)))
-zshd_grid = np.zeros((len(SL_VALS), len(TGT_VALS)))
-n_grid    = np.zeros((len(SL_VALS), len(TGT_VALS)), dtype=int)
+pf_grid   = np.zeros((len(SL_VALS), len(TP_VALS)))
+zpf_grid  = np.zeros((len(SL_VALS), len(TP_VALS)))
+shd_grid  = np.zeros((len(SL_VALS), len(TP_VALS)))
+zshd_grid = np.zeros((len(SL_VALS), len(TP_VALS)))
+n_grid    = np.zeros((len(SL_VALS), len(TP_VALS)), dtype=int)
 
 for si, sl_m in enumerate(SL_VALS):
-    for ti, tgt_m in enumerate(TGT_VALS):
+    for ti, tp_m in enumerate(TP_VALS):
         all_pnl = []; all_entry = []; all_exit = []; all_yr = []; all_dt = []
         for arr in stock_arrays:
-            p, e, x, y, d = run_combo(arr, sl_m, tgt_m)
+            p, e, x, y, d = run_combo(arr, sl_m, tp_m)
             all_pnl.extend(p); all_entry.extend(e); all_exit.extend(x)
             all_yr.extend(y); all_dt.extend(d)
         pnl   = np.array(all_pnl, dtype=float)
@@ -160,53 +160,53 @@ for si, sl_m in enumerate(SL_VALS):
         shd_grid[si, ti]  = shd
         zshd_grid[si, ti] = zshd
         n_grid[si, ti]    = len(pnl)
-        combo_data[(sl_m, tgt_m)] = (pnl, zpnl, np.array(all_yr), all_dt)
-        print(f'  SL={sl_m:.1f} TGT={tgt_m:.1f}  N={len(pnl):,}  PF={pf:.3f}  ZPF={zpf:.3f}  Sh(D)={shd:.3f}  ZSh(D)={zshd:.3f}')
+        combo_data[(sl_m, tp_m)] = (pnl, zpnl, np.array(all_yr), all_dt)
+        print(f'  SL={sl_m:.1f} TP={tp_m:.1f}  N={len(pnl):,}  PF={pf:.3f}  ZPF={zpf:.3f}  Sh(D)={shd:.3f}  ZSh(D)={zshd:.3f}')
 
 # ── ZPF grid ───────────────────────────────────────────────────────────────────
-print(f'\nZPF Grid (rows=SL, cols=TGT):')
-print(f"{'SL\\TGT':>8}" + ''.join(f'{t:>7.1f}' for t in TGT_VALS))
+print(f'\nZPF Grid (rows=SL, cols=TP):')
+print(f"{'SL\\TP':>8}" + ''.join(f'{t:>7.1f}' for t in TP_VALS))
 for si, sl_m in enumerate(SL_VALS):
-    print(f'{sl_m:>8.1f}' + ''.join(f'{zpf_grid[si, ti]:>7.3f}' for ti in range(len(TGT_VALS))))
+    print(f'{sl_m:>8.1f}' + ''.join(f'{zpf_grid[si, ti]:>7.3f}' for ti in range(len(TP_VALS))))
 
 # ── Full 90-combo table ────────────────────────────────────────────────────────
 print(f'\nAll 90 combos:')
-print(f"  {'SL':>4}  {'TGT':>4}  {'N':>7}  {'PF':>6}  {'ZPF':>6}  {'Sh(D)':>7}  {'ZSh(D)':>8}")
+print(f"  {'SL':>4}  {'TP':>4}  {'N':>7}  {'PF':>6}  {'ZPF':>6}  {'Sh(D)':>7}  {'ZSh(D)':>8}")
 flat_zpf = sorted(
     [(zpf_grid[si, ti], pf_grid[si, ti], shd_grid[si, ti], zshd_grid[si, ti],
-      SL_VALS[si], TGT_VALS[ti], n_grid[si, ti])
-     for si in range(len(SL_VALS)) for ti in range(len(TGT_VALS))],
+      SL_VALS[si], TP_VALS[ti], n_grid[si, ti])
+     for si in range(len(SL_VALS)) for ti in range(len(TP_VALS))],
     reverse=True
 )
 for si in range(len(SL_VALS)):
-    for ti in range(len(TGT_VALS)):
-        print(f"  {SL_VALS[si]:>4.1f}  {TGT_VALS[ti]:>4.1f}  {n_grid[si, ti]:>7,}  "
+    for ti in range(len(TP_VALS)):
+        print(f"  {SL_VALS[si]:>4.1f}  {TP_VALS[ti]:>4.1f}  {n_grid[si, ti]:>7,}  "
               f"{pf_grid[si, ti]:>6.3f}  {zpf_grid[si, ti]:>6.3f}  "
               f"{shd_grid[si, ti]:>7.3f}  {zshd_grid[si, ti]:>8.3f}")
 
 # ── Top 5 by ZPF ───────────────────────────────────────────────────────────────
 print(f'\nTop 5 by ZPF:')
-print(f"  {'SL':>4}  {'TGT':>4}  {'N':>7}  {'PF':>6}  {'ZPF':>6}  {'Sh(D)':>7}  {'ZSh(D)':>8}")
-for zpf, pf, shd, zshd, sl_m, tgt_m, n in flat_zpf[:5]:
-    print(f"  {sl_m:>4.1f}  {tgt_m:>4.1f}  {n:>7,}  {pf:>6.3f}  {zpf:>6.3f}  {shd:>7.3f}  {zshd:>8.3f}")
+print(f"  {'SL':>4}  {'TP':>4}  {'N':>7}  {'PF':>6}  {'ZPF':>6}  {'Sh(D)':>7}  {'ZSh(D)':>8}")
+for zpf, pf, shd, zshd, sl_m, tp_m, n in flat_zpf[:5]:
+    print(f"  {sl_m:>4.1f}  {tp_m:>4.1f}  {n:>7,}  {pf:>6.3f}  {zpf:>6.3f}  {shd:>7.3f}  {zshd:>8.3f}")
 
 # ── Top 5 by ZSh(D) ────────────────────────────────────────────────────────────
 flat_zshd = sorted(
     [(zshd_grid[si, ti], zpf_grid[si, ti], pf_grid[si, ti], shd_grid[si, ti],
-      SL_VALS[si], TGT_VALS[ti], n_grid[si, ti])
-     for si in range(len(SL_VALS)) for ti in range(len(TGT_VALS))],
+      SL_VALS[si], TP_VALS[ti], n_grid[si, ti])
+     for si in range(len(SL_VALS)) for ti in range(len(TP_VALS))],
     reverse=True
 )
 print(f'\nTop 5 by ZSh(D):')
-print(f"  {'SL':>4}  {'TGT':>4}  {'N':>7}  {'PF':>6}  {'ZPF':>6}  {'Sh(D)':>7}  {'ZSh(D)':>8}")
-for zshd, zpf, pf, shd, sl_m, tgt_m, n in flat_zshd[:5]:
-    print(f"  {sl_m:>4.1f}  {tgt_m:>4.1f}  {n:>7,}  {pf:>6.3f}  {zpf:>6.3f}  {shd:>7.3f}  {zshd:>8.3f}")
+print(f"  {'SL':>4}  {'TP':>4}  {'N':>7}  {'PF':>6}  {'ZPF':>6}  {'Sh(D)':>7}  {'ZSh(D)':>8}")
+for zshd, zpf, pf, shd, sl_m, tp_m, n in flat_zshd[:5]:
+    print(f"  {sl_m:>4.1f}  {tp_m:>4.1f}  {n:>7,}  {pf:>6.3f}  {zpf:>6.3f}  {shd:>7.3f}  {zshd:>8.3f}")
 
 # ── Best combo detail (by ZPF) ─────────────────────────────────────────────────
-best_zpf, best_pf, best_shd, best_zshd, best_sl, best_tgt, best_n = flat_zpf[0]
-pnl, zpnl, yrs, dts = combo_data[(best_sl, best_tgt)]
+best_zpf, best_pf, best_shd, best_zshd, best_sl, best_tp, best_n = flat_zpf[0]
+pnl, zpnl, yrs, dts = combo_data[(best_sl, best_tp)]
 pct_days, n_days = pct_prof_days(zpnl, dts)
-print(f'\nBest combo (ZPF): SL={best_sl}x  TGT={best_tgt}x')
+print(f'\nBest combo (ZPF): SL={best_sl}x  TP={best_tp}x')
 print(f'Overall: N={len(pnl):,}  Days={n_days:,}  PF={best_pf:.3f}  ZPF={best_zpf:.3f}  '
       f'Sh(D)={best_shd:.3f}  ZSh(D)={best_zshd:.3f}  %ProfDays={pct_days:.1f}%')
 
@@ -225,8 +225,8 @@ for yr in range(2015, 2026):
     print(f'  {yr}  {mask.sum():>6}  {pf_y:>6.3f}  {zpf_y:>6.3f}  {shd_y:>7.3f}  {zshd_y:>8.3f}  {flag}')
 
 # ── Best by ZSh(D) overall line ────────────────────────────────────────────────
-best2_zshd, best2_zpf, best2_pf, best2_shd, best2_sl, best2_tgt, best2_n = flat_zshd[0]
-print(f'\nBest combo (ZSh(D)): SL={best2_sl}x  TGT={best2_tgt}x  '
+best2_zshd, best2_zpf, best2_pf, best2_shd, best2_sl, best2_tp, best2_n = flat_zshd[0]
+print(f'\nBest combo (ZSh(D)): SL={best2_sl}x  TP={best2_tp}x  '
       f'N={best2_n:,}  PF={best2_pf:.3f}  ZPF={best2_zpf:.3f}  '
       f'Sh(D)={best2_shd:.3f}  ZSh(D)={best2_zshd:.3f}')
 
@@ -241,14 +241,14 @@ vmax = float(np.nanmax(zpf_grid)) if zpf_grid.size else 0.90
 # pad slightly so cells are readable
 pad = max(0.02, (vmax - vmin) * 0.05)
 im = ax.imshow(grid_flipped, cmap='RdYlGn', vmin=vmin - pad, vmax=vmax + pad, aspect='auto')
-ax.set_xticks(range(len(TGT_VALS))); ax.set_xticklabels(TGT_VALS, color='#aaa')
+ax.set_xticks(range(len(TP_VALS))); ax.set_xticklabels(TP_VALS, color='#aaa')
 ax.set_yticks(range(len(SL_VALS)));  ax.set_yticklabels(sl_labels, color='#aaa')
-ax.set_xlabel('TGT Multiplier', color='#aaa', fontsize=11)
+ax.set_xlabel('TP Multiplier', color='#aaa', fontsize=11)
 ax.set_ylabel('SL Multiplier', color='#aaa', fontsize=11)
 ax.set_title('ZPF Heatmap — MA Rejection v1 SHORT  |  30 Stocks · 2015-2025  |  Zerodha',
              color='white', fontsize=13, pad=12)
 for si in range(len(SL_VALS)):
-    for ti in range(len(TGT_VALS)):
+    for ti in range(len(TP_VALS)):
         v = grid_flipped[si, ti]
         mid = (vmin + vmax) / 2
         ax.text(ti, si, f'{v:.3f}', ha='center', va='center',
@@ -258,7 +258,7 @@ cbar.set_label('ZPF', color='#aaa')
 cbar.ax.yaxis.set_tick_params(color='#aaa')
 plt.setp(cbar.ax.yaxis.get_ticklabels(), color='#aaa')
 plt.tight_layout()
-out = os.path.join(OUT_DIR, 'sl_tgt_sweep_v1_short.png')
+out = os.path.join(OUT_DIR, 'sl_tp_sweep_v1_short.png')
 plt.savefig(out, dpi=150, bbox_inches='tight', facecolor=fig.get_facecolor())
 plt.close()
 print(f'\nHeatmap saved: {out}')

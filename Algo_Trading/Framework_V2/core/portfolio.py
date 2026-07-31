@@ -107,9 +107,9 @@ class Portfolio:
                 exit_price = bar.open
                 reason = "time"
             else:
-                # v1.4.5 intra-bar sequence logic: check SL/TGT based on candle direction
+                # v1.4.5 intra-bar sequence logic: check SL/TP based on candle direction
                 # Bullish candle likely went: Open -> Low -> High -> Close (check SL first)
-                # Bearish candle likely went: Open -> High -> Low -> Close (check TGT first)
+                # Bearish candle likely went: Open -> High -> Low -> Close (check TP first)
                 is_bullish = bar.close > bar.open
 
                 if is_bullish:
@@ -121,7 +121,7 @@ class Portfolio:
                         exit_price = pos["target"]
                         reason = "target"
                 else:
-                    # Bearish: rallied first, then dropped — check TGT first
+                    # Bearish: rallied first, then dropped — check TP first
                     if bar.high >= pos["target"]:
                         exit_price = pos["target"]
                         reason = "target"

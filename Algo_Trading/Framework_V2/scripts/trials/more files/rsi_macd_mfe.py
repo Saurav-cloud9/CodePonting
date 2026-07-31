@@ -5,7 +5,7 @@ from scipy.stats import gaussian_kde
 
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min'
 DS3_DIR  = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V1\data\historical\intraday_5min_DS3'
-BASE_SL=2.5; BASE_TGT=4.5; MAX_TB_GAP=3; EOD_HOUR=15; WARMUP=40
+BASE_SL=2.5; BASE_TP=4.5; MAX_TB_GAP=3; EOD_HOUR=15; WARMUP=40
 
 def compute_rsi(close, period=14):
     delta = close.diff()
@@ -84,8 +84,8 @@ def run_backtest(csv_path):
                 if kb['hour'] >= EOD_HOUR:
                     pnl_atr = (kb['open'] - entry) / atr
                     outcome = 'EOD+' if pnl_atr > 0 else 'EOD-'; k += 1; break
-                if kb['high'] >= entry + BASE_TGT * atr:
-                    pnl_atr = BASE_TGT; outcome = 'W'; k += 1; break
+                if kb['high'] >= entry + BASE_TP * atr:
+                    pnl_atr = BASE_TP; outcome = 'W'; k += 1; break
                 if kb['low']  <= entry - BASE_SL  * atr:
                     pnl_atr = -BASE_SL; outcome = 'L'; k += 1; break
                 k += 1
@@ -123,7 +123,7 @@ df['rsi_bucket'] = pd.cut(df['rsi'], bins=rsi_bins, labels=rsi_labels)
 plt.style.use('dark_background')
 fig, axes = plt.subplots(2, 2, figsize=(20, 14))
 fig.suptitle('RSI & MACD at Bounce Bar vs Trade Quality (MFE / Profit Factor)\n'
-             '30 Stocks | 2022–2025 | Baseline SL=2.5x ATR, TGT=4.5x ATR',
+             '30 Stocks | 2022–2025 | Baseline SL=2.5x ATR, TP=4.5x ATR',
              fontsize=14, y=1.01)
 
 # Panel 1: RSI bucket vs median MFE by outcome

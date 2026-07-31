@@ -3,7 +3,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min'
-SL_MULT=2.5; TGT_MULT=4.5; MAX_TB_GAP=3; EOD_HOUR=15
+SL_MULT=2.5; TP_MULT=4.5; MAX_TB_GAP=3; EOD_HOUR=15
 
 def compute_rsi(close, period=14):
     delta = close.diff()
@@ -39,13 +39,13 @@ def run_backtest(csv_path):
             if entry_idx >= len(df): i += 1; continue
             entry_bar = df.iloc[entry_idx]
             if entry_bar['date'] != touch_date: i += 1; continue
-            entry = entry_bar['open']; sl = entry - SL_MULT*atr; tgt = entry + TGT_MULT*atr
+            entry = entry_bar['open']; sl = entry - SL_MULT*atr; tp = entry + TP_MULT*atr
             rsi_at_entry = bounce_bar['rsi']
             for k in range(entry_idx, len(df)):
                 k_bar = df.iloc[k]
                 if k_bar['hour'] >= EOD_HOUR:
                     pnl = k_bar['open'] - entry; outcome = 'EOD+' if pnl > 0 else 'EOD-'; break
-                if k_bar['high'] >= tgt: pnl = tgt - entry; outcome = 'W'; break
+                if k_bar['high'] >= tp: pnl = tp - entry; outcome = 'W'; break
                 if k_bar['low'] <= sl: pnl = sl - entry; outcome = 'L'; break
             trades.append({'pnl': pnl, 'outcome': outcome, 'rsi': rsi_at_entry})
             i = k + 1
@@ -64,7 +64,7 @@ bins   = [0, 30, 40, 50, 60, 70, 80, 100]
 labels = ['<30', '30-40', '40-50', '50-60', '60-70', '70-80', '>80']
 df['rsi_bucket'] = pd.cut(df['rsi'], bins=bins, labels=labels)
 
-BE_PURE = SL_MULT / (SL_MULT + TGT_MULT) * 100  # 35.7% fixed
+BE_PURE = SL_MULT / (SL_MULT + TP_MULT) * 100  # 35.7% fixed
 
 rows = []
 for bucket in labels:

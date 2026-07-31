@@ -3,7 +3,7 @@ Optuna Optimization Runner — FV1 Sandbox Step 3.2
 ==================================================
 Standalone script: does NOT modify existing Sandbox code.
 
-Base config  : Extreme-2 (sl_mult=2.5, tgt_mult=4.5)
+Base config  : Extreme-2 (sl_mult=2.5, tp_mult=4.5)
 Stocks       : 29 (VI excluded)
 Data window  : 2022-2025
 Trials       : 200

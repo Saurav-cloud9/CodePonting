@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min'
 DS3_DIR  = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V1\data\historical\intraday_5min_DS3'
-BASE_SL=2.5; BASE_TGT=4.5; MAX_TB_GAP=3; EOD_HOUR=15; WARMUP=200
+BASE_SL=2.5; BASE_TP=4.5; MAX_TB_GAP=3; EOD_HOUR=15; WARMUP=200
 
 def compute_indicators(close):
     ema200 = close.ewm(span=200, adjust=False).mean()
@@ -77,8 +77,8 @@ def run(csv_path):
                 if kb['hour'] >= EOD_HOUR:
                     pnl_atr = (kb['open'] - entry) / atr
                     outcome = 'EOD+' if pnl_atr > 0 else 'EOD-'; k += 1; break
-                if kb['high'] >= entry + BASE_TGT * atr:
-                    pnl_atr = BASE_TGT; outcome = 'W'; k += 1; break
+                if kb['high'] >= entry + BASE_TP * atr:
+                    pnl_atr = BASE_TP; outcome = 'W'; k += 1; break
                 if kb['low'] <= entry - BASE_SL * atr:
                     pnl_atr = -BASE_SL; outcome = 'L'; k += 1; break
                 k += 1
@@ -114,7 +114,7 @@ for outcome, color in omap.items():
     sub = dt[dt['outcome'] == outcome]
     ax1.scatter(sub['date'], sub['pnl'], c=color, s=12, alpha=0.5, label=outcome, zorder=3)
 ax1.axhline(0, color='white', lw=0.8, ls='--', alpha=0.4)
-ax1.axhline(BASE_TGT, color='#00e676', lw=0.6, ls=':', alpha=0.3)
+ax1.axhline(BASE_TP, color='#00e676', lw=0.6, ls=':', alpha=0.3)
 ax1.axhline(-BASE_SL, color='#ff1744', lw=0.6, ls=':', alpha=0.3)
 ax1.set_title('Every DOWNTREND trade as a dot — Date vs PnL (ATR)', fontsize=11)
 ax1.set_ylabel('PnL (ATR multiples)'); ax1.legend(fontsize=9, markerscale=2); ax1.grid(alpha=0.1)

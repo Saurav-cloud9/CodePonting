@@ -107,7 +107,7 @@ select.outcome-sel {
     <div class="hdr-item"><span class="hdr-label">Category</span><span class="hdr-val" id="hCat">—</span></div>
     <div class="hdr-item"><span class="hdr-label">Raw PnL</span><span class="hdr-val" id="hPnl">—</span></div>
     <div class="hdr-item"><span class="hdr-label">SL Price</span><span class="hdr-val" id="hSL">—</span></div>
-    <div class="hdr-item"><span class="hdr-label">Target</span><span class="hdr-val" id="hTgt">—</span></div>
+    <div class="hdr-item"><span class="hdr-label">Target</span><span class="hdr-val" id="hTp">—</span></div>
     <div class="hdr-item"><span class="hdr-label">Exit Reason</span><span class="hdr-val" id="hExit">—</span></div>
     <div class="hdr-item"><span class="hdr-label">ATR14 @ Touch</span><span class="hdr-val" id="hAtr">—</span></div>
     <div class="hdr-item"><span class="hdr-label">MA20 @ Touch</span><span class="hdr-val" id="hMa">—</span></div>
@@ -196,7 +196,7 @@ if (signal.entry_time && signal.entry_time >= '14:45') {
 document.getElementById('hCat').textContent    = signal.category   || '—';
 document.getElementById('hExit').textContent   = signal.exit_reason || '—';
 document.getElementById('hSL').textContent     = signal.sl_price   || '—';
-document.getElementById('hTgt').textContent    = signal.tgt_price  || '—';
+document.getElementById('hTp').textContent    = signal.tp_price  || '—';
 
 const _tc = signal.candle_touch  || {};
 const _bc = signal.candle_bounce || {};

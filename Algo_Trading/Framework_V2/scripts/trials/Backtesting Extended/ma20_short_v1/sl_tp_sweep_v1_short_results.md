@@ -1,8 +1,8 @@
-# MA Rejection v1 SHORT — SL × TGT Grid Sweep Results
+# MA Rejection v1 SHORT — SL × TP Grid Sweep Results
 
-**Script:** `scripts/trials/baseline_explorations/sweep/sl_tgt_sweep_v1_short.py`  
+**Script:** `scripts/trials/baseline_explorations/sweep/sl_tp_sweep_v1_short.py`  
 **Run date:** 2026-07-29  
-**Heatmap:** `outputs/reports/sl_tgt_sweep_v1_short.png`  
+**Heatmap:** `outputs/reports/sl_tp_sweep_v1_short.png`  
 **Rules:** `backtesting_rules/backtesting_rules.md` (Zerodha ZPF / ZSh(D) primary)
 
 ---
@@ -16,8 +16,8 @@
 | **Entry** | Open of next bar (`i+1`), same trading day; skipped if `hour[i+1] >= 15` or date changes |
 | **Signal hour filter** | Signal bar must have `hour < 15` |
 | **SL** | `entry + SL_MULT × ATR14` |
-| **TGT** | `entry - TGT_MULT × ATR14` |
-| **Exit priority** | (1) Date change → prior close · (2) `hour >= 15` → bar open · (3) SL hit · (4) TGT hit |
+| **TP** | `entry - TP_MULT × ATR14` |
+| **Exit priority** | (1) Date change → prior close · (2) `hour >= 15` → bar open · (3) SL hit · (4) TP hit |
 | **Position guard** | Single-pass; resume at `i = k + 1` after each trade |
 | **Universe** | 30 DS3 stocks, 5-min bars, 2015–2025 |
 | **Data path** | `data/historical/intraday_5min_DS3/*.parquet` |
@@ -45,7 +45,7 @@ zpnl  = raw_pnl - total
 
 ```
 SL_MULT  : 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0
-TGT_MULT : 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0
+TP_MULT : 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0
 ```
 
 ---
@@ -56,7 +56,7 @@ TGT_MULT : 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0
 
 | Metric | Value |
 |---|---|
-| **SL × TGT** | **6.0 × 6.0** |
+| **SL × TP** | **6.0 × 6.0** |
 | N trades | 81,675 |
 | N trading days | 2,694 |
 | PF (raw) | 1.124 |
@@ -79,7 +79,7 @@ TGT_MULT : 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0
 
 ## 3. Top 5 by ZPF
 
-| SL | TGT | N | PF | ZPF | Sh(D) | ZSh(D) |
+| SL | TP | N | PF | ZPF | Sh(D) | ZSh(D) |
 |---:|---:|---:|---:|---:|---:|---:|
 | 6.0 | 6.0 | 81,675 | 1.124 | **0.831** | 1.327 | -2.119 |
 | 5.5 | 6.0 | 82,506 | 1.123 | 0.829 | 1.337 | -2.176 |
@@ -89,7 +89,7 @@ TGT_MULT : 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0
 
 ## 4. Top 5 by ZSh(D)
 
-| SL | TGT | N | PF | ZPF | Sh(D) | ZSh(D) |
+| SL | TP | N | PF | ZPF | Sh(D) | ZSh(D) |
 |---:|---:|---:|---:|---:|---:|---:|
 | 6.0 | 6.0 | 81,675 | 1.124 | 0.831 | 1.327 | **-2.119** |
 | 5.5 | 6.0 | 82,506 | 1.123 | 0.829 | 1.337 | -2.176 |
@@ -97,11 +97,11 @@ TGT_MULT : 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0
 | 5.0 | 6.0 | 83,517 | 1.124 | 0.827 | 1.368 | -2.229 |
 | 5.5 | 5.5 | 83,595 | 1.122 | 0.826 | 1.353 | -2.248 |
 
-Wider SL + wider TGT consistently ranks best after charges (still far from viable).
+Wider SL + wider TP consistently ranks best after charges (still far from viable).
 
 ---
 
-## 5. Best combo year-wise (SL=6.0, TGT=6.0)
+## 5. Best combo year-wise (SL=6.0, TP=6.0)
 
 Flag: ✅ ZPF ≥ 1.0 · 🟡 ZPF 0.90–0.99 · ❌ ZPF < 0.90
 
@@ -128,9 +128,9 @@ Flag: ✅ ZPF ≥ 1.0 · 🟡 ZPF 0.90–0.99 · ❌ ZPF < 0.90
 
 ---
 
-## 6. ZPF grid (rows = SL, cols = TGT)
+## 6. ZPF grid (rows = SL, cols = TP)
 
-| SL \ TGT | 2.0 | 2.5 | 3.0 | 3.5 | 4.0 | 4.5 | 5.0 | 5.5 | 6.0 |
+| SL \ TP | 2.0 | 2.5 | 3.0 | 3.5 | 4.0 | 4.5 | 5.0 | 5.5 | 6.0 |
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | **1.5** | 0.633 | 0.671 | 0.696 | 0.712 | 0.721 | 0.730 | 0.736 | 0.741 | 0.743 |
 | **2.0** | 0.671 | 0.710 | 0.734 | 0.751 | 0.761 | 0.770 | 0.775 | 0.780 | 0.781 |
@@ -143,13 +143,13 @@ Flag: ✅ ZPF ≥ 1.0 · 🟡 ZPF 0.90–0.99 · ❌ ZPF < 0.90
 | **5.5** | 0.716 | 0.759 | 0.783 | 0.798 | 0.810 | 0.820 | 0.823 | 0.826 | 0.829 |
 | **6.0** | 0.718 | 0.762 | 0.785 | 0.800 | 0.813 | 0.822 | 0.826 | 0.828 | **0.831** |
 
-**Grid pattern:** ZPF improves monotonically as both SL and TGT widen. Floor is ~0.63 (tight SL/TGT); ceiling is ~0.83 (widest). Nowhere near 1.0.
+**Grid pattern:** ZPF improves monotonically as both SL and TP widen. Floor is ~0.63 (tight SL/TP); ceiling is ~0.83 (widest). Nowhere near 1.0.
 
 ---
 
 ## 7. Full 90-combo table
 
-| SL | TGT | N | PF | ZPF | Sh(D) | ZSh(D) |
+| SL | TP | N | PF | ZPF | Sh(D) | ZSh(D) |
 |---:|---:|---:|---:|---:|---:|---:|
 | 1.5 | 2.0 | 149,181 | 1.089 | 0.633 | 1.924 | -10.101 |
 | 1.5 | 2.5 | 139,586 | 1.102 | 0.671 | 1.988 | -8.217 |
@@ -259,9 +259,9 @@ Flag: ✅ ZPF ≥ 1.0 · 🟡 ZPF 0.90–0.99 · ❌ ZPF < 0.90
 
 | Artifact | Path |
 |---|---|
-| Sweep script | `scripts/trials/baseline_explorations/sweep/sl_tgt_sweep_v1_short.py` |
-| ZPF heatmap PNG | `outputs/reports/sl_tgt_sweep_v1_short.png` |
-| This results file | `scripts/trials/Backtesting Extended/ma20_short_v1/sl_tgt_sweep_v1_short_results.md` |
+| Sweep script | `scripts/trials/baseline_explorations/sweep/sl_tp_sweep_v1_short.py` |
+| ZPF heatmap PNG | `outputs/reports/sl_tp_sweep_v1_short.png` |
+| This results file | `scripts/trials/Backtesting Extended/ma20_short_v1/sl_tp_sweep_v1_short_results.md` |
 | Rules reference | `backtesting_rules/backtesting_rules.md` |
 
 ---
@@ -271,99 +271,99 @@ Flag: ✅ ZPF ≥ 1.0 · 🟡 ZPF 0.90–0.99 · ❌ ZPF < 0.90
 ```
 Loading 30 stocks...
 Loaded. Running 10 x 9 = 90 combo grid sweep...
-  SL=1.5 TGT=2.0  N=149,181  PF=1.089  ZPF=0.633  Sh(D)=1.924  ZSh(D)=-10.101
-  SL=1.5 TGT=2.5  N=139,586  PF=1.102  ZPF=0.671  Sh(D)=1.988  ZSh(D)=-8.217
-  SL=1.5 TGT=3.0  N=132,639  PF=1.113  ZPF=0.696  Sh(D)=2.017  ZSh(D)=-6.985
-  SL=1.5 TGT=3.5  N=127,584  PF=1.121  ZPF=0.712  Sh(D)=2.027  ZSh(D)=-6.169
-  SL=1.5 TGT=4.0  N=123,781  PF=1.123  ZPF=0.721  Sh(D)=1.965  ZSh(D)=-5.677
-  SL=1.5 TGT=4.5  N=120,978  PF=1.129  ZPF=0.730  Sh(D)=1.959  ZSh(D)=-5.260
-  SL=1.5 TGT=5.0  N=118,836  PF=1.132  ZPF=0.736  Sh(D)=1.942  ZSh(D)=-4.945
-  SL=1.5 TGT=5.5  N=117,249  PF=1.136  ZPF=0.741  Sh(D)=1.949  ZSh(D)=-4.725
-  SL=1.5 TGT=6.0  N=116,056  PF=1.137  ZPF=0.743  Sh(D)=1.915  ZSh(D)=-4.573
-  SL=2.0 TGT=2.0  N=136,891  PF=1.099  ZPF=0.671  Sh(D)=1.947  ZSh(D)=-8.098
-  SL=2.0 TGT=2.5  N=127,328  PF=1.110  ZPF=0.710  Sh(D)=1.989  ZSh(D)=-6.546
-  SL=2.0 TGT=3.0  N=120,557  PF=1.118  ZPF=0.734  Sh(D)=1.981  ZSh(D)=-5.532
-  SL=2.0 TGT=3.5  N=115,677  PF=1.126  ZPF=0.751  Sh(D)=1.979  ZSh(D)=-4.869
-  SL=2.0 TGT=4.0  N=111,962  PF=1.130  ZPF=0.761  Sh(D)=1.949  ZSh(D)=-4.443
-  SL=2.0 TGT=4.5  N=109,282  PF=1.135  ZPF=0.770  Sh(D)=1.949  ZSh(D)=-4.108
-  SL=2.0 TGT=5.0  N=107,190  PF=1.137  ZPF=0.775  Sh(D)=1.909  ZSh(D)=-3.855
-  SL=2.0 TGT=5.5  N=105,634  PF=1.139  ZPF=0.780  Sh(D)=1.899  ZSh(D)=-3.695
-  SL=2.0 TGT=6.0  N=104,462  PF=1.139  ZPF=0.781  Sh(D)=1.860  ZSh(D)=-3.588
-  SL=2.5 TGT=2.0  N=129,386  PF=1.091  ZPF=0.686  Sh(D)=1.685  ZSh(D)=-7.153
-  SL=2.5 TGT=2.5  N=119,887  PF=1.104  ZPF=0.726  Sh(D)=1.778  ZSh(D)=-5.761
-  SL=2.5 TGT=3.0  N=113,307  PF=1.113  ZPF=0.751  Sh(D)=1.794  ZSh(D)=-4.853
-  SL=2.5 TGT=3.5  N=108,528  PF=1.118  ZPF=0.766  Sh(D)=1.773  ZSh(D)=-4.286
-  SL=2.5 TGT=4.0  N=104,897  PF=1.123  ZPF=0.778  Sh(D)=1.777  ZSh(D)=-3.879
-  SL=2.5 TGT=4.5  N=102,295  PF=1.127  ZPF=0.786  Sh(D)=1.765  ZSh(D)=-3.605
-  SL=2.5 TGT=5.0  N=100,246  PF=1.129  ZPF=0.791  Sh(D)=1.727  ZSh(D)=-3.389
-  SL=2.5 TGT=5.5  N=98,721  PF=1.129  ZPF=0.794  Sh(D)=1.700  ZSh(D)=-3.270
-  SL=2.5 TGT=6.0  N=97,574  PF=1.129  ZPF=0.796  Sh(D)=1.671  ZSh(D)=-3.172
-  SL=3.0 TGT=2.0  N=124,108  PF=1.087  ZPF=0.695  Sh(D)=1.497  ZSh(D)=-6.418
-  SL=3.0 TGT=2.5  N=114,732  PF=1.100  ZPF=0.736  Sh(D)=1.616  ZSh(D)=-5.160
-  SL=3.0 TGT=3.0  N=108,213  PF=1.107  ZPF=0.760  Sh(D)=1.616  ZSh(D)=-4.384
-  SL=3.0 TGT=3.5  N=103,534  PF=1.111  ZPF=0.775  Sh(D)=1.593  ZSh(D)=-3.883
-  SL=3.0 TGT=4.0  N=99,971  PF=1.117  ZPF=0.787  Sh(D)=1.601  ZSh(D)=-3.507
-  SL=3.0 TGT=4.5  N=97,392  PF=1.119  ZPF=0.794  Sh(D)=1.582  ZSh(D)=-3.280
-  SL=3.0 TGT=5.0  N=95,388  PF=1.120  ZPF=0.798  Sh(D)=1.545  ZSh(D)=-3.102
-  SL=3.0 TGT=5.5  N=93,887  PF=1.120  ZPF=0.801  Sh(D)=1.521  ZSh(D)=-2.991
-  SL=3.0 TGT=6.0  N=92,759  PF=1.120  ZPF=0.803  Sh(D)=1.496  ZSh(D)=-2.901
-  SL=3.5 TGT=2.0  N=120,368  PF=1.085  ZPF=0.702  Sh(D)=1.404  ZSh(D)=-5.938
-  SL=3.5 TGT=2.5  N=111,057  PF=1.101  ZPF=0.745  Sh(D)=1.552  ZSh(D)=-4.724
-  SL=3.5 TGT=3.0  N=104,611  PF=1.109  ZPF=0.769  Sh(D)=1.567  ZSh(D)=-3.996
-  SL=3.5 TGT=3.5  N=99,977  PF=1.113  ZPF=0.784  Sh(D)=1.543  ZSh(D)=-3.542
-  SL=3.5 TGT=4.0  N=96,466  PF=1.118  ZPF=0.796  Sh(D)=1.550  ZSh(D)=-3.193
-  SL=3.5 TGT=4.5  N=93,902  PF=1.121  ZPF=0.803  Sh(D)=1.541  ZSh(D)=-2.972
-  SL=3.5 TGT=5.0  N=91,920  PF=1.122  ZPF=0.807  Sh(D)=1.503  ZSh(D)=-2.818
-  SL=3.5 TGT=5.5  N=90,435  PF=1.122  ZPF=0.810  Sh(D)=1.479  ZSh(D)=-2.720
-  SL=3.5 TGT=6.0  N=89,326  PF=1.122  ZPF=0.813  Sh(D)=1.456  ZSh(D)=-2.636
-  SL=4.0 TGT=2.0  N=117,417  PF=1.090  ZPF=0.710  Sh(D)=1.421  ZSh(D)=-5.520
-  SL=4.0 TGT=2.5  N=108,227  PF=1.104  ZPF=0.752  Sh(D)=1.536  ZSh(D)=-4.389
-  SL=4.0 TGT=3.0  N=101,878  PF=1.112  ZPF=0.776  Sh(D)=1.546  ZSh(D)=-3.700
-  SL=4.0 TGT=3.5  N=97,307  PF=1.116  ZPF=0.791  Sh(D)=1.523  ZSh(D)=-3.274
-  SL=4.0 TGT=4.0  N=93,808  PF=1.121  ZPF=0.803  Sh(D)=1.524  ZSh(D)=-2.954
-  SL=4.0 TGT=4.5  N=91,276  PF=1.124  ZPF=0.811  Sh(D)=1.524  ZSh(D)=-2.737
-  SL=4.0 TGT=5.0  N=89,314  PF=1.125  ZPF=0.815  Sh(D)=1.487  ZSh(D)=-2.594
-  SL=4.0 TGT=5.5  N=87,849  PF=1.125  ZPF=0.818  Sh(D)=1.461  ZSh(D)=-2.505
-  SL=4.0 TGT=6.0  N=86,745  PF=1.125  ZPF=0.821  Sh(D)=1.441  ZSh(D)=-2.425
-  SL=4.5 TGT=2.0  N=115,350  PF=1.095  ZPF=0.716  Sh(D)=1.438  ZSh(D)=-5.212
-  SL=4.5 TGT=2.5  N=106,236  PF=1.109  ZPF=0.759  Sh(D)=1.552  ZSh(D)=-4.127
-  SL=4.5 TGT=3.0  N=99,915  PF=1.116  ZPF=0.783  Sh(D)=1.557  ZSh(D)=-3.474
-  SL=4.5 TGT=3.5  N=95,375  PF=1.120  ZPF=0.798  Sh(D)=1.530  ZSh(D)=-3.066
-  SL=4.5 TGT=4.0  N=91,900  PF=1.125  ZPF=0.810  Sh(D)=1.534  ZSh(D)=-2.759
-  SL=4.5 TGT=4.5  N=89,377  PF=1.130  ZPF=0.819  Sh(D)=1.541  ZSh(D)=-2.541
-  SL=4.5 TGT=5.0  N=87,429  PF=1.130  ZPF=0.823  Sh(D)=1.502  ZSh(D)=-2.412
-  SL=4.5 TGT=5.5  N=85,967  PF=1.130  ZPF=0.826  Sh(D)=1.478  ZSh(D)=-2.326
-  SL=4.5 TGT=6.0  N=84,874  PF=1.130  ZPF=0.828  Sh(D)=1.459  ZSh(D)=-2.252
-  SL=5.0 TGT=2.0  N=113,844  PF=1.090  ZPF=0.716  Sh(D)=1.335  ZSh(D)=-5.068
-  SL=5.0 TGT=2.5  N=104,758  PF=1.105  ZPF=0.759  Sh(D)=1.456  ZSh(D)=-4.014
-  SL=5.0 TGT=3.0  N=98,473  PF=1.112  ZPF=0.783  Sh(D)=1.465  ZSh(D)=-3.399
-  SL=5.0 TGT=3.5  N=93,955  PF=1.115  ZPF=0.797  Sh(D)=1.443  ZSh(D)=-3.006
-  SL=5.0 TGT=4.0  N=90,502  PF=1.120  ZPF=0.809  Sh(D)=1.440  ZSh(D)=-2.720
-  SL=5.0 TGT=4.5  N=87,998  PF=1.124  ZPF=0.818  Sh(D)=1.454  ZSh(D)=-2.502
-  SL=5.0 TGT=5.0  N=86,058  PF=1.124  ZPF=0.822  Sh(D)=1.410  ZSh(D)=-2.382
-  SL=5.0 TGT=5.5  N=84,603  PF=1.123  ZPF=0.825  Sh(D)=1.386  ZSh(D)=-2.303
-  SL=5.0 TGT=6.0  N=83,517  PF=1.124  ZPF=0.827  Sh(D)=1.368  ZSh(D)=-2.229
-  SL=5.5 TGT=2.0  N=112,738  PF=1.089  ZPF=0.716  Sh(D)=1.281  ZSh(D)=-4.944
-  SL=5.5 TGT=2.5  N=103,682  PF=1.103  ZPF=0.759  Sh(D)=1.400  ZSh(D)=-3.920
-  SL=5.5 TGT=3.0  N=97,417  PF=1.109  ZPF=0.783  Sh(D)=1.407  ZSh(D)=-3.325
-  SL=5.5 TGT=3.5  N=92,913  PF=1.114  ZPF=0.798  Sh(D)=1.395  ZSh(D)=-2.940
-  SL=5.5 TGT=4.0  N=89,473  PF=1.118  ZPF=0.810  Sh(D)=1.404  ZSh(D)=-2.655
-  SL=5.5 TGT=4.5  N=86,975  PF=1.124  ZPF=0.820  Sh(D)=1.424  ZSh(D)=-2.438
-  SL=5.5 TGT=5.0  N=85,045  PF=1.123  ZPF=0.823  Sh(D)=1.377  ZSh(D)=-2.326
-  SL=5.5 TGT=5.5  N=83,595  PF=1.122  ZPF=0.826  Sh(D)=1.353  ZSh(D)=-2.248
-  SL=5.5 TGT=6.0  N=82,506  PF=1.123  ZPF=0.829  Sh(D)=1.337  ZSh(D)=-2.176
-  SL=6.0 TGT=2.0  N=111,799  PF=1.090  ZPF=0.718  Sh(D)=1.274  ZSh(D)=-4.813
-  SL=6.0 TGT=2.5  N=102,781  PF=1.105  ZPF=0.762  Sh(D)=1.399  ZSh(D)=-3.811
-  SL=6.0 TGT=3.0  N=96,535  PF=1.110  ZPF=0.785  Sh(D)=1.390  ZSh(D)=-3.243
-  SL=6.0 TGT=3.5  N=92,063  PF=1.114  ZPF=0.800  Sh(D)=1.383  ZSh(D)=-2.866
-  SL=6.0 TGT=4.0  N=88,624  PF=1.120  ZPF=0.813  Sh(D)=1.397  ZSh(D)=-2.583
-  SL=6.0 TGT=4.5  N=86,142  PF=1.124  ZPF=0.822  Sh(D)=1.413  ZSh(D)=-2.374
-  SL=6.0 TGT=5.0  N=84,211  PF=1.124  ZPF=0.826  Sh(D)=1.369  ZSh(D)=-2.263
-  SL=6.0 TGT=5.5  N=82,761  PF=1.123  ZPF=0.828  Sh(D)=1.346  ZSh(D)=-2.185
-  SL=6.0 TGT=6.0  N=81,675  PF=1.124  ZPF=0.831  Sh(D)=1.327  ZSh(D)=-2.119
+  SL=1.5 TP=2.0  N=149,181  PF=1.089  ZPF=0.633  Sh(D)=1.924  ZSh(D)=-10.101
+  SL=1.5 TP=2.5  N=139,586  PF=1.102  ZPF=0.671  Sh(D)=1.988  ZSh(D)=-8.217
+  SL=1.5 TP=3.0  N=132,639  PF=1.113  ZPF=0.696  Sh(D)=2.017  ZSh(D)=-6.985
+  SL=1.5 TP=3.5  N=127,584  PF=1.121  ZPF=0.712  Sh(D)=2.027  ZSh(D)=-6.169
+  SL=1.5 TP=4.0  N=123,781  PF=1.123  ZPF=0.721  Sh(D)=1.965  ZSh(D)=-5.677
+  SL=1.5 TP=4.5  N=120,978  PF=1.129  ZPF=0.730  Sh(D)=1.959  ZSh(D)=-5.260
+  SL=1.5 TP=5.0  N=118,836  PF=1.132  ZPF=0.736  Sh(D)=1.942  ZSh(D)=-4.945
+  SL=1.5 TP=5.5  N=117,249  PF=1.136  ZPF=0.741  Sh(D)=1.949  ZSh(D)=-4.725
+  SL=1.5 TP=6.0  N=116,056  PF=1.137  ZPF=0.743  Sh(D)=1.915  ZSh(D)=-4.573
+  SL=2.0 TP=2.0  N=136,891  PF=1.099  ZPF=0.671  Sh(D)=1.947  ZSh(D)=-8.098
+  SL=2.0 TP=2.5  N=127,328  PF=1.110  ZPF=0.710  Sh(D)=1.989  ZSh(D)=-6.546
+  SL=2.0 TP=3.0  N=120,557  PF=1.118  ZPF=0.734  Sh(D)=1.981  ZSh(D)=-5.532
+  SL=2.0 TP=3.5  N=115,677  PF=1.126  ZPF=0.751  Sh(D)=1.979  ZSh(D)=-4.869
+  SL=2.0 TP=4.0  N=111,962  PF=1.130  ZPF=0.761  Sh(D)=1.949  ZSh(D)=-4.443
+  SL=2.0 TP=4.5  N=109,282  PF=1.135  ZPF=0.770  Sh(D)=1.949  ZSh(D)=-4.108
+  SL=2.0 TP=5.0  N=107,190  PF=1.137  ZPF=0.775  Sh(D)=1.909  ZSh(D)=-3.855
+  SL=2.0 TP=5.5  N=105,634  PF=1.139  ZPF=0.780  Sh(D)=1.899  ZSh(D)=-3.695
+  SL=2.0 TP=6.0  N=104,462  PF=1.139  ZPF=0.781  Sh(D)=1.860  ZSh(D)=-3.588
+  SL=2.5 TP=2.0  N=129,386  PF=1.091  ZPF=0.686  Sh(D)=1.685  ZSh(D)=-7.153
+  SL=2.5 TP=2.5  N=119,887  PF=1.104  ZPF=0.726  Sh(D)=1.778  ZSh(D)=-5.761
+  SL=2.5 TP=3.0  N=113,307  PF=1.113  ZPF=0.751  Sh(D)=1.794  ZSh(D)=-4.853
+  SL=2.5 TP=3.5  N=108,528  PF=1.118  ZPF=0.766  Sh(D)=1.773  ZSh(D)=-4.286
+  SL=2.5 TP=4.0  N=104,897  PF=1.123  ZPF=0.778  Sh(D)=1.777  ZSh(D)=-3.879
+  SL=2.5 TP=4.5  N=102,295  PF=1.127  ZPF=0.786  Sh(D)=1.765  ZSh(D)=-3.605
+  SL=2.5 TP=5.0  N=100,246  PF=1.129  ZPF=0.791  Sh(D)=1.727  ZSh(D)=-3.389
+  SL=2.5 TP=5.5  N=98,721  PF=1.129  ZPF=0.794  Sh(D)=1.700  ZSh(D)=-3.270
+  SL=2.5 TP=6.0  N=97,574  PF=1.129  ZPF=0.796  Sh(D)=1.671  ZSh(D)=-3.172
+  SL=3.0 TP=2.0  N=124,108  PF=1.087  ZPF=0.695  Sh(D)=1.497  ZSh(D)=-6.418
+  SL=3.0 TP=2.5  N=114,732  PF=1.100  ZPF=0.736  Sh(D)=1.616  ZSh(D)=-5.160
+  SL=3.0 TP=3.0  N=108,213  PF=1.107  ZPF=0.760  Sh(D)=1.616  ZSh(D)=-4.384
+  SL=3.0 TP=3.5  N=103,534  PF=1.111  ZPF=0.775  Sh(D)=1.593  ZSh(D)=-3.883
+  SL=3.0 TP=4.0  N=99,971  PF=1.117  ZPF=0.787  Sh(D)=1.601  ZSh(D)=-3.507
+  SL=3.0 TP=4.5  N=97,392  PF=1.119  ZPF=0.794  Sh(D)=1.582  ZSh(D)=-3.280
+  SL=3.0 TP=5.0  N=95,388  PF=1.120  ZPF=0.798  Sh(D)=1.545  ZSh(D)=-3.102
+  SL=3.0 TP=5.5  N=93,887  PF=1.120  ZPF=0.801  Sh(D)=1.521  ZSh(D)=-2.991
+  SL=3.0 TP=6.0  N=92,759  PF=1.120  ZPF=0.803  Sh(D)=1.496  ZSh(D)=-2.901
+  SL=3.5 TP=2.0  N=120,368  PF=1.085  ZPF=0.702  Sh(D)=1.404  ZSh(D)=-5.938
+  SL=3.5 TP=2.5  N=111,057  PF=1.101  ZPF=0.745  Sh(D)=1.552  ZSh(D)=-4.724
+  SL=3.5 TP=3.0  N=104,611  PF=1.109  ZPF=0.769  Sh(D)=1.567  ZSh(D)=-3.996
+  SL=3.5 TP=3.5  N=99,977  PF=1.113  ZPF=0.784  Sh(D)=1.543  ZSh(D)=-3.542
+  SL=3.5 TP=4.0  N=96,466  PF=1.118  ZPF=0.796  Sh(D)=1.550  ZSh(D)=-3.193
+  SL=3.5 TP=4.5  N=93,902  PF=1.121  ZPF=0.803  Sh(D)=1.541  ZSh(D)=-2.972
+  SL=3.5 TP=5.0  N=91,920  PF=1.122  ZPF=0.807  Sh(D)=1.503  ZSh(D)=-2.818
+  SL=3.5 TP=5.5  N=90,435  PF=1.122  ZPF=0.810  Sh(D)=1.479  ZSh(D)=-2.720
+  SL=3.5 TP=6.0  N=89,326  PF=1.122  ZPF=0.813  Sh(D)=1.456  ZSh(D)=-2.636
+  SL=4.0 TP=2.0  N=117,417  PF=1.090  ZPF=0.710  Sh(D)=1.421  ZSh(D)=-5.520
+  SL=4.0 TP=2.5  N=108,227  PF=1.104  ZPF=0.752  Sh(D)=1.536  ZSh(D)=-4.389
+  SL=4.0 TP=3.0  N=101,878  PF=1.112  ZPF=0.776  Sh(D)=1.546  ZSh(D)=-3.700
+  SL=4.0 TP=3.5  N=97,307  PF=1.116  ZPF=0.791  Sh(D)=1.523  ZSh(D)=-3.274
+  SL=4.0 TP=4.0  N=93,808  PF=1.121  ZPF=0.803  Sh(D)=1.524  ZSh(D)=-2.954
+  SL=4.0 TP=4.5  N=91,276  PF=1.124  ZPF=0.811  Sh(D)=1.524  ZSh(D)=-2.737
+  SL=4.0 TP=5.0  N=89,314  PF=1.125  ZPF=0.815  Sh(D)=1.487  ZSh(D)=-2.594
+  SL=4.0 TP=5.5  N=87,849  PF=1.125  ZPF=0.818  Sh(D)=1.461  ZSh(D)=-2.505
+  SL=4.0 TP=6.0  N=86,745  PF=1.125  ZPF=0.821  Sh(D)=1.441  ZSh(D)=-2.425
+  SL=4.5 TP=2.0  N=115,350  PF=1.095  ZPF=0.716  Sh(D)=1.438  ZSh(D)=-5.212
+  SL=4.5 TP=2.5  N=106,236  PF=1.109  ZPF=0.759  Sh(D)=1.552  ZSh(D)=-4.127
+  SL=4.5 TP=3.0  N=99,915  PF=1.116  ZPF=0.783  Sh(D)=1.557  ZSh(D)=-3.474
+  SL=4.5 TP=3.5  N=95,375  PF=1.120  ZPF=0.798  Sh(D)=1.530  ZSh(D)=-3.066
+  SL=4.5 TP=4.0  N=91,900  PF=1.125  ZPF=0.810  Sh(D)=1.534  ZSh(D)=-2.759
+  SL=4.5 TP=4.5  N=89,377  PF=1.130  ZPF=0.819  Sh(D)=1.541  ZSh(D)=-2.541
+  SL=4.5 TP=5.0  N=87,429  PF=1.130  ZPF=0.823  Sh(D)=1.502  ZSh(D)=-2.412
+  SL=4.5 TP=5.5  N=85,967  PF=1.130  ZPF=0.826  Sh(D)=1.478  ZSh(D)=-2.326
+  SL=4.5 TP=6.0  N=84,874  PF=1.130  ZPF=0.828  Sh(D)=1.459  ZSh(D)=-2.252
+  SL=5.0 TP=2.0  N=113,844  PF=1.090  ZPF=0.716  Sh(D)=1.335  ZSh(D)=-5.068
+  SL=5.0 TP=2.5  N=104,758  PF=1.105  ZPF=0.759  Sh(D)=1.456  ZSh(D)=-4.014
+  SL=5.0 TP=3.0  N=98,473  PF=1.112  ZPF=0.783  Sh(D)=1.465  ZSh(D)=-3.399
+  SL=5.0 TP=3.5  N=93,955  PF=1.115  ZPF=0.797  Sh(D)=1.443  ZSh(D)=-3.006
+  SL=5.0 TP=4.0  N=90,502  PF=1.120  ZPF=0.809  Sh(D)=1.440  ZSh(D)=-2.720
+  SL=5.0 TP=4.5  N=87,998  PF=1.124  ZPF=0.818  Sh(D)=1.454  ZSh(D)=-2.502
+  SL=5.0 TP=5.0  N=86,058  PF=1.124  ZPF=0.822  Sh(D)=1.410  ZSh(D)=-2.382
+  SL=5.0 TP=5.5  N=84,603  PF=1.123  ZPF=0.825  Sh(D)=1.386  ZSh(D)=-2.303
+  SL=5.0 TP=6.0  N=83,517  PF=1.124  ZPF=0.827  Sh(D)=1.368  ZSh(D)=-2.229
+  SL=5.5 TP=2.0  N=112,738  PF=1.089  ZPF=0.716  Sh(D)=1.281  ZSh(D)=-4.944
+  SL=5.5 TP=2.5  N=103,682  PF=1.103  ZPF=0.759  Sh(D)=1.400  ZSh(D)=-3.920
+  SL=5.5 TP=3.0  N=97,417  PF=1.109  ZPF=0.783  Sh(D)=1.407  ZSh(D)=-3.325
+  SL=5.5 TP=3.5  N=92,913  PF=1.114  ZPF=0.798  Sh(D)=1.395  ZSh(D)=-2.940
+  SL=5.5 TP=4.0  N=89,473  PF=1.118  ZPF=0.810  Sh(D)=1.404  ZSh(D)=-2.655
+  SL=5.5 TP=4.5  N=86,975  PF=1.124  ZPF=0.820  Sh(D)=1.424  ZSh(D)=-2.438
+  SL=5.5 TP=5.0  N=85,045  PF=1.123  ZPF=0.823  Sh(D)=1.377  ZSh(D)=-2.326
+  SL=5.5 TP=5.5  N=83,595  PF=1.122  ZPF=0.826  Sh(D)=1.353  ZSh(D)=-2.248
+  SL=5.5 TP=6.0  N=82,506  PF=1.123  ZPF=0.829  Sh(D)=1.337  ZSh(D)=-2.176
+  SL=6.0 TP=2.0  N=111,799  PF=1.090  ZPF=0.718  Sh(D)=1.274  ZSh(D)=-4.813
+  SL=6.0 TP=2.5  N=102,781  PF=1.105  ZPF=0.762  Sh(D)=1.399  ZSh(D)=-3.811
+  SL=6.0 TP=3.0  N=96,535  PF=1.110  ZPF=0.785  Sh(D)=1.390  ZSh(D)=-3.243
+  SL=6.0 TP=3.5  N=92,063  PF=1.114  ZPF=0.800  Sh(D)=1.383  ZSh(D)=-2.866
+  SL=6.0 TP=4.0  N=88,624  PF=1.120  ZPF=0.813  Sh(D)=1.397  ZSh(D)=-2.583
+  SL=6.0 TP=4.5  N=86,142  PF=1.124  ZPF=0.822  Sh(D)=1.413  ZSh(D)=-2.374
+  SL=6.0 TP=5.0  N=84,211  PF=1.124  ZPF=0.826  Sh(D)=1.369  ZSh(D)=-2.263
+  SL=6.0 TP=5.5  N=82,761  PF=1.123  ZPF=0.828  Sh(D)=1.346  ZSh(D)=-2.185
+  SL=6.0 TP=6.0  N=81,675  PF=1.124  ZPF=0.831  Sh(D)=1.327  ZSh(D)=-2.119
 
-ZPF Grid (rows=SL, cols=TGT):
-  SL\TGT    2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
+ZPF Grid (rows=SL, cols=TP):
+  SL\TP    2.0    2.5    3.0    3.5    4.0    4.5    5.0    5.5    6.0
      1.5  0.633  0.671  0.696  0.712  0.721  0.730  0.736  0.741  0.743
      2.0  0.671  0.710  0.734  0.751  0.761  0.770  0.775  0.780  0.781
      2.5  0.686  0.726  0.751  0.766  0.778  0.786  0.791  0.794  0.796
@@ -376,7 +376,7 @@ ZPF Grid (rows=SL, cols=TGT):
      6.0  0.718  0.762  0.785  0.800  0.813  0.822  0.826  0.828  0.831
 
 Top 5 by ZPF:
-    SL   TGT        N      PF     ZPF    Sh(D)    ZSh(D)
+    SL   TP        N      PF     ZPF    Sh(D)    ZSh(D)
    6.0   6.0   81,675   1.124   0.831    1.327    -2.119
    5.5   6.0   82,506   1.123   0.829    1.337    -2.176
    4.5   6.0   84,874   1.130   0.828    1.459    -2.252
@@ -384,14 +384,14 @@ Top 5 by ZPF:
    5.0   6.0   83,517   1.124   0.827    1.368    -2.229
 
 Top 5 by ZSh(D):
-    SL   TGT        N      PF     ZPF    Sh(D)    ZSh(D)
+    SL   TP        N      PF     ZPF    Sh(D)    ZSh(D)
    6.0   6.0   81,675   1.124   0.831    1.327    -2.119
    5.5   6.0   82,506   1.123   0.829    1.337    -2.176
    6.0   5.5   82,761   1.123   0.828    1.346    -2.185
    5.0   6.0   83,517   1.124   0.827    1.368    -2.229
    5.5   5.5   83,595   1.122   0.826    1.353    -2.248
 
-Best combo (ZPF): SL=6.0x  TGT=6.0x
+Best combo (ZPF): SL=6.0x  TP=6.0x
 Overall: N=81,675  Days=2,694  PF=1.124  ZPF=0.831  Sh(D)=1.327  ZSh(D)=-2.119  %ProfDays=40.9%
 
 Year        N      PF     ZPF    Sh(D)    ZSh(D)  Flag
@@ -407,8 +407,8 @@ Year        N      PF     ZPF    Sh(D)    ZSh(D)  Flag
   2024    7476   1.099   0.799    1.107    -2.642  ❌
   2025    7616   1.096   0.756    1.143    -3.528  ❌
 
-Best combo (ZSh(D)): SL=6.0x  TGT=6.0x  N=81,675  PF=1.124  ZPF=0.831  Sh(D)=1.327  ZSh(D)=-2.119
+Best combo (ZSh(D)): SL=6.0x  TP=6.0x  N=81,675  PF=1.124  ZPF=0.831  Sh(D)=1.327  ZSh(D)=-2.119
 
-Heatmap saved: C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\outputs\reports\sl_tgt_sweep_v1_short.png
+Heatmap saved: C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\outputs\reports\sl_tp_sweep_v1_short.png
 ```
 

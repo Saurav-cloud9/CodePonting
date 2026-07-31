@@ -60,13 +60,13 @@ for f in files:
             if entry_bar['date'] != touch_date: i += 1; continue
             entry = entry_bar['open']
             sl    = entry - strat.SL_MULT  * atr
-            tgt   = entry + strat.TGT_MULT * atr
+            tp   = entry + strat.TP_MULT * atr
             for k in range(entry_idx, len(df)):
                 k_bar = df.iloc[k]
                 if k_bar['hour'] >= strat.EOD_HOUR:
                     pnl = k_bar['open'] - entry; break
-                if k_bar['high'] >= tgt:
-                    pnl = tgt - entry; break
+                if k_bar['high'] >= tp:
+                    pnl = tp - entry; break
                 if k_bar['low'] <= sl:
                     pnl = sl - entry; break
             all_trades.append({

@@ -6,11 +6,11 @@ import glob
 # v1 + VWAP filter: wick-only touch from below MA20, split by VWAP context
 # Run A: touch bar close < vwap  (below VWAP — bearish context)
 # Run B: touch bar close >= vwap (above VWAP — bullish context, still rejected)
-# SL/TGT locked: SL=2.5x · TGT=4.0x
+# SL/TP locked: SL=2.5x · TP=4.0x
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\intraday_5min_DS3'
 
 SL_MULT   = 2.5
-TGT_MULT  = 4.0
+TP_MULT  = 4.0
 EOD_HOUR  = 15
 
 
@@ -60,7 +60,7 @@ def run_backtest(csv_path, below_vwap):
                 continue
             entry = entry_bar['open']
             sl  = entry + SL_MULT  * atr
-            tgt = entry - TGT_MULT * atr
+            tp = entry - TP_MULT * atr
             for k in range(entry_idx, len(df)):
                 k_bar = df.iloc[k]
                 if k_bar['date'] != touch_date:
@@ -79,8 +79,8 @@ def run_backtest(csv_path, below_vwap):
                     outcome = 'L'
                     exit_dt = k_bar['datetime']
                     break
-                if k_bar['low'] <= tgt:
-                    pnl = entry - tgt
+                if k_bar['low'] <= tp:
+                    pnl = entry - tp
                     outcome = 'W'
                     exit_dt = k_bar['datetime']
                     break
@@ -113,7 +113,7 @@ def run_all(below_vwap, label):
     avg_win   = all_df[all_df['pnl'] > 0]['pnl'].mean()
     avg_loss  = abs(all_df[all_df['pnl'] < 0]['pnl'].mean())
     be_prof   = avg_loss / (avg_win + avg_loss) * 100
-    be_pure   = SL_MULT / (SL_MULT + TGT_MULT) * 100
+    be_pure   = SL_MULT / (SL_MULT + TP_MULT) * 100
     gp = all_df[all_df['pnl'] > 0]['pnl'].sum()
     gl = abs(all_df[all_df['pnl'] < 0]['pnl'].sum())
     pf = gp / gl if gl > 0 else 999

@@ -11,7 +11,7 @@ script processes ONE new candle at a time as it arrives live from Kotak Neo.
 
 v1 touch: clean wick-only touch from below MA20
   high >= ma20 AND open < ma20 AND close < ma20  → body stays below MA20, only wick reaches up.
-SL/TGT locked from v1 sweep (geomean pick): SL=2.0x · TGT=4.5x → PF=1.135 · Sharpe=2.358 (DS3, 11yr)
+SL/TP locked from v1 sweep (geomean pick): SL=2.0x · TP=4.5x → PF=1.135 · Sharpe=2.358 (DS3, 11yr)
 
 This script only READS market data from Kotak Neo (via auth_kotak_neo.py). It never
 places a real order — trades are simulated and logged to CSV as if filled.
@@ -33,7 +33,7 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__
 TRADES_CSV = os.path.join(DATA_DIR, "trades", "rejection_v1_short_trades.csv")
 
 SL_MULT = 2.0
-TGT_MULT = 4.5
+TP_MULT = 4.5
 EOD_HOUR = 15
 MA_PERIOD = 20
 ATR_PERIOD = 14
@@ -52,7 +52,7 @@ CAPITAL = 1_000_000
 RISK_PER_TRADE = 0.01  # 1% of current equity — sizing only, not part of the original signal
 equity = CAPITAL
 
-TRADE_FIELDS = ["symbol", "touch_dt", "entry_dt", "entry", "sl", "tgt", "exit_dt", "qty", "pnl", "outcome"]
+TRADE_FIELDS = ["symbol", "touch_dt", "entry_dt", "entry", "sl", "tp", "exit_dt", "qty", "pnl", "outcome"]
 
 
 # ---------- Indicators (same formulas as core/indicators.py, computed on a rolling buffer) ----------
@@ -119,8 +119,8 @@ def on_new_candle(symbol, row):
             pnl = trade["entry"] - trade["sl"]
             outcome = "L"
             exit_dt = k_bar["datetime"]
-        elif k_bar["low"] <= trade["tgt"]:
-            pnl = trade["entry"] - trade["tgt"]
+        elif k_bar["low"] <= trade["tp"]:
+            pnl = trade["entry"] - trade["tp"]
             outcome = "W"
             exit_dt = k_bar["datetime"]
         else:
@@ -133,7 +133,7 @@ def on_new_candle(symbol, row):
             "entry_dt": trade["entry_dt"],
             "entry": trade["entry"],
             "sl": trade["sl"],
-            "tgt": trade["tgt"],
+            "tp": trade["tp"],
             "exit_dt": exit_dt,
             "qty": trade["qty"],
             "pnl": round(pnl_rupees, 2),
@@ -156,7 +156,7 @@ def on_new_candle(symbol, row):
             atr = touch_row["atr14"]
             entry = entry_bar["open"]
             sl = entry + SL_MULT * atr
-            tgt = entry - TGT_MULT * atr
+            tp = entry - TP_MULT * atr
 
             risk_amount = RISK_PER_TRADE * equity
             qty = max(int(risk_amount // (sl - entry)), 0) if (sl - entry) > 0 else 0
@@ -167,7 +167,7 @@ def on_new_candle(symbol, row):
                     "entry_dt": entry_bar["datetime"],
                     "entry": entry,
                     "sl": sl,
-                    "tgt": tgt,
+                    "tp": tp,
                     "qty": qty,
                 }
             return

@@ -3,7 +3,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min'
-BASE_SL=2.5; BASE_TGT=4.5; MAX_TB_GAP=3; EOD_HOUR=15
+BASE_SL=2.5; BASE_TP=4.5; MAX_TB_GAP=3; EOD_HOUR=15
 
 def compute_rsi(close, period=14):
     delta = close.diff()
@@ -39,7 +39,7 @@ def run_backtest_excursions(csv_path):
             if entry_bar['date'] != touch_date: i += 1; continue
             entry = entry_bar['open']
 
-            # collect ALL bars until EOD (no SL/TGT stop — needed for grid scan)
+            # collect ALL bars until EOD (no SL/TP stop — needed for grid scan)
             bars = []
             k = entry_idx
             while k < len(df):
@@ -53,12 +53,12 @@ def run_backtest_excursions(csv_path):
                              'eod_open': None})
                 k += 1
 
-            # advance i using BASE_SL/TGT so position guarding is consistent
+            # advance i using BASE_SL/TP so position guarding is consistent
             k2 = entry_idx
             while k2 < len(df):
                 kb = df.iloc[k2]
                 if kb['hour'] >= EOD_HOUR: k2 += 1; break
-                if kb['high'] >= entry + BASE_TGT*atr or kb['low'] <= entry - BASE_SL*atr:
+                if kb['high'] >= entry + BASE_TP*atr or kb['low'] <= entry - BASE_SL*atr:
                     k2 += 1; break
                 k2 += 1
 
@@ -76,15 +76,15 @@ for csv_path in csv_files:
     all_trades.extend(run_backtest_excursions(csv_path))
 print(f'Trades collected: {len(all_trades)}')
 
-# ── evaluate outcome for any (sl, tgt) ───────────────────────
-def evaluate(trades, sl, tgt):
+# ── evaluate outcome for any (sl, tp) ───────────────────────
+def evaluate(trades, sl, tp):
     pnls = []
     for t in trades:
         for bar in t['bars']:
             if bar['eod_open'] is not None:
                 pnls.append(bar['eod_open'] * t['atr']); break
-            if bar['h'] >= tgt:
-                pnls.append(tgt * t['atr']); break
+            if bar['h'] >= tp:
+                pnls.append(tp * t['atr']); break
             if bar['l'] <= -sl:
                 pnls.append(-sl * t['atr']); break
     arr = np.array(pnls)
@@ -98,52 +98,52 @@ for t in all_trades:
     for bar in t['bars']:
         if bar['eod_open'] is not None:
             base_pnls.append(bar['eod_open'] * t['atr']); break
-        if bar['h'] >= BASE_TGT:
-            base_pnls.append(BASE_TGT * t['atr']); break
+        if bar['h'] >= BASE_TP:
+            base_pnls.append(BASE_TP * t['atr']); break
         if bar['l'] <= -BASE_SL:
             base_pnls.append(-BASE_SL * t['atr']); break
 
 arr = np.array(base_pnls)
 sl_line = -BASE_SL * np.median([t['atr'] for t in all_trades])
-tgt_line =  BASE_TGT * np.median([t['atr'] for t in all_trades])
+tp_line =  BASE_TP * np.median([t['atr'] for t in all_trades])
 
 plt.style.use('dark_background')
 fig, ax = plt.subplots(figsize=(14, 5))
 ax.hist(arr, bins=120, color='#00aaff', alpha=0.7, edgecolor='none')
 ax.axvline(0,       color='white',   linewidth=1,   linestyle=':',  label='Zero')
 ax.axvline(sl_line, color='#ff4444', linewidth=1.2, linestyle='--', label=f'SL (2.5×ATR median)')
-ax.axvline(tgt_line,color='#00ff88', linewidth=1.2, linestyle='--', label=f'TGT (4.5×ATR median)')
-ax.set_title('PnL Distribution — Baseline (SL=2.5, TGT=4.5) — 30 Stocks', fontsize=13)
+ax.axvline(tp_line,color='#00ff88', linewidth=1.2, linestyle='--', label=f'TP (4.5×ATR median)')
+ax.set_title('PnL Distribution — Baseline (SL=2.5, TP=4.5) — 30 Stocks', fontsize=13)
 ax.set_xlabel('Raw PnL per trade (points)'); ax.set_ylabel('Trade Count')
 ax.legend(); plt.tight_layout()
 out1 = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\outputs\reports\pnl_distribution.png'
 plt.savefig(out1, dpi=150); plt.close()
 print(f'Saved: {out1}')
 
-# ── CHART 2: SL x TGT grid heatmap ───────────────────────────
-print('Running SL x TGT grid scan...')
+# ── CHART 2: SL x TP grid heatmap ───────────────────────────
+print('Running SL x TP grid scan...')
 sl_vals  = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
-tgt_vals = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
+tp_vals = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
 
-grid = np.zeros((len(sl_vals), len(tgt_vals)))
+grid = np.zeros((len(sl_vals), len(tp_vals)))
 for i, sl in enumerate(sl_vals):
-    for j, tgt in enumerate(tgt_vals):
-        pf, _ = evaluate(all_trades, sl, tgt)
+    for j, tp in enumerate(tp_vals):
+        pf, _ = evaluate(all_trades, sl, tp)
         grid[i, j] = round(pf, 3)
-        print(f'  SL={sl} TGT={tgt} PF={pf:.3f}')
+        print(f'  SL={sl} TP={tp} PF={pf:.3f}')
 
 fig, ax = plt.subplots(figsize=(12, 6))
 im = ax.imshow(grid, cmap='RdYlGn', aspect='auto', vmin=0.7, vmax=1.3, origin='lower')
 plt.colorbar(im, ax=ax, label='Profit Factor')
-ax.set_xticks(range(len(tgt_vals))); ax.set_xticklabels(tgt_vals)
+ax.set_xticks(range(len(tp_vals))); ax.set_xticklabels(tp_vals)
 ax.set_yticks(range(len(sl_vals)));  ax.set_yticklabels(sl_vals)
-ax.set_xlabel('TGT Multiplier'); ax.set_ylabel('SL Multiplier')
-ax.set_title('PF Heatmap — SL × TGT Grid (30 Stocks, 2022–2025)', fontsize=13)
+ax.set_xlabel('TP Multiplier'); ax.set_ylabel('SL Multiplier')
+ax.set_title('PF Heatmap — SL × TP Grid (30 Stocks, 2022–2025)', fontsize=13)
 for i in range(len(sl_vals)):
-    for j in range(len(tgt_vals)):
+    for j in range(len(tp_vals)):
         ax.text(j, i, f'{grid[i,j]:.3f}', ha='center', va='center', fontsize=8,
                 color='black' if 0.85 < grid[i,j] < 1.15 else 'white')
 plt.tight_layout()
-out2 = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\outputs\reports\sl_tgt_heatmap.png'
+out2 = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\outputs\reports\sl_tp_heatmap.png'
 plt.savefig(out2, dpi=150); plt.close()
 print(f'Saved: {out2}')

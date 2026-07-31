@@ -7,7 +7,7 @@
 - Read `PROGRESS.md` (in this same folder) at the start of every session before doing anything else.
 
 ## Hard rule — always follow backtesting_rules.md
-- Before writing, editing, or running ANY backtest script, read `backtesting_rules/backtesting_rules.md` in full and follow it exactly (EOD exit logic, ATR14 SL/TGT convention, NPF formula, etc.).
+- Before writing, editing, or running ANY backtest script, read `backtesting_rules/backtesting_rules.md` in full and follow it exactly (EOD exit logic, ATR14 SL/TP convention, NPF formula, etc.).
 - If a script or request conflicts with what's in `backtesting_rules.md`, flag it and confirm with Saurav before proceeding — never silently deviate.
 
 ## Session end

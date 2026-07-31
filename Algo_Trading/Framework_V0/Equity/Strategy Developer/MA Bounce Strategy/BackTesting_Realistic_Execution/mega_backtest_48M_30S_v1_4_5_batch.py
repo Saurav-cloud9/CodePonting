@@ -34,10 +34,10 @@ INTRADAY_DIR      = Path(r'c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V1
 VOLUME_MULTIPLIER = 1.2
 
 ATR_CONFIGS = {
-    'Extreme-1': {'sl_mult': 2.5, 'tgt_mult': 4.0},
-    'Extreme-2': {'sl_mult': 2.5, 'tgt_mult': 4.5},
-    'Extreme-3': {'sl_mult': 3.0, 'tgt_mult': 4.5},
-    'Extreme-4': {'sl_mult': 3.0, 'tgt_mult': 5.0},
+    'Extreme-1': {'sl_mult': 2.5, 'tp_mult': 4.0},
+    'Extreme-2': {'sl_mult': 2.5, 'tp_mult': 4.5},
+    'Extreme-3': {'sl_mult': 3.0, 'tp_mult': 4.5},
+    'Extreme-4': {'sl_mult': 3.0, 'tp_mult': 5.0},
 }
 
 # No Filter only — for direct comparison with Framework_V1
@@ -156,7 +156,7 @@ def simulate_trades(df, signals, atr_config, stock_name="", filter_name="", atr_
         if pd.isna(entry_atr): continue
 
         stop_price   = entry_price - (entry_atr * atr_config['sl_mult'])
-        target_price = entry_price + (entry_atr * atr_config['tgt_mult'])
+        target_price = entry_price + (entry_atr * atr_config['tp_mult'])
         exit_price, exit_time, exit_reason, exit_idx = None, None, None, None
 
         # BUG (original): 80-candle hard cap, no same-day EOD logic

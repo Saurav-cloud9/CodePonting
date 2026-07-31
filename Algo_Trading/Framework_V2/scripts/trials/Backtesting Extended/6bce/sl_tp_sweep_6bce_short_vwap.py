@@ -5,11 +5,11 @@ import numpy as np
 import glob
 import os
 
-# 6BCE + Below-VWAP filter — SHORT — 90-combo SL/TGT sweep
+# 6BCE + Below-VWAP filter — SHORT — 90-combo SL/TP sweep
 # Signal: close[i] == highest close of last 6 bars (i-5 to i inclusive), hour[i] < 15
 # Filter: close[i] < VWAP[i]  (strict; ties at VWAP excluded — not bearish confirmation)
 # Entry:  SHORT at open[i+1], same day, hour[i+1] < 15
-# Exit:   per backtesting_rules_v2.md Section 4 (date change → hour≥15 → SL → TGT)
+# Exit:   per backtesting_rules_v2.md Section 4 (date change → hour≥15 → SL → TP)
 # Guard:  §13 inline single-pass, i = k+1, exit loop starts at k = ei
 # Metrics: ZPF + ZSh(D) primary (Zerodha charges); PF + Sh(D) reference
 # Cache:   sweep_cache_6bce_vwap.npz  (overall_grid, yearly_grid, yearly_zshd_grid)
@@ -22,7 +22,7 @@ WINDOW     = 6
 YEARS      = list(range(2015, 2026))
 
 SL_VALS  = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
-TGT_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
+TP_VALS = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
 
 
 def zerodha_charge(entry, exit_px):
@@ -74,7 +74,7 @@ def load_stocks():
     return stocks
 
 
-def run_combo(stocks, sl_m, tgt_m):
+def run_combo(stocks, sl_m, tp_m):
     all_pnl   = []
     all_zpnl  = []
     all_dates = []
@@ -107,9 +107,9 @@ def run_combo(stocks, sl_m, tgt_m):
             # enter SHORT
             entry_px   = open_[ei]
             sl         = entry_px + sl_m  * atr[i]
-            tgt        = entry_px - tgt_m * atr[i]
+            tp        = entry_px - tp_m * atr[i]
             trade_date = date[i]
-            # exit loop — priority: date change → hour≥15 → SL → TGT  (§13: k = ei)
+            # exit loop — priority: date change → hour≥15 → SL → TP  (§13: k = ei)
             k = ei
             exit_px = entry_px
             exit_dt = trade_date
@@ -120,8 +120,8 @@ def run_combo(stocks, sl_m, tgt_m):
                     exit_px = open_[k]; exit_dt = date[k]; break
                 if high[k] >= sl:
                     exit_px = sl; exit_dt = date[k]; break
-                if low[k] <= tgt:
-                    exit_px = tgt; exit_dt = date[k]; break
+                if low[k] <= tp:
+                    exit_px = tp; exit_dt = date[k]; break
                 k += 1
             else:
                 # end of data without break
@@ -207,23 +207,23 @@ print('  Entry:  SHORT open[i+1], same day, hour[i+1]<15')
 print('Rules: backtesting_rules_v2.md | Data: DS3 30 stocks 2015-2025\n')
 print('Loading stocks (+ VWAP)...')
 stocks = load_stocks()
-print(f'Loaded {len(stocks)} stocks. Running {len(SL_VALS)} × {len(TGT_VALS)} = {len(SL_VALS)*len(TGT_VALS)} combos...\n')
+print(f'Loaded {len(stocks)} stocks. Running {len(SL_VALS)} × {len(TP_VALS)} = {len(SL_VALS)*len(TP_VALS)} combos...\n')
 
-results = {}          # (sl,tgt) -> metrics tuple
-trade_cache = {}      # (sl,tgt) -> (pnl, zpnl, dates)
+results = {}          # (sl,tp) -> metrics tuple
+trade_cache = {}      # (sl,tp) -> (pnl, zpnl, dates)
 
-overall_grid     = np.zeros((len(SL_VALS), len(TGT_VALS)))
-yearly_grid      = np.zeros((len(SL_VALS), len(TGT_VALS), len(YEARS)))
-yearly_zshd_grid = np.zeros((len(SL_VALS), len(TGT_VALS), len(YEARS)))
+overall_grid     = np.zeros((len(SL_VALS), len(TP_VALS)))
+yearly_grid      = np.zeros((len(SL_VALS), len(TP_VALS), len(YEARS)))
+yearly_zshd_grid = np.zeros((len(SL_VALS), len(TP_VALS), len(YEARS)))
 
 for si, sl in enumerate(SL_VALS):
-    for ti, tgt in enumerate(TGT_VALS):
-        pnl, zpnl, dates = run_combo(stocks, sl, tgt)
+    for ti, tp in enumerate(TP_VALS):
+        pnl, zpnl, dates = run_combo(stocks, sl, tp)
         n, pf, zpf, shd, zshd, pct = compute_metrics(pnl, zpnl, dates)
         ndays = len(set(dates)) if dates else 0
         cs = consistency_score(pnl, zpnl, dates)
-        results[(sl, tgt)] = (n, ndays, pf, zpf, shd, zshd, pct, cs)
-        trade_cache[(sl, tgt)] = (pnl, zpnl, dates)
+        results[(sl, tp)] = (n, ndays, pf, zpf, shd, zshd, pct, cs)
+        trade_cache[(sl, tp)] = (pnl, zpnl, dates)
 
         overall_grid[si, ti] = zpf
         y_zpf, y_zshd = yearly_zpf_zshd_arrays(pnl, zpnl, dates)
@@ -242,31 +242,31 @@ print(f'\nCache saved: {CACHE_PATH}\n')
 print('=' * 90)
 print('90-COMBO SWEEP TABLE')
 print('=' * 90)
-hdr = (f'  {"SL":>5}  {"TGT":>5}  {"N":>8}  {"Days":>5}  {"PF":>6}  {"ZPF":>6}  '
+hdr = (f'  {"SL":>5}  {"TP":>5}  {"N":>8}  {"Days":>5}  {"PF":>6}  {"ZPF":>6}  '
        f'{"Sh(D)":>7}  {"ZSh(D)":>8}  {"%ProfD":>7}  {"ConsScr":>8}')
 print(hdr)
 print('  ' + '-' * 86)
 for sl in SL_VALS:
-    for tgt in TGT_VALS:
-        n, ndays, pf, zpf, shd, zshd, pct, cs = results[(sl, tgt)]
-        print(f'  {sl:5.1f}  {tgt:5.1f}  {n:>8,}  {ndays:>5}  {pf:6.3f}  {zpf:6.3f}  '
+    for tp in TP_VALS:
+        n, ndays, pf, zpf, shd, zshd, pct, cs = results[(sl, tp)]
+        print(f'  {sl:5.1f}  {tp:5.1f}  {n:>8,}  {ndays:>5}  {pf:6.3f}  {zpf:6.3f}  '
               f'{shd:7.3f}  {zshd:8.3f}  {pct:7.1f}  {cs:8.3f}')
 
 print()
 
 # ── ZPF GRID ──────────────────────────────────────────────────────────────────
-print('ZPF Grid (rows=SL, cols=TGT):')
-print('  SL\\TGT ' + ''.join(f'  {t:4.1f}' for t in TGT_VALS))
+print('ZPF Grid (rows=SL, cols=TP):')
+print('  SL\\TP ' + ''.join(f'  {t:4.1f}' for t in TP_VALS))
 for sl in SL_VALS:
-    print(f'  {sl:5.1f} ' + ''.join(f' {results[(sl,tgt)][3]:5.3f}' for tgt in TGT_VALS))
+    print(f'  {sl:5.1f} ' + ''.join(f' {results[(sl,tp)][3]:5.3f}' for tp in TP_VALS))
 
 print()
 
 # ── PF GRID ───────────────────────────────────────────────────────────────────
-print('PF Grid (rows=SL, cols=TGT):')
-print('  SL\\TGT ' + ''.join(f'  {t:4.1f}' for t in TGT_VALS))
+print('PF Grid (rows=SL, cols=TP):')
+print('  SL\\TP ' + ''.join(f'  {t:4.1f}' for t in TP_VALS))
 for sl in SL_VALS:
-    print(f'  {sl:5.1f} ' + ''.join(f' {results[(sl,tgt)][2]:5.3f}' for tgt in TGT_VALS))
+    print(f'  {sl:5.1f} ' + ''.join(f' {results[(sl,tp)][2]:5.3f}' for tp in TP_VALS))
 
 print()
 
@@ -275,37 +275,37 @@ ranked_zpf  = sorted(results.items(), key=lambda x: x[1][3], reverse=True)
 ranked_zshd = sorted(results.items(), key=lambda x: x[1][5], reverse=True)
 ranked_cs   = sorted(results.items(), key=lambda x: x[1][7], reverse=True)
 
-hdr2 = f'  {"SL":>5}  {"TGT":>5}  {"N":>8}  {"PF":>6}  {"ZPF":>6}  {"Sh(D)":>7}  {"ZSh(D)":>8}  {"%ProfDays":>10}  {"ConsScr":>8}'
+hdr2 = f'  {"SL":>5}  {"TP":>5}  {"N":>8}  {"PF":>6}  {"ZPF":>6}  {"Sh(D)":>7}  {"ZSh(D)":>8}  {"%ProfDays":>10}  {"ConsScr":>8}'
 print('Top 5 by ZPF:')
 print(hdr2)
-for (sl, tgt), (n, ndays, pf, zpf, shd, zshd, pct, cs) in ranked_zpf[:5]:
-    print(f'  {sl:5.1f}  {tgt:5.1f}  {n:>8,}  {pf:6.3f}  {zpf:6.3f}  {shd:7.3f}  {zshd:8.3f}  {pct:>10.1f}  {cs:8.3f}')
+for (sl, tp), (n, ndays, pf, zpf, shd, zshd, pct, cs) in ranked_zpf[:5]:
+    print(f'  {sl:5.1f}  {tp:5.1f}  {n:>8,}  {pf:6.3f}  {zpf:6.3f}  {shd:7.3f}  {zshd:8.3f}  {pct:>10.1f}  {cs:8.3f}')
 
 print()
 print('Top 5 by ZSh(D):')
 print(hdr2)
-for (sl, tgt), (n, ndays, pf, zpf, shd, zshd, pct, cs) in ranked_zshd[:5]:
-    print(f'  {sl:5.1f}  {tgt:5.1f}  {n:>8,}  {pf:6.3f}  {zpf:6.3f}  {shd:7.3f}  {zshd:8.3f}  {pct:>10.1f}  {cs:8.3f}')
+for (sl, tp), (n, ndays, pf, zpf, shd, zshd, pct, cs) in ranked_zshd[:5]:
+    print(f'  {sl:5.1f}  {tp:5.1f}  {n:>8,}  {pf:6.3f}  {zpf:6.3f}  {shd:7.3f}  {zshd:8.3f}  {pct:>10.1f}  {cs:8.3f}')
 
 print()
 print('Top 5 by Consistency Score (mean yearly ZSh - std yearly ZSh):')
 print(hdr2)
-for (sl, tgt), (n, ndays, pf, zpf, shd, zshd, pct, cs) in ranked_cs[:5]:
-    print(f'  {sl:5.1f}  {tgt:5.1f}  {n:>8,}  {pf:6.3f}  {zpf:6.3f}  {shd:7.3f}  {zshd:8.3f}  {pct:>10.1f}  {cs:8.3f}')
+for (sl, tp), (n, ndays, pf, zpf, shd, zshd, pct, cs) in ranked_cs[:5]:
+    print(f'  {sl:5.1f}  {tp:5.1f}  {n:>8,}  {pf:6.3f}  {zpf:6.3f}  {shd:7.3f}  {zshd:8.3f}  {pct:>10.1f}  {cs:8.3f}')
 
 print()
 
 # ── BEST BY ZPF — OVERALL + YEAR-WISE ────────────────────────────────────────
-(best_sl, best_tgt) = ranked_zpf[0][0]
-best_n, best_ndays, best_pf, best_zpf, best_shd, best_zshd, best_pct, best_cs = results[(best_sl, best_tgt)]
+(best_sl, best_tp) = ranked_zpf[0][0]
+best_n, best_ndays, best_pf, best_zpf, best_shd, best_zshd, best_pct, best_cs = results[(best_sl, best_tp)]
 
 print('=' * 90)
-print(f'Best combo by ZPF: SL={best_sl}x  TGT={best_tgt}x')
+print(f'Best combo by ZPF: SL={best_sl}x  TP={best_tp}x')
 print(f'Overall: N={best_n:,}  Days={best_ndays}  PF={best_pf}  ZPF={best_zpf}  '
       f'Sh(D)={best_shd}  ZSh(D)={best_zshd}  ProfDays={best_pct}%  ConsScr={best_cs}')
 print()
 print('Year-wise (best ZPF combo):')
-pnl, zpnl, dates = trade_cache[(best_sl, best_tgt)]
+pnl, zpnl, dates = trade_cache[(best_sl, best_tp)]
 yr_rows = year_metrics(pnl, zpnl, dates)
 print(f'  {"Year":>5}  {"N":>7}  {"Days":>5}  {"PF":>6}  {"ZPF":>6}  {"Sh(D)":>7}  {"ZSh(D)":>8}  {"%ProfDays":>10}  {"":>2}')
 for r in yr_rows:
@@ -313,16 +313,16 @@ for r in yr_rows:
           f'{r["Sh(D)"]:7.3f}  {r["ZSh(D)"]:8.3f}  {r["%ProfDays"]:>10.1f}  {r[""]:>2}')
 
 # ── BEST BY CONSISTENCY — OVERALL + YEAR-WISE (rules §11 preferred) ──────────
-(cs_sl, cs_tgt) = ranked_cs[0][0]
-cs_n, cs_ndays, cs_pf, cs_zpf, cs_shd, cs_zshd, cs_pct, cs_cs = results[(cs_sl, cs_tgt)]
+(cs_sl, cs_tp) = ranked_cs[0][0]
+cs_n, cs_ndays, cs_pf, cs_zpf, cs_shd, cs_zshd, cs_pct, cs_cs = results[(cs_sl, cs_tp)]
 print()
 print('=' * 90)
-print(f'Best combo by Consistency Score: SL={cs_sl}x  TGT={cs_tgt}x')
+print(f'Best combo by Consistency Score: SL={cs_sl}x  TP={cs_tp}x')
 print(f'Overall: N={cs_n:,}  Days={cs_ndays}  PF={cs_pf}  ZPF={cs_zpf}  '
       f'Sh(D)={cs_shd}  ZSh(D)={cs_zshd}  ProfDays={cs_pct}%  ConsScr={cs_cs}')
 print()
 print('Year-wise (best Consistency combo):')
-pnl, zpnl, dates = trade_cache[(cs_sl, cs_tgt)]
+pnl, zpnl, dates = trade_cache[(cs_sl, cs_tp)]
 yr_rows = year_metrics(pnl, zpnl, dates)
 print(f'  {"Year":>5}  {"N":>7}  {"Days":>5}  {"PF":>6}  {"ZPF":>6}  {"Sh(D)":>7}  {"ZSh(D)":>8}  {"%ProfDays":>10}  {"":>2}')
 for r in yr_rows:
@@ -333,7 +333,7 @@ for r in yr_rows:
 print()
 print('=' * 90)
 print('Viability (rules §12): need ZPF > 1.0 AND ZSh(D) > 0')
-print(f'  Best ZPF combo      SL={best_sl}/{best_tgt}: ZPF={best_zpf}  ZSh(D)={best_zshd}  → '
+print(f'  Best ZPF combo      SL={best_sl}/{best_tp}: ZPF={best_zpf}  ZSh(D)={best_zshd}  → '
       f'{"PASS" if best_zpf > 1.0 and best_zshd > 0 else "FAIL"}')
-print(f'  Best ConsScr combo  SL={cs_sl}/{cs_tgt}: ZPF={cs_zpf}  ZSh(D)={cs_zshd}  → '
+print(f'  Best ConsScr combo  SL={cs_sl}/{cs_tp}: ZPF={cs_zpf}  ZSh(D)={cs_zshd}  → '
       f'{"PASS" if cs_zpf > 1.0 and cs_zshd > 0 else "FAIL"}')

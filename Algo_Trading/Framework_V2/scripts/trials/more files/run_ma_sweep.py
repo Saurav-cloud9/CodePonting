@@ -14,7 +14,7 @@ P05_MIN, P05_MAX = 0.0, 1.6
 P06_MAX  = 55
 P08_MIN  = 0.5
 SL_MULT  = 2.5
-TGT_MULT = 4.5
+TP_MULT = 4.5
 
 MA_VARIANTS = [
     ('SMA10', 'SMA', 10),
@@ -149,24 +149,24 @@ def _run_ma(s, ma):
 
         entry_price = op[eb]
         sl     = entry_price - SL_MULT  * atr_i
-        target = entry_price + TGT_MULT * atr_i
+        target = entry_price + TP_MULT * atr_i
         outcome = 'EOD-'
         pnl     = cl[-1] - entry_price
 
         for j in range(eb, N):
             lo_j = lo[j]; hi_j = hi[j]
             hit_sl  = lo_j <= sl
-            hit_tgt = hi_j >= target
-            if hit_sl and hit_tgt:
+            hit_tp = hi_j >= target
+            if hit_sl and hit_tp:
                 if abs(op[j] - sl) <= abs(op[j] - target):
                     outcome = 'L'; pnl = -SL_MULT  * atr_i
                 else:
-                    outcome = 'W'; pnl =  TGT_MULT * atr_i
+                    outcome = 'W'; pnl =  TP_MULT * atr_i
                 break
             if hit_sl:
                 outcome = 'L'; pnl = -SL_MULT  * atr_i; break
-            if hit_tgt:
-                outcome = 'W'; pnl =  TGT_MULT * atr_i; break
+            if hit_tp:
+                outcome = 'W'; pnl =  TP_MULT * atr_i; break
             if mins[j] >= CUT_EXIT:
                 pnl = op[j] - entry_price
                 outcome = 'EOD+' if pnl > 0 else 'EOD-'

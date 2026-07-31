@@ -1,7 +1,7 @@
 # Trading ABC fv2 Backtest — long only
 # Signal : Trading ABC (TV community) — trend cloud + zigzag ABC + Fib check + MA bounce
 # Entry  : next bar's open after triangle bar
-# SL     : 2.5x ATR14   TGT : 4.5x ATR14 (R:R=1.8, fv2 baseline convention)
+# SL     : 2.5x ATR14   TP : 4.5x ATR14 (R:R=1.8, fv2 baseline convention)
 # EOD    : 15:00
 
 import sys, io
@@ -19,7 +19,7 @@ ERR_RATE  = 0.05
 MAX_BARS  = 6          # abc_bar_count window
 ATR_LEN   = 14
 SL_MULT   = 2.5
-TGT_MULT  = 4.5
+TP_MULT  = 4.5
 EOD       = dt_time(15, 0)
 
 DATA_5MIN = 'Algo_Trading/Framework_V2/data/historical/csv/intraday_5min'
@@ -160,20 +160,20 @@ def run(symbol):
     # ── Simulation ──────────────────────────────────────────
     results = []
     in_trade = False
-    ep = sl = tgt = entry_date = None
+    ep = sl = tp = entry_date = None
 
     for i in range(1, n):
         row = df.iloc[i]
 
         if in_trade:
             hit_sl  = row['low']  <= sl
-            hit_tgt = row['high'] >= tgt
+            hit_tp = row['high'] >= tp
             is_eod  = row['t'] >= EOD or row['date'] != entry_date
 
-            if hit_sl and hit_tgt:
+            if hit_sl and hit_tp:
                 pnl, ex = sl - ep, 'SL'
-            elif hit_tgt:
-                pnl, ex = tgt - ep, 'TGT'
+            elif hit_tp:
+                pnl, ex = tp - ep, 'TP'
             elif hit_sl:
                 pnl, ex = sl - ep, 'SL'
             elif is_eod:
@@ -191,7 +191,7 @@ def run(symbol):
             ep = row['open']
             atr_val = df.iloc[i - 1]['atr']
             sl = ep - SL_MULT * atr_val
-            tgt = ep + TGT_MULT * atr_val
+            tp = ep + TP_MULT * atr_val
             entry_date = row['date']
             in_trade = True
 
@@ -210,8 +210,8 @@ def summarise(r):
     pf = (w * avg_w) / (-l * avg_l) if l and avg_l < 0 else float('inf')
     be = (-avg_l) / (avg_w - avg_l) * 100 if (avg_w > 0 and avg_l < 0) else 0
 
-    print(f"\nTrading ABC fv2 Backtest — {SYMBOL}  SL={SL_MULT}x  TGT={TGT_MULT}x  ATR{ATR_LEN}")
-    print(f"Theoretical BE = {SL_MULT/(SL_MULT+TGT_MULT)*100:.1f}%\n")
+    print(f"\nTrading ABC fv2 Backtest — {SYMBOL}  SL={SL_MULT}x  TP={TP_MULT}x  ATR{ATR_LEN}")
+    print(f"Theoretical BE = {SL_MULT/(SL_MULT+TP_MULT)*100:.1f}%\n")
     print(f"{'Trades':>7}  {'Wins':>5}  {'Losses':>6}  {'WR%':>6}  {'Net PnL':>10}  {'PF':>6}  {'BE%':>6}")
     print(f"{len(r):>7}  {w:>5}  {l:>6}  {wr:>5.1f}%  {pnl:>10.2f}  {pf:>6.3f}  {be:>5.1f}%")
 

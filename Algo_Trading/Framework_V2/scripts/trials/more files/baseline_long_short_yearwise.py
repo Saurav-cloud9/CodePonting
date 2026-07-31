@@ -1,6 +1,6 @@
 """
 Baseline LONG vs SHORT — year-wise comparison
-Same SL=2.0x TGT=3.5x, position guard, 30 stocks 2022-2025
+Same SL=2.0x TP=3.5x, position guard, 30 stocks 2022-2025
 Long:  low<=MA20, open>MA20, close>MA20
 Short: high>=MA20, open<MA20, close<MA20
 """
@@ -8,7 +8,7 @@ import sys, io, glob, pandas as pd, numpy as np
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 CSV_DIR='Algo_Trading/Framework_V2/data/historical/csv/intraday_5min'
-ATR_LEN=14; MA_LEN=20; EOD_HOUR=15; SL_M=2.0; TGT_M=3.5
+ATR_LEN=14; MA_LEN=20; EOD_HOUR=15; SL_M=2.0; TP_M=3.5
 
 def load(f):
     df=pd.read_csv(f,low_memory=False); df.columns=df.columns.str.strip()
@@ -38,24 +38,24 @@ def get_trades(df, side):
             if date[ei]!=date[i]: continue
             entry=open_[ei]
             if side == 'long':
-                sl=entry-SL_M*atr[i]; tgt=entry+TGT_M*atr[i]
+                sl=entry-SL_M*atr[i]; tp=entry+TP_M*atr[i]
             else:
-                sl=entry+SL_M*atr[i]; tgt=entry-TGT_M*atr[i]
+                sl=entry+SL_M*atr[i]; tp=entry-TP_M*atr[i]
             for k in range(ei,n):
                 if hour[k]>=EOD_HOUR or date[k]!=date[i]:
                     pnl=(open_[k]-entry) if side=='long' else (entry-open_[k]); break
                 if side=='long':
-                    if high[k]>=tgt: pnl=tgt-entry; break
+                    if high[k]>=tp: pnl=tp-entry; break
                     if low[k]<=sl:   pnl=sl-entry;  break
                 else:
-                    if low[k]<=tgt:  pnl=entry-tgt; break
+                    if low[k]<=tp:  pnl=entry-tp; break
                     if high[k]>=sl:  pnl=entry-sl;  break
             next_allowed=k+1
             trades.append({'pnl':pnl,'year':df.iloc[ei]['datetime'].year})
     return trades
 
 def summarise(trades, label):
-    print(f'\n{label}  (SL={SL_M}x TGT={TGT_M}x)')
+    print(f'\n{label}  (SL={SL_M}x TP={TP_M}x)')
     print(f"{'Year':<6} {'N':>6}  {'PF':>6}  {'Sharpe':>7}  {'WR%':>6}")
     print('-'*38)
     all_t = []

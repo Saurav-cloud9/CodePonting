@@ -28,10 +28,10 @@ from core.portfolio import Portfolio
 # ATR CONFIGS
 # =========================================================
 ATR_CONFIGS = {
-    'Extreme-1': {'sl_mult': 2.5, 'tgt_mult': 4.0},
-    'Extreme-2': {'sl_mult': 2.5, 'tgt_mult': 4.5},
-    'Extreme-3': {'sl_mult': 3.0, 'tgt_mult': 4.5},
-    'Extreme-4': {'sl_mult': 3.0, 'tgt_mult': 5.0},
+    'Extreme-1': {'sl_mult': 2.5, 'tp_mult': 4.0},
+    'Extreme-2': {'sl_mult': 2.5, 'tp_mult': 4.5},
+    'Extreme-3': {'sl_mult': 3.0, 'tp_mult': 4.5},
+    'Extreme-4': {'sl_mult': 3.0, 'tp_mult': 5.0},
 }
 
 
@@ -101,7 +101,7 @@ for stock_path in stock_files:
             engine = BacktestEngine(df)
             engine.portfolio = Portfolio(
                 atr_mult_stop=config['sl_mult'],
-                rr_target=config['tgt_mult'] / config['sl_mult'],
+                rr_target=config['tp_mult'] / config['sl_mult'],
             )
 
             trades, equity, stats = engine.run()

@@ -63,21 +63,21 @@ SPECIFIED_BEST = {
 }
 
 ATR_CONFIGS = {
-    "Extreme-1": {"sl_mult": 2.5, "tgt_mult": 4.0},
-    "Extreme-2": {"sl_mult": 2.5, "tgt_mult": 4.5},
-    "Extreme-3": {"sl_mult": 3.0, "tgt_mult": 4.5},
-    "Extreme-4": {"sl_mult": 3.0, "tgt_mult": 5.0},
+    "Extreme-1": {"sl_mult": 2.5, "tp_mult": 4.0},
+    "Extreme-2": {"sl_mult": 2.5, "tp_mult": 4.5},
+    "Extreme-3": {"sl_mult": 3.0, "tp_mult": 4.5},
+    "Extreme-4": {"sl_mult": 3.0, "tp_mult": 5.0},
 }
 
 
 # ─── FAST INLINE BACKTEST ──────────────────────────────────────────────────────
-def run_stock_fast(df: pd.DataFrame, sl_mult: float, tgt_mult: float) -> pd.DataFrame:
+def run_stock_fast(df: pd.DataFrame, sl_mult: float, tp_mult: float) -> pd.DataFrame:
     """
     Numpy-based backtest replicating strategy.py + portfolio.py logic exactly.
     No pd.Timestamp() in inner loop — uses integer time arrays throughout.
     Returns a DataFrame of closed trades with columns: entry_time, pnl.
     """
-    rr_target = tgt_mult / sl_mult
+    rr_target = tp_mult / sl_mult
     n = len(df)
     if n < 4:
         return pd.DataFrame()
@@ -261,7 +261,7 @@ for stock_path in stock_files:
         df = compute_daily_mas(df)
         df = add_atr(df)
 
-        trades = run_stock_fast(df, cfg["sl_mult"], cfg["tgt_mult"])
+        trades = run_stock_fast(df, cfg["sl_mult"], cfg["tp_mult"])
 
         if trades.empty:
             per_stock_rows.append({

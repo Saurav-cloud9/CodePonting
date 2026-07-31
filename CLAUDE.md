@@ -14,6 +14,15 @@
           with what happened, and sync any live-file code changes back to the local
           CodePonting copy (source of truth) in the same pass
 
+── RESPONSE FORMATTING ──────────────────────────────────────────
+
+  Default to bullet-point format for assessments, reviews, and multi-point
+  analysis (e.g. reviewing a document/recommendation, summarizing findings,
+  giving feedback on a plan) — one point per line, bolded lead-in where useful
+  — rather than flowing paragraphs. Easier to scan and reference back to.
+  Plain prose is still fine for short answers, direct questions, or single-point
+  replies — this applies specifically to multi-point breakdowns.
+
 ── KITE BOT: LOCAL↔VM SYNC ────────────────────────────────────────
 
   kite_oracle_papertrading/ scripts exist on both local (source of truth) and the
@@ -532,7 +541,7 @@ Sandbox Master Plan     : [[sandbox_master_plan]]
 CC Remote Setup         : [[cc_remote_setup]]
 Hackathon Ideas         : [[hackathon_ideas]]
 Future Skills           : [[future_skills]]
-Backtesting Rules       : Algo_Trading/Framework_V2/backtesting_rules.md — EOD exit logic, ATR14 SL/TGT convention, NPF formula. Read before writing any fv2 backtest script.
+Backtesting Rules       : Algo_Trading/Framework_V2/backtesting_rules.md — EOD exit logic, ATR14 SL/TP convention, NPF formula. Read before writing any fv2 backtest script.
 
 
 ## ── ADVISOR PATTERN ───────────────────────────────────────────────────────────

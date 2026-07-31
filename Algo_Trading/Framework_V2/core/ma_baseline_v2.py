@@ -8,11 +8,11 @@ class MABaselineV2:
     Search: MAX_TB_GAP bars for rejection bar where close < MA20
     Entry:  SHORT at next bar open after rejection bar
     SL:     entry + SL_MULT  * ATR14  (above entry)
-    TGT:    entry - TGT_MULT * ATR14  (below entry)
+    TP:    entry - TP_MULT * ATR14  (below entry)
     PnL:    entry - exit_px  (positive = profit for short)
     """
     SL_MULT    = 2.5
-    TGT_MULT   = 4.5
+    TP_MULT   = 4.5
     MAX_TB_GAP = 3
     EOD_HOUR   = 15
 
@@ -45,14 +45,14 @@ class MABaselineV2:
                     i += 1; continue
                 entry = entry_bar['open']
                 sl  = entry + self.SL_MULT  * atr
-                tgt = entry - self.TGT_MULT * atr
+                tp = entry - self.TP_MULT * atr
                 for k in range(entry_idx, len(df)):
                     k_bar = df.iloc[k]
                     if k_bar['hour'] >= self.EOD_HOUR or k_bar['date'] != touch_date:
                         pnl = entry - k_bar['open']
                         outcome = 'EOD+' if pnl > 0 else 'EOD-'; break
-                    if k_bar['low']  <= tgt:
-                        pnl = entry - tgt; outcome = 'W'; break
+                    if k_bar['low']  <= tp:
+                        pnl = entry - tp; outcome = 'W'; break
                     if k_bar['high'] >= sl:
                         pnl = entry - sl;  outcome = 'L'; break
                 trades.append({'pnl': pnl, 'outcome': outcome, 'exit_dt': k_bar['datetime']})

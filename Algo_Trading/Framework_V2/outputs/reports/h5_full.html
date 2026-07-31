@@ -203,7 +203,7 @@ function loadOptunaJSON(file) {
 }
 
 // ─── Chart (lightweight-charts v4) ───────────────────────────────────────────
-let lwChart = null, candleSeries = null, ma20Series = null, slSeries = null, tgtSeries = null;
+let lwChart = null, candleSeries = null, ma20Series = null, slSeries = null, tpSeries = null;
 
 function toTs(dtStr) {
   if (!dtStr) return null;
@@ -240,7 +240,7 @@ function initChart() {
     color: '#e05070', lineWidth: 1.5, lineStyle: 1,
     priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
   });
-  tgtSeries = lwChart.addLineSeries({
+  tpSeries = lwChart.addLineSeries({
     color: '#52b788', lineWidth: 1.5, lineStyle: 1,
     priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false,
   });
@@ -277,7 +277,7 @@ function renderChart() {
   const exitTs = exitBar ? toTs(exitBar.datetime) : null;
 
   slSeries.setData(sig.sl && entTs && exitTs ? [{ time: entTs, value: sig.sl }, { time: exitTs, value: sig.sl }] : []);
-  tgtSeries.setData(sig.target && entTs && exitTs ? [{ time: entTs, value: sig.target }, { time: exitTs, value: sig.target }] : []);
+  tpSeries.setData(sig.target && entTs && exitTs ? [{ time: entTs, value: sig.target }, { time: exitTs, value: sig.target }] : []);
 
   const markers = [];
   if (t0Bar) markers.push({ time: toTs(t0Bar.datetime), position: 'belowBar', color: '#c9a227', shape: 'circle', text: 'T0' });
@@ -557,7 +557,7 @@ function renderInfoBar() {
 
 // ─── Chart placeholder ────────────────────────────────────────────────────────
 function showPlaceholder() {
-  if (lwChart) { lwChart.remove(); lwChart=null; candleSeries=null; ma20Series=null; slSeries=null; tgtSeries=null; }
+  if (lwChart) { lwChart.remove(); lwChart=null; candleSeries=null; ma20Series=null; slSeries=null; tpSeries=null; }
   const c = document.getElementById('chart-container');
   c.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;color:#4a5260;">
     <div style="font-size:13px;letter-spacing:.05em;margin-bottom:4px;color:#7a8694;">[ CHART ]</div>
@@ -706,7 +706,7 @@ function renderRight() {
         ${row('SL',sig.sl?sig.sl.toFixed(2):'—','#e07191')}
         ${row('target',sig.target?sig.target.toFixed(2):'—','#52b788')}
         <div style="height:4px;"></div>
-        ${row('exit type',sig.outcome==='W'?'TGT hit':sig.outcome==='L'?'SL hit':sig.outcome||'—',oc)}
+        ${row('exit type',sig.outcome==='W'?'TP hit':sig.outcome==='L'?'SL hit':sig.outcome||'—',oc)}
         ${row('pnl',sig.pnl!==undefined?(sig.pnl>=0?'+':'')+sig.pnl.toFixed(2):'—',sig.pnl>=0?'#52b788':'#e07191')}`;
     }
   } else {

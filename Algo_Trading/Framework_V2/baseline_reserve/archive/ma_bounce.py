@@ -5,7 +5,7 @@ import glob
 DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min'
 
 SL_MULT = 2.5
-TGT_MULT = 4.5
+TP_MULT = 4.5
 MAX_TB_GAP = 3
 EOD_HOUR = 15
 
@@ -52,15 +52,15 @@ def run_backtest(csv_path):
                 continue
             entry = entry_bar['open']
             sl = entry - SL_MULT * atr
-            tgt = entry + TGT_MULT * atr
+            tp = entry + TP_MULT * atr
             for k in range(entry_idx, len(df)):
                 k_bar = df.iloc[k]
                 if k_bar['hour'] >= EOD_HOUR:
                     pnl = k_bar['open'] - entry
                     outcome = 'EOD+' if pnl > 0 else 'EOD-'
                     break
-                if k_bar['high'] >= tgt:
-                    pnl = tgt - entry
+                if k_bar['high'] >= tp:
+                    pnl = tp - entry
                     outcome = 'W'
                     break
                 if k_bar['low'] <= sl:
@@ -112,7 +112,7 @@ pure_all = (all_df['outcome'] == 'W').sum()
 avg_win_all = all_df[all_df['pnl'] > 0]['pnl'].mean()
 avg_loss_all = abs(all_df[all_df['pnl'] < 0]['pnl'].mean())
 be_prof_all = avg_loss_all / (avg_win_all + avg_loss_all) * 100
-be_pure = SL_MULT / (SL_MULT + TGT_MULT) * 100
+be_pure = SL_MULT / (SL_MULT + TP_MULT) * 100
 gp_all = all_df[all_df['pnl'] > 0]['pnl'].sum()
 gl_all = abs(all_df[all_df['pnl'] < 0]['pnl'].sum())
 pf_all = gp_all / gl_all if gl_all > 0 else 999

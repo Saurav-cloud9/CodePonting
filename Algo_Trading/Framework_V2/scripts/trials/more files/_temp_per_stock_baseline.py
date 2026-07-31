@@ -2,7 +2,7 @@ import pandas as pd, numpy as np, os, sys, io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 DATA_DIR   = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historical\csv\intraday_5min'
-MAX_TB_GAP = 3; SL_MULT = 2.5; TGT_MULT = 4.5; CUT_EXIT = 15 * 60
+MAX_TB_GAP = 3; SL_MULT = 2.5; TP_MULT = 4.5; CUT_EXIT = 15 * 60
 
 STOCKS = [
     'ADANIPORTS','ASHOKLEY','AXISBANK','BAJFINANCE','BANDHANBNK',
@@ -47,17 +47,17 @@ for stock in STOCKS:
         if bb < 0: i += 1; continue
         eb = bb + 1
         if eb >= N or dates[eb] != d0 or mins[eb] >= CUT_EXIT: i += 1; continue
-        entry = op[eb]; sl = entry - SL_MULT * a; tgt = entry + TGT_MULT * a
+        entry = op[eb]; sl = entry - SL_MULT * a; tp = entry + TP_MULT * a
         pnl = cl[eb] - entry; oc = 'EOD-'
         for j in range(eb, N):
             if dates[j] != d0: pnl = cl[j-1] - entry; oc = 'EOD+' if pnl > 0 else 'EOD-'; break
             if mins[j] >= CUT_EXIT: pnl = op[j] - entry; oc = 'EOD+' if pnl > 0 else 'EOD-'; break
-            if lo[j] <= sl and hi[j] >= tgt:
-                if abs(op[j] - sl) <= abs(op[j] - tgt): oc = 'L'; pnl = -SL_MULT * a
-                else: oc = 'W'; pnl = TGT_MULT * a
+            if lo[j] <= sl and hi[j] >= tp:
+                if abs(op[j] - sl) <= abs(op[j] - tp): oc = 'L'; pnl = -SL_MULT * a
+                else: oc = 'W'; pnl = TP_MULT * a
                 break
             if lo[j] <= sl:  oc = 'L'; pnl = -SL_MULT * a; break
-            if hi[j] >= tgt: oc = 'W'; pnl = TGT_MULT * a; break
+            if hi[j] >= tp: oc = 'W'; pnl = TP_MULT * a; break
         pnls.append(round(pnl, 4)); wins += (1 if oc in ('W','EOD+') else 0); i = eb + 1
 
     arr = np.asarray(pnls); n = len(arr)

@@ -136,7 +136,7 @@ def build_stock_data(stock: str) -> dict:
 
             if bounce_idx is not None:
                 entry_idx = bounce_idx + 1 if bounce_idx + 1 < n else None
-                pnl, win, exit_idx_val, sl_val, tgt_val, exit_reason = None, None, None, None, None, None
+                pnl, win, exit_idx_val, sl_val, tp_val, exit_reason = None, None, None, None, None, None
                 if entry_idx is not None:
                     entry_price = day.iloc[entry_idx]['open']
                     atr_val     = day.iloc[touch_idx]['atr14']
@@ -155,7 +155,7 @@ def build_stock_data(stock: str) -> dict:
                         win          = 1 if exit_reason == 'T' else 0
                         exit_idx_val = int(ki)
                         sl_val       = round(float(sl), 2)
-                        tgt_val      = round(float(target), 2)
+                        tp_val      = round(float(target), 2)
                 day_signals.append([
                     touch_idx,
                     bounce_idx,
@@ -166,7 +166,7 @@ def build_stock_data(stock: str) -> dict:
                     win,
                     exit_idx_val,   # s[7]
                     sl_val,         # s[8]
-                    tgt_val,        # s[9]
+                    tp_val,        # s[9]
                     exit_reason,    # s[10]: 'T'=target, 'S'=SL, 'E'=EOD
                 ])
                 stats['total'] += 1
@@ -346,7 +346,7 @@ BODY = f"""<div class="layout">
 <div class="sd-row"><span class="sd-label">Exit</span><span class="sd-val" id="sdExit">—</span></div>
 <div class="sd-row"><span class="sd-label">Entry</span><span class="sd-val" id="sdEntry">—</span></div>
 <div class="sd-row"><span class="sd-label">SL</span><span class="sd-val" id="sdSL">—</span></div>
-<div class="sd-row"><span class="sd-label">Target</span><span class="sd-val" id="sdTgt">—</span></div>
+<div class="sd-row"><span class="sd-label">Target</span><span class="sd-val" id="sdTp">—</span></div>
 <div class="sd-row"><span class="sd-label">Type</span><span class="sd-val" id="sdType">—</span></div>
 <button class="review-btn" onclick="openReview()">&#9998; Review in H1.1</button>
 </div>
@@ -674,7 +674,7 @@ function updateSidebar() {
     const detail = document.getElementById('sigDetail');
     if (selectedSig >= 0 && selectedSig < daySigs.length) {
         const s = daySigs[selectedSig];
-        const pnl = s[5], win = s[6], sl = s[8], tgt = s[9], cat = s[4], er = s[10];
+        const pnl = s[5], win = s[6], sl = s[8], tp = s[9], cat = s[4], er = s[10];
         const entryIdx = s[2];
         const entryPrice = (entryIdx !== null && candles[entryIdx]) ? candles[entryIdx].o : null;
         const outcomeEl = document.getElementById('sdOutcome');
@@ -690,7 +690,7 @@ function updateSidebar() {
         document.getElementById('sdExit').textContent = exitLabel;
         document.getElementById('sdEntry').textContent = entryPrice !== null ? entryPrice.toFixed(2) : '—';
         document.getElementById('sdSL').textContent = sl !== null ? sl.toFixed(2) : '—';
-        document.getElementById('sdTgt').textContent = tgt !== null ? tgt.toFixed(2) : '—';
+        document.getElementById('sdTp').textContent = tp !== null ? tp.toFixed(2) : '—';
         document.getElementById('sdType').textContent = cat === 'R' ? 'Rising' : cat === 'F' ? 'Falling' : 'Flat';
         detail.classList.add('visible');
     } else {
@@ -813,7 +813,7 @@ function draw() {
     // ── Selected signal overlay ────────────────────────────────────────────────
     if (selectedSig >= 0 && selectedSig < daySigs.length) {
         const s = daySigs[selectedSig];
-        const entryIdx = s[2], exitIdx = s[7], slPrice = s[8], tgtPrice = s[9];
+        const entryIdx = s[2], exitIdx = s[7], slPrice = s[8], tpPrice = s[9];
         if (entryIdx !== null && exitIdx !== null && slPrice !== null) {
             // Entry→exit window highlight (behind lines)
             const xL = x(entryIdx) - cw / 2;
@@ -835,10 +835,10 @@ function draw() {
             // Target line — dashed green
             ctx.setLineDash([4, 3]);
             ctx.strokeStyle = 'rgba(34,197,94,0.7)'; ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.moveTo(PAD.left, y(tgtPrice)); ctx.lineTo(W - PAD.right, y(tgtPrice)); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(PAD.left, y(tpPrice)); ctx.lineTo(W - PAD.right, y(tpPrice)); ctx.stroke();
             ctx.setLineDash([]);
             ctx.fillStyle = '#22c55e'; ctx.textAlign = 'left';
-            ctx.fillText('TGT ' + tgtPrice.toFixed(1), PAD.left + 4, y(tgtPrice) - 3);
+            ctx.fillText('TP ' + tpPrice.toFixed(1), PAD.left + 4, y(tpPrice) - 3);
 
             ctx.restore();
         }
@@ -868,7 +868,7 @@ function openReview() {
         pnl:          s[5],
         exit_reason:  s[10],
         sl_price:     s[8],
-        tgt_price:    s[9],
+        tp_price:    s[9],
         // ── H1.1 Signal Contract ─────────────────────────────────────────────
         // H1.1 (fv2_h1_1_signal_review.html) reads these fields from the signal object.
         // DO NOT remove or rename fields without updating H1.1 computeValue() to match.

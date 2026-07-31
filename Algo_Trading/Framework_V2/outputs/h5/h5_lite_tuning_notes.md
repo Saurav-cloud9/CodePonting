@@ -5,7 +5,7 @@ Date: 2026-05-26
 - Stock: POWERGRID
 - Year: 2022
 - Total signals: 100
-- SL/TGT multipliers: 2.5 / 4.5 ATR
+- SL/TP multipliers: 2.5 / 4.5 ATR
 - Entry cutoff: 14:40
 - Hard exit: 15:00 (open of 15:00 bar)
 

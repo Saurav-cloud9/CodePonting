@@ -1,6 +1,6 @@
 """
 CBQ (Charge Break-even Qty) — Iteration #5 (v1.1)
-v1.1 = v1 + Above VWAP + Below EMA100 | SL=2.5x, TGT=4.5x | 30 stocks 2022-2025
+v1.1 = v1 + Above VWAP + Below EMA100 | SL=2.5x, TP=4.5x | 30 stocks 2022-2025
 Finds the quantity at which NPF crosses 1.0 after full Kotak Neo charges.
 """
 import sys, io, glob, pandas as pd, numpy as np
@@ -71,13 +71,13 @@ for f in files:
             if ei >= len(df) or df.iloc[ei]['date'] != touch_date: i += 1; continue
             entry = df.iloc[ei]['open']
             sl  = entry - strategy.SL_MULT  * atr
-            tgt = entry + strategy.TGT_MULT * atr
+            tp = entry + strategy.TP_MULT * atr
             for k in range(ei, len(df)):
                 kb = df.iloc[k]
                 if kb['hour'] >= strategy.EOD_HOUR:
                     exit_px = kb['open']; pnl = exit_px - entry; break
-                if kb['high'] >= tgt:
-                    exit_px = tgt; pnl = tgt - entry; break
+                if kb['high'] >= tp:
+                    exit_px = tp; pnl = tp - entry; break
                 if kb['low']  <= sl:
                     exit_px = sl;  pnl = sl  - entry; break
             all_trades.append({'pnl': pnl, 'entry': entry, 'exit': exit_px,
@@ -89,7 +89,7 @@ for f in files:
 print(f'Total trades: {len(all_trades)}')
 raw_w = sum(t['pnl'] for t in all_trades if t['pnl'] > 0)
 raw_l = sum(-t['pnl'] for t in all_trades if t['pnl'] < 0)
-print(f'Raw PF: {raw_w/raw_l:.3f}  (SL={strategy.SL_MULT}x, TGT={strategy.TGT_MULT}x)')
+print(f'Raw PF: {raw_w/raw_l:.3f}  (SL={strategy.SL_MULT}x, TP={strategy.TP_MULT}x)')
 print()
 
 QTY_LIST = [1, 2, 3, 5, 10, 20, 50, 100, 200, 500, 1000]
