@@ -647,3 +647,64 @@ closed out, VM backtesting env + VS Code Remote-SSH set up) ─────
                (3) rebuild the memory-encoding models against the author's actual video code
                and retest, (4) standing rule: bring in Opus 5/Fable 5 for an independent
                gap-check once any model here is properly validated
+2026-07-31 SS (MemLabs autoregressive model + ATR formula exploration + SL/TGT->SL/TP rename) ──
+           ✅  Extracted the MemLabs author's exact code (video transcript + frames via Google
+               AI Studio) into script 18. Confirmed no Pearson r used anywhere in his real
+               implementation, and that our earlier PA1/incremental-scaler fixes already
+               matched his actual online-learning approach
+           ✅  Corrected the analogy being tested: the author's model is genuinely
+               autoregressive (x = lag-1 of the SAME series as y), not feature-based. Rebuilt
+               with x = previous trade's PnL, y = current trade's PnL (not ATR%-lag, which
+               would still be feature-based)
+           ✅  Found a real, if modest, persistent OOS edge over baseline on the Test segment
+               at the current live SL/TP (2.0/4.5): Baseline ZPnL -79.18 -> Model-filtered
+               ZPnL -50.41. First genuinely positive ML result after 6 single-feature linear
+               methods were exhausted with negative verdicts
+           ✅  Tested the same model against the SL/TP sweep's "best" combo (6.0/6.0) - edge
+               nearly vanishes (ZPnL -66.60 -> -63.53). Traced the mechanism: wider SL/TP ->
+               longer holding (104.1min -> 188.2min, +81%) and wider trade gaps (1448.4min ->
+               1876.0min, +30%), diluting the short-term serial dependence the autoregressive
+               signal likely depends on. Real collateral-damage tradeoff between "best backtest
+               ZPF" and "best ML-filterable edge" - not just noise
+           ✅  ATR formula exploration: wrote grok_instructions.md for 12 variants (Simple/
+               Wilder x 10/14/20 periods x Signal/Entry ATR source bar), SL/TP locked at
+               2.0/4.5 (current live, explicitly not the unconfirmed 6.0/6.0 combo per the
+               finding above). Fixed two missing-path gaps in the instructions after Saurav
+               caught them (data path, sweep-results-doc reference both needed full paths for
+               Grok to locate)
+           ✅  Validated Grok's results: sanity check passed exactly (Simple14/Signal
+               reproduces precomputed atr14 bit-for-bit, 1.000000 match rate on all 30
+               stocks). ZPF spans only 0.760-0.767 across all 12 variants - current live
+               formula (Simple14/Signal) is actually the BEST of the 12, not worst.
+               Conclusion: ATR formula/period/source is not a lever that fixes strategy
+               viability - confirms the SL/TP sweep's earlier negative verdict wasn't an
+               ATR-calc artifact
+           ✅  Explained (not a bug) a trade-count discrepancy Saurav flagged: N=110,641 here
+               vs N=109,282 in the earlier SL/TP sweep at the same 2.0/4.5. Reference script
+               ma_30_rejection_v1.py (correctly used per instructions) lacks the sweep
+               script's `hour[entry_idx]>=15` skip. Confirmed via exact PF/Sh(D) match
+               (charges-blind metrics identical) that the extra 1,359 trades are all zero-
+               raw-pnl EOD-immediate-exits that still eat Zerodha charges - precisely explains
+               the ZPF/ZSh(D) gap
+           ✅  Bulk-renamed SL/TGT -> SL/TP across the project (content + filenames) per
+               Saurav's request to maintain consistency: ~130 files content-edited, 32 files/
+               images renamed (all `sl_tgt_*` -> `sl_tp_*`) across Framework_V2 (core/,
+               guides/, backtesting_rules/, outputs/, scripts/trials/, baseline_reserve/),
+               Framework_V1 + fv1_sandbox, Framework_V0, paper_trading_bot_ec2_backup,
+               CLAUDE.md, TODO.md
+           ✅  Explicitly excluded per user instruction + standing rules: kite_oracle_
+               papertrading/ (already independently on SL/TP convention), .claude/worktrees/*
+               (stale leftover agent copies), PROGRESS_HISTORY.md (append-only audit trail
+               rule). Caught and reverted one over-eager change mid-run (kite_oracle_
+               papertrading/SESSION_SUMMARY.md got touched before the exclusion was added)
+           ✅  Audited for accidental corruption before finishing: found a near-miss where an
+               old JWT access token in a Framework_V0 file contains mixed-case "TgTQ" that
+               could have been mangled by the blind case-sensitive replace - untouched only
+               because the case pattern didn't match any of the 3 replace patterns used
+               (TGT/Tgt/tgt). Full scoped re-grep post-run confirmed zero remaining TGT/Tgt/
+               tgt in the approved scope and no genuine secrets/tokens altered
+           ✅  Next (explicitly agreed): (1) PRIMARY - resume MemLabs ML/autoregressive
+               thread with a multi-stock test, (2) if spare time only - full 90-combo SL/TP
+               sweep x 6 ATR variants via Grok (not priority), (3) separately, Saurav +
+               VM CC validating 31st July live trades + full 27-31 July weekly recon
+               (process-development practice, known low edge, not this session's task)

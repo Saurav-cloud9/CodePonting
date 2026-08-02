@@ -1047,3 +1047,9 @@ c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\ATR_explora
 c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\ATR_exploration\grok_instructions.md
 C:\Users\Saurav\AppData\Local\Temp\claude\c--Users-Saurav-CodePonting\e9e1dc13-550d-4fcd-9c75-3da972a3b99a\scratchpad\rename_tp_to_tp.py
 C:\Users\Saurav\AppData\Local\Temp\claude\c--Users-Saurav-CodePonting\e9e1dc13-550d-4fcd-9c75-3da972a3b99a\scratchpad\rename_tp_to_tp.py
+c:\Users\Saurav\CodePonting\.remember\today.md
+c:\Users\Saurav\CodePonting\.remember\handoff.md
+c:\Users\Saurav\CodePonting\.remember\remember.md
+C:\Users\Saurav\CodePonting\Concept Lab\FML learning path and discussion\01_fracdiff_intro.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\18_model1_test_vs_baseline_zpnl.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\18_model1_SL6TP6_comparison.py

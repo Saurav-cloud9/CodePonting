@@ -2,46 +2,34 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  Kite bot (market hours only) — running live daily, resume next market session
-        2026-07-28 progress: 3 real mid-session restarts today (09:51/10:14/10:35) with open
-        positions live - all successful, fully validates the weekend's catch-up/discard fix
-        under real conditions (not just morning startup). archive_daily_logs() added - bot
-        now auto-archives its own CSVs on EOD, no more manual archiving each morning. PnL
-        summary fixed: trailing footer after all 30 stocks (was buried at top after just the
-        first), catch-up buckets now get a summary too (never had one before), fields
-        expanded to Trades(total)/Closed/Open/Wins/Losses/PnL. kbccp/kbss moved into
-        CLAUDE.md itself (auto-loads every session, TODO.md glossary doesn't).
-        Next up: continue watching daily runs; re-assess ATR14 divergence question;
-        revisit RELIANCE/TATAMOTORS/PNB from 24th July recon only if spare time
-        Older items still open: MA20/ATR14+touch-eval logging not yet added
+P1  MemLabs autoregressive model — resume from here (diverted into ATR exploration, now closed)
+        2026-07-31: built genuinely autoregressive model (x=prev trade PnL, y=current trade
+        PnL) matching author's actual technique. Real, if modest, OOS edge at live SL/TP
+        2.0/4.5 (ZPnL -79.18 -> -50.41), but nearly vanishes at sweep's "best" 6.0/6.0 combo
+        (ZPnL -66.60 -> -63.53) - wider SL/TP dilutes trade adjacency the signal likely
+        depends on (holding +81%, gaps +30%). Real tradeoff to keep in mind.
+        Next: multi-stock test (single-stock TATAMOTORS noise floor may be too high to see
+        anything real, same open question as before the ATR detour)
 
-P2  MemLabs regime-model — single-feature linear approaches now exhausted (6 features tested)
-        2026-07-28: computed DIRECT Pearson r (not inferred) for ATR%-rollmean40 vs PnL/win-
-        loss - confirmed negligible (-0.015/-0.022). Extended to 5 more candidates (RSI14,
-        MACD%, EMA100/HMA100/VWAP-relative-position) - ALL SIX show negligible correlation,
-        raw or 40-bar-smoothed. This is a stronger finding than "ATR% lacks direction" -
-        NO single-feature linear relationship exists at all for this strategy on TATAMOTORS,
-        magnitude-only or genuinely directional. Also confirmed eta0 sweep (0.01-10.0) and a
-        joint epsilon x eta0 sweep don't rescue the online-learning model either - every
-        cell's ZPF stays at or below ~1.0, and the "best" cell's year-wise breakdown still
-        shows 6 of 11 years failing badly. ZSh(D) confirms the same instability at the
-        Sharpe level (year-wise swings from -7.4 to +2.4).
-        Next (agreed):
-        1) Test across multiple stocks (single-stock TATAMOTORS noise floor may be too high
-           to see anything real, regardless of feature or method)
-        2) If multi-stock also shows nothing: accept single-feature linear methods are
-           exhausted, consider feature COMBINATIONS or a genuinely non-linear approach
-        3) Rebuild the memory-encoding models directly against the author's video code
-           snapshots and retest
-        Standing rule: once any ML model here is properly tested/validated, bring in
-        Opus 5/Fable 5 for an independent gap-check on our computation/code before trusting
-        the result
-        Buy MemLabs notebook ($5.50, patreon.com/cw/MemLabs) — card declined, retry
+P2  ATR formula exploration — CLOSED, informed P1's SL/TP tradeoff finding
+        2026-07-31: 12 variants (Simple/Wilder x 10/14/20 x Signal/Entry) via Grok, validated.
+        ZPF spans only 0.760-0.767; current live formula (Simple14/Signal) already best of 12.
+        Not a lever that fixes viability. If spare time: full 90-combo SL/TP sweep x 6 ATR
+        variants via Grok (nice-to-have, not priority).
 
-P3  New signal sweeps via Grok — ongoing, lower priority until regime model built
+P3  Kite bot (market hours only) — running live daily, resume next market session
+        2026-07-28 progress: 3 real mid-session restarts (09:51/10:14/10:35) with open
+        positions live - all successful, fully validates the weekend's catch-up/discard fix.
+        archive_daily_logs() added, PnL summary fixed (trailing footer + catch-up coverage).
+        2026-07-31: Saurav validating 31st July live trades + full 27-31 July weekly recon
+        with VM CC directly (not this session) - process-development practice, known low edge.
+        Older items still open: MA20/ATR14+touch-eval logging not yet added; ATR14 divergence
+        question; RELIANCE/TATAMOTORS/PNB from 24th July recon (spare time only)
+
+P4  New signal sweeps via Grok — ongoing, lower priority until ML thread resolved
         VWAP done (both baseline + VWAP variant confirmed dead); next: RSI/MACD combos
 
-P4  Build cloud backtesting engine for paper trading
+P5  Build cloud backtesting engine for paper trading
         Target: run fv2 backtests from any device (mobile/remote) without local setup
         Primary: Oracle Cloud; fallback: AWS EC2
 
@@ -64,9 +52,9 @@ F6  Insurance review
 # G3          — Gate 3: post-bounce follow-through
 
 ## Metrics & System
-# SL/TP       — Stop Loss / Take Profit (standard shortform going forward, replaces
-#               TP in all new scripts starting with the kite paper trading bot;
-#               existing files keep TP, not retroactively renamed)
+# SL/TP       — Stop Loss / Take Profit (standard shortform). Retroactively renamed
+#               from SL/TGT across ~130 files project-wide on 2026-07-31 (excluded:
+#               kite_oracle_papertrading/, .claude/worktrees/, PROGRESS_HISTORY.md)
 # PF          — raw profit factor (Python backtest, zero charges)
 # ZPF         — Zerodha Profit Factor: PF after full Zerodha intraday charges
 # ZSh(D)      — Zerodha Daily Sharpe (annualised): daily zpnl mean/std × √252

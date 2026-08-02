@@ -1,58 +1,68 @@
-# Handoff Note — 2026-07-28
+# Handoff Note — 2026-07-31
+
+## Current State — MemLabs ML thread (PRIMARY focus going forward)
+- Built and validated a genuinely autoregressive model (x=previous trade's PnL, y=current
+  trade's PnL - not feature-based) matching the MemLabs author's actual technique (extracted
+  from his real code via script 18). Found a real, if modest, OOS edge over baseline at the
+  current live SL/TP (2.0/4.5): Baseline ZPnL -79.18 -> Model-filtered -50.41.
+- Critical finding: this edge nearly vanishes at the SL/TP sweep's "best" combo (6.0/6.0):
+  ZPnL -66.60 -> -63.53, almost no improvement. Wider SL/TP dilutes trade frequency/adjacency
+  (holding +81%, gaps +30%), which the autoregressive signal likely depends on. This is a
+  genuine collateral-damage tradeoff between "best backtest ZPF" and "best ML-filterable
+  edge" - worth keeping in mind for any future SL/TP decision.
+- Diverted from here into ATR formula exploration (now closed out, see below) - this is
+  exactly where to resume.
+
+## Current State — ATR formula exploration (CLOSED OUT, informed the ML resume)
+- Delegated 12 variants (Simple/Wilder x 10/14/20 x Signal/Entry source) to Grok, SL/TP
+  locked at 2.0/4.5. Results validated: ZPF spans only 0.760-0.767, current live formula
+  (Simple14/Signal) is already the BEST of the 12. ATR formula/period/source is not a lever
+  that fixes strategy viability - confirms the earlier SL/TP sweep's negative verdict wasn't
+  an ATR-calc artifact.
+- Full file: Algo_Trading/Framework_V2/scripts/trials/ATR_exploration/
+  atr_formula_exploration_results.md
+- Explained (not a bug) why N differs from the earlier SL/TP sweep at the same 2.0/4.5:
+  reference script ma_30_rejection_v1.py lacks the sweep script's `hour[entry_idx]>=15` skip,
+  creating ~1,359 zero-raw-pnl EOD-immediate-exit trades that still eat charges. Undecided
+  whether to add that skip to the reference script - revisit if it matters for future work.
+- Agreed (do tomorrow ONLY if time allows, not priority): run the full 90-combo SL/TP sweep
+  across all 6 ATR variants via Grok "for the sake of it."
+
+## Current State — SL/TGT -> SL/TP rename (DONE)
+- ~130 files content-edited + 32 renamed across Framework_V2/V1/V0, baseline_reserve,
+  paper_trading_bot_ec2_backup, CLAUDE.md, TODO.md. Excluded kite_oracle_papertrading/
+  (already independently on SL/TP), .claude/worktrees/*, PROGRESS_HISTORY.md.
+- One file (kite_oracle_papertrading/SESSION_SUMMARY.md) was touched before the exclusion
+  was added mid-run - caught and reverted cleanly.
+- Full corruption audit done post-run (checked for accidentally-mangled tokens/hashes) -
+  clean. TODO.md's glossary note claiming "existing files not retroactively renamed" is now
+  STALE and needs a correction (see Known Issues).
 
 ## Current State — Kite paper trading bot (Algo_Trading/kite_oracle_papertrading/)
-- Running live, healthy. Today's weekend-fix restart validation is DONE: 3 real mid-session
-  restarts (09:51/10:14/10:35) with open positions, all clean - catch-up/discard fix fully
-  proven under real conditions, not just morning startup. Nothing left untested there.
-- archive_daily_logs() now auto-archives the day's CSVs on EOD auto-stop - no more manual
-  archiving needed before tomorrow's start.
-- PnL summary line fixed (was buried at top of each bucket + catch-up never had one at all +
-  "Trades" field was ambiguous) - now a clean trailing footer with
-  Trades(total)/Closed/Open/Wins/Losses/PnL, verified on both live and catch-up buckets.
-- kbccp/kbss shorthand now live in CLAUDE.md's SHORTHAND section (moved from TODO.md, which
-  doesn't auto-load) - use these directly to scope to just the bot instead of full SS/CCP.
-- Next session (market hours): just the routine morning start (refresh token, check for
-  scripts still in sync, start bot) - no more manual archiving step needed now.
-- Still open: re-assess ATR14 divergence question; RELIANCE/TATAMOTORS/PNB from 24th July
-  recon only if spare time (not priority); MA20/ATR14+touch-eval logging not yet added.
-
-## Current State — MemLabs regime-model thread
-- Single-feature linear methods are now MORE comprehensively exhausted than before. Computed
-  DIRECT Pearson r (not inferred) for 6 candidate features against TATAMOTORS 11yr PnL/win-
-  loss: ATR%-rollmean40, RSI14, MACD%, EMA100-rel-pos, HMA100-rel-pos, VWAP-rel-pos. ALL SIX
-  show negligible correlation (max |r| ~0.02-0.04), raw or 40-bar-smoothed. This kills the
-  earlier "ATR% specifically lacks direction" theory in favor of a broader one: no single
-  linear feature at all relates to this strategy's outcome on this stock.
-- Scripts: 16 (unsmoothed, all 6 features) and 17 (all 6 consistently 40-bar-smoothed) in
-  Framework_V2/scripts/trials/regime_model/memlabs/. Both confirm the same verdict.
-- Side finding: online-learning's eta0 is capped 96.4% of the time at 0.01 (barely PA1 at
-  all in practice). Swept eta0 to 10.0 and jointly with epsilon - nothing rescues it, best
-  cell still fails year-wise (6/11 years) and at the Sharpe level (ZSh(D) swings -7.4 to
-  +2.4). This closes the hyperparameter-tuning avenue for the online-learning model entirely.
+- No changes this session (deliberately out of scope for the SL/TP rename per Saurav's
+  explicit instruction - it's already on the SL/TP convention independently).
+- Saurav is separately validating 31st July's live trades + the full 27-31 July weekly recon
+  with VM CC (not this session). Explicitly framed as process-development practice, not
+  expected to show real edge given the known viability gap.
 
 ## Next Step (START HERE) - explicitly agreed with the user
 
-### Kite bot thread (P1)
-1. Routine morning start only - no manual archiving needed anymore
-2. Re-assess ATR14 divergence question now the warmup bug is fully proven fixed
-3. RELIANCE/TATAMOTORS/PNB from 24th July recon - only if genuinely spare time
+### Primary (this session/thread)
+1. Resume MemLabs ML/autoregressive work from where it diverted - multi-stock test is next
+   (single-stock TATAMOTORS noise floor may be too high to see anything real regardless of
+   feature/method, same open question as before the ATR detour).
+2. If genuinely spare time: full 90-combo SL/TP sweep x 6 ATR variants via Grok (secondary).
 
-### MemLabs thread (P2) - in this order
-1. Test across multiple stocks - single-stock TATAMOTORS noise floor may be too high to see
-   anything real regardless of feature/method (this is the natural next step given 6/6
-   single features on one stock all failed identically)
-2. If multi-stock also shows nothing: accept single-feature linear methods are exhausted,
-   move to feature COMBINATIONS or a genuinely non-linear approach
-3. Rebuild the memory-encoding models directly against the author's actual video code
-   snapshots and retest
-4. Standing rule: once any model is properly validated, bring in Opus 5/Fable 5 for an
-   independent gap-check before trusting the result
+### Separate (Saurav + VM CC, kite bot thread)
+1. Validate 31st July live trades
+2. Reconcile complete 27-31 July weekly results
 
 ## Known Issues
-- Kite bot: ATR14 divergence question needs re-assessment post-warmup-fix
-- Kite bot: MA20/ATR14+touch-eval logging still not added
-- MemLabs: no single-feature linear relationship found across 6 features x 2 smoothing
-  variants x 3 fitting methods (bucketing/OLS/online-learning) on TATAMOTORS alone - strong,
-  well-substantiated negative result; multi-stock test is the natural next real question
-- MemLabs notebook purchase blocked on a declined card
-- Old baseline sweep scripts still use monthly Sharpe - not ZSh(D)-compliant
+- TODO.md glossary line (SL/TP entry) says "existing files keep TP, not retroactively
+  renamed" - now FALSE after tonight's rename pass. Needs a one-line correction next session.
+- Undecided: whether to add the `hour[entry_idx]>=15` entry-skip to ma_30_rejection_v1.py to
+  align it with the sweep script's cleaner convention (doesn't change any conclusions reached
+  so far, purely a hygiene question).
+- MemLabs: multi-stock test for the autoregressive model not yet run - single-stock TATAMOTORS
+  result (real but modest edge, vanishes at wider SL/TP) needs that check before trusting it
+  further, per the standing multi-stock-noise-floor concern from the earlier correlation work.

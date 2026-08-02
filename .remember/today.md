@@ -1,85 +1,72 @@
-# Session Log — 2026-07-28
+# Session Log — 2026-07-31
 
-## Kite bot: live-daily operation hardened, restart fix fully validated
-- Morning routine: refreshed Kite access token, archived Monday's leftover top-level files
-  (both VM and local - load_existing_logs() would otherwise merge them into today's run),
-  confirmed local/VM scripts in sync (including yesterday's pre-open-tick fix, found by the
-  user's separate phone CC session and synced back), started the bot for the day.
-- Deliberately triggered 3 real mid-session restarts today (09:51, 10:14, 10:35), each with
-  genuinely open positions live (up to 6 at once by the 3rd) - specifically to validate the
-  weekend's catch-up/discard fix under real conditions, since Monday's uninterrupted run
-  never exercised it. All 3 fully successful: excluded bucket correctly identified each time,
-  catch-up fired exactly on schedule, all 30 stocks got a real touch-check via the [catch-up]
-  tag (not just silent indicator seeding), existing open positions correctly re-evaluated
-  with zero duplication, live tick processing resumed cleanly afterward every time. This
-  closes out the last untested piece of the weekend's fix.
-- Added `archive_daily_logs()`: the bot now archives its own live_trades.csv/live_bars.csv/
-  warmup_bars.csv/open_positions.json into a dated 'daily data/<Nth><Month>' folder
-  automatically, firing only on a genuine EOD auto-stop (not manual Ctrl+C restarts, which
-  still need same-day append behavior to keep working). No more manual archiving needed
-  before starting the bot each morning going forward.
-- Fixed the PnL summary line, in two passes (user noticed it "wasn't showing up," then
-  caught it still wasn't quite right after the first fix):
-  1. It was firing after the FIRST stock's bar closed each bucket - buried at the top of a
-     30-line block instead of acting as a clean bucket-complete marker. Moved to a trailing
-     "===" footer that only prints once all 30 stocks (UNIVERSE) have finalized their bar
-     for that bucket, tracked via a new `bucket_stocks_seen` set.
-  2. The catch-up code path (a separate function, not routed through the same per-tick
-     logic) never printed a summary at all - true from day one, not a regression. Added one
-     call to a new shared `print_pnl_summary()` right after catch-up's loop finishes.
-  3. Also fixed a naming ambiguity the user caught: "Trades" looked like it should mean
-     total positions taken, but was actually just closed-trade count. Expanded to
-     Trades(total=closed+open) / Closed / Open / Wins / Losses / PnL.
-  All verified working correctly on real data across both live buckets and catch-up buckets.
-- Moved `kbccp`/`kbss` shorthand from TODO.md's glossary into CLAUDE.md's own SHORTHAND
-  section, per the user's correct observation: CLAUDE.md auto-loads into every new session's
-  context automatically, TODO.md's glossary doesn't unless a session explicitly reads it.
-  TODO.md now holds only terminology definitions, not action-triggering commands.
+## MemLabs autoregressive model — built and tested against author's actual technique
+- Extracted the MemLabs video author's exact code (via Google AI Studio transcript+frame
+  pull) into script 18. Confirmed no Pearson r used anywhere in his implementation, and that
+  our earlier PA1/incremental-scaler fixes already matched his real online-learning approach.
+- Corrected the analogy we'd been testing: the author's model is genuinely autoregressive
+  (x = lag-1 of the SAME series as y), not feature-based. Rebuilt accordingly with
+  x = previous trade's PnL, y = current trade's PnL (not ATR%-lag, which would still be
+  feature-based, not autoregressive).
+- Found a real, if modest, persistent OOS edge over baseline on the Test segment at the
+  current live SL/TP (2.0/4.5): Baseline ZPnL -79.18 -> Model-filtered ZPnL -50.41.
+- Tested the same model against the SL/TP sweep's "best" combo (6.0/6.0) - the edge nearly
+  vanishes (ZPnL -66.60 -> -63.53). Traced the mechanism: wider SL/TP -> longer holding
+  (104.1min -> 188.2min, +81%) and wider trade gaps (1448.4min -> 1876.0min, +30%), diluting
+  the short-term serial dependence the autoregressive signal likely depends on. Confirms the
+  "better" SL/TP combo may be trading away the one edge we'd actually found - a real
+  collateral-damage tradeoff, not just noise.
 
-## MemLabs: direct correlation check across 6 features - single-feature linear methods now more comprehensively exhausted
-- Computed the actual, direct Pearson r (not inferred from the online-learning model's noisy
-  weight range, which was the earlier approach) between ATR%-rollmean40 and both PnL and
-  win/loss - confirmed genuinely negligible (-0.0149, -0.0225), both deep in the "no real
-  relationship" band (|r| < 0.1 threshold).
-- Extended the same direct-correlation methodology to 5 more candidate features: RSI14,
-  MACD% ((EMA12-EMA26)/close, a price-scale-normalized version to avoid the same "raw
-  price-level" confound that would make raw EMA/HMA values spuriously correlate with PnL
-  purely from 11 years of stock price drift), EMA100-relative-position, HMA100-relative-
-  position (Hull MA, lower-lag alternative), and VWAP-relative-position (daily-reset VWAP,
-  using DS3's volume column). Deliberately did NOT use MA20 for the "relative position"
-  candidates, since the existing touch condition already requires close<MA20 at every touch
-  bar by construction - that would give zero variance and a meaningless correlation.
-- ALL SIX candidates showed negligible correlation (max |r| ~0.02 raw, ~0.04 when all six
-  consistently 40-bar-smoothed for a fair apples-to-apples comparison, script 17 vs 16).
-  This reframes the working theory: it's not "ATR% specifically lacks direction, directional
-  features will work better" - none of the 6 tested features show ANY linear relationship
-  with outcome, whether pure-magnitude (ATR%) or genuinely directional (RSI/MACD/MA-family/
-  VWAP). Single-feature linear approaches (bucketing/OLS/online-learning) are now more
-  comprehensively exhausted than the ATR%-only theory suggested.
-- Traced and fully explained a real discrepancy between two correlation runs (-0.0148 vs
-  -0.0401 for the identical ATR feature, script 16 vs 17) down to one single outlier trade
-  (2025-10-14, pnl=17.2, ~7.4 standard deviations from typical) being included in one run but
-  excluded from the other, purely because the other 5 features' smoothing needs slightly
-  more warmup bars than ATR% alone needs. Confirmed via direct value diffing (bit-identical
-  on the matched subset) that this was not a computation bug - just illustrates how
-  sensitive/fragile a near-zero correlation reading is to single data points.
-- Side investigation into the online-learning model's hyperparameters: found the model is
-  capped at its eta0 step-size ceiling 96.4% of the time at eta0=0.01, meaning it barely
-  behaves like genuine Passive-Aggressive learning at all (nearly identical to the old,
-  already-broken constant-rate model). Swept eta0 up to 10.0 - doesn't help, ZPF stays below
-  1.0 at every value, and weight-sign-flip count explodes from 10 to 1100+, confirming bigger
-  steps just chase noise more aggressively rather than adapting more accurately. A joint
-  epsilon x eta0 sweep's single best cell (eta0=0.05, epsilon=0.5, aggregate ZPF=1.048) still
-  fails under scrutiny - 6 of 11 years below breakeven, and ZSh(D) (Zerodha daily Sharpe)
-  swings wildly year to year (-7.4 to +2.4), confirming the instability at the Sharpe level
-  too, not just PF/ZPF.
+## ATR formula exploration — delegated to Grok, validated, closed out
+- User did ATR groundwork research (chatgpt_recommendation.md) proposing Simple vs Wilder,
+  10/14/20 periods, and signal-bar vs entry-bar ATR sourcing as cheap, clean experiments.
+- Wrote grok_instructions.md specifying all 12 variants (6 formulas x 2 sources), SL/TP
+  locked at 2.0/4.5 (current live, explicitly NOT the 6.0/6.0 "best" sweep combo - that combo
+  isn't a confirmed destination per the MemLabs finding above), exact ZPF/ZSh(D) output format
+  matching the SL/TP sweep doc, explicit output-location instructions after Saurav caught two
+  missing-path gaps in the first draft.
+- Grok's results (atr_formula_exploration_results.md): sanity check passed exactly (Simple14/
+  Signal reproduces precomputed atr14 bit-for-bit, 1.000000 match rate). ZPF spans only
+  0.760-0.767 across all 12 variants - the current live formula (Simple14/Signal) is actually
+  the BEST of the 12, not worst. Conclusion: ATR formula/period/source is not a lever that
+  fixes this strategy's viability.
+- Validated a discrepancy Saurav flagged (N=110,641 here vs N=109,282 in the earlier SL/TP
+  sweep at the same 2.0/4.5): traced to the reference script (ma_30_rejection_v1.py, correctly
+  used per instructions) lacking the sweep script's `hour[entry_idx]>=15` skip. Confirmed via
+  exact PF/Sh(D) match (charges-blind metrics identical) that the extra 1,359 trades are all
+  zero-raw-pnl EOD-immediate-exits that still eat Zerodha charges - explains the ZPF/ZSh(D)
+  gap precisely, not a bug.
+- Discussed possibly adding that EOD-entry skip to the reference script; not yet decided.
+- Decision (agreed, do tomorrow if time allows): run the full 90-combo SL/TP sweep across all
+  6 ATR formula variants via Grok "just for the sake of it," but this is NOT the priority -
+  primary focus resumes on the ML/autoregressive thread from where it diverted into ATR work.
+
+## SL/TGT -> SL/TP naming convention — bulk renamed across the project
+- Renamed all SL/TGT -> SL/TP (content + filenames) across Framework_V2 (core/, guides/,
+  backtesting_rules/, outputs/, scripts/trials/, baseline_reserve/), Framework_V1 + fv1_
+  sandbox, Framework_V0, paper_trading_bot_ec2_backup, CLAUDE.md, TODO.md - ~130 files content-
+  edited, 32 files/images renamed (all `sl_tgt_*` -> `sl_tp_*`).
+- Explicitly excluded (user instruction + standing rules): kite_oracle_papertrading/ (already
+  on SL/TP convention independently), .claude/worktrees/* (stale leftover agent copies),
+  PROGRESS_HISTORY.md (append-only audit trail rule).
+- Caught and reverted one over-eager change mid-run (kite_oracle_papertrading/SESSION_SUMMARY.md
+  got touched by the script before the exclusion was added - reverted cleanly via git checkout).
+- Audited for accidental corruption before finishing: found a near-miss where an old JWT
+  access token in a Framework_V0 file contains mixed-case "TgTQ" that could have been mangled
+  by a blind case-sensitive replace - it wasn't touched only because the case pattern didn't
+  exactly match any of the 3 replace patterns used (TGT/Tgt/tgt). Ran a full scoped re-grep
+  after finishing to confirm zero remaining TGT/Tgt/tgt in the approved scope and no genuine
+  secrets/tokens altered.
+- TODO.md glossary note about "existing files keep TP, not retroactively renamed" is now
+  stale - most existing files WERE retroactively renamed tonight; needs updating.
 
 ## Next session priorities (explicitly agreed with the user)
-1. Test across multiple stocks - single-stock TATAMOTORS noise floor may simply be too high
-   to see anything real, regardless of feature choice or fitting method
-2. If multi-stock also shows nothing: accept single-feature linear methods are exhausted,
-   consider feature combinations (not single-variable) or a genuinely non-linear approach
-3. Rebuild the memory-encoding models directly against the author's actual video code
-   snapshots and retest
-4. Standing rule: once any ML model here is properly tested/validated, bring in Opus 5 or
-   Fable 5 for an independent gap-check on the computation/code before trusting the result
+1. PRIMARY: resume the MemLabs ML/autoregressive thread from where it diverted into the ATR
+   exploration - multi-stock test is the natural next step (single-stock TATAMOTORS noise
+   floor may be too high to see anything real regardless of feature/method).
+2. If time allows: run the full 90-combo SL/TP sweep across all 6 ATR formula variants via
+   Grok (secondary/nice-to-have, not primary).
+3. Separately (Saurav working with VM CC, not this session): validate 31st July's live kite
+   bot trades and reconcile the complete 27-31 July weekly results. Known upfront that the
+   currently-deployed strategy doesn't hold enough edge to matter financially - framed
+   explicitly as process-development practice, not a results-driven exercise.
