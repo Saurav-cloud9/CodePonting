@@ -260,18 +260,23 @@ fv1 Signal  : CLOSED — archived for reference
 PRIMARY (fv2)      : Framework_V2/data/historical/csv/intraday_5min/
   fv2 CSV dataset    TATAMOTORS_5min.csv — 73,174 rows, 7 cols + outcome cols
                      Columns: signal_type, exit_reason, raw_pnl, win
-                     Coverage: 2022–2025 (4 years), MA20 pre-warmed (0 NaN)
-                     ⚠️  ALL fv2 backtests must use these CSVs — including daily
-                         Kijun/indicator derivation (resample from 5-min).
-                         Do NOT use DS3 parquets or fv1 daily parquets for fv2
-                         work unless Saurav explicitly asks.
+                     Coverage: 2022–2025 (4 years) — ARCHIVED, see note below.
+                     ⚠️  DS3 inside fv2 is the default historical dataset for
+                         our projects as of now, no exceptions. This fv2 CSV
+                         set is retired; these CSVs can be archived.
 
-PRIMARY (fv1/Sandbox): Framework_V1/data/historical/intraday_5min_DS3/
-  DS3 dataset        Chunked parquet format
-                     Token metadata: ds3_tokens_chunks.json
+PRIMARY (fv2 DS3)  : Framework_V2/data/historical/intraday_5min_DS3/
+  DS3 dataset        Parquet format, 30 stocks, ma20/atr14 precomputed
                      Coverage: 2015–2025 (11 years)
-                     29 stocks + NIFTY50
+                     Daily NIFTY50: Framework_V2/data/historical/daily/NIFTY50.parquet
+                     (2016-01-01 → present, ~10.5yr — Kite's day-candle lookback limit)
                      ⚠️  ALL sandbox scripts must use DS3. Not intraday_5min.
+
+ARCHIVED (fv1 DS3) : Framework_V1/data/historical/intraday_5min_archived/
+                     Older duplicate copy (raw OHLCV only, no ma20/atr14) —
+                     renamed from intraday_5min_DS3 to mark it archived.
+                     Superseded by the fv2 DS3 copy above — do not reference
+                     for new work.
 
 Legacy dataset     : Framework_V1/data/historical/intraday_5min/
                      30 stocks · Coverage: 2022–2025

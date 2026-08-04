@@ -1,0 +1,13 @@
+label,n,pnl,pf,zpnl,zpf
+TRAIN — SHORT baseline (every short trade),2815,500.6,1.274,-180.51,0.918
+TRAIN — SHORT gated (only Sell-signal days),2131,403.65,1.306,-123.75,0.923
+TRAIN — LONG baseline (every long trade),2786,-225.06,0.895,-901.78,0.653
+TRAIN — LONG gated (only Buy-signal days),643,-61.22,0.883,-205.76,0.667
+"TRAIN — COMBINED baseline (both sides, all trades)",5601,275.55,1.069,-1082.29,0.775
+TRAIN — COMBINED gated (regime-matched only),2774,342.43,1.186,-329.51,0.852
+TEST — SHORT baseline (every short trade),880,389.9,1.435,-78.5,0.932
+TEST — SHORT gated (only Sell-signal days),744,382.42,1.56,-13.06,0.985
+TEST — LONG baseline (every long trade),966,-247.45,0.814,-763.55,0.546
+TEST — LONG gated (only Buy-signal days),133,-11.88,0.945,-82.84,0.684
+"TEST — COMBINED baseline (both sides, all trades)",1846,142.46,1.064,-842.05,0.703
+TEST — COMBINED gated (regime-matched only),877,370.54,1.412,-95.9,0.917
