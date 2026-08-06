@@ -13,6 +13,8 @@
   kbss  = SS scoped to kite_oracle_papertrading only: update its PROGRESS.md (VM)
           with what happened, and sync any live-file code changes back to the local
           CodePonting copy (source of truth) in the same pass
+  CCG   = trigger to delegate the current task to Grok — write the instruction
+          into CCG_ORCHESTRATION.md (project root) instead of doing it in-session
 
 ── RESPONSE FORMATTING ──────────────────────────────────────────
 
@@ -269,7 +271,8 @@ PRIMARY (fv2 DS3)  : Framework_V2/data/historical/intraday_5min_DS3/
   DS3 dataset        Parquet format, 30 stocks, ma20/atr14 precomputed
                      Coverage: 2015–2025 (11 years)
                      Daily NIFTY50: Framework_V2/data/historical/daily/NIFTY50.parquet
-                     (2016-01-01 → present, ~10.5yr — Kite's day-candle lookback limit)
+                     (2015-02-02 → 2025-12-31, matches DS3 stock coverage —
+                     Kite MCP 2016-2025 + Yahoo Finance ^NSEI gap-fill for 2015)
                      ⚠️  ALL sandbox scripts must use DS3. Not intraday_5min.
 
 ARCHIVED (fv1 DS3) : Framework_V1/data/historical/intraday_5min_archived/
@@ -544,6 +547,10 @@ Excel Dark Mode Setup   : [[excel_dark_mode_setup]]
 Transaction Costs       : [[transaction_costs]]
 Sandbox Master Plan     : [[sandbox_master_plan]]
 CC Remote Setup         : [[cc_remote_setup]]
+CCG Orchestration       : CCG_ORCHESTRATION.md (project root) — standing file for delegating
+                          tasks from CC to Grok (which has Kite MCP set up as of 2026-08-06).
+                          New entries appended at top, timestamped. CC writes instructions
+                          here when a task should be delegated instead of run in-session.
 Hackathon Ideas         : [[hackathon_ideas]]
 Future Skills           : [[future_skills]]
 Backtesting Rules       : Algo_Trading/Framework_V2/backtesting_rules.md — EOD exit logic, ATR14 SL/TP convention, NPF formula. Read before writing any fv2 backtest script.

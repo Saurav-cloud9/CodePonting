@@ -1087,3 +1087,12 @@ c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_mode
 c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\28_regime_gate_30stock_sweep.py
 c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\28_regime_gate_30stock_sweep.py
 c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\29_regime_gate_30stock_sweep_flipped.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\30_iteration_instructions.md
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\31_fv2_nifty50_replication.ipynb
+C:\Users\Saurav\AppData\Local\npm-cache\_npx\cc7529f9d105e735\node_modules\@kimtaeyoon83\mcp-server-youtube-transcript\dist\index.js
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\32_nifty50_gate_30stock_short_only.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\32_nifty50_gate_30stock_short_only.py
+c:\Users\Saurav\CodePonting\GROK_INSTRUCTIONS.md
+c:\Users\Saurav\CodePonting\CCG_ORCHESTRATION.md
+c:\Users\Saurav\CodePonting\CCG_ORCHESTRATION.md
+c:\Users\Saurav\CodePonting\CCG_ORCHESTRATION.md
