@@ -1096,3 +1096,14 @@ c:\Users\Saurav\CodePonting\GROK_INSTRUCTIONS.md
 c:\Users\Saurav\CodePonting\CCG_ORCHESTRATION.md
 c:\Users\Saurav\CodePonting\CCG_ORCHESTRATION.md
 c:\Users\Saurav\CodePonting\CCG_ORCHESTRATION.md
+c:\Users\Saurav\CodePonting\CCG_ORCHESTRATION.md
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\34_updated_validation_summary.md
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\35_pearson_r_feature_screening.ipynb
+c:\Users\Saurav\CodePonting\.remember\today.md
+c:\Users\Saurav\CodePonting\.remember\handoff.md
+C:\Users\Saurav\AppData\Local\Temp\claude\c--Users-Saurav-CodePonting\e9e1dc13-550d-4fcd-9c75-3da972a3b99a\scratchpad\append_progress_history.py
+c:\Users\Saurav\CodePonting\.remember\remember.md
+C:\Users\Saurav\.claude\projects\c--Users-Saurav-CodePonting\memory\feedback_pearson_r_outlier_threshold.md
+c:\Users\Saurav\CodePonting\.remember\remember.md
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\49_model_c_online_learning_powergrid.ipynb
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\50_model_c_dummy_then_real.ipynb

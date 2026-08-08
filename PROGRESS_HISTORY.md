@@ -708,3 +708,99 @@ closed out, VM backtesting env + VS Code Remote-SSH set up) ─────
                sweep x 6 ATR variants via Grok (not priority), (3) separately, Saurav +
                VM CC validating 31st July live trades + full 27-31 July weekly recon
                (process-development practice, known low edge, not this session's task)
+
+## 2026-08-06 -- DS3/NIFTY50 gap-fill, NIFTY50-as-regime-gate debunked via WFA, Pearson r screening started
+
+### Data infrastructure -- DS3 + NIFTY50 gap-fill (Jan-Jul 2026)
+       [DONE]  Delegated to Grok via a new standing pattern: CCG_ORCHESTRATION.md (project root),
+           timestamped entries, CCG established as a CLAUDE.md shorthand trigger for this kind
+           of task delegation going forward.
+       [DONE]  Grok completed: all 30 stocks +10,725 5-min bars each (VEDL +10,722, flagged
+           explicitly), NIFTY50 daily +143 rows. All files end 2026-07-31, pre-2026 history
+           preserved, ma20/atr14 recomputed on append with proper warmup.
+       [DONE]  Validated directly (not just trusted the report): row counts match exactly, zero
+           duplicate timestamps, indicator continuity clean across the Dec31-Jan1 append
+           boundary (spot-checked TATAMOTORS). VEDLs flagged 3-bar shortfall investigated and
+           confirmed as a real corporate action (Vedantas 1:5 demerger, ex-date 2026-04-30,
+           special pre-session that morning) via web search corroboration, not a data defect.
+       [DONE]  CLAUDE.md data architecture section rewritten: DS3 primary repointed from fv1s copy
+           to Framework_V2s copy (verified byte-identical on shared OHLCV columns, plus has
+           ma20/atr14 precomputed already). fv1s copy renamed intraday_5min_archived/ and
+           marked superseded (Saurav had independently renamed the folder; CCs CLAUDE.md text
+           corrected to match the actual renamed path). NIFTY50.parquet relocated from fv1 to
+           fv2s daily folder.
+
+### NIFTY50-as-shared-gate hypothesis -- built, tested, conclusively debunked
+       [DONE]  Built notebook 31 (NIFTY50 daily Model A/B replication, same rigor as TATAMOTORS
+           notebook 24) plus steps 25 (LONG trade log builder), 26-27 (single-stock/all-model
+           gating comparison), 32 (30-stock SHORT-only sweep gated by NIFTY50s Model B signal).
+       [DONE]  Initial single-split result looked genuinely promising: mean ZPF=1.008 (vs 0.723
+           ungated baseline), 10/30 stocks individually >=1.0 vs 0/30 at baseline.
+       [FLAG]  Outlier-dependency check (removing each stocks single biggest trade) showed most
+           "winners" were carried by ONE historical event: 2024-06-04 (India election-result
+           market crash) appeared as the dominant trade across NATIONALUM, VEDL, BANDHANBNK,
+           TATAMOTORS, PNB independently.
+       [FLAG]  After the DS3/NIFTY50 gap-fill shifted the Train/Test split boundary (2023-04-28 ->
+           2023-10-04, since the dataset got longer), most top-performer results collapsed:
+           NATIONALUM 2.82->0.79 ZPF, VEDL 1.82->0.99, BANDHANBNK 1.66->0.86 -- high sensitivity
+           to an arbitrary split point, a red flag for a genuinely robust edge.
+       [FAIL]  Full WFA (delegated to Grok, verified): two rolling-window configs (3yr Train/1yr
+           Test x9 folds; 5yr Train/20mo Test x4 folds, both FIXED-size rolling, not expanding,
+           after explicit discussion of why expanding windows would just re-approximate the
+           original single split). EVERY SINGLE FOLD, both configs, net-negative when pooled by
+           real money (not averaged per-stock ratios) -- Config 1 total ZPnL -9,078.85, Config 2
+           -9,967.42. Conclusive: no robust, repeatable edge.
+       [DONE]  Recomputed the single-split result properly on current data with the correct (pooled,
+           not mean-of-ratios) metric for final comparison: pooled_zpf=0.734, total_zpnl=-894.61,
+           n=1103 (Test 2023-10-04 to 2026-07-31) -- better than most WFA folds (supports "more
+           Train history helps somewhat") but still clearly net-losing, not a validated edge.
+       [DONE]  Compared against the ungated baseline for the same period: n=28,767, total_zpnl=
+           -23,077.99, zpf=0.692 -- gating helps modestly (far fewer trades, smaller absolute
+           loss, slightly better ratio) but neither crosses breakeven.
+       [DONE]  Full writeup: 34_updated_validation_summary.md, consolidating old-vs-updated single
+           split + both WFA configs fold-by-fold numbers + final verdict.
+
+### Methodology corrections established this session (reusable going forward)
+       [DONE]  Pooled ZPF/PF (sum-of-wins / sum-of-losses across combined trades) vs mean-of-ratios
+           (averaging separate per-bucket ratios) are NOT the same and can disagree sharply --
+           mean-of-ratios can be badly skewed by one small-N bucket with an extreme value (e.g.
+           AXISBANKs fold 9: N=4, ZPF=46.5, pure small-sample noise). Pooled is the honest
+           metric for "did we actually make money"; mean/median are only useful for checking
+           consistency ACROSS independent buckets (e.g. WFA folds), never as a replacement for
+           pooled when the question is aggregate real-money outcome.
+       [DONE]  WFA window design: rolling FIXED-size Train/Test (old data drops off as new data is
+           added) tests genuine regime-robustness across independent historical eras; expanding
+           Train (accumulates all prior history) just re-approximates the original single split
+           at later folds -- chose rolling for this reason, after explicit discussion.
+       [DONE]  Confirmed the live kite paper-trading bots own PF calculation (ma_30_rejection_v1_
+           offline.py) already uses the pooled method (sums gp/gl across all 30 stocks combined
+           trades in one dataframe) -- consistent with the standard now applied to ZPF too.
+
+### Pearson r feature screening -- new thread started (notebook 35, PRIMARY going forward)
+       [DONE]  Established methodology: every candidate feature must be lagged (no lookahead, same
+           discipline as everywhere else), Train-only r/p-value against the fixed target
+           close_log_return, benchmarked against Model As own lag_1 (consistently non-
+           significant, r=-0.01 to -0.02, p>0.3 everywhere tested).
+       [DONE]  Tested RSI(14, Wilder-smoothed -- confirmed matches TradingViews actual internal
+           calculation, not the optional secondary SMA-smoothing overlay some UIs also offer),
+           lagged 1 day: NIFTY50 r=0.0212/p=0.3281 (not significant); TATAMOTORS r=0.0548/
+           p=0.0120 (statistically significant, beats the benchmark meaningfully) -- but r^2~=
+           0.3%, genuinely tiny in practical terms even though real. Built a toy weak-vs-strong
+           correlation comparison chart to calibrate what r=0.05 actually looks like visually
+           (near-shapeless cloud) vs a real r=0.6 relationship (visible diagonal tilt).
+       [DONE]  Added colored (green=actual up, red=actual down) versions of the scatter plots per
+           user request -- then clarified why that coloring is TRIVIAL/tautological in this
+           context (color is just the sign of the same value already on the y-axis, not an
+           independent check), unlike the earlier Model B decision-boundary chart where color
+           was checked against a genuinely separate fitted-model boundary line.
+       [DONE]  Confirmed NIFTY50s own "volume" field is essentially meaningless (92% of all 2845
+           days show exactly zero volume, since NIFTY50 is an index with no real trading volume
+           of its own -- only its derivatives/constituents do) -- volume as a candidate feature
+           only makes sense to test on individual stocks (TATAMOTORS), not the index.
+       [DONE]  Explicitly decided NOT to build a full Model A/B regression around RSI yet -- its
+           correlation is real but too weak on its own; agreed to screen more candidates first
+           (volume, gap-size vs intraday-move as target, other RSI periods) before investing in
+           the heavier full-model-build + WFA step.
+       [DONE]  Next (explicitly agreed): resume Pearson r screening in notebook 35 with more
+           candidates; only escalate to a full model build once something meaningfully stronger
+           than RSIs current weak signal is found.

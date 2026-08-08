@@ -1,68 +1,59 @@
-# Handoff Note — 2026-07-31
+# Handoff Note — 2026-08-06
 
-## Current State — MemLabs ML thread (PRIMARY focus going forward)
-- Built and validated a genuinely autoregressive model (x=previous trade's PnL, y=current
-  trade's PnL - not feature-based) matching the MemLabs author's actual technique (extracted
-  from his real code via script 18). Found a real, if modest, OOS edge over baseline at the
-  current live SL/TP (2.0/4.5): Baseline ZPnL -79.18 -> Model-filtered -50.41.
-- Critical finding: this edge nearly vanishes at the SL/TP sweep's "best" combo (6.0/6.0):
-  ZPnL -66.60 -> -63.53, almost no improvement. Wider SL/TP dilutes trade frequency/adjacency
-  (holding +81%, gaps +30%), which the autoregressive signal likely depends on. This is a
-  genuine collateral-damage tradeoff between "best backtest ZPF" and "best ML-filterable
-  edge" - worth keeping in mind for any future SL/TP decision.
-- Diverted from here into ATR formula exploration (now closed out, see below) - this is
-  exactly where to resume.
+## Current State — MemLabs Pearson's r feature screening (PRIMARY focus going forward)
+- Notebook 35 (`Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/
+  35_pearson_r_feature_screening.ipynb`) is the active file. Scope is deliberately narrow:
+  Train-only Pearson r/p-value screening of candidate features against the fixed target
+  `close_log_return`, benchmarked against Model A's own `lag_1` (always non-significant,
+  r=-0.01 to -0.02). NOT building a full regression model yet — that's a later, separate step.
+- Only candidate tested so far: RSI(14, Wilder-smoothed, lagged 1 day). Result: NIFTY50
+  r=0.0212/p=0.33 (not significant); TATAMOTORS r=0.0548/p=0.012 (significant, beats benchmark,
+  but r^2~=0.3% — real but very weak in practical terms).
+- Agreed next candidates to screen (not yet built): volume (TATAMOTORS only — NIFTY50's own
+  volume field is confirmed mostly-zero/meaningless, verified directly against the data), gap-
+  size (`log(open_today/close_yesterday)`) paired against intraday-move as target (not the full
+  close_log_return, to avoid the gap-is-part-of-target overlap issue), possibly other RSI
+  periods or a medium-term momentum feature.
+- Rule going forward: only escalate to a full Model A/B-style build + WFA once a candidate shows
+  a meaningfully STRONGER r than RSI's current weak signal, not just statistical significance.
 
-## Current State — ATR formula exploration (CLOSED OUT, informed the ML resume)
-- Delegated 12 variants (Simple/Wilder x 10/14/20 x Signal/Entry source) to Grok, SL/TP
-  locked at 2.0/4.5. Results validated: ZPF spans only 0.760-0.767, current live formula
-  (Simple14/Signal) is already the BEST of the 12. ATR formula/period/source is not a lever
-  that fixes strategy viability - confirms the earlier SL/TP sweep's negative verdict wasn't
-  an ATR-calc artifact.
-- Full file: Algo_Trading/Framework_V2/scripts/trials/ATR_exploration/
-  atr_formula_exploration_results.md
-- Explained (not a bug) why N differs from the earlier SL/TP sweep at the same 2.0/4.5:
-  reference script ma_30_rejection_v1.py lacks the sweep script's `hour[entry_idx]>=15` skip,
-  creating ~1,359 zero-raw-pnl EOD-immediate-exit trades that still eat charges. Undecided
-  whether to add that skip to the reference script - revisit if it matters for future work.
-- Agreed (do tomorrow ONLY if time allows, not priority): run the full 90-combo SL/TP sweep
-  across all 6 ATR variants via Grok "for the sake of it."
+## Current State — NIFTY50-as-shared-gate hypothesis (CLOSED OUT, debunked)
+- Full pipeline built (notebook 31, scripts 25-29/32-33) testing whether NIFTY50's own Model B
+  signal could gate fv2's real 30-stock SHORT trades. Initial single-split result looked
+  promising (mean ZPF=1.008) but did not survive: outlier-dependency check (most "winners"
+  carried by the 2024-06-04 election-crash day), Train/Test-boundary sensitivity (top performers
+  collapsed after a data refresh shifted the split), and full WFA (delegated to Grok, 9-fold +
+  4-fold rolling configs) — every single fold net-negative in real pooled money terms.
+- Full writeup: `34_updated_validation_summary.md`. Established/corrected methodology along the
+  way (pooled vs mean-of-ratios ZPF, rolling not expanding WFA windows) — reusable for any future
+  multi-bucket validation work, not just this thread.
 
-## Current State — SL/TGT -> SL/TP rename (DONE)
-- ~130 files content-edited + 32 renamed across Framework_V2/V1/V0, baseline_reserve,
-  paper_trading_bot_ec2_backup, CLAUDE.md, TODO.md. Excluded kite_oracle_papertrading/
-  (already independently on SL/TP), .claude/worktrees/*, PROGRESS_HISTORY.md.
-- One file (kite_oracle_papertrading/SESSION_SUMMARY.md) was touched before the exclusion
-  was added mid-run - caught and reverted cleanly.
-- Full corruption audit done post-run (checked for accidentally-mangled tokens/hashes) -
-  clean. TODO.md's glossary note claiming "existing files not retroactively renamed" is now
-  STALE and needs a correction (see Known Issues).
-
-## Current State — Kite paper trading bot (Algo_Trading/kite_oracle_papertrading/)
-- No changes this session (deliberately out of scope for the SL/TP rename per Saurav's
-  explicit instruction - it's already on the SL/TP convention independently).
-- Saurav is separately validating 31st July's live trades + the full 27-31 July weekly recon
-  with VM CC (not this session). Explicitly framed as process-development practice, not
-  expected to show real edge given the known viability gap.
+## Current State — Data infrastructure (DONE, validated)
+- DS3 (30 stocks) + NIFTY50 daily both extended through 2026-07-31 via Grok (CCG delegation).
+  Validated directly: row counts, indicator continuity, zero duplicates. One flagged anomaly
+  (VEDL) confirmed as a real corporate action (Vedanta demerger), not a data issue.
+- CLAUDE.md updated: DS3 primary = Framework_V2's copy (has ma20/atr14 precomputed); fv1's copy
+  renamed `intraday_5min_archived/`, marked superseded. NIFTY50.parquet now lives in fv2's daily
+  folder.
+- New standing pattern: `CCG_ORCHESTRATION.md` (project root) for Claude Code -> Grok task
+  delegation. `CCG` = CLAUDE.md shorthand trigger for this.
 
 ## Next Step (START HERE) - explicitly agreed with the user
 
 ### Primary (this session/thread)
-1. Resume MemLabs ML/autoregressive work from where it diverted - multi-stock test is next
-   (single-stock TATAMOTORS noise floor may be too high to see anything real regardless of
-   feature/method, same open question as before the ATR detour).
-2. If genuinely spare time: full 90-combo SL/TP sweep x 6 ATR variants via Grok (secondary).
+1. Continue Pearson's r screening in notebook 35 — add volume (TATAMOTORS), gap-size (vs
+   intraday-move target), and any other quick candidates. Compare all r/p values side by side.
+2. Once a genuinely stronger candidate is found (not just RSI's weak-but-real signal), build a
+   proper Model A/B-style regression + full Train/Test/WFA validation around it.
 
-### Separate (Saurav + VM CC, kite bot thread)
-1. Validate 31st July live trades
-2. Reconcile complete 27-31 July weekly results
+### Parked / lower priority
+1. August 2026 DS3 gap-fill — once the month closes, same CCG pattern as the July fill.
+2. Full 90-combo SL/TP sweep x 6 ATR variants via Grok — still not priority, carried over from
+   before this session (unrelated to the current MemLabs thread).
+3. Separate (Saurav + VM CC, kite bot thread, not this session): live trade validation/recon —
+   status unchanged from before this session.
 
 ## Known Issues
-- TODO.md glossary line (SL/TP entry) says "existing files keep TP, not retroactively
-  renamed" - now FALSE after tonight's rename pass. Needs a one-line correction next session.
-- Undecided: whether to add the `hour[entry_idx]>=15` entry-skip to ma_30_rejection_v1.py to
-  align it with the sweep script's cleaner convention (doesn't change any conclusions reached
-  so far, purely a hygiene question).
-- MemLabs: multi-stock test for the autoregressive model not yet run - single-stock TATAMOTORS
-  result (real but modest edge, vanishes at wider SL/TP) needs that check before trusting it
-  further, per the standing multi-stock-noise-floor concern from the earlier correlation work.
+- None new this session beyond what's already resolved/documented above. Prior known issues
+  (TODO.md glossary SL/TP note, ma_30_rejection_v1.py's missing EOD entry-skip) still carried
+  over, unchanged, from before this session — not touched tonight.
