@@ -1107,3 +1107,11 @@ C:\Users\Saurav\.claude\projects\c--Users-Saurav-CodePonting\memory\feedback_pea
 c:\Users\Saurav\CodePonting\.remember\remember.md
 c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\49_model_c_online_learning_powergrid.ipynb
 c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\50_model_c_dummy_then_real.ipynb
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\51_least_squares_3d.md
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_model\memlabs\51_least_squares_3d.md
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\add_wilder_atr_ds3.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\add_wilder_atr_ds3.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\add_wilder_atr_ds3.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\add_wilder_atr_ds3.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\add_wilder_atr_ds3.py
+c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\add_wilder_atr_ds3.py
