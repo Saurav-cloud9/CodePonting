@@ -1,61 +1,105 @@
-# Session Log — 2026-08-06
+# Session Log — 2026-08-16
 
-## Data infrastructure — DS3 gap-fill + NIFTY50 restructure
-- Delegated (CCG, new standing pattern established this session) the Jan-July 2026 DS3 gap-fill
-  to Grok: all 30 stocks + NIFTY50 daily, 5-min OHLCV, ma20/atr14 recomputed on append. Validated
-  the result directly: row counts match exactly, indicator continuity clean across the append
-  boundary, zero duplicate timestamps. One flagged anomaly (VEDL, 3 fewer bars) confirmed
-  legitimate — Vedanta's real 1:5 demerger, ex-date 2026-04-30, special pre-session that day.
-- CLAUDE.md updated: DS3 primary location repointed to Framework_V2's copy (has ma20/atr14
-  precomputed, verified byte-identical to fv1's on shared columns); fv1's copy renamed to
-  `intraday_5min_archived/` and marked superseded. NIFTY50.parquet moved from fv1 to fv2's daily
-  folder, extended from Kite MCP fetch (2016-2025) + prior Yahoo Finance gap-fill for 2015,
-  now 2015-02-02 -> 2026-07-31 (2845 rows) after the Grok append.
-- New standing convention: `CCG_ORCHESTRATION.md` (project root) as the Claude Code <-> Grok
-  task-delegation log, timestamped entries, most-recent-first. `CCG` is now a CLAUDE.md shorthand
-  trigger for "write this task there instead of doing it in-session."
+## Model C (MemLabs online/Passive-Aggressive learning) — deep exploration, now paused
 
-## MemLabs regime-signal work — NIFTY50-as-shared-gate hypothesis, tested and largely debunked
-- Built notebook 31 (NIFTY50 Model A/B replication) and steps 25-29/32 (fv2 SHORT/LONG trade
-  logs, regime-gating scripts) testing whether NIFTY50's own daily Model A/B signal could gate
-  fv2's real SHORT strategy trades across all 30 stocks.
-- Initial single-split result looked promising (mean ZPF=1.008, 10/30 stocks >=1.0) but did not
-  survive scrutiny: (1) outlier-dependency check showed most "winners" were carried by one single
-  historical event (2024-06-04, India election-result market crash) appearing across multiple
-  stocks' best trades; (2) after the DS3 refresh shifted the Train/Test boundary, most top
-  performers collapsed (NATIONALUM 2.82->0.79 ZPF, VEDL 1.82->0.99, etc.); (3) full WFA (two
-  rolling-window configs, 9 and 4 folds, delegated to Grok, verified) showed EVERY single fold
-  net-negative in real pooled money terms across both configs — no robust, repeatable edge.
-- Established (and corrected) methodology along the way: pooled vs mean-of-ratios ZPF/PF
-  (pooled = sum-of-wins/sum-of-losses across combined trades, the more honest metric; mean/
-  median only meaningful when explicitly comparing across independent buckets like WFA folds);
-  rolling fixed-size Train/Test windows (not expanding) for genuine walk-forward robustness
-  testing; confirmed live paper-trading bot's PF is already computed the pooled way.
-- Verdict documented in `34_updated_validation_summary.md`: NIFTY50-Model-B-as-gate does not
-  show a genuine repeatable edge on fv2's SHORT strategy. Also built the exact same regime-
-  gating pipeline for TATAMOTORS' own signal (steps 25-29) with the same negative outcome.
+### BTC replication + eta0/reference mystery, fully resolved
+- Notebook `50_model_c_dummy_then_real.ipynb` built fresh: Part 1 toy walkthrough (8 hand-picked
+  ticks, full per-tick trace, 2D fitted-line plot with tab10 colors + tick labels, 3D swept-line
+  ruled surface + separate interactive Plotly HTML version), Part 2 real BTC replication, Part 3
+  eta0=1 vs eta0=0.01 stability comparison.
+- Resolved the long-standing eta0 mystery via exact reverse-engineering of tau from the author's
+  own real screenshot values at 9 ticks spanning the sequence: TRUE value is eta0=1.0 (not the
+  reference code's stated 0.01), with epsilon=0.0002 confirmed simultaneously. Root cause: almost
+  certainly a stale-Jupyter-output artifact in the author's own notebook (supported by a
+  systematic comment-misalignment bug found directly in the reference code file).
+- Also discovered a SEPARATE reference-document error: the assumed target hit rate 50.82% was
+  itself wrong — author's real screenshot shows 50.02%.
+- Verified sklearn source directly (`_sgd_fast.pyx.tp`) for the tick-0 special case: PA1 has a
+  hard-coded `if sqnorm(x)==0: continue` guard (skips update entirely), NOT the naively-assumed
+  `min(eta0, loss/0)=eta0` result — explains why tick 0 always gives w=b=0 under PA1 but not PA2.
+- Fixed real bugs along the way: row-count mismatch (added date filter `>=2020-09-29` matching
+  author's true Train start), a mislabeled second plot, a KeyError from a wrong dataframe
+  reference, and (later) mislabeled "Warmup" vs "Zero-return" ticks in the Excel export (tick
+  1088 has a genuine zero-return day, not a warmup case) plus a blank `cum_trade_log_return` gap
+  and a VS-Code-unfriendly date format — all fixed in `50_model_c_real_replication_full.xlsx`.
 
-## Pearson's r feature screening — new thread started, in progress
-- Established methodology: candidate features must be lagged (no lookahead), screened via
-  Train-only Pearson's r/p-value against the fixed target (`close_log_return`), benchmarked
-  against Model A's own `close_log_return_lag_1` (r=-0.0087 to -0.0204, always non-significant).
-- Built notebook 35: tested RSI(14, Wilder-smoothed, lag-1) on both NIFTY50 (r=0.0212, p=0.33,
-  not significant) and TATAMOTORS (r=0.0548, p=0.012, IS statistically significant — beats the
-  benchmark meaningfully) — but r^2~=0.3%, i.e. genuinely tiny in practical terms even though
-  real. Added colored (actual up/down) scatter plots per user request; walked through why that
-  coloring is trivial/tautological here (color = sign of the same value on the y-axis) vs. the
-  earlier Model B decision-boundary chart's genuinely independent color check.
-- Explicitly NOT yet building a full model around RSI — screening more candidates first (agreed
-  plan: volume, gap-size, other indicators) before investing in the heavier build+WFA step,
-  given RSI's edge is real but too weak on its own to justify it yet.
+### POWERGRID replication — the key finding
+- Built `50c_model_c_powergrid.ipynb`: same Model C config applied to POWERGRID, 11.5 years
+  (2015-02-04 to 2026-07-31), daily-resampled from DS3 5-min bars per CLAUDE.md's DS3-only rule.
+- **Both eta0=1 (-0.947) and eta0=0.01 (-0.727) lose money over the full history**, vs raw
+  POWERGRID buy-and-hold (+1.277, max drawdown only -0.440). eta0=1 never recovers into sustained
+  profitability on POWERGRID — no repeat of BTC's "3yr underwater then breakeven" pattern, which
+  directly answers a credibility concern raised mid-session (that pattern was only ever observed
+  once, on one non-independent stretch of BTC data).
+- eta0 sweep on both assets (0.001 to 5.0): POWERGRID's best is eta0=2.0 (+0.692, still loses to
+  buy-and-hold); BTC's best is eta0=0.005 (+3.320, beats its own buy-and-hold). Zero overlap
+  between the two assets' best eta0 — strong evidence Model C isn't finding a transferable edge,
+  just fitting each asset's idiosyncratic noise pattern.
+- Built `50b_model_c_eta_comparison.ipynb` (3-way stacked equity/drawdown: eta0=1 / eta0=0.01 /
+  raw asset, for both BTC and POWERGRID) — visually confirms eta0=0.01 essentially rides the
+  underlying asset's own trend (near-identical curve shape to buy-and-hold) rather than
+  demonstrating independent signal.
+
+### Root cause: weak underlying feature, not model capacity
+- Pearson r, `close_log_return_lag_1` vs `close_log_return`: POWERGRID r=-0.0567 (p=0.0027,
+  significant, r²<1%), BTC r=-0.0369 (p=0.09, NOT significant). Both negative (mean-reverting,
+  not momentum). Naive "follow yesterday's sign" baseline loses money on both assets outright
+  (POWERGRID -1.57, BTC -0.51 cumulative), confirming this isn't a model-tuning problem.
+- Confirmed explicitly: Models A/B/C are ALL strictly linear (ŷ=w·x+b, only the fitting procedure
+  differs) — established Pearson r as the correctly-matched screening tool for this model family
+  specifically (a non-linear-detecting metric like mutual information would be misleading, since a
+  linear model can't exploit a non-linear relationship even if one existed).
+- Discussed but explicitly deferred: testing the weak signal through this project's actual
+  RR/SL-TP exit framework (separate axis from model choice — a sub-50% hit rate can still be
+  profitable with the right exit structure) — not yet built.
+
+### Decision
+Pause Model A/B/C exploration. Resume notebook 35's Pearson r feature screening (parallel,
+separately-tracked thread) as primary. Only return to Model C once a feature meaningfully
+stronger than current candidates (RSI r≈0.08, lag-1 return r≈-0.057, both r²<1%) is found.
+
+## Math/stats teaching thread (alpha/beta CAPM regression) — in progress, paused mid-derivation
+
+- Explicit standing preference established and saved to memory: teach underlying math (variance,
+  OLS, calculus) as pure/standalone math first, then map onto trading terms second — combining
+  new math + new domain vocabulary simultaneously was flagged as harder to absorb.
+- Derivation covered so far (testing whether POWERGRID's eta0=2.0 equity curve is real skill or
+  just trend-tracking): beta=Cov/Var, alpha=mean(y)-beta*mean(x), residual/error_t definition,
+  covariance/variance refresher, residual variance formula (n-2) with full derivation of WHY n-2
+  (OLS's alpha+beta fit forces two exact constraints: sum(error)=0 from dS/dalpha=0, and
+  sum(error*x)=0 from dS/dbeta=0 via calculus) — taught via a concrete "5 numbers, mean must be
+  10" analogy. Explicitly clarified this n-2 correction is unrelated to Model C's "Warmup tick"
+  exclusions (different concepts that happened to come up in the same conversation).
+- Paused right after introducing (not yet breaking down) the SE(alpha) formula. Next: SE(alpha)
+  breakdown → t-statistic → p-value → apply to POWERGRID's real eta0=2.0 data.
+
+## Session/tooling: WSL + cross-session messaging setup
+
+- Explored Claude Code's cross-session messaging feature (SendMessage/ListAgents) to get a
+  genuinely separate, addressable "math mode" chat session. Learned via official docs
+  (code.claude.com/docs/en/cross-session-messaging) that this feature is NOT available on native
+  Windows (macOS/Linux/WSL2 only) — confirmed empirically here too (`/list-agents` returned "not
+  available in this environment").
+- Initially spawned a background subagent ("math-mode") via the Agent tool as a workaround — this
+  works (parent-child relationship, SendMessage-able by agentId) but is a different mechanism from
+  true peer-to-peer cross-session messaging.
+- Set up WSL (Ubuntu, already installed) + VS Code WSL extension to get a genuine second,
+  independent Claude Code session with real cross-session messaging available. Confirmed Node
+  v20.19.5 and Claude Code CLI 2.1.233 already present inside WSL, repo reachable at the same
+  path via `/mnt/c/Users/Saurav/CodePonting` (same files, not a separate copy — no sync-drift risk
+  like the kite_oracle_papertrading VM setup). Configured a global `python.analysis.exclude`
+  (`data`, `outputs`) to fix a Pylance performance warning along the way.
+- Plan going forward: this native-Windows session stays as the "master backup" thread; the WSL VS
+  Code instance becomes the orchestration hub, spawning its own independent "math mode" WSL
+  session for genuine two-way cross-session messaging between peers.
+- Wrote a full recap/seed file (`memlabs/50d_full_recap_seed.md`) covering the entire Model C
+  investigation end-to-end, for the new WSL session to read and continue from with zero context
+  loss (including the exact alpha/beta derivation stopping point).
 
 ## Next session priorities (explicitly agreed)
-1. PRIMARY: continue Pearson's r feature screening in notebook 35 — add more candidates
-   (volume on TATAMOTORS specifically, since NIFTY50's own volume field is confirmed meaningless/
-   mostly-zero; gap-size vs intraday-move as a cleaner target pairing; possibly a different RSI
-   period) — looking for a candidate with a genuinely stronger r, not just statistically
-   significant.
-2. Only escalate to a full Model A/B-style build + WFA once a meaningfully stronger candidate
-   (not just RSI's current weak-but-real signal) is found.
-3. Separately: August 2026 DS3 gap-fill (once the month closes) — parked in CCG_ORCHESTRATION.md
-   pattern for whenever it's next relevant.
+1. PRIMARY: continue Pearson r feature screening in notebook 35 (separate thread — see its own
+   handoff notes for exact next candidate: gap-size vs intraday-move).
+2. When picking the math-mode/alpha-beta thread back up (new WSL session, seeded from
+   `memlabs/50d_full_recap_seed.md`): continue from SE(alpha), same slow one-step-at-a-time style.
+3. Not urgent: testing the weak Pearson-r signal(s) found so far through actual RR/SL-TP exits
+   rather than raw full-day-return capture — a separate, not-yet-started axis of investigation.

@@ -23,6 +23,20 @@ ATR = rolling 14-period mean of TR
 - Entry is always at the **open of the next bar** (i+1), same trading day as the signal bar
 - If `hour[i+1] >= 15` or date changes → signal is skipped entirely
 
+### Touch / Entry cutoff (matches live bot, `ma_rejection_v1_core.py`)
+
+- **LAST_TOUCH_TIME = 14:45** — the touch/signal bar's time must be `<= 14:45`. A touch
+  registering at 14:50 or later is not recognized at all, since the resulting entry
+  would fire with too little runway before the 15:00 hard EOD square-off. This is
+  stricter than the plain `hour < 15` check above, which treats all of 14:00–14:55 as
+  equally "not yet EOD" — 14:45 closes that gap.
+- **ENTRY_CUTOFF_TIME = 14:50** — the entry bar (i+1, or the rejection-bar+1 for
+  multi-bar rejection signals) must have time `<= 14:50`, else the signal is cancelled
+  outright — no trade logged, no charges applied (distinct from the EOD_HOUR>=15 exit
+  branch, which still logs a wash trade). Normally unreachable given the 14:45 touch
+  cap (the very next bar is always 14:50), but guards multi-bar rejection windows
+  (`MAX_TR_GAP`/`MAX_TB_GAP`) where the entry bar can land later than the touch bar.
+
 ---
 
 ## 3. SL / TP Sizing

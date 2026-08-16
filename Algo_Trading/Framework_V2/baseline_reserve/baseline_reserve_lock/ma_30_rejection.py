@@ -5,6 +5,7 @@ Metrics: PF + ZPF (Zerodha charges) + ZSh(D) (daily Sharpe after charges)
 Per-stock breakdown + overall + year-wise
 """
 import sys, io, os, glob
+from datetime import time as _time
 import pandas as pd
 import numpy as np
 
@@ -15,6 +16,9 @@ SL_MULT    = 1.5
 TP_MULT    = 4.0
 MAX_TR_GAP = 3
 EOD_HOUR   = 15
+LAST_TOUCH_TIME   = _time(14, 45)  # matches live bot (ma_rejection_v1_core.py) — touch bar
+                                    # must be <= 14:45, stricter than plain hour<EOD_HOUR
+ENTRY_CUTOFF_TIME = _time(14, 50)  # entry bar must be <= 14:50, else cancel (no trade)
 
 
 def zerodha_short(entry, exit_px):
@@ -36,27 +40,28 @@ def load_arrays(path):
         df[col] = pd.to_numeric(df[col], errors='coerce')
     df['date'] = df['datetime'].dt.date
     df['hour'] = df['datetime'].dt.hour
+    df['time'] = df['datetime'].dt.time
     df['year'] = df['datetime'].dt.year
     return {
         'high':  df['high'].values,  'low':   df['low'].values,
         'open_': df['open'].values,  'close': df['close'].values,
         'ma20':  df['ma20'].values,  'atr14': df['atr14'].values,
         'hour':  df['hour'].values,  'date':  df['date'].values,
-        'year':  df['year'].values,  'n':     len(df),
+        'time':  df['time'].values,  'year':  df['year'].values,  'n': len(df),
     }
 
 
 def run_stock(arr):
     high, low, open_, close = arr['high'], arr['low'], arr['open_'], arr['close']
     ma20, atr14 = arr['ma20'], arr['atr14']
-    hour, date, year = arr['hour'], arr['date'], arr['year']
+    hour, date, time_, year = arr['hour'], arr['date'], arr['time'], arr['year']
     n = arr['n']
     trades = []
     i = 0
     while i < n:
         if np.isnan(ma20[i]) or np.isnan(atr14[i]):
             i += 1; continue
-        if high[i] >= ma20[i] and hour[i] < EOD_HOUR:
+        if high[i] >= ma20[i] and time_[i] <= LAST_TOUCH_TIME:
             touch_date = date[i]; atr = atr14[i]; rej = -1
             for j in range(i, min(i + MAX_TR_GAP + 1, n)):
                 if date[j] != touch_date or hour[j] >= EOD_HOUR: break
@@ -64,6 +69,7 @@ def run_stock(arr):
             if rej < 0: i += 1; continue
             ei = rej + 1
             if ei >= n or date[ei] != touch_date: i += 1; continue
+            if time_[ei] > ENTRY_CUTOFF_TIME: i += 1; continue
             entry = open_[ei]; sl = entry + SL_MULT * atr; tp = entry - TP_MULT * atr
             k = ei
             for k in range(ei, n):

@@ -804,3 +804,85 @@ closed out, VM backtesting env + VS Code Remote-SSH set up) ─────
        [DONE]  Next (explicitly agreed): resume Pearson r screening in notebook 35 with more
            candidates; only escalate to a full model build once something meaningfully stronger
            than RSIs current weak signal is found.
+
+## 2026-08-16 — Model C deep-dive (BTC + POWERGRID), concluded no transferable edge
+
+### Model C mechanics, fully reverse-engineered and verified against sklearn source
+       [DONE]  Replicated MemLabs tutorial's "Model C" (SGDRegressor, online Passive-Aggressive
+           learning) end to end on BTC. Resolved the long-standing eta0 mystery: reference code
+           stated eta0=0.01, but reverse-engineering tau from the author's own real screenshot
+           values at 9 ticks (spanning early and late in the sequence) proved the TRUE value was
+           eta0=1.0, epsilon=0.0002 -- most likely a stale-Jupyter-output artifact in the
+           author's own notebook (supported by a systematic comment-misalignment bug found
+           directly in the reference code file).
+       [DONE]  Discovered a SEPARATE reference-document error along the way: assumed target hit
+           rate 50.82% was itself wrong -- author's real screenshot shows 50.02%.
+       [DONE]  Read sklearn's actual source (_sgd_fast.pyx.tp) to resolve the tick-0 special
+           case: PA1 has a hard-coded "if sqnorm(x)==0: continue" guard (skips the update
+           entirely), not the naively-assumed min(eta0, loss/0)=eta0 result -- explains why
+           tick 0 always gives w=b=0 under PA1 specifically, not PA2.
+       [DONE]  Built notebooks 50 (toy walkthrough + BTC replication + eta0=1-vs-0.01 stability
+           comparison), 50b (3-way eta0=1/eta0=0.01/raw-asset stacked equity+drawdown
+           comparison), 50c (same applied to POWERGRID, 11.5yr DS3 daily-resampled). Formulas-
+           only reference: 52_model_c_formulas.md.
+
+### POWERGRID replication -- the key finding
+       [DONE]  Both eta0=1 (-0.947 final cum return) and eta0=0.01 (-0.727) LOSE MONEY over
+           POWERGRID's full 11.5yr history, vs raw buy-and-hold (+1.277, max drawdown only
+           -0.440). eta0=1 never recovers into sustained profitability on POWERGRID -- no
+           repeat of BTC's "3yr underwater then breakeven" pattern (which was itself flagged as
+           weak evidence, since it was only ever observed once on a single non-independent
+           908-tick stretch of BTC data).
+       [DONE]  eta0 sweep (0.001 to 5.0) on both assets: POWERGRID's best is eta0=2.0 (+0.692,
+           still loses to buy-and-hold); BTC's best is eta0=0.005 (+3.320, beats its own
+           buy-and-hold). ZERO overlap between the two assets' best eta0 values -- strong
+           evidence Model C is fitting each asset's idiosyncratic noise, not a transferable
+           signal.
+
+### Root cause: weak underlying feature, not model capacity
+       [DONE]  Pearson r, close_log_return_lag_1 vs close_log_return: POWERGRID r=-0.0567
+           (p=0.0027, significant but r^2<1%), BTC r=-0.0369 (p=0.09, NOT significant). Both
+           negative/mean-reverting, not momentum. Naive "follow yesterday's sign" baseline loses
+           money outright on both assets (POWERGRID -1.57, BTC -0.51 cumulative) -- confirms
+           this isn't a model-tuning problem, the raw feature itself carries too little signal.
+       [DONE]  Confirmed Models A/B/C are ALL strictly linear (ŷ=w·x+b, only the fitting
+           procedure differs) -- established Pearson r as the correctly-matched screening tool
+           for this specific model family (non-linear-detecting metrics like mutual information
+           would be misleading, since a linear model can't exploit a non-linear relationship
+           even if found).
+       [PARKED] Testing the weak signal(s) through this project's actual RR/SL-TP exit framework
+           (separate axis from model/feature choice -- a sub-50% hit rate can still be
+           profitable with the right exits) -- raised explicitly, not yet built.
+
+### Decision
+       [DONE]  Paused Model A/B/C exploration. Resume notebook 35's Pearson r feature screening
+           (separate, independently-tracked thread) as primary. Only return to Model C once a
+           feature meaningfully stronger than current candidates (RSI r~=0.08, lag-1 return
+           r~=-0.057, both r^2<1%) is found. Full context recap saved to
+           memlabs/50d_full_recap_seed.md for zero-loss continuation in a future session.
+
+### Math/stats teaching thread (alpha/beta CAPM regression) -- in progress, paused
+       [DONE]  Established explicit teaching preference (saved to memory): teach underlying math
+           (variance, OLS, calculus) standalone/neutral-variables first, map onto trading terms
+           second -- combining new math + new domain vocabulary simultaneously is harder to
+           absorb. Go one small step at a time, wait for confirmation before continuing.
+       [DONE]  Derivation covered (testing POWERGRID eta0=2.0's credibility via
+           strategy_return=alpha+beta*market_return+error): beta=Cov/Var, alpha=mean(y)-
+           beta*mean(x), residual/error_t definition (and how it differs fundamentally from
+           Model C's live-error-drives-the-fit usage -- online vs OLS residual philosophy),
+           covariance/variance refresher, residual variance formula with full derivation of WHY
+           n-2 (OLS's alpha+beta fit forces two exact constraints via calculus,
+           taught with a concrete "5 numbers, mean must be 10" analogy).
+       [PAUSED] Next: SE(alpha) formula breakdown -> t-statistic -> p-value -> apply to real
+           POWERGRID eta0=2.0 data. Not yet done.
+
+### Session/tooling: WSL + cross-session messaging
+       [DONE]  Confirmed via official docs + empirically (/list-agents failed here) that Claude
+           Code's cross-session messaging feature is NOT available on native Windows (macOS/
+           Linux/WSL2 only). Set up WSL (Ubuntu, already installed) + VS Code WSL extension to
+           get a genuine second, independent Claude Code session for this purpose -- confirmed
+           Node/Claude CLI already present, repo reachable at the same path (no separate-copy
+           sync risk, unlike the kite_oracle_papertrading VM setup).
+       [DONE]  Plan: this native-Windows session stays as "master backup"; WSL VS Code instance
+           becomes the orchestration hub, spawning its own independent "math mode" WSL peer
+           session for genuine two-way cross-session messaging.

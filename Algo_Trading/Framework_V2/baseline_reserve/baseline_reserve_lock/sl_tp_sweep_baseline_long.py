@@ -6,6 +6,7 @@ Metrics: ZPF + ZSh(D) primary (Zerodha charges); PF reference
 Vectorized numpy ZPF for speed.
 """
 import sys, io, glob, os
+from datetime import time as _time
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,6 +17,8 @@ DATA_DIR = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\data\historic
 OUT_DIR  = r'C:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\outputs\reports'
 EOD_HOUR   = 15
 MAX_TR_GAP = 3
+LAST_TOUCH_TIME   = _time(14, 45)  # matches live bot convention — touch bar must be <= 14:45
+ENTRY_CUTOFF_TIME = _time(14, 50)  # entry bar must be <= 14:50, else cancel (no trade)
 
 SL_VALS  = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
 TP_VALS  = [2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0]
@@ -41,6 +44,7 @@ def load(f):
         df[col] = pd.to_numeric(df[col], errors='coerce')
     df['date']  = df['datetime'].dt.date
     df['hour']  = df['datetime'].dt.hour
+    df['time']  = df['datetime'].dt.time
     df['year']  = df['datetime'].dt.year
     return df.reset_index(drop=True)
 
@@ -49,14 +53,14 @@ def run_combo(arrays, sl_m, tp_m):
     """Returns lists: pnl, entry, exit_px, year, date."""
     high, low, open_, close = arrays['high'], arrays['low'], arrays['open_'], arrays['close']
     ma20, atr14 = arrays['ma20'], arrays['atr14']
-    hour, date, year = arrays['hour'], arrays['date'], arrays['year']
+    hour, date, time_, year = arrays['hour'], arrays['date'], arrays['time'], arrays['year']
     n = arrays['n']
     pnl_out = []; entry_out = []; exit_out = []; yr_out = []; dt_out = []
     i = 0
     while i < n:
         if np.isnan(ma20[i]) or np.isnan(atr14[i]):
             i += 1; continue
-        if low[i] <= ma20[i] and hour[i] < EOD_HOUR:
+        if low[i] <= ma20[i] and time_[i] <= LAST_TOUCH_TIME:
             touch_date = date[i]; atr = atr14[i]; bounce = -1
             for j in range(i, min(i + MAX_TR_GAP + 1, n)):
                 if date[j] != touch_date or hour[j] >= EOD_HOUR: break
@@ -64,6 +68,7 @@ def run_combo(arrays, sl_m, tp_m):
             if bounce < 0: i += 1; continue
             ei = bounce + 1
             if ei >= n or date[ei] != touch_date: i += 1; continue
+            if time_[ei] > ENTRY_CUTOFF_TIME: i += 1; continue
             entry = open_[ei]; sl = entry - sl_m * atr; tp = entry + tp_m * atr
             k = ei
             for k in range(ei, n):
@@ -107,7 +112,7 @@ for f in files:
         'open_': df['open'].values,  'close': df['close'].values,
         'ma20':  df['ma20'].values,  'atr14': df['atr14'].values,
         'hour':  df['hour'].values,  'date':  df['date'].values,
-        'year':  df['year'].values,  'n':     len(df),
+        'time':  df['time'].values,  'year':  df['year'].values,  'n': len(df),
     })
 print(f'Loaded. Running {len(SL_VALS)} x {len(TP_VALS)} grid sweep...')
 

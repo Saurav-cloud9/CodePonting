@@ -3,20 +3,21 @@
 # ─────────────────────────────────────────────────────────────
 
 P1  MemLabs Pearson's r feature screening — resume from here (notebook 35)
-        2026-08-06: Train-only r/p screening vs fixed target close_log_return, benchmarked
-        against Model A's own lag_1 (always non-significant). RSI(14, lagged) tested: NIFTY50
-        not significant, TATAMOTORS r=0.0548/p=0.012 significant but r^2~=0.3%, still very weak.
-        Next: screen more candidates (volume on TATAMOTORS - NIFTY50's own volume is confirmed
-        meaningless; gap-size vs intraday-move target; other RSI periods). Only escalate to a
-        full Model A/B build + WFA once something meaningfully stronger than RSI turns up.
+        2026-08-16: RSI period sweep (7/9/14/21/28) done — no period beats 14 meaningfully.
+        Volume (TATAMOTORS) screened — weakest candidate yet, log transform didn't help. Two
+        real DS3 data bugs found+fixed along the way (INFY frozen-tick day, DIVISLAB un-split-
+        adjusted day). Model C (separate deep-dive, notebooks 50/50b/50c) concluded no
+        transferable edge exists on raw signals either — reinforces this stays the priority.
+        Next: screen gap-size (log(open_today/close_yesterday)) vs intraday-move as target.
+        Only escalate to a full Model A/B build + WFA once something meaningfully stronger than
+        RSI's current weak signal (r~=0.08, r^2<1%) turns up.
 
-P2  NIFTY50-as-shared-gate hypothesis — CLOSED, debunked via full WFA
-        2026-08-06: built + validated end-to-end (notebook 31, scripts 25-29/32/33). Full WFA
-        (9-fold + 4-fold rolling, via Grok) - every fold net-negative in pooled money terms.
-        Top single-split "winners" traced to one dominant event (2024-06-04 crash) + Train/Test
-        boundary sensitivity, not real edge. Writeup: 34_updated_validation_summary.md.
-        Established reusable methodology: pooled (not mean-of-ratios) ZPF, rolling (not
-        expanding) WFA windows - apply to any future multi-bucket validation.
+P2  Alpha/beta CAPM regression derivation (math-mode thread) — resume from SE(alpha)
+        2026-08-16: paused mid-derivation testing POWERGRID Model C eta0=2.0's credibility.
+        Covered: beta, alpha, residual/error_t, covariance/variance, residual variance (n-2,
+        fully derived why). Next: SE(alpha) formula breakdown -> t-stat -> p-value -> apply to
+        real data. Full context: memlabs/50d_full_recap_seed.md. Continue in WSL-based session
+        for genuine cross-session messaging, or here directly — either works.
 
 P3  Kite bot (market hours only) — running live daily, resume next market session
         2026-07-28 progress: 3 real mid-session restarts (09:51/10:14/10:35) with open
@@ -25,8 +26,11 @@ P3  Kite bot (market hours only) — running live daily, resume next market sess
         Older items still open: MA20/ATR14+touch-eval logging not yet added; ATR14 divergence
         question.
 
-P4  ATR formula exploration - CLOSED. If spare time only: full 90-combo SL/TP sweep x 6 ATR
-        variants via Grok (nice-to-have, not priority, carried over unchanged).
+P4  Test weak Pearson-r signal(s) through actual RR/SL-TP exits (not yet started)
+        Raised 2026-08-16: everything tested so far (Model C, naive baseline) captures the full
+        day's raw return with no exit structure. A sub-50% hit rate can still be profitable with
+        the right ATR-based SL/TP (this project's actual convention) — genuinely untested axis,
+        separate from model/feature choice.
 
 P5  August 2026 DS3 gap-fill — once the month closes, same CCG pattern as the July fill just
         completed (all 30 stocks + NIFTY50 daily).
@@ -38,42 +42,5 @@ F3  Volume Spike Exhaustion — hypothesis parked
 F4  Stock diversity analysis — check if 5 stocks fire on same days
 F5  Portfolio construction — capital allocation across stocks
 F6  Insurance review
-F7  New signal sweeps via Grok — VWAP done (confirmed dead); RSI/MACD combos not yet run
-F8  Cloud backtesting engine — run fv2 backtests from any device without local setup
-        (Primary: Oracle Cloud; fallback: AWS EC2)
-
-# ── GLOSSARY ──────────────────────────────────────────────────
-## Signal Geometry
-# T0          — touch bar: candle where price touches MA20 or Kijun
-# tb_gap      — touch-to-bounce gap: bars between T0 and bounce bar
-
-## Gates & Params
-# G1          — Gate 1: pre-touch regime check
-# G2          — Gate 2: touch & bounce quality
-# G3          — Gate 3: post-bounce follow-through
-
-## Metrics & System
-# SL/TP       — Stop Loss / Take Profit (standard shortform). Retroactively renamed
-#               from SL/TGT across ~130 files project-wide on 2026-07-31 (excluded:
-#               kite_oracle_papertrading/, .claude/worktrees/, PROGRESS_HISTORY.md)
-# PF          — raw profit factor (Python backtest, zero charges)
-# ZPF         — Zerodha Profit Factor: PF after full Zerodha intraday charges
-# ZSh(D)      — Zerodha Daily Sharpe (annualised): daily zpnl mean/std × √252
-# NPF         — Neo Profit Factor (Kotak Neo, archived — Zerodha is now primary)
-# WR          — win rate
-# WFA         — walk-forward analysis
-# OOS         — out-of-sample
-# SL          — stop loss (replaces old "SL" in SL/TP — industry standard)
-# TP          — take profit (replaces TP — industry standard)
-# R/R         — reward/risk ratio
-# BE          — breakeven W/(W+L) = SL/(SL+TP)
-# MFE         — Max Favourable Excursion (best point trade reached, in ATR units)
-# MAE         — Max Adverse Excursion (worst point trade reached, in ATR units)
-
-## Frameworks & Data
-# fv2         — Framework V2 (active)
-# DS3         — primary historical dataset (30 stocks, 2015-02 to 2026-07, 5-min parquet,
-#               Framework_V2 copy is primary as of 2026-08-06 - has ma20/atr14 precomputed)
-
-# Note: kbccp/kbss (kite bot scoped CCP/SS) moved to CLAUDE.md SHORTHAND section -
-# action-triggering shorthand lives there (auto-loaded every session), not here.
+F7  51_least_squares_3d.md (memlabs) — Least Squares 2D->3D plane fit writeup, parked mid-2026-08
+F8  Full 90-combo SL/TP sweep x 6 ATR variants via Grok — nice-to-have, not priority
