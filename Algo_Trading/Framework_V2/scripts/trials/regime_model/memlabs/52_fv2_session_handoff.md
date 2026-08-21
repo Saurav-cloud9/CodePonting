@@ -122,12 +122,35 @@ verified against actual docs, not guessed):
 4. Everything else (MemLabs notebook 35 Pearson-r screening, P1 on TODO.md) is unrelated to this
    session's work and untouched — check TODO.md/PROGRESS.md directly for that thread's status.
 
-## 6. Setting up two mobile-accessible Remote Control sessions on the VM (PENDING — Saurav will
-   do this himself from the VM's remote CC session, not yet done)
+## 6. Two mobile-accessible Remote Control sessions on the VM — DONE, live
 
-Goal: two persistent, separately-named Claude Code sessions running on the VM ("fv2" and
-"math mode"), each reachable from a mobile device at any time, surviving SSH disconnect.
-Doc-verified (via `claude-code-guide` agent, not guessed) — precise requirements below.
+Two persistent, separately-named Claude Code sessions are running on the VM right now ("fv2" and
+"math mode"), each reachable from a mobile device at any time, surviving SSH disconnect. Set up
+and verified working this session (not just planned — actually done).
+
+**Live right now** (tmux session name → Remote Control name):
+- `fv2` tmux session → Remote Control session "fv2"
+- `mathmode` tmux session → Remote Control session "math mode"
+
+Both launched via `tmux new-session -d -s <name> -c ~/CodePonting '<claude_bin> --remote-control
+"<name>"'`, confirmed live in the Claude mobile app's Code tab (green dot, listed by name) and via
+`tmux list-sessions` on the VM. If either ever goes offline (VM reboot, tmux killed, etc.), re-run
+the same launch command to bring it back — see "Exact steps" below.
+
+**A real gotcha hit and solved**: the `claude` binary (npm-installed, v2.1.238, confirmed matching
+desktop's version) is NOT in the default non-interactive SSH `PATH` — `ssh host "claude ..."` fails
+with "command not found" even though it's genuinely installed. Use the full path instead:
+`/home/ubuntu/.npm-global/bin/claude`.
+
+**Bonus finding**: a third session named plain "CodePonting" also shows in the mobile Code tab —
+that's desktop's own separate Remote Control session (auto-launches daily on Windows boot, per
+CLAUDE.md's existing CC Remote Setup). Decided to keep it, not remove it — it's the one remaining
+channel to reach desktop specifically for anything that only works there (TradingView MCP,
+Chrome/CDP-dependent work — see section 2's TradingView note). Not redundant with the two VM
+sessions, genuinely different purpose.
+
+Doc-verified requirements/steps below (via `claude-code-guide` agent, not guessed) — kept for
+reference in case either session needs to be relaunched from scratch.
 
 **Requirements:**
 - Claude Code CLI on the VM, Pro/Max/Team/Enterprise plan (Remote Control is on by default for
