@@ -11,6 +11,27 @@
         ]
       }
     ],
-    "Stop": []
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/git_sync_check_start.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/git_sync_check_stop.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }
