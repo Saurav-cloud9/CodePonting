@@ -121,6 +121,47 @@ verified against actual docs, not guessed):
 4. Everything else (MemLabs notebook 35 Pearson-r screening, P1 on TODO.md) is unrelated to this
    session's work and untouched — check TODO.md/PROGRESS.md directly for that thread's status.
 
+## 6. Setting up two mobile-accessible Remote Control sessions on the VM (PENDING — Saurav will
+   do this himself from the VM's remote CC session, not yet done)
+
+Goal: two persistent, separately-named Claude Code sessions running on the VM ("fv2" and
+"math mode"), each reachable from a mobile device at any time, surviving SSH disconnect.
+Doc-verified (via `claude-code-guide` agent, not guessed) — precise requirements below.
+
+**Requirements:**
+- Claude Code CLI on the VM, Pro/Max/Team/Enterprise plan (Remote Control is on by default for
+  Pro/Max — no admin toggle needed; Team/Enterprise needs an Owner to enable it once at
+  claude.ai/admin-settings/claude-code).
+- `tmux` or `screen` installed on the VM — **non-negotiable**. Remote Control keeps the `claude`
+  process itself running the whole time; if the terminal/SSH connection closes without tmux/screen,
+  the session goes offline. There is no separate built-in persistent daemon for this.
+- One `claude` process = one Remote Control session (a single process cannot serve two named
+  sessions at once) — hence two separate tmux windows/panes, not one.
+
+**Exact steps:**
+```bash
+ssh into the VM
+tmux
+# window 1 (Ctrl+B, C creates a new window):
+cd ~/CodePonting && claude --remote-control "fv2"
+# window 2:
+cd ~/CodePonting && claude --remote-control "math mode"
+# detach, safe to close SSH now: Ctrl+B, D
+```
+(`/remote-control name` mid-session is an equivalent alternative to the `--remote-control` startup
+flag, if a session is already running unflagged and needs to be made remote-accessible in place.)
+
+**Accessing from mobile** (either works):
+- Claude mobile app → **Code** tab → both sessions listed by name, green dot = online
+- `claude.ai/code` in any mobile browser → same sessions in the sidebar
+- Or scan the QR code shown in each session's terminal output (press spacebar to toggle it)
+
+**Gotchas:**
+- Must start tmux/screen *before* the session goes remote-control-enabled and *before* SSH
+  disconnects — not after.
+- No inbound firewall/port config needed — Claude Code only makes outbound HTTPS calls.
+- Short network drops auto-retry; extended VM/network outages will require reconnecting manually.
+
 ## Session/workflow notes
 
 - This session upgraded its own local Claude Code CLI from v2.0.50 → v2.1.238 mid-conversation
