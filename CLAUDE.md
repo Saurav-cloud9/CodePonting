@@ -16,6 +16,23 @@
   CCG   = trigger to delegate the current task to Grok — write the instruction
           into CCG_ORCHESTRATION.md (project root) instead of doing it in-session
 
+── CROSS-SESSION PEER NAMING ────────────────────────────────────
+
+  Saurav runs parallel Claude Code sessions (desktop WSL and/or VM) that message each
+  other via ListAgents/SendMessage (Linux/WSL2 only, not native Windows). Auto-assigned
+  peer names (e.g. "codeponting-bd") vary per session and are meaningless — always
+  resolve the live name via ListAgents, never assume it matches a prior session.
+
+  Saurav's fixed reference names for the roles, regardless of which machine or
+  auto-name is currently running them:
+    fv2       = the main/general CodePonting session (fv2 signal work, CCP, MemLabs
+                research, most tasks)
+    math mode = a session strictly scoped to the alpha/beta CAPM math-teaching thread
+                only — NOT "memlab". MemLabs research itself stays in fv2.
+
+  If ambiguous (new session, unclear which is which), send an identity-check message
+  and let the peer self-report its role before addressing it further.
+
 ── RESPONSE FORMATTING ──────────────────────────────────────────
 
   Default to bullet-point format for assessments, reviews, and multi-point
@@ -586,6 +603,18 @@ Side quests — revisit when fv2 signal is stable. Full details → [[hackathon_
 
 NSE Signal Dashboard (2026-04-22) — CC + Opus 4.7 + Claude Design.
 Explainable G1-G3 signal screener for 29 NSE stocks. Post-fv2 stable.
+
+
+## ── PARKED REMINDERS ──────────────────────────────────────────────────────────
+Non-project, revisit during a free window — not priority work.
+
+Radhika ML repo walkthrough (2026-08-21) — github.com/Radhika-Keni, an old college
+friend's GitHub. Pinned repo Satellite_Imagery_Detection_YOLOV7 (YOLOv7 satellite
+imagery object detection, 8★/3 forks) looked like a well-structured end-to-end ML
+project worth walking through together for general ML appreciation, outside
+fv2/trading. Profile is AI-Vision focused (postgrad AI/ML, surveillance automation +
+medical imaging diagnosis). 5 total repos on the profile, only the pinned one checked
+so far.
 
 
 ## ── CC REMOTE SETUP ───────────────────────────────────────────
