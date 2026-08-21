@@ -15,6 +15,9 @@ _explore/
 *.swp
 *.swo
 
+# Machine-specific Claude Code overrides (platform-specific hook commands etc.)
+.claude/settings.local.json
+
 # Python
 __pycache__/
 *.pyc
