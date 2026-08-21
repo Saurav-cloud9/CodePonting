@@ -50,13 +50,14 @@
   dependency (apt etc.) and the venv is built on top of it, not independent of it.
 - Installed into `kite_bot_env` this session: scipy, scikit-learn, nbformat, nbconvert (numpy,
   pandas, matplotlib, pyarrow, ipykernel were already there from the bot's original setup).
-- **`.claude/settings.json`'s PostToolUse hook command differs intentionally between machines**:
-  desktop keeps `py C:/Users/Saurav/CodePonting/.claude/hooks/log_modified.py` (Windows-specific,
-  git-tracked, correct for desktop). VM has a **local, deliberately uncommitted** override to
-  `python3 .claude/hooks/log_modified.py` (portable). This is NOT a bug — don't try to "fix"/sync
-  it, don't push the VM's version back to desktop. Any future pull on the VM that touches this
-  exact file may need re-stashing the VM's local override first (already happened once this
-  session, resolved via stash → pull → reapply → drop stash).
+- **Platform-specific hook command issue — RESOLVED (see section 7)**: the PostToolUse hook
+  (`log_modified.py`) needs a different launcher per OS (`py` on Windows, `python3` on Linux).
+  This originally lived in the shared, git-tracked `settings.json`, causing a permanent diff on
+  the VM. Root-caused and fixed this session: `settings.json` now holds only the universal
+  SessionStart/Stop hooks (byte-identical on both machines); the platform-specific PostToolUse
+  hook moved into `settings.local.json`, which is now properly gitignored (it was being
+  accidentally committed before — see section 7 for the full story). No more permanent diff,
+  no more stash dance on pull.
 - **Git sync-discipline hooks are live on both machines** (git-tracked, so any future clone gets
   them too): `.claude/hooks/git_sync_check_start.sh` (SessionStart — warns if behind origin or
   dirty) and `git_sync_check_stop.sh` (Stop — warns if unpushed/dirty before switching machines).
@@ -162,27 +163,32 @@ flag, if a session is already running unflagged and needs to be made remote-acce
 - No inbound firewall/port config needed — Claude Code only makes outbound HTTPS calls.
 - Short network drops auto-retry; extended VM/network outages will require reconnecting manually.
 
-## 7. Why the VM's settings.json diff isn't gitignored (discussed, decided: leave as-is)
+## 7. VM's settings.json diff — root cause fixed (was: "leave as-is", now: actually resolved)
 
 Saurav asked why the VM's intentional local `python3` override (section 2) isn't just added to
-`.gitignore` to prevent an accidental commit via VS Code's Source Control panel. Two real findings:
+`.gitignore`. Two real findings from that discussion, then an actual fix was applied:
 
-- **`.gitignore` doesn't work for this at all** — it only affects untracked files. `settings.json`
-  is already tracked (it holds the sync-discipline hooks, which must stay tracked/synced), so
-  adding it to `.gitignore` would do nothing to the visible diff.
-- **`git update-index --skip-worktree .claude/settings.json`** is the actual correct git tool for
-  "hide this tracked file's local diff, don't let it get overwritten" — but it has a real
-  trade-off: it trades today's *safe, loud* pull behavior (git refuses to overwrite and forces an
-  explicit fix — exactly what happened once already this session, cleanly resolved via
-  stash→pull→reapply→drop-stash) for a *silent* one — if desktop ever adds a genuinely new hook to
-  `settings.json`, the VM's `git pull` would quietly NOT pick it up while skip-worktree is set,
-  since it freezes the whole file, not just the one differing line.
-
-**Decision: leave it as a plain unstaged diff, don't use skip-worktree or gitignore.** The only
-real risk is accidentally clicking "Commit" on that one line — low-probability, and even if it
-happens, trivially recoverable (`git checkout .claude/settings.json` then reapply the one-line
-`python3` fix). The current visible/blocking behavior is safer than a silent freeze that could
-cause a future real hook update to be missed without any warning.
+- **`.gitignore` doesn't work on an already-tracked file** — it only affects untracked files, so
+  it wouldn't touch `settings.json`'s visible diff at all.
+- **`git update-index --skip-worktree`** would work but trades safe/loud pull-blocking for a
+  silent future-update-miss risk (considered, rejected).
+- **The actual fix, applied**: `settings.local.json` was *supposed* to be Claude Code's own
+  gitignored, per-machine override layer all along — but it had been accidentally committed to
+  this repo since early on, which is the real root cause (not something specific to the VM setup;
+  it just never surfaced as a problem until a second machine existed). Fix:
+  1. Moved the PostToolUse hook out of `settings.json` into `settings.local.json` (desktop version:
+     `py C:/...`, VM version: `python3 ...`).
+  2. Added `.claude/settings.local.json` to `.gitignore`.
+  3. `git rm --cached .claude/settings.local.json` on desktop to actually stop tracking it,
+     committed + pushed (`93b3fe4`).
+  4. On the VM: `git pull` deleted the now-untracked `settings.local.json` from disk (expected,
+     since it had no local modifications there) — recreated it manually with the same permissions
+     block plus the VM's `python3` hook line.
+- **Result, verified**: `settings.json` is now byte-identical on both machines and holds only the
+  universal SessionStart/Stop hooks. `settings.local.json` is genuinely per-machine, gitignored,
+  and invisible to `git status` on both sides. `git status` is fully clean on both machines for
+  the first time this session. No more permanent diff, no more stash dance, root cause actually
+  eliminated rather than worked around.
 
 ## Session/workflow notes
 
