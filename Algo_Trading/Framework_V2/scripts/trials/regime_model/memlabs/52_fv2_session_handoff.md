@@ -162,6 +162,28 @@ flag, if a session is already running unflagged and needs to be made remote-acce
 - No inbound firewall/port config needed — Claude Code only makes outbound HTTPS calls.
 - Short network drops auto-retry; extended VM/network outages will require reconnecting manually.
 
+## 7. Why the VM's settings.json diff isn't gitignored (discussed, decided: leave as-is)
+
+Saurav asked why the VM's intentional local `python3` override (section 2) isn't just added to
+`.gitignore` to prevent an accidental commit via VS Code's Source Control panel. Two real findings:
+
+- **`.gitignore` doesn't work for this at all** — it only affects untracked files. `settings.json`
+  is already tracked (it holds the sync-discipline hooks, which must stay tracked/synced), so
+  adding it to `.gitignore` would do nothing to the visible diff.
+- **`git update-index --skip-worktree .claude/settings.json`** is the actual correct git tool for
+  "hide this tracked file's local diff, don't let it get overwritten" — but it has a real
+  trade-off: it trades today's *safe, loud* pull behavior (git refuses to overwrite and forces an
+  explicit fix — exactly what happened once already this session, cleanly resolved via
+  stash→pull→reapply→drop-stash) for a *silent* one — if desktop ever adds a genuinely new hook to
+  `settings.json`, the VM's `git pull` would quietly NOT pick it up while skip-worktree is set,
+  since it freezes the whole file, not just the one differing line.
+
+**Decision: leave it as a plain unstaged diff, don't use skip-worktree or gitignore.** The only
+real risk is accidentally clicking "Commit" on that one line — low-probability, and even if it
+happens, trivially recoverable (`git checkout .claude/settings.json` then reapply the one-line
+`python3` fix). The current visible/blocking behavior is safer than a silent freeze that could
+cause a future real hook update to be missed without any warning.
+
 ## Session/workflow notes
 
 - This session upgraded its own local Claude Code CLI from v2.0.50 → v2.1.238 mid-conversation
