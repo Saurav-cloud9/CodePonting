@@ -5,7 +5,7 @@
 
 ── SHORTHAND ────────────────────────────────────────────────────
 
-  ris = "reply in short" — reply in 1–2 lines max, no elaboration
+  ras = "reply answer in short" — reply in 1–2 lines max, no elaboration
   lm  = "learning mode" — explain concepts directly, no solution code. Let user write the code himself.
   ivb = initialize voice bridge — execute /ivb command immediately, no confirmation needed.
   kbccp = CCP scoped to kite_oracle_papertrading only: read its PROGRESS.md (VM,
