@@ -1,14 +1,27 @@
 # PROGRESS.md — CodePonting
-# Two views, 5 pointers each. Update both on every SS.
+# Two views, 5 pointers each. Update both on every SIF.
 # Full history → PROGRESS_HISTORY.md
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. Deep-dived MemLabs "Model C" (online/Passive-Aggressive learning) end-to-end: replicated author's BTC numbers (locked eta0=1.0/epsilon=0.0002 via reverse-engineering real screenshots; corrected a second reference-doc error, true hit rate 50.02% not 50.82%), built full toy-walkthrough + 2D/3D visualizations, then tested the same config on POWERGRID (11.5yr DS3) — 50/50b/50c notebooks in memlabs/
-2. Found Model C shows NO transferable edge across assets: BTC's best eta0 (0.005, beats buy-and-hold) and POWERGRID's best eta0 (2.0, still loses to buy-and-hold) share zero overlap; BTC's "eta0=1 needs ~3yrs to become profitable" pattern does not repeat on POWERGRID even with 2x the data
-3. Root-caused the underperformance to weak underlying signal, not model capacity — Pearson r on close_log_return_lag_1: POWERGRID r=-0.057 (p=0.003, significant but r²<1%), BTC r=-0.037 (p=0.09, not significant); naive "follow yesterday's sign" baseline loses money on both. Confirmed Models A/B/C are all strictly linear, making Pearson r the correctly-matched screening tool
-4. Decision: pause Model A/B/C, resume notebook 35 Pearson r feature screening (parallel thread, continued independently — INFY/DIVISLAB data bugs fixed, RSI period sweep done, volume screening done, all weak/negative) as the primary active thread; only return to Model C once notebook 35 finds a meaningfully stronger candidate
-5. Mid-derivation, paused: alpha/beta CAPM-style regression (testing POWERGRID eta0=2.0's credibility) — covariance/variance, OLS normal equations, n-2 degrees-of-freedom correction all taught; next step is SE(alpha)/t-stat/p-value. Full recap seeded to `memlabs/50d_full_recap_seed.md` for continuation in a new session (WSL-based, for genuine cross-session messaging)
+1. Continued the alpha/beta CAPM regression math-mode thread (VM session, 2026-08-22/23): built a
+   new `52_mathmode_full_derivation_expanded.md` (every algebra line shown, companion to the
+   existing compact `_chronological.md`), fully deriving Steps 0-6 with a parabola-shape aside/
+   cross-check, the Cov(x,y)/Var(x) expansion proof, and two understanding-checkpoint summaries
+2. Deep-dived Step 6's n-2 degrees-of-freedom correction with a concrete 10-residual worked
+   example (8 free + 2 forced by the two normal-equation constraints) plus a matplotlib dark-mode
+   chart comparing Var(n) vs Var(n-2) — `52_mathmode_variance_dof_example.py`/`.png`
+3. Continued conversationally through Steps 7-12 (weighted-sum rewrite, Cov(ȳ,β)=0 proof, general
+   SE(ŷ at x0) formula, SE(α) special case, confidence-interval-vs-prediction-interval
+   distinction) — not yet written into the expanded file; chronological file already has all 14
+   steps in compact form
+4. Renamed the "SS"/"save state" shorthand to "SIF"/"save information" project-wide across all
+   CLAUDE.md files on the VM (main + kite_oracle_live_trading x2 + kite_oracle_papertrading +
+   backtesting), including `kbss`→`kbsif` and `SSD`→`SIFD` in the main file
+5. Fixed a PostToolUse hook bug (`log_modified.py` invoked via relative path, broke when a prior
+   Bash `cd` changed the shell's cwd) by switching to an absolute path in `settings.local.json`;
+   also added a VM-hostname-based skip to the git-sync Stop-hook reminder (not needed mid-session
+   on the VM itself, since it's the primary workspace now)
 
 ── MILESTONES (5 most important) ────────────────────────────
 1. v1 clean-touch SHORT locked: SL=2.0x/TP=4.5x → PF=1.135 Sharpe=2.358 (110,641 trades, DS3 11yr) — cross-validated (array backtest + offline engine + Grok)

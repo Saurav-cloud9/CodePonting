@@ -46,18 +46,27 @@
 - Explicit teaching preference (saved to memory, `feedback_math_before_domain_mapping.md`): teach
   math standalone/neutral-variables first, map onto trading terms second; go one small step at a
   time, wait for confirmation before adding the next piece.
-- **Steps covered**: beta=Cov/Var formula; alpha=mean(y)-beta*mean(x); residual/error_t
-  definition (and how it differs from Model C's live-error-drives-the-fit usage); covariance vs
-  variance refresher; residual variance formula with FULL derivation of why n-2 (not n or n-1) —
-  OLS's alpha+beta fit forces two exact constraints (Σerror=0 from dS/dalpha=0, Σ(error·x)=0 from
-  dS/dbeta=0), taught via a "5 numbers, mean must be 10" concrete analogy.
-- **PAUSED right here — next step**: SE(alpha) formula was just introduced (one line, not yet
-  broken down):
-  `SE(alpha) = √[Var(error) × (1/n + mean(market_return)²/Σ(market_returnₜ-mean(market_return))²)]`
-  Continue from here, same slow style, then t-statistic, p-value, then finally apply to real
-  POWERGRID eta0=2.0 data.
+- **2026-08-23 update (math-mode VM session)**: built a new expanded companion file,
+  `memlabs/52_mathmode_full_derivation_expanded.md` (every algebra line shown), alongside the
+  existing compact `52_mathmode_full_derivation_chronological.md`. Fully re-derived Steps 0-6 in
+  the expanded file (parabola-shape cross-check, full Cov(x,y)/Var(x) expansion proof, two
+  understanding-checkpoint summaries), plus a standalone 10-residual worked example +
+  matplotlib chart (`52_mathmode_variance_dof_example.py`/`.png`) illustrating the n-2
+  degrees-of-freedom correction concretely (Var(n)=17.4 vs correct Var(n-2)=21.75).
+- **Steps covered (chronological file has all 14 in compact form; expanded file has 0-6 in full
+  detail)**: beta=Cov/Var formula; alpha=mean(y)-beta*mean(x); residual/error_t definition;
+  covariance vs variance refresher; residual variance formula with FULL derivation of why n-2;
+  weighted-sum rewrite of β/ȳ (Step 7); Cov(ȳ,β)=0 proof (Step 9); general SE(ŷ at x0) formula
+  (Step 11); SE(α) as the x0=0 special case (Step 12); confidence-interval-vs-prediction-interval
+  distinction (SE formula = uncertainty about the *line's location*, not a wider prediction
+  interval for one new individual observation — that needs an extra +1 term, not derived here).
+- **PAUSED right here — next step**: write Steps 7-12 into the expanded file (matching the full
+  algebra-line detail already there for Steps 0-6) — covered conversationally but not yet
+  transcribed. Then continue to Steps 13-14 (t-statistic, p-value), then finally apply the whole
+  derivation to real POWERGRID eta0=2.0 data (Part 2 of `52_alpha_beta_concept_and_powergrid.ipynb`
+  — still not started).
 - Full context (including everything needed to continue with zero loss) is in
-  `memlabs/50d_full_recap_seed.md`.
+  `memlabs/50d_full_recap_seed.md` and `memlabs/52_mathmode_session_handoff.md`.
 
 ## Session/tooling note — WSL + cross-session messaging
 
@@ -71,6 +80,19 @@
   Agent tool, parent-child relationship, not true peer messaging) — seeded with the same alpha/
   beta context. Superseded by the WSL plan for anything needing genuine two-way sync, but still
   reachable via SendMessage-by-agentId from this session if needed.
+
+## Housekeeping — 2026-08-23 (math-mode VM session)
+
+- Renamed "SS"/"save state" → "SIF"/"save information" across all 6 CLAUDE.md files on the VM
+  (main + kite_oracle_live_trading x2 + kite_oracle_papertrading + backtesting), incl.
+  `kbss`→`kbsif` and `SSD`→`SIFD` in the main file. Verified no leftover bare SS/ss matches.
+- Fixed the PostToolUse `log_modified.py` hook (was relative-path, broke on cwd change) —
+  switched to absolute path in `settings.local.json`.
+- Added VM-hostname skip to `git_sync_check_stop.sh` — sync reminder no longer fires on the VM
+  itself (primary workspace), still fires on desktop/laptop.
+- Set up project memory for the first time (`~/.claude/projects/-home-ubuntu-CodePonting/memory/`)
+  — `MEMORY.md` index + first entry (`parked_prediction_interval_position_sizing`, mirrored as
+  TODO.md's F9).
 
 ## Known Issues
 

@@ -1136,3 +1136,17 @@ c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_mode
 c:\Users\Saurav\CodePonting\.remember\today.md
 c:\Users\Saurav\CodePonting\.remember\handoff.md
 c:\Users\Saurav\CodePonting\.remember\remember.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_expanded.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_expanded.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_chronological.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_expanded.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_chronological.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_expanded.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_expanded.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_expanded.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_expanded.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_chronological.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_expanded.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_variance_dof_example.py
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_expanded.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_chronological.md
