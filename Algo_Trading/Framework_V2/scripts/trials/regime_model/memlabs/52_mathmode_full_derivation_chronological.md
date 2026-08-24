@@ -31,11 +31,18 @@ the output.
 
 ### Step 0. Set up the model and the thing to minimize
 
+**The regression equation — `ŷ(x0) = α + β*x0`.** This is the fitted line itself, used to predict
+y at any x0. It's the same equation used throughout this entire derivation — it never changes;
+later steps (e.g. Step 11) only ever rewrite it algebraically into a different-looking but
+identical form, never a different line. It's also what `error_t` is built from below.
+
 ```
 excess_strategy_return_t = α + β * excess_market_return_t + error_t
 ```
 
-Rearranged: `error_t = y_t - (α + β*x_t)` (using `x_t`, `y_t` as shorthand from here on).
+Rearranged: `error_t = y_t - (α + β*x_t)` (using `x_t`, `y_t` as shorthand from here on) — not a
+line itself, but a per-point application of the regression equation above: plug the line's
+predicted value in, subtract it from the actual observed `y_t`, get one residual number.
 
 We want the `α`, `β` that make the total squared error as small as possible:
 
@@ -121,24 +128,47 @@ Var(error) = (1 / (n-2)) * Σ error_t²
 
 ### Step 7. Rewrite `β` and `ȳ` as weighted sums of the `y_t`'s (needed for Step 9-10)
 
-Since `Σ(x_t-x̄)*ȳ = ȳ * Σ(x_t-x̄) = ȳ * 0 = 0`, the `ȳ` term drops out of `β`'s
-numerator, leaving:
+Start directly from Step 2's `β` formula and isolate `y_t` on its own — numerator and
+denominator each need their own simplification.
+
+**Numerator** — substitute `n*x̄*ȳ = x̄*Σy_t = Σ(x̄*y_t)`, then combine and factor:
 
 ```
-β  = Σ w_t * y_t,     w_t = (x_t - x̄) / Sxx,     Sxx = Σ (x_t - x̄)²
-
-ȳ  = Σ (1/n) * y_t
+Σx_t*y_t - n*x̄*ȳ  =  Σx_t*y_t - Σ(x̄*y_t)  =  Σ(x_t - x̄)*y_t
 ```
 
-Both `β` and `ȳ` are just weighted sums of the same underlying `y_t`'s — different weights.
+**Denominator** — prove `Σx_t² - n*x̄² = Σ(x_t-x̄)²` by expanding the right side:
+
+```
+Σ(x_t-x̄)² = Σ(x_t² + x̄² - 2*x_t*x̄)
+          = Σx_t² + n*x̄² - 2*x̄*Σx_t
+          = Σx_t² + n*x̄² - 2*x̄*(n*x̄)
+          = Σx_t² + n*x̄² - 2n*x̄²
+          = Σx_t² - n*x̄²
+```
+
+Combining both (this is the `Sxx = Σ(x_t-x̄)²` notation used from here on):
+
+```
+β  = Σ(x_t-x̄)*y_t / Sxx  =  Σ w_t * y_t,     w_t = (x_t - x̄) / Sxx
+
+ȳ  = Σ v_t * y_t,     v_t = 1/n     (no derivation needed — direct from the definition of the mean)
+```
+
+Both `β` and `ȳ` are weighted sums of the same underlying `y_t`'s, but with different, distinct
+weights — `w_t` varies per `t` (depends on that point's own `x_t`); `v_t` is the same constant
+for every `t`.
 
 ---
 
 ### Step 8. Two variance rules (each provable directly from Step 5's definition)
 
 ```
-Var(k * B)   = k² * Var(B)              for constant k
-Var(A + B)   = Var(A) + Var(B)          if Cov(A,B) = 0
+Var(k * B)   = k² * Var(B)                          for constant k
+
+Var(A + B)   = Var(A) + Var(B) + 2*Cov(A,B)          general case
+
+Var(A + B)   = Var(A) + Var(B)                       simplified — ONLY if Cov(A,B) = 0
 ```
 
 ---
@@ -159,8 +189,8 @@ Cov(ȳ, β) = (σ²/n) * Σ w_t
 ### Step 10. Get `Var(ȳ)` and `Var(β)` individually
 
 ```
-Var(ȳ) = Var( Σ (1/n)*y_t )
-       = Σ (1/n)² * Var(error)
+Var(ȳ) = Var( Σ v_t*y_t )
+       = Σ v_t² * Var(error)
        = Var(error) / n
 ```
 
@@ -175,7 +205,11 @@ Var(β) = Var( Σ w_t*y_t )
 
 ### Step 11. Combine — general SE at any point `x0`
 
-Rewrite the fitted line at any point `x0`: `ŷ(x0) = ȳ + β*(x0-x̄)`. Apply Step 8's rules
+`SE` is mathematically just `sqrt(variance)` — same operation as standard deviation, just applied
+here to an *estimator's* own uncertainty (ȳ, β, ŷ(x0)) rather than to raw data.
+
+Rewrite the fitted line at any point `x0`: `ŷ(x0) = ȳ + β*(x0-x̄)` (substituting Step 1's
+`α = ȳ - β*x̄` into `ŷ(x0) = α + β*x0`). Apply Step 8's rules
 with Step 9 (cross term = 0) and Step 10 (the two individual variances):
 
 ```

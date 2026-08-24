@@ -1150,3 +1150,14 @@ c:\Users\Saurav\CodePonting\.remember\remember.md
 /home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_variance_dof_example.py
 /home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_expanded.md
 /home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_chronological.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_chronological.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_chronological.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_chronological.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_chronological.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_expanded.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_chronological.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_chronological.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_confidence_vs_prediction_band.py
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_chronological.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_expanded.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/52_mathmode_full_derivation_chronological.md

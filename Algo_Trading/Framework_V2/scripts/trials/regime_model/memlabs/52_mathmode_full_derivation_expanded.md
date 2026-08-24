@@ -19,11 +19,18 @@ several variables appear in one equation.
 
 ### Step 0. Set up the model and the thing to minimize
 
+**The regression equation — `ŷ(x0) = α + β*x0`.** This is the fitted line itself, used to predict
+y at any x0. It's the same equation used throughout this entire derivation — it never changes;
+later steps (e.g. Step 11) only ever rewrite it algebraically into a different-looking but
+identical form, never a different line. It's also what `error_t` is built from below.
+
 ```
 excess_strategy_return_t = α + β * excess_market_return_t + error_t
 ```
 
-Rearranged: `error_t = y_t - (α + β*x_t)` (using `x_t`, `y_t` as shorthand from here on).
+Rearranged: `error_t = y_t - (α + β*x_t)` (using `x_t`, `y_t` as shorthand from here on) — not a
+line itself, but a per-point application of the regression equation above: plug the line's
+predicted value in, subtract it from the actual observed `y_t`, get one residual number.
 
 We want the `α`, `β` that make the total squared error as small as possible:
 
@@ -357,5 +364,51 @@ correction exists specifically to prevent that chain of overconfidence.
 
 ---
 
-*(To be continued — Step 7 onward added as we re-derive them
+### Step 7. Rewrite `β` and `ȳ` as weighted sums of the `y_t`'s (needed for Step 9-10)
+
+Start directly from Step 2's `β` formula and isolate `y_t` on its own — numerator and
+denominator each need their own simplification.
+
+**Numerator** — substitute `n*x̄*ȳ = x̄*Σy_t = Σ(x̄*y_t)` (x̄ is constant across `t`, so it
+distributes into the sum), then combine the two sums and factor `y_t` out:
+
+```
+Σx_t*y_t - n*x̄*ȳ  =  Σx_t*y_t - Σ(x̄*y_t)  =  Σ[(x_t*y_t) - (x̄*y_t)]  =  Σ(x_t - x̄)*y_t
+```
+
+**Denominator** — prove `Σx_t² - n*x̄² = Σ(x_t-x̄)²` by expanding the right side (this is the
+identity needed before the denominator can be labeled `Sxx`):
+
+```
+Σ(x_t-x̄)² = Σ(x_t² + x̄² - 2*x_t*x̄)
+          = Σx_t² + Σx̄² - Σ(2*x_t*x̄)
+          = Σx_t² + n*x̄² - 2*x̄*Σx_t          (Σx̄² over n terms = n*x̄²; factor out constant 2*x̄)
+          = Σx_t² + n*x̄² - 2*x̄*(n*x̄)          (substitute Σx_t = n*x̄)
+          = Σx_t² + n*x̄² - 2n*x̄²
+          = Σx_t² - n*x̄²
+```
+
+Combining both results — the numerator and denominator simplify to:
+
+```
+β = Σ(x_t-x̄)*y_t / Sxx,     Sxx = Σ(x_t-x̄)²
+```
+
+Since `Sxx` is a single fixed number, pull it inside the sum and combine it with `(x_t-x̄)` into
+one weight per `t`:
+
+```
+β  = Σ w_t * y_t,     w_t = (x_t - x̄) / Sxx
+
+ȳ  = Σ v_t * y_t,     v_t = 1/n     (no derivation needed — direct from the definition of the mean)
+```
+
+Both `β` and `ȳ` are weighted sums of the same underlying `y_t`'s, but with different, distinct
+weights — `w_t` varies per `t` (depends on that point's own `x_t`); `v_t` is the same constant
+for every `t`. Both `w_t` and `v_t` are named purely as an intermediate device for Steps 9-10;
+they resolve back to plain numbers (`1/Sxx`, `1/n`) once those steps are done.
+
+---
+
+*(To be continued — Step 8 onward added as we re-derive them
 in conversation.)*
