@@ -12,12 +12,12 @@ P1  MemLabs Pearson's r feature screening — resume from here (notebook 35)
         Only escalate to a full Model A/B build + WFA once something meaningfully stronger than
         RSI's current weak signal (r~=0.08, r^2<1%) turns up.
 
-P2  Alpha/beta CAPM regression derivation (math-mode thread) — resume from SE(alpha)
-        2026-08-16: paused mid-derivation testing POWERGRID Model C eta0=2.0's credibility.
-        Covered: beta, alpha, residual/error_t, covariance/variance, residual variance (n-2,
-        fully derived why). Next: SE(alpha) formula breakdown -> t-stat -> p-value -> apply to
-        real data. Full context: memlabs/50d_full_recap_seed.md. Continue in WSL-based session
-        for genuine cross-session messaging, or here directly — either works.
+P2  Alpha/beta CAPM regression derivation (math-mode thread) — write Steps 7-12 into expanded doc
+        2026-08-23: covered Steps 0-12 (chronological file has all 14 in compact form; new
+        expanded file has 0-6 in full algebra detail + a variance/n-2 worked example+chart).
+        Next: transcribe Steps 7-12 into the expanded file, then Steps 13-14 (t-stat, p-value),
+        then finally apply to real POWERGRID eta0=2.0 data (Part 2 of the notebook, unstarted).
+        Full context: memlabs/50d_full_recap_seed.md, memlabs/52_mathmode_session_handoff.md.
 
 P3  Kite bot (market hours only) — running live daily, resume next market session
         2026-07-28 progress: 3 real mid-session restarts (09:51/10:14/10:35) with open
@@ -44,3 +44,6 @@ F5  Portfolio construction — capital allocation across stocks
 F6  Insurance review
 F7  51_least_squares_3d.md (memlabs) — Least Squares 2D->3D plane fit writeup, parked mid-2026-08
 F8  Full 90-combo SL/TP sweep x 6 ATR variants via Grok — nice-to-have, not priority
+F9  Prediction-interval position sizing — once a model is validated/live, use OLS prediction
+        intervals (wider than SE, includes individual-point scatter) for position sizing/risk
+        bounding. Detail: memory/parked_prediction_interval_position_sizing.md

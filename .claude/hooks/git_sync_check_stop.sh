@@ -2,6 +2,9 @@
 # Stop hook — reminds to push if there are unpushed commits or uncommitted changes,
 # so switching to another machine (VM/desktop/laptop) doesn't leave work stranded locally.
 cd "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || exit 0
+# Skip on the Oracle VM itself — it's the primary workspace, so "switching machines" doesn't
+# apply mid-session there; still warns on desktop/laptop. (Saurav's request, 2026-08-22.)
+[ "$(hostname)" = "instance-20260712-0412" ] && exit 0
 DIRTY=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
 AHEAD=$(git rev-list --count origin/main..HEAD 2>/dev/null || echo 0)
 if [ "$DIRTY" -gt 0 ] || [ "$AHEAD" -gt 0 ]; then

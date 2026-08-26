@@ -5,195 +5,245 @@ in APPLICATION order — the order you'd plug numbers into a spreadsheet), this 
 the order they were actually **derived**, each with the calculation shown, not just the result.
 Built entirely from this conversation's own step-by-step derivations.
 
+Formulas are in plain-text code blocks (not LaTeX) so they're easy to copy/paste back into chat,
+using actual symbols (`α`, `β`, `x̄`, `ȳ`, `σ`) rather than spelled-out words — clearer when
+several variables appear in one equation.
+
 **Regression, in general:** the technique of fitting the best-fit line/curve that relates one
 variable to another, by minimizing total squared error (OLS) between the fit and the actual data —
 no notion of time or causation built in, just "best-fit relationship."
 
 This derivation is one **application** of that general math — specifically, regression used for
-*inference* (testing whether alpha is real) rather than for prediction, same-day (contemporaneous)
+*inference* (testing whether `alpha` is real) rather than for prediction, same-day (contemporaneous)
 market/strategy returns, not past-predicting-future.
 
 In finance specifically, this exact setup (CAPM alpha/beta) is called a **factor regression** or
 **performance-attribution regression**. Same OLS math either way, just a different purpose for
 the output.
 
----
-
-**Step 0. Set up the model and the thing to minimize**
-
-$$
-excess\_strategy\_return_t = \alpha + \beta \cdot excess\_market\_return_t + error_t
-$$
-
-Rearranged: $error_t = y_t - (\alpha + \beta x_t)$ (using $x_t, y_t$ as shorthand from here on).
-
-We want the $\alpha, \beta$ that make the total squared error as small as possible:
-
-$$
-S = \sum_t error_t^2 = \sum_t \big(y_t - \alpha - \beta x_t\big)^2
-$$
+**Fitted line — two perspectives, same equation (`ŷ = α + β*x`):**
+- *Prediction:* the best-fit relationship used to estimate/forecast `y` for a new or given `x`.
+- *Alpha-derivation (inference, this file's focus):* the same line used to decompose `y` into a
+  market-explained part (`β*x`) and a leftover intercept (`α`) — not for forecasting, but to
+  isolate `α` so its statistical credibility (real skill vs. noise) can be tested.
 
 ---
 
-**Step 1. Normal equation 1 — $dS/d\alpha = 0$ — solve for $\alpha$**
+### Step 0. Set up the model and the thing to minimize
 
-$$
-\frac{dS}{d\alpha} = -2\sum_t(y_t - \alpha - \beta x_t) = 0 \;\Rightarrow\; \sum_t(y_t-\alpha-\beta x_t)=0
-$$
+**The regression equation — `ŷ(x0) = α + β*x0`.** This is the fitted line itself, used to predict
+y at any x0. It's the same equation used throughout this entire derivation — it never changes;
+later steps (e.g. Step 11) only ever rewrite it algebraically into a different-looking but
+identical form, never a different line. It's also what `error_t` is built from below.
 
-Expand and solve directly (using $\sum y_t = n \cdot \bar{y}$, $\sum x_t = n \cdot \bar{x}$):
+```
+excess_strategy_return_t = α + β * excess_market_return_t + error_t
+```
 
-$$
-\boxed{\alpha = \bar{y} - \beta \bar{x}}
-$$
+Rearranged: `error_t = y_t - (α + β*x_t)` (using `x_t`, `y_t` as shorthand from here on) — not a
+line itself, but a per-point application of the regression equation above: plug the line's
+predicted value in, subtract it from the actual observed `y_t`, get one residual number.
 
----
+We want the `α`, `β` that make the total squared error as small as possible:
 
-**Step 2. Normal equation 2 — $dS/d\beta = 0$ — solve for $\beta$**
-
-$$
-\frac{dS}{d\beta} = -2\sum_t x_t(y_t - \alpha - \beta x_t) = 0 \;\Rightarrow\; \sum_t x_t(y_t-\alpha-\beta x_t)=0
-$$
-
-Substitute Step 1's $\alpha$ in, expand, and simplify (algebra shown in-conversation):
-
-$$
-\beta = \frac{\sum_t x_t y_t - n\bar{x}\bar{y}}{\sum_t x_t^2 - n\bar{x}^2}
-$$
-
-Recognize numerator/denominator as $Cov$/$Var$ in disguise (expand $\sum(x_t-\bar x)(y_t-\bar y)$
-and $\sum(x_t-\bar x)^2$ — they equal the same expressions):
-
-$$
-\boxed{\beta = \frac{Cov(x,y)}{Var(x)}}
-$$
-
-(the $1/n$ in $Cov$ and $Var$'s own definitions cancels top/bottom, so it never matters here)
+```
+S = Σ error_t²  =  Σ (y_t - α - β*x_t)²
+```
 
 ---
 
-**Step 3. Now that $\alpha,\beta$ are known numbers — compute each residual**
+### Step 1. Normal equation 1 — `dS/dα = 0` — solve for `α`
 
-$$
-error_t = y_t - (\alpha + \beta x_t)
-$$
+```
+dS/dα = -2 * Σ(y_t - α - β*x_t) = 0   =>   Σ(y_t - α - β*x_t) = 0
+```
 
----
+Expand and solve directly (using `Σy_t = n*ȳ`, `Σx_t = n*x̄`):
 
-**Step 4. Two properties fall out for free (they're just Steps 1 and 2, rearranged)**
-
-$$
-\sum_t error_t = 0 \qquad\text{(this IS Step 1's equation, unrearranged)}
-$$
-
-$$
-\sum_t (error_t \cdot x_t) = 0 \qquad\text{(this IS Step 2's equation, unrearranged)}
-$$
+```
+α = ȳ - β*x̄
+```
 
 ---
 
-**Step 5. Variance / Covariance definitions (used throughout)**
+### Step 2. Normal equation 2 — `dS/dβ = 0` — solve for `β`
 
-$$
-Var(X) = \frac{1}{n}\sum_i(x_i-mean(X))^2 \qquad Cov(X,Y) = \frac{1}{n}\sum_i(x_i-mean(X))(y_i-mean(Y))
-$$
+```
+dS/dβ = -2 * Σ x_t*(y_t - α - β*x_t) = 0   =>   Σ x_t*(y_t - α - β*x_t) = 0
+```
 
----
+Substitute Step 1's `α` in, expand, and simplify (algebra shown in-conversation):
 
-**Step 6. Residual variance — why $n-2$**
+```
+β = (Σ x_t*y_t  -  n*x̄*ȳ) / (Σ x_t²  -  n*x̄²)
+```
 
-$S = \sum_t error_t^2$ has two exact constraints on it (Step 4) — 2 degrees of freedom consumed by
-fitting $\alpha$ and $\beta$. Only $n-2$ residuals are truly free, so:
+Recognize numerator/denominator as `Cov`/`Var` in disguise (expand `Σ(x_t-x̄)(y_t-ȳ)` and
+`Σ(x_t-x̄)²` — they equal the same expressions):
 
-$$
-\boxed{Var(error) = \frac{1}{n-2}\sum_t error_t^2}
-$$
+```
+β = Cov(x,y) / Var(x)
+```
 
----
-
-**Step 7. Rewrite $\beta$ and $\bar y$ as weighted sums of the $y_t$'s (needed for Step 9-10)**
-
-Since $\sum_t(x_t-\bar x)\cdot\bar y = \bar y \cdot \sum_t(x_t - \bar x) = \bar y \cdot 0 = 0$, the
-$\bar y$ term drops out of $\beta$'s numerator, leaving:
-
-$$
-\beta = \sum_t w_t y_t, \quad w_t = \frac{x_t-\bar x}{S_{xx}}, \quad S_{xx}=\sum_t(x_t-\bar x)^2
-\qquad\qquad
-\bar y = \sum_t \frac{1}{n} y_t
-$$
-
-Both $\beta$ and $\bar y$ are just weighted sums of the same underlying $y_t$'s — different weights.
+(the `1/n` in `Cov` and `Var`'s own definitions cancels top/bottom, so it never matters here)
 
 ---
 
-**Step 8. Two variance rules (each provable directly from Step 5's definition)**
+### Step 3. Now that `α`, `β` are known numbers — compute each residual
 
-$$
-Var(k \cdot B) = k^2 \cdot Var(B) \quad\text{for constant } k
-\qquad\qquad
-Var(A+B) = Var(A)+Var(B) \quad\text{if } Cov(A,B)=0
-$$
+```
+error_t = y_t - (α + β*x_t)
+```
 
 ---
 
-**Step 9. Prove $Cov(\bar y, \beta) = 0$ (using Step 7's weights + independence of the $y_t$'s)**
+### Step 4. Two properties fall out for free (they're just Steps 1 and 2, rearranged)
 
-$$
-Cov(\bar y,\beta) = \frac{\sigma^2}{n}\sum_t w_t = \frac{\sigma^2}{n}\cdot\frac{\sum_t(x_t-\bar x)}{S_{xx}} = \frac{\sigma^2}{n}\cdot\frac{0}{S_{xx}} = 0
-$$
+```
+Σ error_t = 0                  (this IS Step 1's equation, unrearranged)
+Σ (error_t * x_t) = 0          (this IS Step 2's equation, unrearranged)
+```
+
+---
+
+### Step 5. Variance / Covariance definitions (used throughout)
+
+```
+Var(X)    = (1/n) * Σ (x_i - mean(X))²
+Cov(X,Y)  = (1/n) * Σ (x_i - mean(X)) * (y_i - mean(Y))
+```
+
+---
+
+### Step 6. Residual variance — why `n-2`
+
+`S = Σ error_t²` has two exact constraints on it (Step 4) — 2 degrees of freedom consumed by
+fitting `α` and `β`. Only `n-2` residuals are truly free, so:
+
+```
+Var(error) = (1 / (n-2)) * Σ error_t²
+```
+
+---
+
+### Step 7. Rewrite `β` and `ȳ` as weighted sums of the `y_t`'s (needed for Step 9-10)
+
+Start directly from Step 2's `β` formula and isolate `y_t` on its own — numerator and
+denominator each need their own simplification.
+
+**Numerator** — substitute `n*x̄*ȳ = x̄*Σy_t = Σ(x̄*y_t)`, then combine and factor:
+
+```
+Σx_t*y_t - n*x̄*ȳ  =  Σx_t*y_t - Σ(x̄*y_t)  =  Σ(x_t - x̄)*y_t
+```
+
+**Denominator** — prove `Σx_t² - n*x̄² = Σ(x_t-x̄)²` by expanding the right side:
+
+```
+Σ(x_t-x̄)² = Σ(x_t² + x̄² - 2*x_t*x̄)
+          = Σx_t² + n*x̄² - 2*x̄*Σx_t
+          = Σx_t² + n*x̄² - 2*x̄*(n*x̄)
+          = Σx_t² + n*x̄² - 2n*x̄²
+          = Σx_t² - n*x̄²
+```
+
+Combining both (this is the `Sxx = Σ(x_t-x̄)²` notation used from here on):
+
+```
+β  = Σ(x_t-x̄)*y_t / Sxx  =  Σ w_t * y_t,     w_t = (x_t - x̄) / Sxx
+
+ȳ  = Σ v_t * y_t,     v_t = 1/n     (no derivation needed — direct from the definition of the mean)
+```
+
+Both `β` and `ȳ` are weighted sums of the same underlying `y_t`'s, but with different, distinct
+weights — `w_t` varies per `t` (depends on that point's own `x_t`); `v_t` is the same constant
+for every `t`.
+
+---
+
+### Step 8. Two variance rules (each provable directly from Step 5's definition)
+
+```
+Var(k * B)   = k² * Var(B)                          for constant k
+
+Var(A + B)   = Var(A) + Var(B) + 2*Cov(A,B)          general case
+
+Var(A + B)   = Var(A) + Var(B)                       simplified — ONLY if Cov(A,B) = 0
+```
+
+---
+
+### Step 9. Prove `Cov(ȳ, β) = 0` (using Step 7's weights + independence of the `y_t`'s)
+
+```
+Cov(ȳ, β) = (σ²/n) * Σ w_t
+          = (σ²/n) * ( Σ(x_t - x̄) / Sxx )
+          = (σ²/n) * (0 / Sxx)
+          = 0
+```
 
 (the same "deviations from a mean sum to zero" fact, reused)
 
 ---
 
-**Step 10. Get $Var(\bar y)$ and $Var(\beta)$ individually**
+### Step 10. Get `Var(ȳ)` and `Var(β)` individually
 
-$$
-Var(\bar y) = Var\Big(\sum_t \tfrac{1}{n}y_t\Big) = \sum_t \Big(\tfrac{1}{n}\Big)^2 Var(error) = \frac{Var(error)}{n}
-$$
+```
+Var(ȳ) = Var( Σ v_t*y_t )
+       = Σ v_t² * Var(error)
+       = Var(error) / n
+```
 
-$$
-Var(\beta) = Var\Big(\sum_t w_t y_t\Big) = \sum_t w_t^2 \cdot Var(error) = Var(error)\cdot\frac{\sum_t(x_t-\bar x)^2}{S_{xx}^2} = \frac{Var(error)}{S_{xx}}
-$$
-
----
-
-**Step 11. Combine — general SE at any point $x_0$**
-
-Rewrite the fitted line at any point $x_0$: $\hat y(x_0) = \bar y + \beta(x_0-\bar x)$. Apply Step
-8's rules with Step 9 (cross term = 0) and Step 10 (the two individual variances):
-
-$$
-Var(\hat y(x_0)) = Var(\bar y) + (x_0-\bar x)^2 Var(\beta) = Var(error)\left(\frac{1}{n}+\frac{(x_0-\bar x)^2}{S_{xx}}\right)
-$$
-
-$$
-\boxed{SE(\hat y \text{ at } x_0) = \sqrt{\ Var(error)\left(\frac{1}{n}+\frac{(x_0-\bar x)^2}{S_{xx}}\right)\ }}
-$$
+```
+Var(β) = Var( Σ w_t*y_t )
+       = Σ w_t² * Var(error)
+       = Var(error) * ( Σ(x_t-x̄)² / Sxx² )
+       = Var(error) / Sxx
+```
 
 ---
 
-**Step 12. $SE(\alpha)$ — the special case $x_0 = 0$ (since $\alpha$ IS the line's height at $x=0$)**
+### Step 11. Combine — general SE at any point `x0`
 
-$$
-\boxed{SE(\alpha) = \sqrt{\ Var(error)\left(\frac{1}{n}+\frac{\bar x^2}{S_{xx}}\right)\ }}
-$$
+`SE` is mathematically just `sqrt(variance)` — same operation as standard deviation, just applied
+here to an *estimator's* own uncertainty (ȳ, β, ŷ(x0)) rather than to raw data.
+
+Rewrite the fitted line at any point `x0`: `ŷ(x0) = ȳ + β*(x0-x̄)` (substituting Step 1's
+`α = ȳ - β*x̄` into `ŷ(x0) = α + β*x0`). Apply Step 8's rules
+with Step 9 (cross term = 0) and Step 10 (the two individual variances):
+
+```
+Var(ŷ(x0)) = Var(ȳ) + (x0-x̄)² * Var(β)
+           = Var(error) * ( 1/n + (x0-x̄)²/Sxx )
+```
+
+```
+SE(ŷ at x0) = sqrt( Var(error) * ( 1/n + (x0-x̄)²/Sxx ) )
+```
 
 ---
 
-**Step 13. t-statistic**
+### Step 12. `SE(α)` — the special case `x0 = 0` (since `α` IS the line's height at `x=0`)
 
-$$
-t = \frac{\alpha}{SE(\alpha)}
-$$
+```
+SE(α) = sqrt( Var(error) * ( 1/n + x̄²/Sxx ) )
+```
 
 ---
 
-**Step 14. p-value**
+### Step 13. t-statistic
 
-$$
-p\text{-value} = P(|T|>|t|), \quad T \sim t\text{-distribution},\ n-2 \text{ degrees of freedom}
-$$
+```
+t = α / SE(α)
+```
+
+---
+
+### Step 14. p-value
+
+```
+p-value = P(|T| > |t|),   T ~ t-distribution,  n-2 degrees of freedom
+```
 
 ---
 

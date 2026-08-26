@@ -886,3 +886,49 @@ closed out, VM backtesting env + VS Code Remote-SSH set up) ─────
        [DONE]  Plan: this native-Windows session stays as "master backup"; WSL VS Code instance
            becomes the orchestration hub, spawning its own independent "math mode" WSL peer
            session for genuine two-way cross-session messaging.
+
+## 2026-08-23 — math-mode VM session
+
+### Alpha/beta CAPM regression thread -- continued, Steps 0-12
+       [DONE]  Built a new companion file `memlabs/52_mathmode_full_derivation_expanded.md`
+           (every algebra line shown), alongside the existing compact
+           `52_mathmode_full_derivation_chronological.md`. Fully re-derived Steps 0-6 in the
+           expanded file: parabola-shape aside/cross-check (power-rule vs chain-rule
+           differentiation of S(alpha), both landing on the same slope), full Cov(x,y)/Var(x)
+           expansion proof (FOIL-expanding Sigma(x_t-xbar)(y_t-ybar) and Sigma(x_t-xbar)^2 to
+           match beta's numerator/denominator exactly), and two understanding-checkpoint
+           summaries (after Steps 0-2 and Steps 3-6).
+       [DONE]  Built and ran `52_mathmode_variance_dof_example.py` -- a standalone 10-residual
+           worked example (8 freely chosen + 2 forced by the two normal-equation constraints),
+           producing a matplotlib dark-mode chart comparing Var(n)=17.4 vs the correct
+           Var(n-2)=21.75, illustrating the degrees-of-freedom correction concretely.
+       [DONE]  Continued conversationally through Steps 7-12 (weighted-sum rewrite of beta/ybar,
+           Cov(ybar,beta)=0 proof, general SE(yhat at x0) formula, SE(alpha) as the x0=0 special
+           case, confidence-interval-vs-prediction-interval distinction) -- not yet transcribed
+           into the expanded file.
+       [DONE]  Converted both files' bold Step headings to Markdown ### headings and wrapped
+           inline math terms in backticks, for consistent rendering across phone/desktop/iPad
+           (color isn't controllable from file content, standard Markdown headings/code spans
+           are). Added a short "fitted line -- two perspectives" (prediction vs alpha-derivation)
+           definition to both files' intros.
+       [PAUSED] Next: transcribe Steps 7-12 into the expanded file, then Steps 13-14 (t-stat,
+           p-value), then finally apply the whole derivation to real POWERGRID eta0=2.0 data
+           (Part 2 of `52_alpha_beta_concept_and_powergrid.ipynb`, still not started).
+
+### Housekeeping -- SS to SIF rename, hook fixes, memory setup
+       [DONE]  Renamed the "SS"/"save state" shorthand to "SIF"/"save information" across all 6
+           CLAUDE.md files on the VM (main CodePonting + kite_oracle_live_trading x2 copies +
+           kite_oracle_papertrading + backtesting; tradingview-mcp had no SS references).
+           Includes kbss->kbsif and SSD->SIFD in the main file. Verified no leftover bare
+           SS/ss matches remain (only HH:MM:SS time format, correctly untouched).
+       [DONE]  Fixed a PostToolUse hook bug: log_modified.py was invoked via a relative path in
+           settings.local.json, which broke when an earlier Bash cd (into the memlabs folder)
+           left the shell's cwd changed for a subsequent hook firing. Fixed via absolute path.
+       [DONE]  Added a VM-hostname-based skip to git_sync_check_stop.sh -- the "commit before
+           switching machines" reminder no longer fires on the VM itself (primary workspace now),
+           still fires normally on desktop/laptop.
+       [DONE]  Set up this project's persistent memory
+           (~/.claude/projects/-home-ubuntu-CodePonting/memory/) for the first time -- created
+           MEMORY.md index and a parked_prediction_interval_position_sizing entry (future idea:
+           use OLS prediction intervals, once a model is validated, for position sizing/risk
+           bounding -- mirrored as TODO.md's F9).
