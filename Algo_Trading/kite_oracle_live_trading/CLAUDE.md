@@ -19,6 +19,6 @@ Saurav explicitly asks — doing so would imply a readiness that doesn't exist y
 
 ## Shorthand
 - `vsa` = "very short answer" — reply in 1–2 lines max, no elaboration.
-- `SIF` = "save information" — update `PROGRESS.md` with what was completed this session.
+- `RS` = "right save" — update `PROGRESS.md` with what was completed this session.
 - `CCP` = "Context Catch-Up / Peek" — read `PROGRESS.md` only (read-only), then reply
   with a 3-part summary: (1) where we are, (2) what's next, (3) any blockers.

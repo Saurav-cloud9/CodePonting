@@ -410,5 +410,104 @@ they resolve back to plain numbers (`1/Sxx`, `1/n`) once those steps are done.
 
 ---
 
-*(To be continued — Step 8 onward added as we re-derive them
+### Step 8. Two variance rules (each provable directly from Step 5's definition)
+
+```
+Var(k * B)   = k² * Var(B)                          for constant k
+
+Var(A + B)   = Var(A) + Var(B) + 2*Cov(A,B)          general case
+
+Var(A + B)   = Var(A) + Var(B)                       simplified — ONLY if Cov(A,B) = 0
+```
+
+The simplified rule is only legally usable once `Cov(A,B)=0` is proven for the specific `A`, `B`
+in question — that's exactly Step 9's job below.
+
+---
+
+### Step 9. Prove `Cov(ȳ, β) = 0` (using Step 7's weights + independence of the `y_t`'s)
+
+**Why the standard sample Cov formula can't be used here:** `Cov(X,Y) = (1/n)*Σ(x_i-x̄)(y_i-ȳ)`
+needs multiple *paired* observations of the two variables to average over. We only have ONE `ȳ`
+and ONE `β`, computed once from this one dataset — no repeated (ȳ,β) pairs exist to plug into
+that formula. So this proof uses the population/theoretical Cov definition instead, applied via
+covariance's bilinearity property.
+
+**Substitute `X=ȳ=Σv_t*y_t` and `Y=β=Σw_t*y_t` into `Cov(X,Y) = E[(X-E[X])(Y-E[Y])]`:**
+
+```
+Cov(ȳ,β) = E[ (Σv_t*y_t - E[Σv_t*y_t]) * (Σw_t*y_t - E[Σw_t*y_t]) ]
+```
+
+Simplify each inner `E[·]` term using expectation's linearity (E distributes over a sum; a
+non-random constant like `v_t`/`w_t` — non-random because `x_t` is treated as fixed in this
+model, only `y_t` carries randomness via `error_t` — factors out of each E[·]):
+
+```
+E[Σv_t*y_t] = Σv_t*E[y_t]          E[Σw_t*y_t] = Σw_t*E[y_t]
+```
+
+Substitute back in, then factor the weight back out of each subtraction
+(`Σv_t*y_t - Σv_t*E[y_t] = Σv_t*(y_t-E[y_t])`):
+
+```
+Cov(ȳ,β) = E[ (Σv_t*(y_t-E[y_t])) * (Σw_t*(y_t-E[y_t])) ]
+```
+
+**Relabel the second sum's index from `t` to `s` before multiplying** — required because
+multiplying two sums together needs two independent indices to represent every possible pairing;
+reusing the same letter for both would only capture the `t=s` matches, silently dropping every
+`t≠s` cross-term. Let `d_t = y_t-E[y_t]`, `d_s = y_s-E[y_s]`:
+
+```
+Cov(ȳ,β) = E[ (Σv_t*d_t) * (Σw_s*d_s) ]
+```
+
+Multiplying two separate sums together expands into a double sum over every (t,s) pair
+(`(Σa_t)*(Σb_s) = ΣΣa_t*b_s`):
+
+```
+= E[ ΣΣ v_t*d_t*w_s*d_s ]
+```
+
+Distribute `E[·]` over the double sum, then recognize `E[d_t*d_s] = E[(y_t-E[y_t])(y_s-E[y_s])]`
+is exactly `Cov(y_t,y_s)` by definition:
+
+```
+= ΣΣ v_t*w_s*E[d_t*d_s]  =  ΣΣ v_t*w_s*Cov(y_t,y_s)
+```
+
+**Collapse the double sum via independence.** The model assumes each data point's noise is
+independent of every other's: `Cov(y_t,y_s)=0` whenever `t≠s` (the off-diagonal pairs — most of
+the grid — all vanish to exactly zero, regardless of `n`). Only the diagonal (`t=s`) pairs
+survive, where `Cov(y_t,y_t)=Var(y_t)=σ²` (constant noise level across all t):
+
+```
+ΣΣ v_t*w_s*Cov(y_t,y_s)  =  Σ v_t*w_t*σ²          (n² terms collapse down to n surviving terms)
+```
+
+Substitute `v_t=1/n`, factor the constant `σ²/n` out of the sum, then substitute `w_t`'s
+definition:
+
+```
+= Σ (1/n)*w_t*σ²  =  (σ²/n)*Σw_t  =  (σ²/n)*Σ[(x_t-x̄)/Sxx]
+```
+
+`Σ(x_t-x̄)=0` always (deviations from a mean sum to zero — from `x̄=(1/n)Σx_t` rearranged,
+already used in Steps 1 and 7), so `Σw_t = (1/Sxx)*Σ(x_t-x̄) = 0` too — a structural fact, true
+for any dataset, since it's baked into `w_t`'s own definition:
+
+```
+Cov(ȳ,β) = (σ²/n) * 0 = 0
+```
+
+**What this means, theoretically:** the uncertainty in estimating the line's overall level (ȳ)
+and the uncertainty in estimating its slope (β) are completely unrelated — an unusually high or
+low `ȳ` in one hypothetical resample tells you nothing about whether that same sample's `β` came
+out unusually high or low too. That's exactly why Step 11 can use Step 8's simplified addition
+rule (no cross-term correction needed) when combining `Var(ȳ)` and `Var(β)`.
+
+---
+
+*(To be continued — Step 10 onward added as we re-derive them
 in conversation.)*

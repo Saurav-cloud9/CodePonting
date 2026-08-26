@@ -10,7 +10,7 @@
   ivb = initialize voice bridge — execute /ivb command immediately, no confirmation needed.
   kbccp = CCP scoped to kite_oracle_papertrading only: read its PROGRESS.md (VM,
           read-only) and give the 3-part CCP summary (where we are/next/blockers)
-  kbsif = SIF scoped to kite_oracle_papertrading only: update its PROGRESS.md (VM)
+  kbrs = RS scoped to kite_oracle_papertrading only: update its PROGRESS.md (VM)
           with what happened, and sync any live-file code changes back to the local
           CodePonting copy (source of truth) in the same pass
   CCG   = trigger to delegate the current task to Grok — write the instruction
@@ -166,11 +166,11 @@ Execution rules:
     PROGRESS: add one line (≤10 words) for what was completed.
     TODO: remove done item, re-prioritize remaining items.
     Only ask Saurav if the summary is genuinely ambiguous.
-  - When Saurav types "sif" (save information), immediately:
+  - When Saurav types "rs" (right save), immediately:
     1. Update PROGRESS.md — Recent 5 steps + 5 Milestones (overwrite both sections)
     2. Write a brief summary of what was done to .remember/today.md
     3. Update .remember/handoff.md with current task + next step + known issues
-    4. Call /remember:remember to save information
+    4. Call /remember:remember to save state
     5. Update TODO.md (max 5 items, P1 priority first)
     6. Append to PROGRESS_HISTORY.md (never delete existing entries)
     All six are MANDATORY. Without them, next session starts with no context.
@@ -186,16 +186,16 @@ Execution rules:
   - CC updates PROGRESS_HISTORY.md (full audit trail, never deleted)
   - CC updates TODO.md (max 5 items, P1 priority first)
 
-  ### When Saurav types "SIF" (Save Information):
+  ### When Saurav types "RS" (Right Save):
   - CC updates PROGRESS.md (Recent 5 steps + 5 Milestones)
   - CC updates .remember/handoff.md + today.md
   - CC updates TODO.md (max 5 items, P1 priority first)
   - CC appends to PROGRESS_HISTORY.md (never delete existing entries)
-  - CC calls /remember:remember to save information
+  - CC calls /remember:remember to save state
 
   ### When Saurav types "CCP" (Context Catch-Up / Peek):
   - Read these files in order:
-      SIF-triggered (8):
+      RS-triggered (8):
         1. .remember/remember.md
         2. .remember/handoff.md
         3. .remember/today.md
@@ -211,15 +211,15 @@ Execution rules:
   - No file writes. Read-only. Fast.
   - Note: Claude.ai uses CCP to read CC memory via cc-memory MCP tools — same spirit, different mechanism.
 
-  ### When Saurav types "SIFD" (Save Information + Drive):
-  - Everything SIF does, PLUS syncs all 4 .remember/ files to Google Drive
+  ### When Saurav types "RSD" (Right Save + Drive):
+  - Everything RS does, PLUS syncs all 4 .remember/ files to Google Drive
     CodePonting/.remember/ folder
 
   ### Files and their purpose:
   - PROGRESS_HISTORY.md → full chronological audit trail (CC writes)
-  - PROGRESS.md         → lean reference: Recent 5 + Milestones 5 (SIF trigger)
+  - PROGRESS.md         → lean reference: Recent 5 + Milestones 5 (RS trigger)
   - TODO.md             → current priorities max 5 items (CC maintains)
-  - .remember/          → CC memory for CCP (SIF trigger)
+  - .remember/          → CC memory for CCP (RS trigger)
 
 
 ## ── PYTHON LEARNING JOURNEY ──────────────────────────────────
