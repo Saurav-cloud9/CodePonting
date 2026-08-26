@@ -1136,3 +1136,5 @@ c:\Users\Saurav\CodePonting\Algo_Trading\Framework_V2\scripts\trials\regime_mode
 c:\Users\Saurav\CodePonting\.remember\today.md
 c:\Users\Saurav\CodePonting\.remember\handoff.md
 c:\Users\Saurav\CodePonting\.remember\remember.md
+C:\Users\Saurav\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\claude_remote.bat
+C:\Users\Saurav\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\claude_remote.bat
