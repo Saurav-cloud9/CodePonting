@@ -161,14 +161,19 @@ for every `t`.
 
 ---
 
-### Step 8. Two variance rules (each provable directly from Step 5's definition)
+### Step 8. Variance and covariance rules (each provable directly from Step 5's definition)
 
 ```
-Var(k * B)   = k² * Var(B)                          for constant k
+Var(k * B)     = k² * Var(B)                          for constant k
 
-Var(A + B)   = Var(A) + Var(B) + 2*Cov(A,B)          general case
+Cov(A, k * B)  = k * Cov(A,B)                          for constant k — same "pull the
+                                                        constant out" logic, one power of k
+                                                        instead of two, since Cov is only
+                                                        linear in each argument, not squared
 
-Var(A + B)   = Var(A) + Var(B)                       simplified — ONLY if Cov(A,B) = 0
+Var(A + B)     = Var(A) + Var(B) + 2*Cov(A,B)          general case
+
+Var(A + B)     = Var(A) + Var(B)                       simplified — ONLY if Cov(A,B) = 0
 ```
 
 ---

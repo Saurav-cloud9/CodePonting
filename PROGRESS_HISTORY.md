@@ -932,3 +932,63 @@ closed out, VM backtesting env + VS Code Remote-SSH set up) ─────
            MEMORY.md index and a parked_prediction_interval_position_sizing entry (future idea:
            use OLS prediction intervals, once a model is validated, for position sizing/risk
            bounding -- mirrored as TODO.md's F9).
+
+## 2026-08-27 — math-mode VM session
+
+### Alpha/beta CAPM regression thread -- Steps 8-14 complete, applied to real data (COMPLETE)
+       [DONE]  Completed the full derivation, Steps 0-14, in both
+           52_mathmode_full_derivation_expanded.md (every algebra line) and
+           52_mathmode_full_derivation_chronological.md (compact form). Added the missing
+           Cov(A,k*B)=k*Cov(A,B) rule to Step 8 (caught mid-derivation as a real gap needed for
+           Step 11's cross term, Cov(ybar, beta*(x0-xbar))).
+       [DONE]  Step 9's Cov(ybar,beta)=0 proof and Step 10's Var(ybar)=sigma^2/n /
+           Var(beta)=sigma^2/Sxx derivations independently re-derived by Saurav (with real
+           errors caught and corrected in real time: a missing denominator identity, a wrong
+           substitution of a per-t term for a grand total, sign errors, notation
+           inconsistencies) -- all now written up in full in the expanded file.
+       [DONE]  Steps 11 (general SE formula), 12 (SE(alpha) special case), 13 (t-statistic), 14
+           (p-value) all derived and confirmed correct, including a full re-derivation of Step
+           11's Var(A+B) expansion using both Step 8 rules.
+       [DONE]  Resolved several real conceptual misconceptions along the way: random vs
+           non-random / constant vs variable across t (built a full reference table), why
+           Sigma(x_t-xbar)=0 is universal but Sigma(x_t-xbar)^2 is not, the "p-value fallacy"
+           (1-p is NOT probability alpha is real), what the T-distribution actually represents
+           (distribution of the ESTIMATED alpha's ratio under the null, not built from the true
+           alpha), true-alpha vs estimated-alpha (alpha-hat) terminology.
+       [DONE]  Built two new standalone visuals: 52_mathmode_confidence_vs_prediction_band.py/png
+           (confidence vs. wider prediction band, same toy dataset) and
+           52_mathmode_diagonal_collapse_example.py/png (n=6 heatmap of the Cov(y_t,y_s) grid).
+       [DONE]  Sanity-checked the whole pipeline against the toy dataset's known ground truth
+           (TRUE_ALPHA=0.01, TRUE_BETA=0.6, NOISE_SIGMA=0.02) before trusting it on real data --
+           beta/noise-variance estimates landed close to truth; alpha came out wrong-signed with
+           p=0.44, a live illustration that real small alpha can fail to reach significance in a
+           small sample (n=15), not a pipeline bug.
+       [DONE]  Applied the full derivation to REAL data for the first time: POWERGRID eta0=2.0
+           Model C, n=2808 real trading days (2015-2026). Built out properly as Part 2 of
+           52_alpha_beta_concept_and_powergrid.ipynb -- data quality sanity checks (no gaps, no
+           extreme outliers), residual diagnostics for homoscedasticity/independence (residuals
+           vs time, vs market_return, 126-day rolling std), full step-by-step cells mirroring
+           Part 1's structure, executed end-to-end via jupyter nbconvert with every plot
+           embedded in the notebook.
+       [DONE]  RESULT: alpha is NOT statistically significant (p=0.3905). Beta also not
+           significant (p=0.1245, beta~=-0.029, essentially no market exposure either way).
+           Residual diagnostics show noise level varies ~2.7x over time (real-market volatility
+           clustering) but the gap from significance is far too large for this to change the
+           conclusion. This formally closes the question this entire math-mode thread was built
+           to answer -- Model C's POWERGRID eta0=2.0 equity-curve outperformance is not
+           statistically distinguishable from noise, confirming and formalizing (via rigorous
+           statistical test, not just backtest comparison) the earlier PROGRESS_HISTORY
+           conclusion that Model C has no transferable edge.
+       [DONE]  Thread is now functionally complete. Removed from active TODO.md (was P2); any
+           further work here (different eta0/stock) would be optional/exploratory.
+
+### Housekeeping
+       [DONE]  Confirmed via codeponting-84 (RS peer check-in): that session set up VS Code
+           Tunnels on the VM for iPad file access, and renamed shorthand in CLAUDE.md
+           (ris->ras, sif->rs "right save") across all 6 CLAUDE.md files, committed/merged to
+           main. Explains the VS Code gateway connection error encountered earlier today
+           (routine idle-timeout, tunnel daemon was healthy throughout -- confirmed via
+           systemctl --user status code-tunnel.service and log inspection; restarted the
+           service as a troubleshooting step regardless).
+       [DONE]  remember plugin (installed 2026-08-26) confirmed working via /remember:doctor
+           after a session restart picked up its hooks.

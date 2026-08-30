@@ -410,18 +410,25 @@ they resolve back to plain numbers (`1/Sxx`, `1/n`) once those steps are done.
 
 ---
 
-### Step 8. Two variance rules (each provable directly from Step 5's definition)
+### Step 8. Variance and covariance rules (each provable directly from Step 5's definition)
 
 ```
-Var(k * B)   = k² * Var(B)                          for constant k
+Var(k * B)     = k² * Var(B)                          for constant k
 
-Var(A + B)   = Var(A) + Var(B) + 2*Cov(A,B)          general case
+Cov(A, k * B)  = k * Cov(A,B)                          for constant k — same "pull the
+                                                        constant out" logic, one power of k
+                                                        instead of two, since Cov is only
+                                                        linear in each argument, not squared
 
-Var(A + B)   = Var(A) + Var(B)                       simplified — ONLY if Cov(A,B) = 0
+Var(A + B)     = Var(A) + Var(B) + 2*Cov(A,B)          general case
+
+Var(A + B)     = Var(A) + Var(B)                       simplified — ONLY if Cov(A,B) = 0
 ```
 
 The simplified rule is only legally usable once `Cov(A,B)=0` is proven for the specific `A`, `B`
-in question — that's exactly Step 9's job below.
+in question — that's exactly Step 9's job below. The `Cov(A,k*B)` rule is what Step 11 needs to
+correctly expand a cross term like `Cov(ȳ, β*(x0-x̄))` into `(x0-x̄)*Cov(ȳ,β)`, before the
+zero-cross-term simplification can even apply.
 
 ---
 
@@ -509,5 +516,217 @@ rule (no cross-term correction needed) when combining `Var(ȳ)` and `Var(β)`.
 
 ---
 
-*(To be continued — Step 10 onward added as we re-derive them
-in conversation.)*
+### Step 10. Get `Var(ȳ)` and `Var(β)` individually
+
+Since `Var(X) = Cov(X,X)` (variance is just covariance of something with itself), both derivations
+reuse Step 9's exact double-sum machinery — substitute the SAME weighted sum for both sides,
+relabel one occurrence's index, expand, then collapse via independence.
+
+**`Var(ȳ)` — full chain, starting from the `Var(X)=Cov(X,X)` identity itself:**
+
+```
+Var(ȳ) = Cov(X,X)                                        (X = ȳ)
+       = E[(X-E[X])(X-E[X])]                              (substitute Y=X into Cov's definition)
+       = E[(X-E[X])²]                                     (same factor twice = squared)
+```
+
+Substitute `X = ȳ = Σv_t*y_t`:
+
+```
+= E[(Σv_t*y_t - E[Σv_t*y_t])²]
+```
+
+Simplify the inner `E[·]` (linearity: distribute over the sum, pull the non-random constant `v_t`
+out), then factor `v_t` back out of the subtraction:
+
+```
+= E[(Σv_t*y_t - Σv_t*E[y_t])²]  =  E[(Σv_t*(y_t-E[y_t]))²]
+```
+
+Substituting `d_t = y_t-E[y_t]`:
+
+```
+= E[(Σv_t*d_t)²]
+```
+
+Squaring a sum is the same operation as multiplying that sum by itself — needs the same
+relabel-then-double-sum move as Step 9 (a single reused index can't represent every possible
+pairing; `(Σa_t)² ≠ Σa_t²` — this is the same missing-cross-terms trap as `(a+b)² ≠ a²+b²`).
+Relabel one copy's index to `s`:
+
+```
+= E[(Σv_t*d_t)*(Σv_s*d_s)]  =  E[ΣΣ v_t*d_t*v_s*d_s]
+```
+
+Distribute `E[·]` over the double sum, pull out the non-random `v_t`,`v_s`, then recognize
+`E[d_t*d_s] = Cov(y_t,y_s)` by definition:
+
+```
+= ΣΣ v_t*v_s*E[d_t*d_s]  =  ΣΣ v_t*v_s*Cov(y_t,y_s)
+```
+
+**Now apply independence** — off-diagonal (`t≠s`) terms vanish to 0; only the diagonal (`t=s`)
+survives, forcing `s→t`:
+
+```
+Var(ȳ) = Σ v_t*v_t*Cov(y_t,y_t)     =  Σ v_t²*Var(y_t)     (v_t*v_t=v_t²; Cov(y_t,y_t)=Var(y_t))
+       = Σ (1/n)²*σ²                                          (substituting v_t=1/n, Var(y_t)=σ²)
+       = (1/n)²*n*σ²                                           (n identical terms summed)
+       = σ²/n
+```
+
+**`Var(β)`:** identical route, substituting `w_t` for `v_t` throughout (same `Cov(X,X)` start,
+same `E[·]` substitution, same relabel-to-`s`, same double-sum, same independence collapse — not
+re-shown line by line since it's a direct swap). One extra care point at the final substitution:
+`Sxx²` and `σ²` are constants (don't depend on `t`) and must be factored OUT of the sum *before*
+substituting the total identity `Σ(x_t-x̄)²=Sxx` — substituting a per-t term with a grand total
+while it's still inside the Σ is invalid (the same error as claiming each individual `x_t` equals
+`n*x̄` just because `Σx_t=n*x̄`).
+
+```
+Var(β) = Cov(β,β) = Σ w_t*w_t*Cov(y_t,y_t) = Σ w_t²*Var(y_t) = Σ w_t²*σ²
+       = Σ [(x_t-x̄)/Sxx]² * σ²
+       = Σ [(x_t-x̄)²/Sxx²] * σ²
+       = (σ²/Sxx²) * Σ(x_t-x̄)²          (factor the constants Sxx², σ² out of the sum FIRST)
+       = (σ²/Sxx²) * Sxx                 (NOW substitute — the full sum equals Sxx)
+       = σ²/Sxx
+```
+
+**Summary — understanding checkpoint for Steps 9-10:**
+
+- `σ²` (true population noise level) is a notational substitution, not a separately derived
+  fact — `σ` is *defined* as `sqrt(Var(y_t))`, so `Var(y_t)=σ²` follows immediately by squaring.
+  `Var(y_t)=σ²` for every `t` specifically because of the model's homoscedasticity assumption
+  (constant noise level across all data points, not a function of `t` or `x_t`).
+- `Var(y_t)` is not the residual/error itself — it's a *summary statistic* describing the error's
+  typical squared size (`Var(y_t)=Var(error_t)=E[error_t²]`), not any one realized error value.
+- `n` never disappears in these collapses — it resurfaces explicitly: once as "how many diagonal
+  terms survive" (n of them, out of n² total pairs), and again inside `v_t=1/n` itself; the two
+  combine (`n * (1/n)² = 1/n`) to leave a single `n` in the final denominator.
+- `Cov(y_t,y_t)=Var(y_t)` (t=s case) is true unconditionally, by definition — independence is
+  NOT what causes this. Independence is only responsible for the *other* fact: `Cov(y_t,y_s)=0`
+  when `t≠s` — the off-diagonal terms vanishing is the actual collapse; the diagonal identity was
+  always true regardless.
+- Both results (`Var(ȳ)=σ²/n`, `Var(β)=σ²/Sxx`) feed directly into Step 11's combination.
+
+---
+
+### Step 11. Combine — general SE at any point `x0`
+
+`SE` is mathematically just `sqrt(variance)` — same operation as standard deviation, just applied
+here to an *estimator's* own uncertainty (ȳ, β, ŷ(x0)) rather than to raw data.
+
+**Rewrite the fitted line at any point `x0`**, substituting Step 1's `α = ȳ - β*x̄` into
+`ŷ(x0) = α + β*x0`:
+
+```
+ŷ(x0) = (ȳ - β*x̄) + β*x0  =  ȳ - β*x̄ + β*x0  =  ȳ + β*(x0 - x̄)
+```
+
+(careful with the sign here — combining the two `β` terms gives `+β*(x0-x̄)`, not minus; a common
+slip is writing `β*(x̄-x0)`, which is the negative of the correct form)
+
+**Apply `Var(·)` to both sides**, treating this as `A+B` with `A=ȳ`, `B=β*(x0-x̄)` — note `B` is a
+*constant* (`x0-x̄`) multiplying `β`, not `β` alone, so both of Step 8's rules are needed:
+
+```
+Var(ŷ(x0)) = Var(ȳ) + Var(β*(x0-x̄)) + 2*Cov(ȳ, β*(x0-x̄))
+```
+
+Pull the constant `(x0-x̄)` out of the middle term (`Var(k*B)=k²*Var(B)`) and out of the cross
+term (`Cov(A,k*B)=k*Cov(A,B)`):
+
+```
+Var(ŷ(x0)) = Var(ȳ) + (x0-x̄)²*Var(β) + 2*(x0-x̄)*Cov(ȳ,β)
+```
+
+**`Cov(ȳ,β)=0`** (Step 9) — the cross term vanishes entirely:
+
+```
+Var(ŷ(x0)) = Var(ȳ) + (x0-x̄)²*Var(β)
+```
+
+**Substitute Step 10's results** (`Var(ȳ)=Var(error)/n`, `Var(β)=Var(error)/Sxx` — using
+`Var(error)` as the practical, computable stand-in for the theoretical `σ²`):
+
+```
+Var(ŷ(x0)) = Var(error)/n + (x0-x̄)²*Var(error)/Sxx  =  Var(error) * ( 1/n + (x0-x̄)²/Sxx )
+```
+
+**Square root to get `SE`:**
+
+```
+SE(ŷ at x0) = sqrt( Var(error) * ( 1/n + (x0-x̄)²/Sxx ) )
+```
+
+---
+
+### Step 12. `SE(α)` — the special case `x0 = 0` (since `α` IS the line's height at `x=0`)
+
+Plug `x0=0` directly into Step 11's general formula — `α` is literally `ŷ(0)` (Step 0's model
+structure guarantees this, since `β*0=0` makes the `β` term vanish regardless of `β`'s value):
+
+```
+SE(α) = sqrt( Var(error) * ( 1/n + x̄²/Sxx ) )
+```
+
+---
+
+### Step 13. t-statistic
+
+```
+t = α / SE(α)
+```
+
+A ratio of the estimated `α` to its own uncertainty — mechanically identical in form to a
+signal-to-noise ratio.
+
+---
+
+### Step 14. p-value
+
+```
+p-value = P(|T| > |t|),   T ~ t-distribution,  n-2 degrees of freedom
+```
+
+**`T` vs `t` — an important distinction.** `T` (capital) is a *random variable* — the whole range
+of possible t-ratios `α̂/SE(α̂)` you'd get across many hypothetical resamples, **assuming the null
+hypothesis is true** (true `α_true = 0`). `t` (lowercase) is the *one specific number* actually
+computed from real data. `T`'s formula still uses the *estimated* `α̂` (which fluctuates around
+zero across noisy resamples even when the true `α` is exactly 0) — not the *true* `α`, which the
+null hypothesis fixes at zero throughout.
+
+`P(|T|>|t|)` asks: "what fraction of `T`'s possible outcomes, under the null, are at least as
+extreme (far from zero) as our one observed `|t|`?" That fraction is the p-value — the area under
+the t-distribution's curve beyond `±|t|` (both tails). A small p-value means our result would be
+rare under pure noise — evidence *against* the null, not proof the null is false (statistical
+significance is a probabilistic standard of evidence, not certainty — there's always a real,
+quantified chance, conventionally 5%, of a false positive even when the test correctly passes).
+
+**Plain-English recap — how to read a p-value, step by step** *(added 2026-08-28 at Saurav's
+request, fv2 session, while walking through Part 2's real-data result):*
+
+1. Start by *assuming* the null hypothesis is true: `α_true = 0`, and the only reason `α̂` isn't
+   exactly 0 is random noise in the sample.
+2. Under that assumption, ask: "what's the probability of getting an `α̂` (equivalently, a `|t|`)
+   this far from zero, purely by chance?" — that probability is the p-value.
+3. "This far from zero" (`|T| > |t|`) means *at least as extreme in either direction* — a large
+   negative `α̂` counts as equally extreme as a large positive one of the same size, since the null
+   only claims `α=0`, not a direction.
+4. **If p is small (< 5%):** noise alone would rarely produce a result this extreme → the
+   noise-only story is implausible → reject the null → there's probably a real, nonzero `α_true`
+   driving it. This is an *indication*, not a guarantee, and it says nothing about the *size* of
+   `α_true` — only that it's probably not zero. The actual magnitude still carries its own
+   uncertainty band (the confidence interval, `α̂ ± ~1.96×SE(α̂)` at large `n` — same 1.96 cutoff
+   because it's the same two-tailed 5% boundary on the same t-distribution).
+5. **If p is large (as in our real result, p=0.3905):** this does *not* prove `α_true = 0` —
+   it means the data isn't strong enough evidence either way. "Failing to reject the null" and
+   "proving the null" are different claims; here it means the observed outperformance is not
+   distinguishable from what pure noise around a true alpha of zero would produce.
+
+---
+
+*(Derivation complete — Steps 0-14. Applied to real data for the first time in
+`52_alpha_beta_concept_and_powergrid.ipynb`'s Part 2: POWERGRID eta0=2.0 Model C, n=2808 real
+trading days. Result: alpha NOT statistically significant, p=0.3905 — see that notebook and
+PROGRESS_HISTORY.md's 2026-08-27 entry for the full real-data writeup.)*

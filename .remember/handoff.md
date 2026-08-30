@@ -39,34 +39,31 @@
   meaningfully stronger than RSI's current best (r≈0.08, r²<1%), not just statistically
   significant.
 
-## Current State — Math/stats teaching thread (alpha/beta CAPM regression, IN PROGRESS)
+## Current State — Math/stats teaching thread (alpha/beta CAPM regression, COMPLETE)
 
-- Testing whether POWERGRID's eta0=2.0 Model C equity curve represents genuine skill vs.
+- Tested whether POWERGRID's eta0=2.0 Model C equity curve represents genuine skill vs.
   asset-trend-tracking, via `strategy_return_t = alpha + beta × market_return_t + error_t`.
-- Explicit teaching preference (saved to memory, `feedback_math_before_domain_mapping.md`): teach
-  math standalone/neutral-variables first, map onto trading terms second; go one small step at a
-  time, wait for confirmation before adding the next piece.
-- **2026-08-23 update (math-mode VM session)**: built a new expanded companion file,
-  `memlabs/52_mathmode_full_derivation_expanded.md` (every algebra line shown), alongside the
-  existing compact `52_mathmode_full_derivation_chronological.md`. Fully re-derived Steps 0-6 in
-  the expanded file (parabola-shape cross-check, full Cov(x,y)/Var(x) expansion proof, two
-  understanding-checkpoint summaries), plus a standalone 10-residual worked example +
-  matplotlib chart (`52_mathmode_variance_dof_example.py`/`.png`) illustrating the n-2
-  degrees-of-freedom correction concretely (Var(n)=17.4 vs correct Var(n-2)=21.75).
-- **Steps covered (chronological file has all 14 in compact form; expanded file has 0-6 in full
-  detail)**: beta=Cov/Var formula; alpha=mean(y)-beta*mean(x); residual/error_t definition;
-  covariance vs variance refresher; residual variance formula with FULL derivation of why n-2;
-  weighted-sum rewrite of β/ȳ (Step 7); Cov(ȳ,β)=0 proof (Step 9); general SE(ŷ at x0) formula
-  (Step 11); SE(α) as the x0=0 special case (Step 12); confidence-interval-vs-prediction-interval
-  distinction (SE formula = uncertainty about the *line's location*, not a wider prediction
-  interval for one new individual observation — that needs an extra +1 term, not derived here).
-- **PAUSED right here — next step**: write Steps 7-12 into the expanded file (matching the full
-  algebra-line detail already there for Steps 0-6) — covered conversationally but not yet
-  transcribed. Then continue to Steps 13-14 (t-statistic, p-value), then finally apply the whole
-  derivation to real POWERGRID eta0=2.0 data (Part 2 of `52_alpha_beta_concept_and_powergrid.ipynb`
-  — still not started).
-- Full context (including everything needed to continue with zero loss) is in
-  `memlabs/50d_full_recap_seed.md` and `memlabs/52_mathmode_session_handoff.md`.
+- **2026-08-27 update — DONE.** Steps 0-14 fully derived in both `52_mathmode_full_derivation_
+  expanded.md` (every algebra line) and `52_mathmode_full_derivation_chronological.md` (compact
+  form). Added a missing `Cov(A,k*B)=k*Cov(A,B)` rule to Step 8 (caught mid-derivation, needed
+  for Step 11's cross term). Then **applied the full derivation to real POWERGRID eta0=2.0 data
+  for the first time** — built out properly as Part 2 of
+  `52_alpha_beta_concept_and_powergrid.ipynb` (data sanity checks, residual diagnostics for
+  homoscedasticity, full step-by-step cells, executed end-to-end with every plot embedded).
+- **RESULT: alpha is NOT statistically significant (p=0.3905, n=2808 real trading days,
+  2015-2026).** Beta also not significant (p=0.1245, beta≈-0.029). Residual diagnostics show
+  noise varies ~2.7x over time (real-market volatility clustering) but the gap from significance
+  is large enough this doesn't change the conclusion. **This formally closes the original
+  question** — Model C's POWERGRID eta0=2.0 outperformance is not statistically distinguishable
+  from noise, confirming (via rigorous test, not just backtest comparison) the earlier
+  PROGRESS_HISTORY finding that Model C has no transferable edge.
+- Also sanity-checked the whole pipeline against the toy dataset's known ground truth
+  (TRUE_ALPHA=0.01 etc.) before trusting it on real data — beta/noise-variance estimates landed
+  close to truth; alpha came out wrong-signed with p=0.44, a live illustration that real small
+  alpha can fail to reach significance in a small sample (n=15), not a pipeline bug.
+- Thread is now functionally complete. Any further work here (different eta0/stock) would be
+  optional/exploratory, not a continuation of unfinished work.
+- Full context: `memlabs/50d_full_recap_seed.md`, `memlabs/52_mathmode_session_handoff.md`.
 
 ## Session/tooling note — WSL + cross-session messaging
 

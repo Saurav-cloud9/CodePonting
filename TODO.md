@@ -12,27 +12,20 @@ P1  MemLabs Pearson's r feature screening — resume from here (notebook 35)
         Only escalate to a full Model A/B build + WFA once something meaningfully stronger than
         RSI's current weak signal (r~=0.08, r^2<1%) turns up.
 
-P2  Alpha/beta CAPM regression derivation (math-mode thread) — write Steps 7-12 into expanded doc
-        2026-08-23: covered Steps 0-12 (chronological file has all 14 in compact form; new
-        expanded file has 0-6 in full algebra detail + a variance/n-2 worked example+chart).
-        Next: transcribe Steps 7-12 into the expanded file, then Steps 13-14 (t-stat, p-value),
-        then finally apply to real POWERGRID eta0=2.0 data (Part 2 of the notebook, unstarted).
-        Full context: memlabs/50d_full_recap_seed.md, memlabs/52_mathmode_session_handoff.md.
-
-P3  Kite bot (market hours only) — running live daily, resume next market session
+P2  Kite bot (market hours only) — running live daily, resume next market session
         2026-07-28 progress: 3 real mid-session restarts (09:51/10:14/10:35) with open
         positions live - all successful, fully validates the weekend's catch-up/discard fix.
         Saurav validating live trades + weekly recon with VM CC directly (not this session).
         Older items still open: MA20/ATR14+touch-eval logging not yet added; ATR14 divergence
         question.
 
-P4  Test weak Pearson-r signal(s) through actual RR/SL-TP exits (not yet started)
+P3  Test weak Pearson-r signal(s) through actual RR/SL-TP exits (not yet started)
         Raised 2026-08-16: everything tested so far (Model C, naive baseline) captures the full
         day's raw return with no exit structure. A sub-50% hit rate can still be profitable with
         the right ATR-based SL/TP (this project's actual convention) — genuinely untested axis,
         separate from model/feature choice.
 
-P5  August 2026 DS3 gap-fill — once the month closes, same CCG pattern as the July fill just
+P4  August 2026 DS3 gap-fill — once the month closes, same CCG pattern as the July fill just
         completed (all 30 stocks + NIFTY50 daily).
 
 # ── PARKED / FUTURE ───────────────────────────────────────────

@@ -187,6 +187,14 @@ Execution rules:
   - CC updates TODO.md (max 5 items, P1 priority first)
 
   ### When Saurav types "RS" (Right Save):
+  - If running on a Linux/VM session (cross-session messaging available, per CROSS-
+    SESSION PEER NAMING above): run ListAgents first to find live peer sessions on
+    this machine (cpgeneric/fv2/mathmode/cplearning, whichever are up). SendMessage
+    each asking for a one-line update on their current work; give them a brief
+    window to reply. Fold anything received into the steps below, attributed to its
+    source session. A peer that doesn't respond promptly is skipped, not waited on
+    indefinitely — RS must still complete. Skip this step entirely on native Windows
+    (cross-session messaging unavailable there).
   - CC updates PROGRESS.md (Recent 5 steps + 5 Milestones)
   - CC updates .remember/handoff.md + today.md
   - CC updates TODO.md (max 5 items, P1 priority first)
