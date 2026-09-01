@@ -992,3 +992,81 @@ closed out, VM backtesting env + VS Code Remote-SSH set up) ─────
            service as a troubleshooting step regardless).
        [DONE]  remember plugin (installed 2026-08-26) confirmed working via /remember:doctor
            after a session restart picked up its hooks.
+
+## 2026-08-30/31 -> 2026-09-01 (math-mode VM session)
+
+### Vector/geometric interpretation of the normal equations
+       [DONE]  Walked through 52_mathmode_normal_equations_projection_interactive.html in depth:
+           spanning vectors vs vectors-in-the-plane, why perpendicular-to-2-spanning-vectors
+           implies perpendicular-to-the-entire-plane (linearity of dot product), ambient-space
+           dimension (n) vs plane/hyperplane dimension (number of parameters) and its direct tie
+           to degrees of freedom (df=n-2 must be positive or the fit is a trivial zero-residual
+           overfit), why visually judging perpendicularity from a 3D screenshot is unreliable
+           (projection distortion + genuine 3D-direction ambiguity for a hand-drawn line),
+           "normal equations" (perpendicular) vs "normal/Gaussian residuals" (bell curve) as two
+           unrelated meanings of the same word, i.i.d. Gaussian as 3 separate conditions, and
+           CLT's role protecting alpha's own sampling distribution regardless of residual-shape
+           violations (rescues the conclusion, doesn't make the assumption true).
+       [DONE]  Established OLS vs SGDRegressor relationship: same linear-model shape; for
+           squared-error loss specifically, SGD converges iteratively toward the same convex-
+           bowl minimum OLS reaches directly in one shot; but OLS only exists for squared-error
+           loss, while SGD generalizes to losses (e.g. Model C's epsilon-insensitive/passive-
+           aggressive) that have no closed form at all.
+
+### POWERGRID residual diagnostics -- 4th panel + X-shape mechanism
+       [DONE]  Added histogram + fitted-Gaussian-curve panel to 52_alpha_beta_concept_and_
+           powergrid.ipynb (now 4 panels). Finding: real residual histogram visibly
+           peaked/narrower than fitted Gaussian -- a genuine mild non-Gaussian shape, on top of
+           the already-known heteroscedasticity.
+       [DONE]  Fully explained the X-shaped "Residuals vs market_return" pattern algebraically:
+           strategy_return_t = signal_t x market_return_t (signal in {+1,-1}) substituted into
+           the residual formula collapses to two near-straight lines (slope ~+1.03/-0.97 using
+           the real fitted beta=-0.029) -- a deterministic artifact of strategy construction, not
+           noise misbehaving. Corrected an earlier mislabeling: market_return in this notebook is
+           POWERGRID's own actual return (true_y), not NIFTY -- a "beat buy-and-hold" test, not a
+           market-index CAPM test.
+
+### eta0=2.0 selection-bias question -- resolved
+       [DONE]  Flagged eta0=2.0 was chosen purely by best-of-9 raw cumulative return (a real
+           selection-bias risk). fv2 confirmed sweep context (9 values tested 0.001-5.0, only
+           2/9 net-positive) and argued best-of-9 already failing significance means the rest
+           have no realistic path to significance either.
+       [DONE]  Ran confirmatory Part 3 in the same notebook for eta0=5.0 (second-best, +0.201
+           raw return): alpha=-0.000033, p=0.9134 -- even more decisively non-significant than
+           eta0=2.0's p=0.39. Confirms fv2's reasoning. eta0 selection-bias thread closed.
+
+### Feature separability checks -- Model B (2-feature) and Model C (1-feature)
+       [DONE]  Built direction-only visualizations for both: Model B (NIFTY50, lag_1+ma_lag_1,
+           32_model_b_actual_direction_only.py/html, 32_model_b_actual_direction_quadrant.py/
+           png) and Model C (POWERGRID, lag_1 only, 50e_powergrid_lag1_direction_only.py/png).
+           Both show no separating power (corr~0.03-0.05, near-coin-flip sign-match).
+       [DONE]  Built a dummy XOR/interaction-effect toy example (52_mathmode_xor_interaction_
+           quadrant_example.py/png, plus a hypothetical-fitted-line overlay showing why a
+           straight line fails on XOR-shaped data) to test whether Model B's near-zero
+           individual correlations could be hiding a real joint pattern. Confirmed: real data
+           shows no such hidden structure either -- genuinely no signal, not a linearly-
+           undetectable one.
+
+### New planning doc -- #53 feature screening -> model pipeline
+       [DONE]  Created 53_feature_screening_to_model_pipeline.md: recap #35 -> continue
+           screening (gap-size vs intraday-move, r) -> select candidates -> Step 2.5 XOR check
+           (if 2 features) -> Step 3 revisit #51 plane-fit primer (if 2 features) -> build Model
+           B/C -> full alpha/beta derivation to final p-value verdict. Continuation of #35, not
+           a restart. TODO.md P1 updated to point here.
+
+### Tooling -- VS Code Remote-SSH / Live Preview on the VM
+       [DONE]  Clarified HTML preview workflow for VS Code connected via SSH/Tunnel to the VM:
+           Live Preview extension (embedded, JS-capable webview) confirmed working including
+           hover tooltips; "Open in Integrated Browser" (VS Code's newer built-in feature)
+           confirmed local-machine-only, unavailable over Remote-SSH. Set
+           workbench.editorAssociations to default .html files to Live Preview. Multi-file-open
+           handled via split editor groups (preview-tab reuse is per-group) or the Browser
+           panel's own tab support.
+
+### Peer check-ins (RS)
+       [DONE]  cplearning (codeponting-d1): rerouted from ML module to Data Structures &
+           Algorithms as of 2026-08-28 (next Codedex ML lesson not yet unlocked).
+       [DONE]  cpgeneric (codeponting-00): diagnosed VM-tunnel Live Preview 127.0.0.1 hardcoding
+           issue, set up Live Preview cleanly on Saurav's desktop WSL VS Code instead; verified
+           2026-08-28 kite_oracle_papertrading run clean end-to-end (39 trades, PnL +29.31,
+           ZPnL -13.22).

@@ -1,95 +1,71 @@
-# Handoff Note — 2026-08-16
+# Handoff Note — 2026-09-01 (math-mode VM session)
 
-## Current State — Model C exploration (CLOSED OUT / PAUSED this session)
+## Current State — Math-mode/vector-geometry teaching thread (COMPLETE for now)
 
-- Full investigation across `Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/`:
-  notebooks `50` (toy walkthrough + BTC replication), `50b` (eta0=1 vs 0.01 vs raw-asset 3-way
-  comparison), `50c` (same applied to POWERGRID, 11.5yr DS3). Formulas-only reference: `52`.
-- **Conclusion**: Model C (online/Passive-Aggressive linear regression) shows no transferable edge
-  across assets — BTC's best eta0 (0.005) and POWERGRID's best eta0 (2.0) share zero overlap, and
-  BTC's "eta0=1 needs ~3yrs to become profitable" pattern does not repeat on POWERGRID even with
-  2x the data (both eta0=1 and eta0=0.01 lose money outright over POWERGRID's full 11.5yr history,
-  vs. buy-and-hold's +1.277). Root-caused to weak underlying signal (Pearson r on
-  close_log_return_lag_1: POWERGRID r=-0.057/p=0.003 significant-but-r²<1%, BTC r=-0.037/p=0.09
-  not significant), not model capacity — confirmed Models A/B/C are all strictly linear, making
-  Pearson r the correctly-matched screening tool.
-- **Full context recap saved**: `memlabs/50d_full_recap_seed.md` — a new session (or this one, if
-  resumed later) should read that file for complete details rather than re-deriving anything.
-- **Decision**: paused, not abandoned. Resume only once notebook 35 (separate thread, below) finds
-  a candidate feature meaningfully stronger than what's been found so far.
-- **Still open, not started**: testing the weak signal(s) through this project's actual RR/SL-TP
-  exit framework (a sub-50% hit rate can be profitable with the right exits — this is a separate
-  axis from model choice, raised explicitly but not yet built).
+- Alpha/beta CAPM derivation (Steps 0-14) was already complete going into this session (see
+  prior handoff). This session extended the *conceptual* side: the vector/orthogonal-projection
+  interpretation of the normal equations (`52_mathmode_normal_equations_projection_interactive.
+  html`), covering spanning vectors, degrees of freedom (ambient-space vs plane dimension),
+  OLS-as-projection equivalence, Gaussian-vs-normal terminology, i.i.d. Gaussian assumption
+  breakdown, CLT's role, and OLS-vs-SGDRegressor's relationship (same shape, same convex minimum
+  for squared-error loss, but SGD generalizes to losses OLS has no closed form for).
+- Full detail: `.remember/today.md` (this session) + `memlabs/50d_full_recap_seed.md` +
+  `memlabs/52_mathmode_session_handoff.md` (prior sessions).
+- Thread is functionally complete — any further work here is optional/exploratory, on Saurav's
+  request for a specific concept, not a continuation of unfinished derivation work.
 
-## Current State — MemLabs Pearson's r feature screening (PRIMARY, continues independently)
+## Current State — POWERGRID Model C eta0 selection-bias question (RESOLVED/CLOSED)
 
-- Notebook 35 (`Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/
-  35_pearson_r_feature_screening.ipynb`). Per the most recent tracked progress: RSI period sweep
-  done (7/9/14/21/28 — no period beats period=14 meaningfully; POWERGRID/TATAMOTORS/DABUR stay
-  significant across all periods but still weak, r²<1%), volume screened on TATAMOTORS (weakest
-  candidate yet, only 2/30 stocks significant even before requiring NIFTY; log transform fixed
-  skew/kurtosis but did not strengthen r). Two real DS3 data bugs found and fixed along the way:
-  INFY frozen-tick day + gap (2015-04-24), DIVISLAB un-split-adjusted day (2015-09-22, real 1:1
-  bonus issue) — both corrected in their respective parquet files.
-- Standing memory saved: `|r|>0.1` in this daily-Pearson-r context is a trigger to verify against
-  raw DS3/Kite data before trusting (`feedback_pearson_r_outlier_threshold.md`).
-- **Next (explicitly agreed, PRIMARY)**: screen gap-size (`log(open_today/close_yesterday)`) vs
-  intraday-move as target (not full close_log_return, to avoid gap-being-part-of-target overlap).
-- Standing rule unchanged: only escalate to a full Model A/B build + WFA once a candidate is found
-  meaningfully stronger than RSI's current best (r≈0.08, r²<1%), not just statistically
-  significant.
+- Saurav flagged eta0=2.0 (used throughout the alpha/beta test) was chosen purely by best-of-9
+  raw cumulative return — a real selection-bias risk. fv2 confirmed the sweep context (9 values
+  tested, 0.001-5.0, only 2/9 net-positive) and argued the best-of-9 already failing significance
+  means the rest have no realistic path to significance either.
+- Confirmatory run added as Part 3 in `52_alpha_beta_concept_and_powergrid.ipynb`: eta0=5.0
+  (second-best, +0.201 raw return) → **alpha=-0.000033, p=0.9134** — even more decisively
+  non-significant than eta0=2.0's p=0.39. Confirms fv2's reasoning. **This question is closed.**
 
-## Current State — Math/stats teaching thread (alpha/beta CAPM regression, COMPLETE)
+## Current State — Feature separability checks (Model B two-feature, Model C single-feature)
 
-- Tested whether POWERGRID's eta0=2.0 Model C equity curve represents genuine skill vs.
-  asset-trend-tracking, via `strategy_return_t = alpha + beta × market_return_t + error_t`.
-- **2026-08-27 update — DONE.** Steps 0-14 fully derived in both `52_mathmode_full_derivation_
-  expanded.md` (every algebra line) and `52_mathmode_full_derivation_chronological.md` (compact
-  form). Added a missing `Cov(A,k*B)=k*Cov(A,B)` rule to Step 8 (caught mid-derivation, needed
-  for Step 11's cross term). Then **applied the full derivation to real POWERGRID eta0=2.0 data
-  for the first time** — built out properly as Part 2 of
-  `52_alpha_beta_concept_and_powergrid.ipynb` (data sanity checks, residual diagnostics for
-  homoscedasticity, full step-by-step cells, executed end-to-end with every plot embedded).
-- **RESULT: alpha is NOT statistically significant (p=0.3905, n=2808 real trading days,
-  2015-2026).** Beta also not significant (p=0.1245, beta≈-0.029). Residual diagnostics show
-  noise varies ~2.7x over time (real-market volatility clustering) but the gap from significance
-  is large enough this doesn't change the conclusion. **This formally closes the original
-  question** — Model C's POWERGRID eta0=2.0 outperformance is not statistically distinguishable
-  from noise, confirming (via rigorous test, not just backtest comparison) the earlier
-  PROGRESS_HISTORY finding that Model C has no transferable edge.
-- Also sanity-checked the whole pipeline against the toy dataset's known ground truth
-  (TRUE_ALPHA=0.01 etc.) before trusting it on real data — beta/noise-variance estimates landed
-  close to truth; alpha came out wrong-signed with p=0.44, a live illustration that real small
-  alpha can fail to reach significance in a small sample (n=15), not a pipeline bug.
-- Thread is now functionally complete. Any further work here (different eta0/stock) would be
-  optional/exploratory, not a continuation of unfinished work.
-- Full context: `memlabs/50d_full_recap_seed.md`, `memlabs/52_mathmode_session_handoff.md`.
+- Built direction-only visualizations for both models confirming **no separating power** in the
+  features tested so far:
+  - Model B (NIFTY50, lag_1+ma_lag_1): `32_model_b_actual_direction_only.py`/html,
+    `32_model_b_actual_direction_quadrant.py`/png. Corr~0.03 each, shapeless 2D scatter.
+  - Model C (POWERGRID, lag_1 only): `50e_powergrid_lag1_direction_only.py`/png. Corr=-0.047,
+    50.9% sign-match (coin flip).
+- Verified via a dummy XOR/interaction-effect toy example
+  (`52_mathmode_xor_interaction_quadrant_example.py`/png) that Model B's near-zero individual
+  correlations aren't hiding a real joint/interaction pattern — genuinely no signal at all, not
+  just a linearly-undetectable one.
 
-## Session/tooling note — WSL + cross-session messaging
+## Current State — MemLabs Pearson's r feature screening (PRIMARY, continues via new #53 doc)
 
-- Set up WSL (Ubuntu) + VS Code WSL extension specifically to get genuine cross-session messaging
-  (confirmed NOT available on native Windows — this main session cannot use `/list-agents` or
-  `SendMessage` to peer sessions at all, confirmed empirically). Node/Claude CLI already present
-  in WSL; repo reachable at the same path (`/mnt/c/Users/Saurav/CodePonting`, same files, no
-  sync-drift risk). Plan: this native-Windows session = "master backup" thread; a WSL VS Code
-  instance = orchestration hub, spawning its own independent "math mode" WSL peer session.
-- A background subagent named "math-mode" was also spawned earlier from this session (via the
-  Agent tool, parent-child relationship, not true peer messaging) — seeded with the same alpha/
-  beta context. Superseded by the WSL plan for anything needing genuine two-way sync, but still
-  reachable via SendMessage-by-agentId from this session if needed.
+- **New**: `53_feature_screening_to_model_pipeline.md` created — full chronology from #35 recap
+  through to a final alpha/p-value verdict:
+  1. Recap #35 (`35_pearson_r_feature_screening.ipynb`) end-to-end, checking for mistakes.
+  2. Continue screening: gap-size (`log(open_today/close_yesterday)`) vs intraday-move.
+  3. Select 1-2 candidates (meaningfully better than RSI's r≈0.08).
+  4. Step 2.5 (if 2 features): XOR/interaction check via 2D scatter, same recipe as Model B's.
+  5. Step 3 (if 2 features): revisit `51_least_squares_3d.md` for plane-fit intuition before
+     interpreting the real model's R²/SSE.
+  6. Build Model B/C with selected feature(s).
+  7. Full alpha/beta derivation → residual diagnostics → SE → t-stat → p-value → verdict,
+     mirroring #52's now-validated pipeline.
+- **This is a continuation of #35, not a restart** — #35's existing RSI/Volume results stay
+  where they are; #53 is the plan for carrying the *next* candidate all the way through.
+- **Next action**: Step 0 of #53 — recap #35 for correctness before screening gap-size.
 
-## Housekeeping — 2026-08-23 (math-mode VM session)
+## Housekeeping / Tooling
 
-- Renamed "SS"/"save state" → "SIF"/"save information" across all 6 CLAUDE.md files on the VM
-  (main + kite_oracle_live_trading x2 + kite_oracle_papertrading + backtesting), incl.
-  `kbss`→`kbsif` and `SSD`→`SIFD` in the main file. Verified no leftover bare SS/ss matches.
-- Fixed the PostToolUse `log_modified.py` hook (was relative-path, broke on cwd change) —
-  switched to absolute path in `settings.local.json`.
-- Added VM-hostname skip to `git_sync_check_stop.sh` — sync reminder no longer fires on the VM
-  itself (primary workspace), still fires on desktop/laptop.
-- Set up project memory for the first time (`~/.claude/projects/-home-ubuntu-CodePonting/memory/`)
-  — `MEMORY.md` index + first entry (`parked_prediction_interval_position_sizing`, mirrored as
-  TODO.md's F9).
+- VS Code Remote-SSH (VM) HTML preview workflow clarified: Live Preview extension (embedded,
+  JS-capable webview) is correct; "Open in Integrated Browser" (VS Code's newer built-in
+  feature) is confirmed local-machine-only, not available over Remote-SSH at all.
+  `workbench.editorAssociations` set to default `.html` → Live Preview. Multi-file-open handled
+  via split editor groups (preview-tab reuse is per-group) or the Browser panel's own tabs.
+- cpgeneric (peer) separately found: VM tunnel's Live Preview hardcodes 127.0.0.1 (breaks over a
+  remote tunnel, needs manual tunnel-URL+path workaround); set up Live Preview cleanly on
+  Saurav's desktop WSL VS Code instead (works with no tunnel involved).
+- cplearning (peer): rerouted from ML module to Data Structures & Algorithms (2026-08-28, next
+  Codedex ML lesson not yet unlocked); resumes once released.
 
 ## Known Issues
 
