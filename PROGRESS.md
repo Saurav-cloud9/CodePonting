@@ -4,23 +4,25 @@
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. Completed the vector/geometric interpretation of the normal equations (orthogonal projection,
+1. fv2: recapped notebook 35 as `53_step0_recap_pearson_r_screening.ipynb` (#53 Step 0) —
+   confirmed Aug-10 DS3 update (new atr14_wilder column, tiny ma20/atr14 edge-case diffs) doesn't
+   touch #35's actual inputs (raw close, byte-identical); re-executed, all r/p results matched
+   exactly. Added a null-intuition validation chart (5000-sim t-stats vs theoretical curve) to
+   `52_alpha_beta_concept_and_powergrid.ipynb` right after the Steps 7-8 t-distribution chart
+2. fv2: KEY OPEN DECISION for next session — #53's screening (target=close_log_return, feeds
+   Models A/B/C raw-price-prediction) does NOT directly serve the actual current priority: the
+   MA-bounce strategy needs a REGIME FILTER (target = the strategy's own trade win/loss outcomes)
+   to push ZPF above 1.0 (zpnl = raw_pnl - zerodha_charge_per_trade) BEFORE the alpha/beta
+   credibility test is even meaningful to run. Must decide: redirect #53's target to the
+   strategy's own outcomes, or run it as a separate parallel thread
+3. Completed the vector/geometric interpretation of the normal equations (orthogonal projection,
    `52_mathmode_normal_equations_projection_interactive.html`) — spanning vectors vs vectors-in-
    the-plane, degrees of freedom (ambient-space dim vs plane dim), OLS-as-projection equivalence,
    Gaussian/normal-equations terminology disambiguation, CLT's role protecting alpha's sampling
    distribution regardless of residual-shape violations
-2. Added a 4th panel (histogram + fitted Gaussian curve) to the POWERGRID residual diagnostics
-   in `52_alpha_beta_concept_and_powergrid.ipynb`; explained the X-shaped heteroscedasticity
-   mechanistically (strategy_return = signal_t × market_return_t collapses residual into two
-   near-straight lines, slope ≈+1.03/-0.97) — deterministic artifact of strategy construction,
-   not real noise misbehaving
-3. Resolved the eta0=2.0 selection-bias question (fv2 confirmed best-of-9 by raw return): ran a
+4. Resolved the eta0=2.0 selection-bias question (fv2 confirmed best-of-9 by raw return): ran a
    confirmatory Part 3 in the same notebook for eta0=5.0 (second-best) — alpha=-0.000033,
    p=0.9134, even more decisively non-significant than eta0=2.0's p=0.39. Closes the eta0 thread
-4. Built Model B's #32-series direction-only visualizations (NIFTY50, lag_1+ma_lag_1 vs actual
-   buy/sell) and a single-feature POWERGRID/Model C check (`50e_powergrid_lag1_direction_only.py`)
-   — both show no separating power (near-zero correlation, ~coin-flip sign-match); confirmed via
-   a dummy XOR toy example that this isn't a hidden interaction effect either
 5. Created `53_feature_screening_to_model_pipeline.md` — chains #35 recap → continue screening
    (gap-size vs intraday-move, r + 2D-scatter/XOR check) → select candidates → #51 plane-fit
    primer (if 2 features) → build Model B/C → full alpha/beta derivation to final p-value,

@@ -5,12 +5,30 @@ Data-source agnostic: both the offline engine (DS3 replay) and the live engine
 bar came from.
 """
 from collections import deque
+from datetime import time as _time
 
 SL_MULT    = 2.0
 TP_MULT    = 4.5
 EOD_HOUR   = 15
 MA_PERIOD  = 20
 ATR_PERIOD = 14
+LAST_TOUCH_TIME = _time(14, 45)  # last bar allowed to register a NEW touch - blocks 14:50
+                                  # onward, so no entry can fire at 14:55 with only ~5min
+                                  # before the hard EOD square-off. The old bar['hour'] <
+                                  # EOD_HOUR check only had hour granularity, so it treated
+                                  # all of 14:00-14:55 as equally "not yet EOD".
+ENTRY_CUTOFF_TIME = _time(14, 50)  # latest bar a pending touch may convert into a real
+                                    # entry on. Normally unreachable (LAST_TOUCH_TIME=14:45
+                                    # caps touches, so the very next bar is always 14:50) -
+                                    # this guards the edge case where a bucket gets silently
+                                    # skipped (e.g. a live tick gap with no bot restart, so
+                                    # catchup_range() never gets a chance to backfill it),
+                                    # which would otherwise let the entry land later than
+                                    # intended with even less runway before EOD. Cancels
+                                    # outright (no trade, no charges) rather than entering
+                                    # and immediately exiting like the EOD_HOUR>=15 branch
+                                    # below does (that one still logs a charges-only-loss
+                                    # "wash" trade - a separate, pre-existing behavior).
 
 
 def zerodha_short(entry, exit_price):
@@ -102,6 +120,11 @@ def process_bar(symbol, bar, state, trades):
         pend = state.pending_entry
         if bar['date'] != pend['touch_date']:
             state.pending_entry = None  # cancelled - same bar re-checked for touch below
+        elif bar['datetime'].time() > ENTRY_CUTOFF_TIME:
+            state.pending_entry = None  # cancelled - entry bar skipped past the intended
+                                         # cutoff (bucket gap); no trade, no charges, same
+                                         # bar re-checked for touch below (won't re-qualify,
+                                         # already past LAST_TOUCH_TIME anyway)
         else:
             entry = bar['open']
             sl = entry + SL_MULT * pend['atr']
@@ -127,7 +150,7 @@ def process_bar(symbol, bar, state, trades):
     if (state.position is None and state.pending_entry is None and not just_exited
             and ma20 is not None and atr14 is not None and is_shortable(symbol)
             and bar['high'] >= ma20 and bar['open'] < ma20 and bar['close'] < ma20
-            and bar['hour'] < EOD_HOUR):
+            and bar['datetime'].time() <= LAST_TOUCH_TIME):
         state.pending_entry = {'touch_date': bar['date'], 'atr': atr14}
 
 

@@ -11,10 +11,14 @@ P1  MemLabs feature screening -> model pipeline — new plan doc: memlabs/53_fea
         confirmatory run) concluded no transferable edge exists on raw signals either.
         2026-08-30 methodology note: don't limit screening to single-feature Pearson r — always
         cross-check any 2-feature combination with a 2D scatter (XOR/interaction-effect lesson).
-        2026-09-01 next action: #53 Step 0 — recap notebook 35 for mistakes, then Step 1 —
-        screen gap-size (log(open_today/close_yesterday)) vs intraday-move as target. Only
-        escalate to a full Model A/B build once something meaningfully stronger than RSI's
-        current weak signal (r~=0.08, r^2<1%) turns up.
+        2026-09-01/02: #53 Step 0 done — recapped as `53_step0_recap_pearson_r_screening.ipynb`,
+        confirmed Aug-10 DS3 update doesn't affect #35's results (raw close byte-identical).
+        DECISION NEEDED before Step 1: #53 as currently scoped (target=close_log_return, feeds
+        Models A/B/C raw-price-prediction) does NOT directly serve the actual priority — the
+        MA-bounce strategy needs a REGIME FILTER (target = strategy's own trade win/loss
+        outcomes) to push ZPF above 1.0 BEFORE alpha/beta testing is meaningful. Decide next
+        session: redirect #53's target to the strategy's own outcomes, or run both as separate
+        parallel threads.
 
 P2  Kite bot (market hours only) — running live daily, resume next market session
         2026-07-28 progress: 3 real mid-session restarts (09:51/10:14/10:35) with open
