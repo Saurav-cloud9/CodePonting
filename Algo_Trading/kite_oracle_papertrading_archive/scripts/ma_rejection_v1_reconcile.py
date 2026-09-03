@@ -1,0 +1,163 @@
+"""
+Reconciliation script — run after a live/paper session.
+1. Bar-level check: our live-built bars (live_bars.csv) vs Kite's official
+   historical_data for the same window.
+2. Trade-level check: replay the shared core logic on official bars, compare
+   resulting trades against what the live engine actually did (live_trades.csv).
+Some divergence is expected (real tick-driven slippage vs clean official-bar
+fills) - the goal is catching structural mismatches, not zero difference.
+Saves both the fetched official bars and the findings to data/recon/, dated
+by the session being reconciled (not today's date).
+
+Usage:
+  python ma_rejection_v1_reconcile.py            -> reads data/trades/ root
+  python ma_rejection_v1_reconcile.py 28thJuly    -> reads data/trades/daily data/28thJuly/
+                                                      (use after archive_daily_logs() has
+                                                      moved the day's files out of root)
+"""
+import os
+import sys
+from datetime import timedelta
+from pathlib import Path
+
+import pandas as pd
+from dotenv import load_dotenv
+from kiteconnect import KiteConnect
+
+from ma_rejection_v1_core import StockState, process_bar, update_indicators
+
+env_path = Path(__file__).resolve().parents[1] / '.env'
+load_dotenv(dotenv_path=env_path, override=True)
+
+API_KEY = os.getenv('KITE_API_KEY')
+ACCESS_TOKEN = os.getenv('KITE_ACCESS_TOKEN')
+
+TRADES_ROOT = Path(__file__).resolve().parent.parent / 'data' / 'trades'
+if len(sys.argv) > 1:
+    DATA_DIR = TRADES_ROOT / 'daily data' / sys.argv[1]
+else:
+    DATA_DIR = TRADES_ROOT
+LIVE_BARS = DATA_DIR / 'live_bars.csv'
+LIVE_TRADES = DATA_DIR / 'live_trades.csv'
+RECON_DIR = Path(__file__).resolve().parent.parent / 'data' / 'recon'
+
+SYMBOL_MAP = {'TATAMOTORS': 'TMPV'}
+
+log_lines = []
+
+
+def log(msg=''):
+    print(msg)
+    log_lines.append(str(msg))
+
+
+def kite_symbol(display_symbol):
+    return SYMBOL_MAP.get(display_symbol, display_symbol)
+
+
+if not LIVE_BARS.exists():
+    print(f'ERROR: {LIVE_BARS} not found.')
+    print('Pass the dated folder name as an argument, e.g.: python ma_rejection_v1_reconcile.py 28thJuly')
+    sys.exit(1)
+
+kite = KiteConnect(api_key=API_KEY)
+kite.set_access_token(ACCESS_TOKEN)
+
+live_bars = pd.read_csv(LIVE_BARS, parse_dates=['datetime'])
+symbols = sorted(live_bars['symbol'].unique())
+session_start = live_bars['datetime'].min()
+session_end = live_bars['datetime'].max() + timedelta(minutes=5)
+session_date = session_start.date()
+log(f'Reconciling from {LIVE_BARS}')
+log(f'{len(symbols)} symbols, session window {session_start} to {session_end}')
+
+official_bars_rows = []
+official_trades = []
+
+for sym in symbols:
+    ksym = kite_symbol(sym)
+    quote = kite.ltp([f'NSE:{ksym}'])
+    token = quote[f'NSE:{ksym}']['instrument_token']
+    candles = kite.historical_data(
+        token, from_date=session_start - timedelta(days=10),
+        to_date=session_end + timedelta(minutes=10), interval='5minute')
+
+    state = StockState()
+    for c in candles:
+        dt = c['date'].replace(tzinfo=None)
+        bar = {'datetime': dt, 'open': c['open'], 'high': c['high'],
+               'low': c['low'], 'close': c['close'], 'date': dt.date(), 'hour': dt.hour}
+        if dt < session_start:
+            update_indicators(bar, state)
+            continue
+        if dt > session_end:
+            continue
+        official_bars_rows.append({'symbol': sym, **bar})
+        process_bar(sym, bar, state, official_trades)
+
+official_bars = pd.DataFrame(official_bars_rows)
+official_trades_df = pd.DataFrame(official_trades)
+
+log(f'\nOfficial bars fetched: {len(official_bars):,}   Live bars: {len(live_bars):,}')
+log(f'Official-replay trades: {len(official_trades_df):,}')
+
+# ── Bar-level check ─────────────────────────────────────────────────────────
+merged = pd.merge(
+    live_bars[['symbol', 'datetime', 'open', 'high', 'low', 'close']],
+    official_bars[['symbol', 'datetime', 'open', 'high', 'low', 'close']],
+    on=['symbol', 'datetime'], suffixes=('_live', '_official'), how='outer', indicator=True)
+
+only_live = merged[merged['_merge'] == 'left_only']
+only_official = merged[merged['_merge'] == 'right_only']
+both = merged[merged['_merge'] == 'both'].copy()
+
+for col in ['open', 'high', 'low', 'close']:
+    both[f'{col}_diff'] = (both[f'{col}_live'] - both[f'{col}_official']).abs()
+max_diff = both[[f'{c}_diff' for c in ['open', 'high', 'low', 'close']]].max().max()
+mismatched = both[(both[[f'{c}_diff' for c in ['open', 'high', 'low', 'close']]] > 0.01).any(axis=1)]
+
+log(f'\n--- Bar-level ---')
+log(f'Matched bars (both sources): {len(both):,}')
+log(f'Only in live (missing from official): {len(only_live)}')
+if len(only_live) > 0:
+    log(only_live[['symbol', 'datetime']].sort_values(['symbol', 'datetime']).to_string(index=False))
+log(f'Only in official (missing from live): {len(only_official)}')
+if len(only_official) > 0:
+    log(only_official[['symbol', 'datetime']].sort_values(['symbol', 'datetime']).to_string(index=False))
+log(f'Max abs OHLC diff on matched bars: {max_diff:.4f}')
+log(f'Bars with OHLC diff > 0.01: {len(mismatched)}')
+if len(mismatched) > 0:
+    log(mismatched[['symbol', 'datetime', 'open_diff', 'high_diff', 'low_diff', 'close_diff']].to_string(index=False))
+
+# ── Trade-level check ───────────────────────────────────────────────────────
+log(f'\n--- Trade-level ---')
+if LIVE_TRADES.exists():
+    live_trades = pd.read_csv(LIVE_TRADES, parse_dates=['entry_dt'])
+    log(f'Live trades: {len(live_trades)}   Official-replay trades: {len(official_trades_df)}')
+    if len(official_trades_df) > 0:
+        live_keys = set(zip(live_trades['symbol'], live_trades['entry_dt']))
+        off_keys = set(zip(official_trades_df['symbol'], official_trades_df['entry_dt']))
+        log(f'Matched (same symbol+entry_dt): {len(live_keys & off_keys)}')
+        only_in_live = sorted(live_keys - off_keys)
+        only_in_official = sorted(off_keys - live_keys)
+        log(f'Only in live: {len(only_in_live)}')
+        for s, dt in only_in_live:
+            log(f'  {s}  {dt}')
+        log(f'Only in official-replay: {len(only_in_official)}')
+        for s, dt in only_in_official:
+            log(f'  {s}  {dt}')
+    else:
+        log('No official-replay trades to compare (no signal fired in this window).')
+else:
+    log('No live_trades.csv yet - no trade has exited during this session.')
+
+# ── Save outputs ─────────────────────────────────────────────────────────────
+RECON_DIR.mkdir(parents=True, exist_ok=True)
+official_bars_path = RECON_DIR / f'official_bars_{session_date}.csv'
+findings_path = RECON_DIR / f'recon_{session_date}.md'
+
+official_bars.to_csv(official_bars_path, index=False)
+findings_path.write_text('\n'.join(log_lines), encoding='utf-8')
+
+print(f'\nSaved official bars to {official_bars_path}')
+print(f'Saved findings to {findings_path}')

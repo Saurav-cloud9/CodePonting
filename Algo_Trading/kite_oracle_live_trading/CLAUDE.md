@@ -20,5 +20,8 @@ Saurav explicitly asks — doing so would imply a readiness that doesn't exist y
 ## Shorthand
 - `vsa` = "very short answer" — reply in 1–2 lines max, no elaboration.
 - `RS` = "right save" — update `PROGRESS.md` with what was completed this session.
+  On a Linux/VM session, first ListAgents/SendMessage any live peer sessions on this
+  machine for a one-line update to fold in (skip if none respond promptly, or if on
+  native Windows where cross-session messaging is unavailable).
 - `CCP` = "Context Catch-Up / Peek" — read `PROGRESS.md` only (read-only), then reply
   with a 3-part summary: (1) where we are, (2) what's next, (3) any blockers.
