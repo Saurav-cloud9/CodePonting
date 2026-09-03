@@ -54,3 +54,6 @@ F10 Model C 3D time-evolution visualization (parked 2026-08-31) — lag_1 vs tic
         change every tick, unlike Model B's fixed fit) but not decision-driving — POWERGRID
         already concluded no significant edge (alpha p=0.39). Revisit only if curiosity-driven,
         not blocking #35 priority.
+F11 StatQuest (Josh Starmer, YouTube) — standing reference source, explore over time. Covers
+        most core ML/stats topics this project touches (regression, classification, trees,
+        feature selection). First video logged: regime_model/statquest/roc_auc.md.

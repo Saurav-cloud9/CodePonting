@@ -1232,3 +1232,9 @@ C:\Users\Saurav\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\cl
 /home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/53_feature_screening_to_model_pipeline.md
 /home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/53_feature_screening_to_model_pipeline.md
 /home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/53_feature_screening_to_model_pipeline.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/exit_management/01_reference_baseline_offline.py
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/exit_management/01_ma_short_baseline_offline.py
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/exit_management/ma_short_baseline_core.py
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/exit_management/01_ma_short_baseline_offline.py
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/statquest/roc_auc.md
+/home/ubuntu/kite_oracle_papertrading/scripts/ma_rejection_v1_reconcile.py

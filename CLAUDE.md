@@ -58,6 +58,21 @@
   without first pulling VM CC's already-applied pending_entry persistence fix,
   silently overwriting and losing it. Caught only because VM CC noticed and asked.
 
+── KITE_ORACLE_PAPERTRADING MIRROR — ARCHIVED (2026-09-02) ─────────
+
+  `Algo_Trading/kite_oracle_papertrading/` (the git-tracked mirror of the live bot's code,
+  inside CodePonting) was renamed to `Algo_Trading/kite_oracle_papertrading_archive/`.
+  Reason: found significantly stale on 2 of 4 shared files vs the actual live VM bot
+  (`ma_30_rejection_v1_live.py` 89 lines behind, `ma_rejection_v1_reconcile.py` 266 lines
+  behind) — an out-of-sync mirror is actively misleading, not just outdated. Decision: not
+  worth maintaining/syncing going forward. Kept as-is for occasional future reference only,
+  via `git mv` (history preserved). The actual live bot's own folder (`~/kite_oracle_papertrading`,
+  outside CodePonting, VM + local) remains the real source of truth — the sync-discipline
+  rule above still applies to that folder specifically, not the now-archived mirror.
+  New backtesting/exit-management work happens in
+  `Algo_Trading/Framework_V2/scripts/trials/exit_management/` instead, using copies pulled
+  fresh from the live VM folder as needed (not from the archived mirror).
+
 ── CODEPONTING VM (ORACLE CLOUD) ──────────────────────────────────
 
   CodePonting is also cloned onto the same Oracle Cloud VM that runs
