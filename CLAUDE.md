@@ -33,6 +33,23 @@
   If ambiguous (new session, unclear which is which), send an identity-check message
   and let the peer self-report its role before addressing it further.
 
+── GIT SYNC BEFORE CROSS-AGENT HANDOFF ──────────────────────────
+
+  HARD RULE: whenever CC edits a file that a DIFFERENT agent/AI will read to pick up
+  instructions or context — CCG_ORCHESTRATION.md for Grok being the concrete case that
+  surfaced this (2026-09-04: Grok was executing a stale Aug 8 version of the file for
+  hours because the edit sat uncommitted+unpushed on the VM's local working directory)
+  — commit AND push that edit immediately, before telling anyone to go read it. Do not
+  wait for a natural batch/checkpoint. This applies whenever the other agent reads the
+  file through a separate clone or the repo's remote rather than this exact working
+  directory — true for Grok, and for any other local/external AI or tool that consumes
+  a CodePonting file as its instruction source, not just Grok specifically.
+
+  Why: a local edit is invisible to anything that isn't this exact checkout. The
+  instruction-writer (CC) can see its own edit immediately and has no signal that the
+  reader (Grok) is working from stale content — the mismatch is silent until someone
+  notices the reader's output doesn't match what was actually asked.
+
 ── RESPONSE FORMATTING ──────────────────────────────────────────
 
   Default to bullet-point format for assessments, reviews, and multi-point
@@ -323,9 +340,11 @@ PRIMARY (fv2)      : Framework_V2/data/historical/csv/intraday_5min/
 
 PRIMARY (fv2 DS3)  : Framework_V2/data/historical/intraday_5min_DS3/
   DS3 dataset        Parquet format, 30 stocks, ma20/atr14 precomputed
-                     Coverage: 2015–2025 (11 years)
+                     Coverage: 2015-02-02 → 2026-08-31 (confirmed 2026-09-04 — extends
+                     well past the original 11-year/2025 build; keeps growing as new
+                     months are fetched, verify actual max date before assuming it's stale)
                      Daily NIFTY50: Framework_V2/data/historical/daily/NIFTY50.parquet
-                     (2015-02-02 → 2025-12-31, matches DS3 stock coverage —
+                     (2015-02-02 → 2026-08-31, matches DS3 stock coverage —
                      Kite MCP 2016-2025 + Yahoo Finance ^NSEI gap-fill for 2015)
                      ⚠️  ALL sandbox scripts must use DS3. Not intraday_5min.
 

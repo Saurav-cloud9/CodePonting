@@ -160,6 +160,28 @@ Every backtest result must include:
 - All 90 SL/TP combos with N, PF, ZPF, Sh(D), ZSh(D)
 - Highlight best ZPF and best ZSh(D) combo
 
+**Exit-mix / touch-hour breakdown (mandatory, added 2026-09-04):**
+- For any combo being seriously considered (not every one of the 90 — at minimum
+  the best-by-ZPF combo, and any combo proposed for live/paper deployment),
+  bucket trades by touch-bar hour (09-10, 10-11, ..., 14-15) and report per
+  bucket: N, EOD%, SL%, TP%, PF, ZPF, Net ZPnL.
+- Why: raw overall ZPF alone can hide a combo that only "works" by riding most
+  trades to EOD close (SL/TP too wide to bind intraday, changing the exit-type
+  mix rather than reflecting genuine directional edge) — found 2026-09-04 when
+  every family's raw-ZPF-ranked #1 combo landed at the edge of the swept SL/TP
+  grid. A combo whose top-line ZPF looks fine but whose per-hour breakdown
+  shows EOD% climbing sharply late in the day (e.g. >60-70% in the 14-15
+  bucket) is suspect even if its blended number looks acceptable.
+- This diagnostic does not replace the SL/TP health check in §11/§12 — it
+  supplements ZPF-based ranking with a second, orthogonal lens (when in the
+  day the edge actually shows up, not just whether it exists in aggregate).
+- Any newly proposed time-of-day-restricted variant (e.g. trading only the
+  best-looking hour window) must be validated out-of-sample (derive the
+  window on one time split, confirm it holds on a held-out split) before
+  being treated as a real candidate — picking the best-looking window from
+  the same data used to evaluate it is the same selection-bias trap as
+  cherry-picking a single significant variant from a multi-variant sweep.
+
 ---
 
 ## 10. Iteration Methodology

@@ -33,8 +33,22 @@ P3  Test weak Pearson-r signal(s) through actual RR/SL-TP exits (not yet started
         the right ATR-based SL/TP (this project's actual convention) — genuinely untested axis,
         separate from model/feature choice.
 
-P4  August 2026 DS3 gap-fill — once the month closes, same CCG pattern as the July fill just
-        completed (all 30 stocks + NIFTY50 daily).
+P4  Exit-management trials (Framework_V2/scripts/trials/exit_management/) — ongoing
+        2026-09-02/03: August 2026 DS3 gap-fill DONE (30 stocks + NIFTY50 daily, verified
+        pre-Aug data byte-identical). Built memory-safe baseline (01) + SL6/TP6 variant (02)
+        offline engines — fixed a real OOM bug (pd.concat+to_dict('records') on 6.25M bars
+        crashed the VM for 40min); rewrote using per-stock numpy arrays (known-good pattern
+        from baseline_reserve_lock/sl_tp_sweep_baseline_short.py), process_bar()/core.py
+        logic untouched. Ran a 4-way August comparison (live/reconcile/baseline/SL6-TP6) —
+        found RECONCILE vs BASELINE diverge due to a real DIVISLAB split-adjustment data
+        mismatch (~1.5% of bars), not a logic bug — confirmed by replaying reconcile's exact
+        structure sourced from DS3 (exact match to baseline). Added volume/oi to reconcile's
+        official_bars fetch (matches DS3 schema). Built two new cron jobs on the live bot VM:
+        daily settled-reconcile (18:00 IST, `--settled` flag, lets same-day data settle) and
+        monthly 3-way reconciliation (09:30 IST 1st-of-month, LIVE/RECONCILE/fresh-Kite-pull,
+        catches retroactive corporate-action adjustments) — both validated against August.
+        Next: dig into WHY the exit-management numbers themselves (ZPF<1) need improving —
+        trailing stop / partial profit-taking, per the earlier diagnostic plan.
 
 # ── PARKED / FUTURE ───────────────────────────────────────────
 F1  Single-stock trade dump (TATAMOTORS) — verify SHORT calculations
