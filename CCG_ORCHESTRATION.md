@@ -7,6 +7,76 @@ instruction, and report back — CC keeps this file updated going forward.
 
 ---
 
+## 2026-09-04 (pending — Grok) — Exit-type breakdown for top-10 SL/TP combos, 4 strategy versions
+
+**Context**: Overnight (2026-09-04 00:39–02:18 VM time) 4 full 90-combo SL/TP
+sweeps ran with the refined live-matching cutoff (`LAST_TOUCH_TIME=14:45`,
+`ENTRY_CUTOFF_TIME=14:50`, per `Framework_V2/backtesting_rules/backtesting_rules.md`)
+freshly added. All 4 picked their #1-ranked-by-ZPF combo at or near SL=6.0/TP=6.0 —
+the very edge of the swept grid (`SL_VALS`/`TP_VALS` both cap at 6.0). Checked
+6×ATR14 against actual price data: it's ~1.6–2.1% of price, roughly a full day's
+typical intraday range for these stocks — meaning at that width, SL/TP barely
+bind intraday and most trades likely just ride to the 15:00 EOD square-off
+regardless of the entry signal's actual quality. That inflates ZPF by changing
+the *exit-type mix* (fewer full stop-loss hits), not by reflecting genuine
+directional edge — a trap, not a real result.
+
+**Task**: instrument each of the 4 existing sweep scripts (below) to additionally
+count, per combo, the exit-type breakdown across all trades: **SL-hit%, TP-hit%,
+EOD+% (EOD exit with pnl>0), EOD-% (EOD exit with pnl<=0)** — four buckets
+summing to 100% of that combo's trade count. This is a small addition: each
+script's `run_combo()` already has an exit-priority branch (date-change → hour≥15
+EOD → SL hit → TP hit, in that order) — just tag which branch fired per trade
+alongside the existing pnl/exit_px append, then tally per combo.
+
+**Scope — rerun the FULL 90-combo grid for all 4 versions, not just the current
+top-10.** Restricting the recheck to the existing top-10-by-ZPF would be
+circular: that subset is exactly where the suspected EOD-exit artifact
+concentrates, so a genuinely healthy narrower-band combo sitting outside the
+current top-10 (e.g. rank #35, disadvantaged by *not* benefiting from the
+artifact) would never get surfaced. Full-grid instrumentation lets you re-rank
+every combo by "ZPF among combos with a healthy exit-mix" directly, rather than
+trusting a list built from the very metric under suspicion.
+
+**The 4 scripts** (all under `Algo_Trading/Framework_V2/strategies/`, already
+using DS3 data at `Framework_V2/data/historical/intraday_5min_DS3/`, all already
+carry the refined cutoff — do not touch the entry/exit logic itself, only add
+the tagging/counting):
+1. `ma_short/v1/sweep_v1.py`
+2. `ma_short/v2_vwap/sweep_v2_vwap.py`
+3. `6bce/v0/sweep_v0.py`
+4. `6bce/v1_vwap/sweep_v1_vwap.py`
+Each already sweeps `SL_VALS = [1.5..6.0]` × `TP_VALS = [2.0..6.0]` (90 combos)
+— reuse that grid, just add the new tagging/counting to `run_combo()`.
+
+**Output**: one CSV per version, 90 rows each (one per combo), columns:
+`sl, tp, n, pf, zpf, shd, zshd, sl_hit_pct, tp_hit_pct, eod_plus_pct, eod_minus_pct`.
+Save alongside each script (e.g. `ma_short/v1/exit_breakdown_full.csv`), plus
+one combined `strategies/exit_breakdown_summary.md` per version showing: (a) the
+current #1-by-raw-ZPF combo's exit-mix and whether EOD% (eod_plus_pct +
+eod_minus_pct) exceeds ~25–30% (the threshold CC and Saurav agreed marks
+"SL/TP no longer doing real work"), and (b) the top-5 combos ranked by ZPF
+**after excluding any combo whose EOD% exceeds that threshold** — this
+healthy-subset top-5 is the one to carry forward, not the raw-ZPF top-5.
+
+**Report back**: the 4 CSVs + summary.md, plus a one-line verdict per version
+(does the raw #1 pick survive the health filter, or does the healthy-subset
+top-5 look meaningfully different from what we had).
+
+**Validation baseline — read before running**: current known-good `.npz`
+caches + full stdout logs from last night's (pre-instrumentation) runs are
+backed up at `strategies/_baseline_2026-09-04/` (do not overwrite or read
+FROM this folder as input — it's a reference copy only). Since instrumentation
+is purely additive (same signal, same data, same cutoff, same trade loop —
+just tagging which exit branch fired), your rerun's `pf`/`zpf`/`n` per combo
+must exactly match the corresponding baseline grid cell. Diff your own output
+against the baseline before reporting back; if any combo's pf/zpf/n doesn't
+match, that means the script edit broke something in the underlying logic —
+flag this explicitly rather than reporting the exit-breakdown numbers as
+trustworthy.
+
+---
+
 ## 2026-08-06 (done — Grok) — WFA NIFTY50 Model B gate
 
 Walk-forward of NIFTY50 Model B Sell-gate on 30-stock SHORT trades **completed**.
