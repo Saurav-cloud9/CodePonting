@@ -1070,3 +1070,103 @@ closed out, VM backtesting env + VS Code Remote-SSH set up) ─────
            issue, set up Live Preview cleanly on Saurav's desktop WSL VS Code instead; verified
            2026-08-28 kite_oracle_papertrading run clean end-to-end (39 trades, PnL +29.31,
            ZPnL -13.22).
+
+## 2026-09-03/04 (fv2 VM session) -- strategies/ folder consolidation, EOD-riding artifact found + fixed, CAPM alpha confirms negative edge, SL/TP sweet-spot methodology
+
+### Folder consolidation -- Algo_Trading/Framework_V2/strategies/
+       [DONE]  Built strategies/ as the single home for ma_short (v0 locked/v1/v2_vwap),
+           6bce (v0/v1_vwap), replacing scattered copies across baseline_reserve/
+           baseline_explorations/Backtesting Extended. Old locations kept as-is (cleanup is a
+           separate later step, not done yet).
+       [DONE]  ma_long (bounce) renamed to ma_long_archived/ -- confirmed non-viable (PF/NPF
+           never crosses 1.0 any year), no more work planned on it.
+       [DONE]  Renamed exit_management/'s baseline-> v1 naming (01_ma_short_baseline_offline.py
+           -> 01_ma_short_v1_offline.py, ma_short_baseline_core.py -> ma_short_v1_core.py) --
+           matches the same v0/v1 versioning convention used everywhere else.
+
+### EOD-riding artifact -- found, diagnosed, fixed methodology project-wide
+       [DONE]  All 4 main sweeps (ma_short v1/v2_vwap, 6bce v0/v1_vwap) re-run with the refined
+           live-matching cutoff (LAST_TOUCH_TIME=14:45/ENTRY_CUTOFF_TIME=14:50, replacing the
+           pre-refinement 2026-07-29 numbers) -- found every family's raw-ZPF-ranked #1 combo
+           sits at the edge of the swept grid (SL/TP=6.0) and is 68-78% EOD-exit (SL/TP barely
+           bind intraday at that width) -- an artifact of exit-type mix, not genuine edge.
+       [DONE]  Added mandatory SL-hit%/TP-hit%/EOD+%/EOD-% exit-mix diagnostic to
+           backtesting_rules.md (any combo considered for deployment must report this
+           breakdown, healthy threshold EOD%<=30, plus an out-of-sample-validation guard
+           against picking a data-mined time-window post-hoc).
+       [DONE]  Touch-hour breakdown (by time-of-day of the touch bar) confirms the mechanism:
+           EOD-exit rate climbs from ~27-34% (09:00-13:00 touches) to 79% (14:00-15:00
+           touches) -- a touch late in the day has too little runway left before the 15:00
+           hard EOD to resolve via SL/TP regardless of width. Live-deployed combo (SL=2.0/
+           TP=4.5) EOD%=38.6% overall.
+       [DONE]  Live-deployed combo's SL%~TP% imbalance isolated: SL%=45.1 (close to healthy
+           combos' ~42-44%) but TP%=16.3 (vs ~29-30% for healthy combos) -- the wide TP=4.5x
+           target, not the SL side, is what's driving the extra EOD contamination.
+
+### CAPM alpha/p-value testing -- confirms significant NEGATIVE edge (not noise)
+       [DONE]  Ran manual OLS alpha/p-value (daily aggregate zpnl vs NIFTY50 daily return, all
+           30 stocks pooled) on 8 shortlisted combos (raw #1 + healthy-subset #1, for ma_short
+           v1/v2_vwap and 6bce v0/v1_vwap) -- ALL 8 show statistically significant NEGATIVE
+           alpha (p<0.0001, as low as 1.23e-130) -- cross-validated against a second market
+           factor (30-stock equal-weighted basket return instead of NIFTY50) with near-
+           identical results, confirming it's not a benchmark-choice artifact.
+       [DONE]  Tested "flip to LONG on ma_short's bearish touch" hypothesis (motivated by the
+           negative-alpha finding) -- RULED OUT: worse than SHORT on every metric/combo tested
+           (4 combos spread across the grid, all PF<1.0). Archived as ma_short_flip_archived/.
+           Reasoning correction: negative alpha for SHORT does not imply positive alpha for a
+           naive LONG flip, because flipping changes the whole exit structure, not just the
+           PnL sign.
+       [DONE]  Tested the mirror hypothesis "SHORT on ma_bounce's bullish touch" (ma_long_flip)
+           -- initially looked promising (PF>1.0 raw across 3 spot-check combos) but after full
+           90-combo sweep + exit-mix scrutiny, its healthy-subset ceiling (0.746) lands
+           mid-pack among the 5 families tested, not a standout. Built as strategies/
+           ma_long_flip/v0/ (6BCE-style 2-tier format, no legacy 3-bar version needed since
+           it's a brand-new hypothesis).
+       [DONE]  Found and fixed a real DS3 data-quality bug during this work: ICICIBANK, ITC,
+           SBIN have entire trading days (11/11/3 days, all April-July 2015) zero-filled across
+           all OHLC fields, not just close -- confirmed via direct Kite Connect historical_data
+           fetch that this is Zerodha's own source data gap (not a DS3 build bug); Yahoo
+           Finance can't help either (intraday data only goes back ~60 days). Delegation to
+           cpgeneric (via CCG-style cross-session message) held for Saurav's approval, expired
+           undelivered -- needs resend or manual fix next session. Meanwhile defensive masking
+           (close<=0 treated as missing) applied wherever needed.
+       [DONE]  Diagnosed Kite MCP's get_historical_data as broken at the app-level (generic
+           "Failed to get historical data" even for recent dates, after confirming the MCP
+           session itself reconnects fine via search_instruments) -- direct Kite Connect API
+           via the live bot's own cached credentials works perfectly. Recommend using the
+           direct-API path for any future historical fetch, not Kite MCP, until its own app's
+           permissions are separately sorted.
+
+### SL/TP sweet-spot methodology -- holding TP fixed, sweeping SL to find genuine plateau
+       [DONE]  New diagnostic: hold TP=3.0 fixed, sweep all 10 SL values, track ZPF/NetZPnL/
+           Alpha together -- widening SL shifts SL-hits into EOD- (not EOD+, unlike TP-
+           widening which shifts into EOD+) via the same position-guard "blocking" mechanism
+           (an EOD-bound trade occupies its stock's slot till 15:00, silently losing any later
+           same-day touch signal; a freed-up SL-hit can re-fire). Confirmed via falling N
+           counts as SL widens (position-guard blocking effect, not just fewer stop-outs).
+       [DONE]  LOCKED (3 of 5 families) -- SL=4.5x/TP=3.0x, clean interior peak on ZPF+NetZPnL+
+           Alpha simultaneously: ma_short_v1, ma_short_v2vwap, 6bce_v1vwap.
+       [PENDING]  6bce_v0 and ma_long_flip do NOT show a clean interior peak at SL=4.5 -- all
+           metrics kept improving to the grid edge (SL=6.0). Extended 6bce_v0's grid to
+           SL=6.5-10.0: genuine plateau found around SL=7.5-8.0, but at that point EOD%=56-57%
+           (vs ~47-50% for the other 4 families' SL=4.5 picks) -- open question for next
+           session: accept the higher EOD% since it's a real saturation point (not an
+           artifact), or hold to a lower EOD% for consistency across families. ma_long_flip's
+           grid not yet extended.
+       [PENDING]  ma_long_flip's VWAP filter variant (above vs below comparison, mirroring what
+           was done for ma_short) never built -- still on the list, deferred behind the SL/TP
+           sweet-spot work above.
+
+### Housekeeping
+       [DONE]  CLAUDE.md: corrected stale DS3/NIFTY50 date range (was "2015-2025", actually
+           2015-02-02 to 2026-08-31 -- confirmed live, keeps growing).
+       [DONE]  CLAUDE.md: added GIT SYNC BEFORE CROSS-AGENT HANDOFF hard rule -- Grok was
+           executing a stale CCG_ORCHESTRATION.md for hours because an edit sat uncommitted+
+           unpushed on the VM's local working directory; now: commit+push immediately before
+           telling any other agent/AI to go read a file.
+       [DONE]  Committed + pushed all strategies/ + exit_management/ + backtesting_rules.md +
+           CLAUDE.md changes (2 commits: 0f954a7 CCG delegation, 4ac0e9f main consolidation).
+
+### Peer check-ins (RS)
+       [PENDING]  Sent RS check-in requests to cplearning, cpfable, mathmode, cpgeneric --
+           replies not yet received as of this write; fold in if they arrive before session end.

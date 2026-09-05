@@ -1,73 +1,89 @@
-# Handoff Note — 2026-09-01 (math-mode VM session)
+# Handoff Note — 2026-09-04 (fv2 VM session)
 
-## Current State — Math-mode/vector-geometry teaching thread (COMPLETE for now)
+## Current State — Strategy raw-edge search, mid-flight (PRIMARY, resume here)
 
-- Alpha/beta CAPM derivation (Steps 0-14) was already complete going into this session (see
-  prior handoff). This session extended the *conceptual* side: the vector/orthogonal-projection
-  interpretation of the normal equations (`52_mathmode_normal_equations_projection_interactive.
-  html`), covering spanning vectors, degrees of freedom (ambient-space vs plane dimension),
-  OLS-as-projection equivalence, Gaussian-vs-normal terminology, i.i.d. Gaussian assumption
-  breakdown, CLT's role, and OLS-vs-SGDRegressor's relationship (same shape, same convex minimum
-  for squared-error loss, but SGD generalizes to losses OLS has no closed form for).
-- Full detail: `.remember/today.md` (this session) + `memlabs/50d_full_recap_seed.md` +
-  `memlabs/52_mathmode_session_handoff.md` (prior sessions).
-- Thread is functionally complete — any further work here is optional/exploratory, on Saurav's
-  request for a specific concept, not a continuation of unfinished derivation work.
+Working through `Algo_Trading/Framework_V2/strategies/` — consolidated all MA-short/6BCE
+variants into one folder today, found and fixed a systematic EOD-riding artifact in the
+sweep methodology, confirmed via CAPM alpha testing that the current signal family has a
+real, significant NEGATIVE edge (not just insufficient edge), and built a new SL/TP
+"sweet-spot" methodology (hold TP fixed, sweep SL, find genuine plateau via ZPF+NetZPnL+
+Alpha together — not just where the grid ends).
 
-## Current State — POWERGRID Model C eta0 selection-bias question (RESOLVED/CLOSED)
+**Locked today** (SL=4.5x/TP=3.0x, clean interior peak on ZPF+NetZPnL+Alpha all 3):
+- `ma_short/v1` (strategies/ma_short/v1/)
+- `ma_short/v2_vwap` (strategies/ma_short/v2_vwap/)
+- `6bce/v1_vwap` (strategies/6bce/v1_vwap/)
 
-- Saurav flagged eta0=2.0 (used throughout the alpha/beta test) was chosen purely by best-of-9
-  raw cumulative return — a real selection-bias risk. fv2 confirmed the sweep context (9 values
-  tested, 0.001-5.0, only 2/9 net-positive) and argued the best-of-9 already failing significance
-  means the rest have no realistic path to significance either.
-- Confirmatory run added as Part 3 in `52_alpha_beta_concept_and_powergrid.ipynb`: eta0=5.0
-  (second-best, +0.201 raw return) → **alpha=-0.000033, p=0.9134** — even more decisively
-  non-significant than eta0=2.0's p=0.39. Confirms fv2's reasoning. **This question is closed.**
+**NOT locked, needs a decision next session**:
+- `6bce/v0` — genuine plateau found at SL=7.5-8.0x/TP=3.0x (extended grid to 10.0 to confirm
+  it's real saturation, not just grid-edge), but EOD%=56-57% there vs ~47-50% for the other
+  3 families' SL=4.5x picks. Open question: accept the higher EOD% since it's a genuine
+  saturation point, or hold to SL=4.5x for cross-family consistency? Full numbers in
+  PROGRESS_HISTORY.md 2026-09-03/04 entry.
+- `ma_long_flip/v0` — same edge-of-grid issue as `6bce_v0` was (all metrics still climbing at
+  SL=6.0), but its grid was NOT yet extended past 6.0 — do that first, mirroring what was
+  done for `6bce_v0`, before deciding its SL/TP pick.
 
-## Current State — Feature separability checks (Model B two-feature, Model C single-feature)
+## Immediate next steps (in order)
 
-- Built direction-only visualizations for both models confirming **no separating power** in the
-  features tested so far:
-  - Model B (NIFTY50, lag_1+ma_lag_1): `32_model_b_actual_direction_only.py`/html,
-    `32_model_b_actual_direction_quadrant.py`/png. Corr~0.03 each, shapeless 2D scatter.
-  - Model C (POWERGRID, lag_1 only): `50e_powergrid_lag1_direction_only.py`/png. Corr=-0.047,
-    50.9% sign-match (coin flip).
-- Verified via a dummy XOR/interaction-effect toy example
-  (`52_mathmode_xor_interaction_quadrant_example.py`/png) that Model B's near-zero individual
-  correlations aren't hiding a real joint/interaction pattern — genuinely no signal at all, not
-  just a linearly-undetectable one.
+1. Extend `ma_long_flip`'s SL grid (script: `strategies/ma_long_flip/v0/sweep_v0.py` — reuse
+   the pattern from `6bce_v0_extend.py` in scratchpad, values 6.5-10.0, TP=3.0 fixed) to find
+   its genuine plateau, same as was just done for `6bce_v0`.
+2. Decide the `6bce_v0` SL/TP question above (needs Saurav's input, not a technical call).
+3. Build `ma_long_flip`'s VWAP filter variant — above vs below comparison (mirror the
+   `ma_short v2_vwap` decision process: 3-combo comparison, pick the clear winner, then full
+   90-combo sweep on the locked signal). Not started at all yet.
+4. DS3 data bug (ICICIBANK/ITC/SBIN zero-filled OHLC, 2015) — delegation to cpgeneric via
+   cross-session message expired without approval. Either resend it, or fix directly using
+   the direct Kite Connect API path (confirmed working — `kiteconnect` library + the live
+   bot's own cached `.env` credentials at `/home/ubuntu/kite_oracle_papertrading/.env`). Do
+   NOT use Kite MCP's `get_historical_data` — confirmed broken at the app level (generic
+   failure even on recent dates; `search_instruments`/`login` work fine on the same MCP
+   connection, so it's not a connection issue, just that one endpoint).
+5. Once the 5 families' SL/TP picks are all settled, this whole thread's actual end goal is
+   updating `monthly_reconciliation.py` on the live bot VM (~/kite_oracle_papertrading/
+   scripts/) to include all locked variants for side-by-side comparison — not started yet,
+   was the original ask that led into all of today's work.
+6. SMC rebuild (Liquidity/FVG/OB standalone, then as filters on MA-short/6BCE) — explicitly
+   on hold per Saurav's instruction until the above settles. When resumed: rebuild fresh
+   from the locked spec in `strategies/smc/smc_concepts_summary.md` (the original backtest
+   results live on a bookmarked claude.ai session Saurav has, not recovered here).
 
-## Current State — MemLabs Pearson's r feature screening (PRIMARY, continues via new #53 doc)
+## Key methodology established today (apply going forward)
 
-- **New**: `53_feature_screening_to_model_pipeline.md` created — full chronology from #35 recap
-  through to a final alpha/p-value verdict:
-  1. Recap #35 (`35_pearson_r_feature_screening.ipynb`) end-to-end, checking for mistakes.
-  2. Continue screening: gap-size (`log(open_today/close_yesterday)`) vs intraday-move.
-  3. Select 1-2 candidates (meaningfully better than RSI's r≈0.08).
-  4. Step 2.5 (if 2 features): XOR/interaction check via 2D scatter, same recipe as Model B's.
-  5. Step 3 (if 2 features): revisit `51_least_squares_3d.md` for plane-fit intuition before
-     interpreting the real model's R²/SSE.
-  6. Build Model B/C with selected feature(s).
-  7. Full alpha/beta derivation → residual diagnostics → SE → t-stat → p-value → verdict,
-     mirroring #52's now-validated pipeline.
-- **This is a continuation of #35, not a restart** — #35's existing RSI/Volume results stay
-  where they are; #53 is the plan for carrying the *next* candidate all the way through.
-- **Next action**: Step 0 of #53 — recap #35 for correctness before screening gap-size.
+- **Exit-mix diagnostic is now mandatory** (backtesting_rules.md): any combo considered for
+  deployment needs SL%/TP%/EOD+%/EOD-% reported, healthy threshold EOD%<=30%. A raw-ZPF-
+  ranked #1 pick sitting at the edge of the swept grid is a red flag — check its exit mix
+  before trusting it.
+- **SL/TP sweet-spot method**: hold TP fixed (3.0x worked well as the reference), sweep SL,
+  and require ZPF, NetZPnL, AND alpha to all show a genuine interior peak (not just "the
+  metric flattened because we ran out of grid") before locking a value. Widening SL shifts
+  losing trades from SL-hit into EOD- (not EOD+) via the position-guard "blocking" mechanism
+  — an EOD-bound trade occupies its stock's slot till 15:00, silently losing any later
+  same-day touch signal, while an SL-hit frees the slot for a possible re-entry. This is
+  directly visible in falling N counts as SL widens.
+- **Multiple-testing discipline still applies**: don't pick a time-window or SL/TP value by
+  eyeballing which one looks best on the same data used to select it — validate any such
+  choice against a held-out slice (see backtesting_rules.md's out-of-sample guard, added
+  today after the earlier eta0/monthly-variant-cherry-picking lessons).
+- **Kite MCP vs direct Kite Connect**: two separate access paths into Zerodha, not the same
+  app — permissions can differ per-endpoint. Use direct `kiteconnect` (live bot's cached
+  credentials) for historical data; Kite MCP is fine for quick interactive lookups.
 
-## Housekeeping / Tooling
+## Housekeeping done today
 
-- VS Code Remote-SSH (VM) HTML preview workflow clarified: Live Preview extension (embedded,
-  JS-capable webview) is correct; "Open in Integrated Browser" (VS Code's newer built-in
-  feature) is confirmed local-machine-only, not available over Remote-SSH at all.
-  `workbench.editorAssociations` set to default `.html` → Live Preview. Multi-file-open handled
-  via split editor groups (preview-tab reuse is per-group) or the Browser panel's own tabs.
-- cpgeneric (peer) separately found: VM tunnel's Live Preview hardcodes 127.0.0.1 (breaks over a
-  remote tunnel, needs manual tunnel-URL+path workaround); set up Live Preview cleanly on
-  Saurav's desktop WSL VS Code instead (works with no tunnel involved).
-- cplearning (peer): rerouted from ML module to Data Structures & Algorithms (2026-08-28, next
-  Codedex ML lesson not yet unlocked); resumes once released.
+- CLAUDE.md corrected: DS3/NIFTY50 date range was stale ("2015-2025"), actually extends live
+  to 2026-08-31 and keeps growing — verify actual max date before assuming staleness.
+- CLAUDE.md new rule: GIT SYNC BEFORE CROSS-AGENT HANDOFF — commit+push immediately before
+  telling another agent/AI (Grok via CCG_ORCHESTRATION.md, or any similar handoff) to read a
+  file; a local uncommitted edit is invisible to anything reading via a separate clone/remote.
+- 2 commits pushed: `0f954a7` (CCG delegation instructions), `4ac0e9f` (main strategies/
+  consolidation + all of today's findings).
 
-## Known Issues
+## Known issues / open threads
 
-- None new beyond what's documented above. Prior known issues (TODO.md glossary SL/TP note,
-  ma_30_rejection_v1.py's missing EOD entry-skip) still carried over, unchanged.
+- RS peer check-ins (cplearning, cpfable, mathmode, cpgeneric) sent at end-of-session — no
+  replies received before this write. Check `.remember/today.md` or ask them directly next
+  session if their status matters.
+- Everything in `TODO.md` P2 (MemLabs #53 decision point) is untouched today — still pending
+  from before, not addressed in this session.

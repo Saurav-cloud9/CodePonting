@@ -2,7 +2,29 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  MemLabs feature screening -> model pipeline — new plan doc: memlabs/53_feature_screening_
+P1  Strategy raw-edge search (Algo_Trading/Framework_V2/strategies/) — ACTIVE
+        2026-09-04: trailing-stop/partial-profit-taking direction DEPRIORITIZED — CAPM alpha
+        testing showed the current signal family has a real, significant NEGATIVE edge
+        (p<0.0001), not just insufficient edge; exit-mechanic refinement can't fix a
+        directional problem. Refocused on raw-edge search (SMC concepts) instead.
+        Immediate next steps, in order:
+        1. Decide 6bce_v0's SL/TP pick: genuine plateau at SL=7.5-8.0x/TP=3.0x but EOD%=56-57%
+           (vs ~47-50% for the other 4 families' SL=4.5x picks) — accept higher EOD% since
+           it's a real saturation point, or hold to SL=4.5x for cross-family consistency?
+        2. Extend ma_long_flip's SL grid past 6.0 (same edge-of-grid issue as 6bce_v0, not yet
+           extended) to find its genuine plateau.
+        3. Build ma_long_flip's VWAP filter variant (above vs below comparison, mirroring
+           ma_short's v2_vwap) — planned, not started.
+        4. Resend/manually fix the DS3 data bug (ICICIBANK/ITC/SBIN zero-filled OHLC, 2015) —
+           delegation to cpgeneric expired unapproved; direct Kite Connect API confirmed
+           working (use that, not Kite MCP's historical_data which is broken at the app level).
+        5. Once 1-4 settle, resume the SMC rebuild (Liquidity/FVG/OB standalone tests, then
+           as filters on MA-short/6BCE) — on hold per Saurav's explicit instruction, and the
+           update monthly_reconciliation.py on the live bot VM with the final locked-in
+           variant set (the actual end goal of this whole thread, not yet started).
+        Full detail: PROGRESS_HISTORY.md 2026-09-03/04 entry.
+
+P2  MemLabs feature screening -> model pipeline — new plan doc: memlabs/53_feature_screening_
         to_model_pipeline.md. Continuation of notebook 35, not a restart.
         2026-08-16: RSI period sweep (7/9/14/21/28) done — no period beats 14 meaningfully.
         Volume (TATAMOTORS) screened — weakest candidate yet, log transform didn't help. Two
@@ -20,35 +42,18 @@ P1  MemLabs feature screening -> model pipeline — new plan doc: memlabs/53_fea
         session: redirect #53's target to the strategy's own outcomes, or run both as separate
         parallel threads.
 
-P2  Kite bot (market hours only) — running live daily, resume next market session
+P3  Kite bot (market hours only) — running live daily, resume next market session
         2026-07-28 progress: 3 real mid-session restarts (09:51/10:14/10:35) with open
         positions live - all successful, fully validates the weekend's catch-up/discard fix.
         Saurav validating live trades + weekly recon with VM CC directly (not this session).
         Older items still open: MA20/ATR14+touch-eval logging not yet added; ATR14 divergence
         question.
 
-P3  Test weak Pearson-r signal(s) through actual RR/SL-TP exits (not yet started)
+P4  Test weak Pearson-r signal(s) through actual RR/SL-TP exits (not yet started)
         Raised 2026-08-16: everything tested so far (Model C, naive baseline) captures the full
         day's raw return with no exit structure. A sub-50% hit rate can still be profitable with
         the right ATR-based SL/TP (this project's actual convention) — genuinely untested axis,
         separate from model/feature choice.
-
-P4  Exit-management trials (Framework_V2/scripts/trials/exit_management/) — ongoing
-        2026-09-02/03: August 2026 DS3 gap-fill DONE (30 stocks + NIFTY50 daily, verified
-        pre-Aug data byte-identical). Built memory-safe baseline (01) + SL6/TP6 variant (02)
-        offline engines — fixed a real OOM bug (pd.concat+to_dict('records') on 6.25M bars
-        crashed the VM for 40min); rewrote using per-stock numpy arrays (known-good pattern
-        from baseline_reserve_lock/sl_tp_sweep_baseline_short.py), process_bar()/core.py
-        logic untouched. Ran a 4-way August comparison (live/reconcile/baseline/SL6-TP6) —
-        found RECONCILE vs BASELINE diverge due to a real DIVISLAB split-adjustment data
-        mismatch (~1.5% of bars), not a logic bug — confirmed by replaying reconcile's exact
-        structure sourced from DS3 (exact match to baseline). Added volume/oi to reconcile's
-        official_bars fetch (matches DS3 schema). Built two new cron jobs on the live bot VM:
-        daily settled-reconcile (18:00 IST, `--settled` flag, lets same-day data settle) and
-        monthly 3-way reconciliation (09:30 IST 1st-of-month, LIVE/RECONCILE/fresh-Kite-pull,
-        catches retroactive corporate-action adjustments) — both validated against August.
-        Next: dig into WHY the exit-management numbers themselves (ZPF<1) need improving —
-        trailing stop / partial profit-taking, per the earlier diagnostic plan.
 
 # ── PARKED / FUTURE ───────────────────────────────────────────
 F1  Single-stock trade dump (TATAMOTORS) — verify SHORT calculations

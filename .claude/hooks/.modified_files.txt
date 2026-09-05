@@ -2551,3 +2551,13 @@ C:\Users\Saurav\AppData\Local\Temp\claude\c--Users-Saurav-CodePonting\e9e1dc13-5
 /tmp/claude-1001/-home-ubuntu-CodePonting/2ab3341b-3241-42d8-80be-ae02e76ebb31/scratchpad/alpha_pvalue_8combos.py
 /home/ubuntu/CodePonting/Algo_Trading/Framework_V2/strategies/ma_short_flip/entry_flip.py
 /home/ubuntu/CodePonting/Algo_Trading/Framework_V2/strategies/ma_short_flip/findings.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/strategies/ma_long_flip/v0/sweep_v0.py
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/strategies/ma_long_flip/v0/sweep_v0.py
+/tmp/claude-1001/-home-ubuntu-CodePonting/2ab3341b-3241-42d8-80be-ae02e76ebb31/scratchpad/ma_long_flip_alpha.py
+/tmp/claude-1001/-home-ubuntu-CodePonting/2ab3341b-3241-42d8-80be-ae02e76ebb31/scratchpad/sl_sweep_remaining3.py
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/strategies/ma_short/v1/sl_sweet_spot.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/strategies/ma_short/v2_vwap/sl_sweet_spot.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/strategies/6bce/v1_vwap/sl_sweet_spot.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/strategies/6bce/v0/sl_sweet_spot.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/strategies/ma_long_flip/v0/sl_sweet_spot.md
+/home/ubuntu/CodePonting/Algo_Trading/Framework_V2/strategies/ma_long_flip/v1_vwap/sweep_v1_vwap.py
