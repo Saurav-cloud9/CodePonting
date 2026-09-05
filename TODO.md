@@ -3,26 +3,22 @@
 # ─────────────────────────────────────────────────────────────
 
 P1  Strategy raw-edge search (Algo_Trading/Framework_V2/strategies/) — ACTIVE
-        2026-09-04: trailing-stop/partial-profit-taking direction DEPRIORITIZED — CAPM alpha
-        testing showed the current signal family has a real, significant NEGATIVE edge
-        (p<0.0001), not just insufficient edge; exit-mechanic refinement can't fix a
-        directional problem. Refocused on raw-edge search (SMC concepts) instead.
-        Immediate next steps, in order:
-        1. Decide 6bce_v0's SL/TP pick: genuine plateau at SL=7.5-8.0x/TP=3.0x but EOD%=56-57%
-           (vs ~47-50% for the other 4 families' SL=4.5x picks) — accept higher EOD% since
-           it's a real saturation point, or hold to SL=4.5x for cross-family consistency?
-        2. Extend ma_long_flip's SL grid past 6.0 (same edge-of-grid issue as 6bce_v0, not yet
-           extended) to find its genuine plateau.
-        3. Build ma_long_flip's VWAP filter variant (above vs below comparison, mirroring
-           ma_short's v2_vwap) — planned, not started.
-        4. Resend/manually fix the DS3 data bug (ICICIBANK/ITC/SBIN zero-filled OHLC, 2015) —
+        2026-09-05: all 6 variants locked, monthly_reconciliation.py rebuilt + deployed on
+        live bot VM with correct raw-₹ alpha methodology, dual NIFTY/basket benchmarks, and
+        an sl_tp combo column. August 2026 run done — all 9 sources negative alpha, mixed
+        significance (one month, not a verdict). Immediate next steps, in order:
+        1. Resend/manually fix the DS3 data bug (ICICIBANK/ITC/SBIN zero-filled OHLC, 2015) —
            delegation to cpgeneric expired unapproved; direct Kite Connect API confirmed
            working (use that, not Kite MCP's historical_data which is broken at the app level).
-        5. Once 1-4 settle, resume the SMC rebuild (Liquidity/FVG/OB standalone tests, then
-           as filters on MA-short/6BCE) — on hold per Saurav's explicit instruction, and the
-           update monthly_reconciliation.py on the live bot VM with the final locked-in
-           variant set (the actual end goal of this whole thread, not yet started).
-        Full detail: PROGRESS_HISTORY.md 2026-09-03/04 entry.
+        2. Resume the SMC rebuild (Liquidity/FVG/OB standalone tests, then as filters on the
+           3 strategy families) — was on hold pending the monthly_reconciliation.py deploy,
+           which is now done, so this is unblocked whenever Saurav wants to start it.
+        3. Full diff-review of strategies/_archive_pre_strategies_consolidation/ (the 4
+           archived folders) to decide what's safe to permanently delete — separate task,
+           not urgent.
+        4. Live bot core file renaming (ma_rejection_v1_core.py etc.) for naming consistency
+           with strategies/ convention — deferred "to another day," not blocking anything.
+        Full detail: PROGRESS_HISTORY.md 2026-09-05 entry.
 
 P2  MemLabs feature screening -> model pipeline — new plan doc: memlabs/53_feature_screening_
         to_model_pipeline.md. Continuation of notebook 35, not a restart.

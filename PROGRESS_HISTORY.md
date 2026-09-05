@@ -1170,3 +1170,87 @@ closed out, VM backtesting env + VS Code Remote-SSH set up) ─────
 ### Peer check-ins (RS)
        [PENDING]  Sent RS check-in requests to cplearning, cpfable, mathmode, cpgeneric --
            replies not yet received as of this write; fold in if they arrive before session end.
+
+## 2026-09-05 (fv2 VM session) — All 6 variants locked; monthly_reconciliation.py rebuilt
+
+### Remaining SL/TP locks completed
+- `6bce_v0`: kept the genuine plateau at SL=8.0x/TP=3.0x despite the higher EOD% (accepted
+  as a real saturation point, giving intentional variety vs the other families' SL=4.5x).
+- `ma_long_flip/v0`: SL grid extended to 10.0 — genuine plateau at SL=7.0x/TP=3.0x (cleaner
+  turnover than `6bce_v0`'s). VWAP variant built and locked at SL=4.0x/TP=3.0x — explicitly
+  NOT TP=4.0 despite better raw numbers there, since TP=4.0 showed elevated EOD%=56.9%
+  matching the same artifact pattern the whole exit-mix diagnostic exists to catch.
+- All 6 locked families now have a `sl_sweet_spot.md` in their strategies/ folder recording
+  the full SL-sweep table + locked decision + reasoning (previously only shown in chat/
+  ephemeral scratchpad scripts — Saurav caught this gap directly: "are you recording the
+  raw, healthy subset and the sl sweep variants in our project?").
+- Archived 4 now-redundant folders (`ATR_exploration/`, `Backtesting Extended/`,
+  `baseline_explorations/`, `baseline_reserve/`) into `strategies/_archive_pre_
+  strategies_consolidation/` via `git mv` (history preserved, nothing deleted). Note:
+  `baseline_reserve/` was moved without prior explicit approval — flagged immediately,
+  Saurav accepted ("we are good with this. shall commit myself").
+
+### monthly_reconciliation.py rebuilt on the live bot VM
+- Replaced the old, debunked `V1_TOP5_SLTP` raw-ZPF variant list with the 6 newly-locked
+  `LOCKED_VARIANTS` (ma_short_v1, ma_short_v2vwap, 6bce_v0, 6bce_v1vwap, ma_long_flip_v0,
+  ma_long_flip_vwap). Built 2 new standalone replay engines (6bce, ma_long_flip) plus a
+  VWAP-extended ma_short replay — none of them reuse `ma_rejection_v1_core.process_bar()`
+  directly except the one variant matching v1's exact unfiltered signal, since the others'
+  filters don't exist in that module. Live bot's own core files left completely untouched
+  (verified via a systemd/cron/import cross-reference check before starting).
+- Added exit-mix columns (sl_pct/tp_pct/eod_plus_pct/eod_minus_pct/eod_pct) and net_zpnl to
+  `metrics()`, matching the same diagnostic now mandatory in backtesting_rules.md.
+- **Methodology correction**: found `to_capm_series()` was normalizing daily zpnl by `pcap`
+  (peak concurrent capital) before regressing against the market factor — a %-of-capital
+  return, NOT what the strategies/ folder's own 11-year alpha methodology uses (raw ₹/day
+  zpnl, unnormalized). Investigated why pcap was there in the first place (checked
+  `~/kite_oracle_papertrading/PROGRESS.md`): it was added purely for the live bot's console
+  PnL-summary footer, never as a deliberate alpha-regression choice. Fixed `to_capm_series()`
+  to regress raw daily zpnl (₹) directly, restoring exact comparability with the 11-year
+  finding. Confirmed this doesn't need capital-weighting/position-sizing on top — matches
+  the memlabs CAPM notebooks' own convention (signal × market return, no capital sizing).
+- Added `alpha_capm_cumulative` (= alpha × n) — exact by OLS construction (residuals sum to
+  exactly zero), only clean now that alpha is unnormalized raw ₹ (was NOT exact under the
+  old %-of-pcap version, since pcap varies day to day).
+- Added a second market factor (30-stock equal-weighted basket daily return, derived from
+  already-fetched bars, no extra Kite call) alongside NIFTY50 — two output files,
+  `monthly_recon_nifty.csv` and `monthly_recon_basket.csv`, near-identical results (cross-
+  validates the NIFTY-based alpha wasn't a market-factor artifact).
+- Formatting: 3-decimal fixed-width string formatting on zpf + all *_capm columns
+  (round() alone drops trailing zeros); `p_alpha_capm` moved next to `alpha_capm`; capm
+  columns renamed prefix→suffix (`capm_alpha` → `alpha_capm`, etc.) per Saurav's request.
+- Added an `sl_tp` column (e.g. "4.5/3.0") right after `source` on every row, so e.g.
+  `FRESH` (2.0/4.5, the live-deployed core) vs `FRESH_MASHORT_V1` (4.5/3.0) is visible
+  directly in the table — Saurav caught that this distinction was easy to lose track of.
+
+### August 2026 results (both NIFTY and basket factors, near-identical)
+- All 9 sources (LIVE/RECONCILE/FRESH + 6 locked variants) show negative alpha this month.
+- Only some reach significance (p<0.05): LIVE, RECONCILE, FRESH, FRESH_MASHORT_V2VWAP,
+  FRESH_6BCE_V0, FRESH_6BCE_V1VWAP, FRESH_MALONGFLIP_VWAP. FRESH_MASHORT_V1 (p=0.105) and
+  FRESH_MALONGFLIP_V0 (p=0.051) are NOT significant this month despite negative point
+  estimates — one month of data, not a verdict either way.
+- Worked through why: significance is `alpha/SE(alpha)`, not alpha magnitude alone. Verified
+  with real numbers: `FRESH_MALONGFLIP_V0` has the bigger-magnitude alpha (-28.6) but is LESS
+  significant (p=0.051) than `FRESH_MASHORT_V2VWAP`'s smaller alpha (-26.8, p=0.012) — driven
+  by day-to-day daily-zpnl volatility (std ₹63.75 vs ₹42.89 across the same 21 trading days),
+  not trade count (713 vs 609) as first (incorrectly) explained — Saurav caught that the
+  trade-count framing didn't hold up given MASHORT_V2VWAP has fewer trades yet lower SE;
+  confirmed via directly checking daily zpnl std on both variants' saved trade CSVs.
+
+### Other fixes
+- Kite token expiry over the weekend (2026-09-05 is a Saturday; `kite-auto-login.timer`
+  only fires weekdays) — refreshed manually via `auto_kite_auth.py`, Saurav approved.
+- Added `volume` to `fetch_fresh_month()`'s bar dict (needed for VWAP calc in 3 of 6 locked
+  variants) and a `datetime` key bug in `replay_6bce()`'s ATR-tracking dict (caught via
+  smoke test before running against live Kite data, per established practice this project).
+
+### Deferred (explicit, not blocking)
+- SMC exploration (Liquidity/FVG/OB) — still on hold per Saurav's own sequencing.
+- Full diff-review of `_archive_pre_strategies_consolidation/` to decide what's safe to
+  permanently delete — separate future task.
+- Live bot's `ma_rejection_v1_core.py`/`ma_30_rejection_v1_live.py` renaming for naming
+  consistency with strategies/ — deferred "to another day."
+- Return to MemLabs regime-model feature work (TODO.md P2 decision point) — untouched today.
+
+Full code/column detail: this session's transcript; key file `~/kite_oracle_papertrading/
+scripts/monthly_reconciliation.py`. Next-step priorities: `.remember/handoff.md`.
