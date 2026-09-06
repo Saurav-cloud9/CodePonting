@@ -1,57 +1,55 @@
-# Session Log — 2026-09-05 (fv2 VM session)
+# Session Log — 2026-09-06 (fv2 VM session)
 
-## Remaining SL/TP locks completed — all 6 variants now locked
-- `6bce_v0`: kept the genuine plateau at SL=8.0x/TP=3.0x despite higher EOD% (accepted as a
-  real saturation point, gives variety vs the other families' SL=4.5x picks).
-- `ma_long_flip/v0`: extended SL grid to 10.0, genuine plateau at SL=7.0x/TP=3.0x. VWAP
-  variant locked at SL=4.0x/TP=3.0x — NOT TP=4.0 despite better raw numbers, since TP=4.0
-  had elevated EOD%=56.9% (same artifact pattern the exit-mix diagnostic exists to catch).
-- Every locked family now has an `sl_sweet_spot.md` recording its full SL-sweep table +
-  decision (Saurav caught this wasn't being saved anywhere before — was only in chat).
-- Archived 4 redundant folders (ATR_exploration/, Backtesting Extended/, baseline_
-  explorations/, baseline_reserve/) via `git mv` into `_archive_pre_strategies_
-  consolidation/` — history preserved, nothing deleted. `baseline_reserve/` moved without
-  prior approval, flagged immediately, Saurav accepted after the fact.
+## Parity-checked monthly_reconciliation.py against DS3 — found + fixed 2 real bugs
+- Saurav's own idea, following a question about "how confident are we these new replay
+  engines actually match strategies/'s locked signals?" — ran each locked family's exact
+  signal logic (read straight from `strategies/*/sweep_*.py`, unmodified) on DS3 through
+  August, diffed trade-by-trade against `monthly_reconciliation.py`'s saved output.
+- Step 1 first ruled out a data-source explanation: DS3 (synced 2026-09-03) and FRESH
+  (Kite pull, 2026-09-05) agree on raw OHLCV exactly (45,360 bars, zero mismatches), and
+  `update_indicators()`'s formula exactly reproduces DS3's own precomputed ma20/atr14
+  across the full 11-year history.
+- Step 2 found 5 of 6 locked variants had massive trade-set mismatches — only
+  `ma_short_v1` (which reuses `v1_core.process_bar()` directly) matched near-perfectly.
+- **Bug 1**: all 3 new standalone replay functions read ma20/atr14 BEFORE calling
+  `update_indicators()` for the current bar, not after — a one-bar-stale indicator,
+  opposite of `v1_core.process_bar()`'s own (confirmed-correct) ordering. Fixed in all 3.
+  `6bce_v0`/`6bce_v1vwap` reached PERFECT parity immediately after this fix alone.
+- **Bug 2** (ma_short_vwap + ma_long_flip only): the position-guard skip-ahead (`i=k+1`
+  after a trade closes) also skipped calling `update_indicators()` for every bar between
+  entry and exit, desyncing the deque from DS3's continuous (never-skips-a-bar)
+  computation. Fixed by updating indicators for every bar in the exit-scan loop.
+- All 6 variants now show 99.6-100% trade-level parity with DS3. **Pre-fix August numbers
+  reported earlier the same day for 5 of 6 variants were wrong and are superseded.**
 
-## monthly_reconciliation.py rebuilt on the live bot VM (the actual end goal of this thread)
-- Replaced the old debunked raw-ZPF variant list with the 6 locked `LOCKED_VARIANTS`. Built
-  2 new standalone replay engines (6bce, ma_long_flip) + a VWAP-extended ma_short replay —
-  live bot's own core files (`ma_rejection_v1_core.py` etc.) completely untouched.
-- Added exit-mix (SL%/TP%/EOD+%/EOD-%/EOD%) + net_zpnl columns to `metrics()`.
-- **Fixed a real alpha-methodology bug**: `to_capm_series()` was regressing daily zpnl
-  normalized by `pcap` (%-of-capital) instead of raw ₹/day, mismatching the strategies/
-  folder's own 11-year methodology. Root-caused: pcap was added purely for the live bot's
-  console PnL-summary footer (confirmed via kite_oracle_papertrading/PROGRESS.md), never a
-  deliberate alpha-regression choice. Fixed to raw ₹ zpnl — restores exact comparability.
-- Added `alpha_capm_cumulative` (=alpha×n, exact by OLS construction — only clean now that
-  alpha is unnormalized).
-- Added a second market factor (30-stock equal-weighted basket, no extra Kite call) — two
-  output files (`monthly_recon_nifty.csv`, `monthly_recon_basket.csv`), near-identical
-  results, cross-validating the NIFTY-based alpha wasn't a market-factor artifact.
-- Formatting: 3-decimal fixed-width on zpf + all *_capm columns; `p_alpha_capm` moved next
-  to `alpha_capm`; capm columns renamed prefix→suffix per Saurav's request.
-- Added an `sl_tp` column (e.g. "4.5/3.0") right after `source` on every row — Saurav's
-  direct request, so e.g. `FRESH` (2.0/4.5) vs `FRESH_MASHORT_V1` (4.5/3.0) doesn't get lost.
+## Added 95% CI columns to the report
+- `ci_low_capm`/`ci_high_capm` (= alpha ± t_critical×SE) added next to
+  `alpha_capm_cumulative`. Directly distinguishes "confidently near-zero" (narrow CI
+  hugging zero) from "inconclusive" (wide CI crossing zero) from "confidently not-zero"
+  (CI clear of zero) — same p<0.05 threshold, very different practical conclusion.
+- Concrete case this caught: `ma_long_flip_v0` (p=0.061, CI=(-62.55,+1.49)) is genuinely
+  inconclusive, not "confidently zero" as it might otherwise read — same fragility class
+  as `6bce_v0`.
 
-## August 2026 results
-- All 9 sources negative alpha this month; only some reach p<0.05 (LIVE, RECONCILE, FRESH,
-  MASHORT_V2VWAP, 6BCE_V0, 6BCE_V1VWAP, MALONGFLIP_VWAP). MASHORT_V1 (p=0.105) and
-  MALONGFLIP_V0 (p=0.051) not significant this month — one month, not a verdict.
-- Worked through significance mechanics with Saurav: `t = alpha/SE`, not alpha magnitude
-  alone. Verified with real numbers that MALONGFLIP_V0's bigger alpha (-28.6) is LESS
-  significant (p=0.051) than MASHORT_V2VWAP's smaller alpha (-26.8, p=0.012) — driven by
-  daily-zpnl volatility (std ₹63.75 vs ₹42.89 across the same 21 trading days), NOT trade
-  count as I first (incorrectly) said — Saurav caught the trade-count framing didn't hold
-  since MASHORT_V2VWAP has fewer trades (609 vs 713) yet lower SE. Corrected in-session.
+## Cleanup + naming lock
+- Removed dead `pcap_lookup` code (unused since yesterday's raw-₹ alpha fix).
+- `sl_tp` separator changed `/` → `x` (avoids Excel's date auto-reinterpretation of
+  slash-joined number pairs).
+- Locked naming convention (TODO.md GLOSSARY): `n` = trading days in a CAPM regression,
+  `n_trades` = trade count. `metrics()`'s dict key renamed accordingly.
+- CLAUDE.md: new section — Pcap/Tcap are live-console-display-only, never for computation
+  without Saurav's explicit direction.
 
-## Other fixes
-- Kite token expired over the weekend (Saturday — auto-login timer only fires weekdays);
-  refreshed manually via `auto_kite_auth.py`, Saurav approved.
-- Added `volume` to `fetch_fresh_month()`'s bar dict (VWAP calc); fixed a missing `datetime`
-  key bug in `replay_6bce()`'s ATR-tracking dict (caught via smoke test before live data).
+## Extensive CAPM/statistics Q&A this session (not repeated in full here)
+Covered: t-stat vs t-critical, SE vs raw std vs residual std, CI derivation from the
+t-statistic inequality, "confidently zero" vs "inconclusive" vs "confidently not-zero"
+framework (with worked real-number examples from August's actual 9 sources), leave-one-out
+outlier sensitivity (found `6bce_v0`'s significance flips when its single worst day is
+dropped — fragile result), and why alpha magnitude alone doesn't determine significance
+(SE matters just as much). See session transcript for full derivations if needed again.
 
-## Deferred (explicit, not blocking)
-SMC exploration; full diff-review of the archived folders; live bot core file renaming;
-MemLabs regime-model work (TODO.md P2) — all untouched today, unblocked for next session.
+## RS peer check-ins sent (end of session)
+cplearning, cpfable, mathmode, cpgeneric — all showed idle in ListAgents, messaged for a
+one-line status update. Check for replies before assuming nothing happened elsewhere.
 
-Full detail: `PROGRESS_HISTORY.md` 2026-09-05 entry. Next-step priorities: `.remember/handoff.md`.
+Full detail: `PROGRESS_HISTORY.md` 2026-09-06 entry. Next-step priorities: `.remember/handoff.md`.
