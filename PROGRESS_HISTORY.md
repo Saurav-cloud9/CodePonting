@@ -1254,3 +1254,55 @@ closed out, VM backtesting env + VS Code Remote-SSH set up) ─────
 
 Full code/column detail: this session's transcript; key file `~/kite_oracle_papertrading/
 scripts/monthly_reconciliation.py`. Next-step priorities: `.remember/handoff.md`.
+
+## 2026-09-06 — Parity-checked monthly_reconciliation.py against DS3, found + fixed 2 real bugs
+
+### Parity check (Saurav's idea): DS3-restricted-to-August vs monthly_reconciliation.py's FRESH replay
+- Step 1: confirmed DS3 (last synced 2026-09-03) and FRESH (Kite pull, 2026-09-05) agree on raw
+  OHLCV exactly (45,360 bars, 30 stocks, zero mismatches) AND that `update_indicators()`'s
+  MA20/ATR14 formula exactly reproduces DS3's own precomputed columns across the full 11-year
+  history (zero mismatches) — ruled out a data-source explanation before touching any logic.
+- Step 2: ran each locked family's exact signal logic (read directly from strategies/*/sweep_*.py,
+  not modified) on DS3 through August, diffed trade-by-trade against monthly_recon's saved output.
+  Found 5 of 6 locked variants had massive trade-set mismatches (only ma_short_v1, which reuses
+  v1_core.process_bar() directly, matched near-perfectly at 785/786).
+
+### Bug 1 (all 3 new replay engines) — one-bar-stale indicators
+- `replay_ma_short_vwap()`, `replay_6bce()`, `replay_ma_long_flip()` were reading ma20/atr14 from
+  StockState BEFORE calling update_indicators() for that bar, not after — opposite of v1_core.
+  process_bar()'s own ordering (confirmed correct via DS3 match in Step 1). Fixed by swapping the
+  order in all three. 6bce_v0/v1vwap reached PERFECT parity (1014/1014, 794/794, zero mismatches)
+  immediately after this fix alone — its separate full-pass ATR precompute already avoided bug 2.
+
+### Bug 2 (ma_short_vwap + ma_long_flip only) — indicators skipped during position-guard skip-ahead
+- These two functions' `i = k+1` skip-ahead (after a trade closes) also skipped calling
+  update_indicators() for every bar between entry and exit — desyncing the MA20/ATR14 deque from
+  DS3's fully-vectorized (never-skips-a-bar) computation for the rest of the run. Fixed by calling
+  update_indicators() for every bar in the exit-scan loop, not just the touch bar. All 6 variants
+  now show 99.6-100% trade-level parity with DS3 (remaining 1-3 trades/variant are boundary
+  artifacts, same class already accepted for ma_short_v1's 1/786).
+- August 2026 rerun after both fixes: all 6 variants' trade counts and alpha/p changed
+  meaningfully from the pre-fix numbers reported earlier the same day — the pre-fix numbers for
+  5 of 6 variants were wrong and have been superseded.
+
+### Cleanup + methodology additions (same session, Saurav-directed)
+- Removed dead `pcap_lookup` code (unused since the 2026-09-05 raw-₹ alpha fix). CLAUDE.md: new
+  section clarifying Pcap/Tcap are live-console-display-only, never for computation without
+  explicit direction.
+- `sl_tp` column separator changed `/` -> `x` (e.g. `4.5x3.0`) — a `/`-joined number pair is
+  exactly the pattern Excel/Sheets auto-reinterprets as a date on open.
+- Naming convention locked (added to TODO.md GLOSSARY): `n` = number of trading DAYS in a CAPM
+  regression, `n_trades` = trade count — these were both being called "n" and caused real
+  confusion mid-derivation-walkthrough. `metrics()`'s dict key renamed n -> n_trades.
+- Added `ci_low_capm`/`ci_high_capm` (95% CI on alpha) to the report, next to
+  `alpha_capm_cumulative` — carries information p-value alone doesn't: distinguishes "confidently
+  near-zero" (narrow CI hugging zero) from "inconclusive" (wide CI that happens to cross zero) from
+  "confidently not-zero" (CI doesn't touch zero at all) — same p<0.05 threshold, very different
+  practical read. Concrete case this surfaced: `ma_long_flip_v0` (p=0.061, CI=(-62.55,+1.49)) is
+  genuinely inconclusive, not "confidently zero" — same fragility class as `6bce_v0`.
+- Extensive Q&A this session on CAPM mechanics (t-stat vs t-critical, SE vs raw std vs residual
+  std, CI derivation from the t-statistic inequality, leave-one-out outlier sensitivity) — not
+  repeated here in full; see session transcript if the reasoning needs revisiting.
+
+Next: SMC exploration (Liquidity/FVG/OB), now fully unblocked — the monthly_reconciliation.py
+deploy this whole multi-session thread was building toward is complete and validated.

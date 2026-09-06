@@ -3,22 +3,24 @@
 # ─────────────────────────────────────────────────────────────
 
 P1  Strategy raw-edge search (Algo_Trading/Framework_V2/strategies/) — ACTIVE
-        2026-09-05: all 6 variants locked, monthly_reconciliation.py rebuilt + deployed on
-        live bot VM with correct raw-₹ alpha methodology, dual NIFTY/basket benchmarks, and
-        an sl_tp combo column. August 2026 run done — all 9 sources negative alpha, mixed
-        significance (one month, not a verdict). Immediate next steps, in order:
-        1. Resend/manually fix the DS3 data bug (ICICIBANK/ITC/SBIN zero-filled OHLC, 2015) —
+        2026-09-06: monthly_reconciliation.py's 6 new replay engines parity-checked against
+        DS3, 2 real bugs found+fixed (one-bar-stale indicators; indicators skipped during
+        position-guard skip-ahead) — now 99.6-100% trade-level parity. 95% CI columns added
+        to the report (distinguishes confidently-zero/inconclusive/confidently-not-zero).
+        August 2026 verdict (post-fix): all 9 sources negative alpha; ma_long_flip_v0 and
+        ma_short_v1 are genuinely inconclusive (wide CI), the other 7 confidently negative.
+        Immediate next steps, in order:
+        1. Resume the SMC rebuild (Liquidity/FVG/OB standalone tests, then as filters on the
+           3 strategy families) — fully unblocked now that the deploy above is validated.
+        2. Resend/manually fix the DS3 data bug (ICICIBANK/ITC/SBIN zero-filled OHLC, 2015) —
            delegation to cpgeneric expired unapproved; direct Kite Connect API confirmed
            working (use that, not Kite MCP's historical_data which is broken at the app level).
-        2. Resume the SMC rebuild (Liquidity/FVG/OB standalone tests, then as filters on the
-           3 strategy families) — was on hold pending the monthly_reconciliation.py deploy,
-           which is now done, so this is unblocked whenever Saurav wants to start it.
         3. Full diff-review of strategies/_archive_pre_strategies_consolidation/ (the 4
            archived folders) to decide what's safe to permanently delete — separate task,
            not urgent.
         4. Live bot core file renaming (ma_rejection_v1_core.py etc.) for naming consistency
            with strategies/ convention — deferred "to another day," not blocking anything.
-        Full detail: PROGRESS_HISTORY.md 2026-09-05 entry.
+        Full detail: PROGRESS_HISTORY.md 2026-09-06 entry.
 
 P2  MemLabs feature screening -> model pipeline — new plan doc: memlabs/53_feature_screening_
         to_model_pipeline.md. Continuation of notebook 35, not a restart.
@@ -72,3 +74,12 @@ F10 Model C 3D time-evolution visualization (parked 2026-08-31) — lag_1 vs tic
 F11 StatQuest (Josh Starmer, YouTube) — standing reference source, explore over time. Covers
         most core ML/stats topics this project touches (regression, classification, trees,
         feature selection). First video logged: regime_model/statquest/roc_auc.md.
+
+# ── GLOSSARY ───────────────────────────────────────────────────
+n        = trade count (matches every report's own "n" column, e.g. monthly_recon_*.csv —
+           metrics()'s n=len(trades_df)). Never repurpose this symbol for anything else.
+n_days   = number of trading days feeding a CAPM/alpha regression (daily-aggregated zpnl
+           vs daily market return) — a completely different count from n above (e.g. 1014
+           trades roll up into n_days=21 for FRESH_6BCE_V0's August 2026 regression).
+           Locked 2026-09-06 after n/trade-count vs n/day-count caused real confusion
+           mid-derivation-walkthrough.
