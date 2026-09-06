@@ -104,6 +104,19 @@
   etc.) and kite_bot_env is itself built on top of it, not independent of it —
   never remove or modify the system interpreter.
 
+── PCAP/TCAP — DISPLAY-ONLY, NOT FOR COMPUTATION ──────────────────
+
+  Pcap (peak concurrent capital) and Tcap (total capital committed that day) are
+  metrics on the live bot's own console PnL-summary footer only — added purely
+  for Saurav's live monitoring readability, never as a deliberate methodology
+  choice for any alpha/regression/backtest computation (confirmed 2026-09-05 via
+  kite_oracle_papertrading/PROGRESS.md's original entry). Harmless to keep
+  showing on the live console. Do NOT feed pcap/tcap into any alpha regression,
+  normalization, or other serious computation unless Saurav explicitly directs
+  it for that specific case — `monthly_reconciliation.py`'s CAPM alpha was
+  found doing exactly this by incidental reuse and was fixed to use raw ₹/day
+  zpnl instead (matches strategies/'s 11-year methodology).
+
 ── VOICE BRIDGE ─────────────────────────────────────────────────
 
   Activation : type "ivb" → CC executes /ivb immediately, no confirmation.
