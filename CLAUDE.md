@@ -18,11 +18,7 @@
   kbu   = "kite bot update" — ONE-SHOT, no follow/Monitor. Report current state
           (latest PnL Summary + recent exits + open positions) from:
           `sudo journalctl -u kitebot.service --since today -o cat | tail -n 60`
-          A VM crontab also runs scripts/bot_snapshot.sh every :00/:30 during
-          market hours (09:30–15:30 IST, Mon–Fri), appending compact status lines
-          to ~/kite_oracle_papertrading/data/monitoring/snapshots_YYYY-MM-DD.log
-          — independent of any CC session. `tail` that file for the half-hourly
-          history; use journalctl for full live detail.
+          Re-run kbu each time an update is wanted; no auto-polling.
 
 ── CROSS-SESSION PEER NAMING ────────────────────────────────────
 
