@@ -1,0 +1,118 @@
+<svg viewBox="0 0 700 480" xmlns="http://www.w3.org/2000/svg" font-family="monospace" font-size="12">
+  <rect width="700" height="480" fill="#0f172a"/>
+
+  <!-- title -->
+  <text x="350" y="26" fill="#e2e8f0" font-size="15" font-weight="bold" text-anchor="middle">Order Block (OB) — Formation and Retest</text>
+
+  <!-- phase backgrounds -->
+  <rect x="50"  y="42" width="210" height="330" rx="6" fill="#22c55e" opacity="0.05"/>
+  <rect x="275" y="42" width="375" height="330" rx="6" fill="#3b82f6" opacity="0.05"/>
+
+  <!-- phase labels -->
+  <text x="155" y="58" fill="#64748b" font-size="11" text-anchor="middle" font-weight="bold">PHASE 1 — OB FORMATION</text>
+  <text x="462" y="58" fill="#64748b" font-size="11" text-anchor="middle" font-weight="bold">PHASE 2 — RETEST + BOUNCE</text>
+  <line x1="268" y1="42" x2="268" y2="380" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- grid lines -->
+  <!-- y(price) = 400 - (price-100)*14 -->
+  <!-- 125→50, 120→120, 115→190, 110→260, 105→330 -->
+  <line x1="50" y1="50"  x2="660" y2="50"  stroke="#1e293b" stroke-width="0.8"/>
+  <line x1="50" y1="120" x2="660" y2="120" stroke="#1e293b" stroke-width="0.8"/>
+  <line x1="50" y1="190" x2="660" y2="190" stroke="#1e293b" stroke-width="0.8"/>
+  <line x1="50" y1="260" x2="660" y2="260" stroke="#1e293b" stroke-width="0.8"/>
+  <line x1="50" y1="330" x2="660" y2="330" stroke="#1e293b" stroke-width="0.8"/>
+  <text x="44" y="54"  fill="#475569" font-size="10" text-anchor="end">125</text>
+  <text x="44" y="124" fill="#475569" font-size="10" text-anchor="end">120</text>
+  <text x="44" y="194" fill="#475569" font-size="10" text-anchor="end">115</text>
+  <text x="44" y="264" fill="#475569" font-size="10" text-anchor="end">110</text>
+  <text x="44" y="334" fill="#475569" font-size="10" text-anchor="end">105</text>
+
+  <!-- OB ZONE: last bearish candle before displacement -->
+  <!-- OB candle: open=108(y=288), close=104(y=344), high=109(y=274), low=103(y=358) -->
+  <!-- OB zone = OB candle high to OB candle low = 103 to 109 -->
+  <!-- y=274 to y=358 -->
+  <rect x="50" y="274" width="610" height="84" fill="#f59e0b" opacity="0.12" rx="2"/>
+  <line x1="50" y1="274" x2="660" y2="274" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="7,5"/>
+  <line x1="50" y1="358" x2="660" y2="358" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="7,5"/>
+
+  <!-- OB zone label -->
+  <rect x="55" y="297" width="105" height="30" rx="4" fill="#1c1a0a"/>
+  <text x="107" y="309" fill="#f59e0b" font-size="10" text-anchor="middle" font-weight="bold">ORDER BLOCK</text>
+  <text x="107" y="322" fill="#f59e0b" font-size="10" text-anchor="middle">zone 103—109</text>
+
+  <!-- boundary labels right side -->
+  <rect x="638" y="266" width="52" height="16" rx="3" fill="#1c1a0a"/>
+  <text x="664" y="277" fill="#f59e0b" font-size="10" text-anchor="middle">109 ← top</text>
+  <rect x="638" y="350" width="52" height="16" rx="3" fill="#1c1a0a"/>
+  <text x="664" y="361" fill="#f59e0b" font-size="10" text-anchor="middle">103 ← bot</text>
+
+  <!-- ═══ PHASE 1 CANDLES ═══ -->
+
+  <!-- Bearish candle 1 before OB -->
+  <!-- open=112(y=232), close=109(y=274), high=113(y=218), low=108(y=288) -->
+  <line x1="80" y1="218" x2="80" y2="288" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="66" y="232" width="28" height="42" rx="2" fill="#ef4444"/>
+
+  <!-- OB CANDLE — last bearish candle before displacement -->
+  <!-- open=108(y=288), close=103(y=358), high=109(y=274), low=102(y=372) -->
+  <line x1="145" y1="274" x2="145" y2="372" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="131" y="288" width="28" height="70" rx="2" fill="#ef4444"/>
+  <!-- OB candle label -->
+  <text x="145" y="395" fill="#f59e0b" font-size="11" text-anchor="middle">OB candle</text>
+  <text x="145" y="408" fill="#f59e0b" font-size="10" text-anchor="middle">last bearish</text>
+  <text x="145" y="420" fill="#f59e0b" font-size="10" text-anchor="middle">before push up</text>
+
+  <!-- DISPLACEMENT candle — big bullish -->
+  <!-- open=103(y=358), close=120(y=120), high=121(y=106), low=102(y=372) -->
+  <line x1="215" y1="106" x2="215" y2="372" stroke="#22c55e" stroke-width="1.5"/>
+  <rect x="201" y="120" width="28" height="238" rx="2" fill="#22c55e"/>
+  <text x="215" y="395" fill="#22c55e" font-size="11" text-anchor="middle">displacement</text>
+  <text x="215" y="408" fill="#22c55e" font-size="10" text-anchor="middle">strong push up</text>
+
+  <!-- ═══ PHASE 2 CANDLES ═══ -->
+
+  <!-- C4 small bullish continuation -->
+  <line x1="310" y1="92" x2="310" y2="148" stroke="#22c55e" stroke-width="1.5"/>
+  <rect x="296" y="106" width="28" height="28" rx="2" fill="#22c55e"/>
+
+  <!-- C5 bearish pullback starts -->
+  <line x1="375" y1="92" x2="375" y2="176" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="361" y="106" width="28" height="56" rx="2" fill="#ef4444"/>
+
+  <!-- C6 bearish drops further -->
+  <line x1="440" y1="148" x2="440" y2="232" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="426" y="162" width="28" height="56" rx="2" fill="#ef4444"/>
+
+  <!-- C7 RETEST — wick enters OB zone top, body stays above -->
+  <!-- open=111(y=246), close=110(y=260), high=112(y=232), low=107(y=302) -->
+  <line x1="505" y1="232" x2="505" y2="302" stroke="#eab308" stroke-width="2.5"/>
+  <rect x="491" y="246" width="28" height="14" rx="2" fill="#ef4444"/>
+  <circle cx="505" cy="302" r="9" fill="none" stroke="#eab308" stroke-width="2"/>
+  <text x="505" y="395" fill="#eab308" font-size="11" text-anchor="middle">Retest</text>
+  <text x="505" y="408" fill="#eab308" font-size="10" text-anchor="middle">wick touches</text>
+  <text x="505" y="420" fill="#eab308" font-size="10" text-anchor="middle">OB zone top</text>
+
+  <!-- C8 BOUNCE / BUY SIGNAL -->
+  <!-- open=110(y=260), close=116(y=176), high=117(y=162), low=109(y=274) -->
+  <line x1="575" y1="162" x2="575" y2="274" stroke="#22c55e" stroke-width="1.5"/>
+  <rect x="561" y="176" width="28" height="84" rx="2" fill="#22c55e"/>
+  <polygon points="575,138 563,162 587,162" fill="#22c55e"/>
+  <rect x="546" y="118" width="58" height="20" rx="4" fill="#14532d"/>
+  <text x="575" y="132" fill="#22c55e" font-size="13" font-weight="bold" text-anchor="middle">BUY</text>
+  <text x="575" y="395" fill="#22c55e" font-size="11" text-anchor="middle">Confirmation</text>
+  <text x="575" y="408" fill="#22c55e" font-size="10" text-anchor="middle">close above</text>
+  <text x="575" y="420" fill="#22c55e" font-size="10" text-anchor="middle">OB zone top</text>
+
+  <!-- C9 continuation -->
+  <line x1="635" y1="106" x2="635" y2="190" stroke="#22c55e" stroke-width="1.5"/>
+  <rect x="621" y="120" width="28" height="56" rx="2" fill="#22c55e"/>
+
+  <!-- bottom legend -->
+  <rect x="50" y="435" width="610" height="34" rx="6" fill="#1e293b"/>
+  <rect x="65"  y="447" width="14" height="12" rx="2" fill="#f59e0b" opacity="0.5"/>
+  <text x="84"  y="457" fill="#94a3b8" font-size="11">OB zone (last bearish candle's full range before displacement)</text>
+  <rect x="400" y="447" width="14" height="12" rx="2" fill="#eab308"/>
+  <text x="420" y="457" fill="#94a3b8" font-size="11">Retest candle</text>
+  <rect x="510" y="447" width="14" height="12" rx="2" fill="#22c55e"/>
+  <text x="530" y="457" fill="#94a3b8" font-size="11">Bounce / BUY</text>
+</svg>

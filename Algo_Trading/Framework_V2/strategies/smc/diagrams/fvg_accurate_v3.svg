@@ -1,0 +1,137 @@
+<svg viewBox="0 0 700 480" xmlns="http://www.w3.org/2000/svg" font-family="monospace" font-size="12">
+  <rect width="700" height="480" fill="#0f172a"/>
+
+  <!-- title -->
+  <text x="350" y="26" fill="#e2e8f0" font-size="15" font-weight="bold" text-anchor="middle">Fair Value Gap (FVG) — Formation and Retest</text>
+
+  <!-- phase backgrounds -->
+  <rect x="50"  y="42" width="230" height="330" rx="6" fill="#22c55e" opacity="0.05"/>
+  <rect x="295" y="42" width="360" height="330" rx="6" fill="#3b82f6" opacity="0.05"/>
+
+  <!-- phase labels -->
+  <text x="165" y="58" fill="#64748b" font-size="11" text-anchor="middle" font-weight="bold">PHASE 1 — FVG FORMATION</text>
+  <text x="475" y="58" fill="#64748b" font-size="11" text-anchor="middle" font-weight="bold">PHASE 2 — RETEST + BOUNCE</text>
+  <line x1="285" y1="42" x2="285" y2="380" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- grid lines + price labels -->
+  <!-- y(price) = 400 - (price - 100) * 14 -->
+  <!-- 125→50, 120→120, 115→190, 110→260, 105→330 -->
+  <line x1="50" y1="50"  x2="660" y2="50"  stroke="#1e293b" stroke-width="0.8"/>
+  <line x1="50" y1="120" x2="660" y2="120" stroke="#1e293b" stroke-width="0.8"/>
+  <line x1="50" y1="190" x2="660" y2="190" stroke="#1e293b" stroke-width="0.8"/>
+  <line x1="50" y1="260" x2="660" y2="260" stroke="#1e293b" stroke-width="0.8"/>
+  <line x1="50" y1="330" x2="660" y2="330" stroke="#1e293b" stroke-width="0.8"/>
+  <text x="44" y="54"  fill="#475569" font-size="10" text-anchor="end">125</text>
+  <text x="44" y="124" fill="#475569" font-size="10" text-anchor="end">120</text>
+  <text x="44" y="194" fill="#475569" font-size="10" text-anchor="end">115</text>
+  <text x="44" y="264" fill="#475569" font-size="10" text-anchor="end">110</text>
+  <text x="44" y="334" fill="#475569" font-size="10" text-anchor="end">105</text>
+
+  <!-- FVG ZONE: C1 high=109 (y=274) to C3 low=113 (y=218) -->
+  <rect x="50" y="218" width="610" height="56" fill="#6366f1" opacity="0.18" rx="2"/>
+  <!-- zone boundary lines -->
+  <line x1="50" y1="218" x2="660" y2="218" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="7,5"/>
+  <line x1="50" y1="274" x2="660" y2="274" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="7,5"/>
+
+  <!-- zone label -->
+  <rect x="55" y="229" width="100" height="30" rx="4" fill="#1e1a3d"/>
+  <text x="105" y="241" fill="#a78bfa" font-size="10" text-anchor="middle" font-weight="bold">FVG ZONE</text>
+  <text x="105" y="254" fill="#a78bfa" font-size="10" text-anchor="middle">109 — 113</text>
+
+  <!-- boundary tick labels -->
+  <rect x="644" y="210" width="48" height="16" rx="3" fill="#1e1a3d"/>
+  <text x="668" y="221" fill="#a78bfa" font-size="10" text-anchor="middle">113 ← top</text>
+  <rect x="644" y="266" width="48" height="16" rx="3" fill="#1e1a3d"/>
+  <text x="668" y="277" fill="#a78bfa" font-size="10" text-anchor="middle">109 ← bot</text>
+
+  <!-- ═══ CANDLE 1 (C1) — bearish ═══ -->
+  <!-- open=108(y=288), close=104(y=344), high=109(y=274), low=103(y=358) -->
+  <line x1="90" y1="274" x2="90" y2="358" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="76" y="288" width="28" height="56" rx="2" fill="#ef4444"/>
+  <!-- C1 high = 109 = gap bottom boundary -->
+  <line x1="90" y1="274" x2="172" y2="274" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="90" y="390" fill="#94a3b8" font-size="11" text-anchor="middle">C1</text>
+  <text x="90" y="403" fill="#a78bfa" font-size="10" text-anchor="middle">high=109</text>
+  <text x="90" y="415" fill="#a78bfa" font-size="10" text-anchor="middle">gap bottom</text>
+
+  <!-- ═══ CANDLE 2 (C2) — big bullish displacement ═══ -->
+  <!-- open=104(y=344), close=120(y=120), high=121(y=106), low=103(y=358) -->
+  <line x1="165" y1="106" x2="165" y2="358" stroke="#22c55e" stroke-width="1.5"/>
+  <rect x="151" y="120" width="28" height="224" rx="2" fill="#22c55e"/>
+  <!-- displacement arrow/label -->
+  <text x="165" y="390" fill="#94a3b8" font-size="11" text-anchor="middle">C2</text>
+  <text x="165" y="403" fill="#22c55e" font-size="10" text-anchor="middle">displacement</text>
+  <!-- arrow showing gap skip -->
+  <line x1="185" y1="218" x2="185" y2="274" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="198" y="250" fill="#a78bfa" font-size="10">skips</text>
+  <text x="198" y="262" fill="#a78bfa" font-size="10">this zone</text>
+
+  <!-- ═══ CANDLE 3 (C3) — bullish ═══ -->
+  <!-- open=118(y=148), close=121(y=106), high=122(y=92), low=113(y=218) -->
+  <line x1="240" y1="92" x2="240" y2="218" stroke="#22c55e" stroke-width="1.5"/>
+  <rect x="226" y="106" width="28" height="42" rx="2" fill="#22c55e"/>
+  <!-- C3 low = 113 = gap top boundary -->
+  <line x1="226" y1="218" x2="172" y2="218" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="240" y="390" fill="#94a3b8" font-size="11" text-anchor="middle">C3</text>
+  <text x="240" y="403" fill="#a78bfa" font-size="10" text-anchor="middle">low=113</text>
+  <text x="240" y="415" fill="#a78bfa" font-size="10" text-anchor="middle">gap top</text>
+
+  <!-- bracket on left showing gap -->
+  <line x1="56" y1="218" x2="56" y2="274" stroke="#a78bfa" stroke-width="2"/>
+  <line x1="52" y1="218" x2="63" y2="218" stroke="#a78bfa" stroke-width="2"/>
+  <line x1="52" y1="274" x2="63" y2="274" stroke="#a78bfa" stroke-width="2"/>
+
+  <!-- ═══ PHASE 2: RETEST CANDLES ═══ -->
+
+  <!-- C4 — small bearish pullback starts -->
+  <!-- open=122(y=92), close=118(y=148), high=123(y=78), low=117(y=162) -->
+  <line x1="340" y1="78" x2="340" y2="162" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="326" y="92" width="28" height="56" rx="2" fill="#ef4444"/>
+
+  <!-- C5 — bearish, drops further -->
+  <!-- open=120(y=120), close=115(y=190), high=121(y=106), low=114(y=204) -->
+  <line x1="410" y1="106" x2="410" y2="204" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="396" y="120" width="28" height="70" rx="2" fill="#ef4444"/>
+
+  <!-- C6 — RETEST: enters FVG zone, long wick touches zone bottom -->
+  <!-- open=116(y=176), close=113(y=218), high=117(y=162), low=108(y=288) -->
+  <line x1="480" y1="162" x2="480" y2="288" stroke="#eab308" stroke-width="2.5"/>
+  <rect x="466" y="176" width="28" height="42" rx="2" fill="#ef4444"/>
+  <!-- highlight circle at wick bottom -->
+  <circle cx="480" cy="288" r="9" fill="none" stroke="#eab308" stroke-width="2"/>
+  <text x="480" y="390" fill="#eab308" font-size="11" text-anchor="middle">Retest</text>
+  <text x="480" y="403" fill="#eab308" font-size="10" text-anchor="middle">wick enters zone</text>
+  <text x="480" y="415" fill="#eab308" font-size="10" text-anchor="middle">close at 113</text>
+
+  <!-- C7 — BOUNCE / BUY SIGNAL -->
+  <!-- open=113(y=218), close=117(y=162), high=118(y=148), low=112(y=232) -->
+  <line x1="550" y1="148" x2="550" y2="232" stroke="#22c55e" stroke-width="1.5"/>
+  <rect x="536" y="162" width="28" height="56" rx="2" fill="#22c55e"/>
+  <!-- BUY arrow -->
+  <polygon points="550,125 540,148 560,148" fill="#22c55e"/>
+  <rect x="522" y="105" width="56" height="20" rx="4" fill="#14532d"/>
+  <text x="550" y="119" fill="#22c55e" font-size="13" font-weight="bold" text-anchor="middle">BUY</text>
+  <text x="550" y="390" fill="#22c55e" font-size="11" text-anchor="middle">Bounce</text>
+  <text x="550" y="403" fill="#22c55e" font-size="10" text-anchor="middle">close above 113</text>
+
+  <!-- C8 — continuation -->
+  <!-- open=117(y=162), close=121(y=106), high=122(y=92), low=116(y=176) -->
+  <line x1="620" y1="92" x2="620" y2="176" stroke="#22c55e" stroke-width="1.5"/>
+  <rect x="606" y="106" width="28" height="56" rx="2" fill="#22c55e"/>
+
+  <!-- arrow defs -->
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+    </marker>
+  </defs>
+
+  <!-- bottom legend box -->
+  <rect x="50" y="430" width="610" height="36" rx="6" fill="#1e293b"/>
+  <rect x="65"  y="442" width="14" height="12" rx="2" fill="#6366f1" opacity="0.5"/>
+  <text x="84"  y="452" fill="#94a3b8" font-size="11">FVG zone (C1 high → C3 low, price never traded here)</text>
+  <rect x="370" y="442" width="14" height="12" rx="2" fill="#eab308"/>
+  <text x="390" y="452" fill="#94a3b8" font-size="11">Retest candle (enters + rejects zone)</text>
+  <rect x="560" y="442" width="14" height="12" rx="2" fill="#22c55e"/>
+  <text x="580" y="452" fill="#94a3b8" font-size="11">Bounce / BUY</text>
+</svg>

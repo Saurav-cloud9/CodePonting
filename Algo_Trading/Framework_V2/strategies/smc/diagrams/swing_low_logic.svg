@@ -1,0 +1,105 @@
+<svg viewBox="0 0 760 460" xmlns="http://www.w3.org/2000/svg" font-family="monospace">
+  <rect width="760" height="460" fill="#0f172a"/>
+  <text x="20" y="28" fill="#e2e8f0" font-size="15" font-weight="bold">Swing Low Identification — N-bar Fractal Logic</text>
+
+  <!-- grid -->
+  <line x1="40" y1="80"  x2="740" y2="80"  stroke="#1e293b"/>
+  <line x1="40" y1="160" x2="740" y2="160" stroke="#1e293b"/>
+  <line x1="40" y1="240" x2="740" y2="240" stroke="#1e293b"/>
+  <line x1="40" y1="320" x2="740" y2="320" stroke="#1e293b"/>
+
+  <!-- ─── EXAMPLE 1: N=1 (1 candle each side) ─── -->
+  <text x="50" y="55" fill="#94a3b8" font-size="12" font-weight="bold">Example 1: N=1 (1 candle left, 1 candle right)</text>
+
+  <!-- C1 -->
+  <line x1="80"  y1="140" x2="80"  y2="200" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="68"  y="155" width="24" height="30" rx="2" fill="#ef4444"/>
+  <!-- C2 = swing low candidate, low=240 -->
+  <line x1="140" y1="180" x2="140" y2="260" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="128" y="195" width="24" height="50" rx="2" fill="#ef4444"/>
+  <!-- C3 (right side: low is HIGHER than C2 low) -->
+  <line x1="200" y1="155" x2="200" y2="245" stroke="#22c55e" stroke-width="1.5"/>
+  <rect x="188" y="170" width="24" height="55" rx="2" fill="#22c55e"/>
+
+  <!-- swing low marker -->
+  <circle cx="140" cy="260" r="7" fill="none" stroke="#a78bfa" stroke-width="2"/>
+  <text x="110" y="285" fill="#a78bfa" font-size="11">Swing Low</text>
+  <text x="105" y="297" fill="#a78bfa" font-size="10">C2 low lower than</text>
+  <text x="105" y="308" fill="#a78bfa" font-size="10">C1 low AND C3 low</text>
+
+  <!-- comparison arrows -->
+  <line x1="80" y1="200" x2="128" y2="258" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="200" y1="245" x2="152" y2="258" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="60" y="200" fill="#64748b" font-size="10">higher</text>
+  <text x="205" y="240" fill="#64748b" font-size="10">higher</text>
+  <text x="115" y="255" fill="#a78bfa" font-size="10">lowest</text>
+
+  <!-- result -->
+  <rect x="55" y="325" width="195" height="22" rx="4" fill="#1a1a2e"/>
+  <text x="65" y="340" fill="#22c55e" font-size="11">Valid swing low (N=1). Simple but noisy.</text>
+
+  <!-- ─── EXAMPLE 2: N=2 (2 candles each side) ─── -->
+  <text x="310" y="55" fill="#94a3b8" font-size="12" font-weight="bold">Example 2: N=2 (2 candles left, 2 candles right)</text>
+
+  <!-- C1 -->
+  <line x1="320" y1="130" x2="320" y2="190" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="308" y="145" width="24" height="30" rx="2" fill="#ef4444"/>
+  <!-- C2 -->
+  <line x1="375" y1="155" x2="375" y2="215" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="363" y="170" width="24" height="30" rx="2" fill="#ef4444"/>
+  <!-- C3 = swing low candidate, low=260 -->
+  <line x1="430" y1="185" x2="430" y2="270" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="418" y="200" width="24" height="55" rx="2" fill="#ef4444"/>
+  <!-- C4 -->
+  <line x1="485" y1="150" x2="485" y2="255" stroke="#22c55e" stroke-width="1.5"/>
+  <rect x="473" y="165" width="24" height="70" rx="2" fill="#22c55e"/>
+  <!-- C5 -->
+  <line x1="540" y1="120" x2="540" y2="195" stroke="#22c55e" stroke-width="1.5"/>
+  <rect x="528" y="135" width="24" height="48" rx="2" fill="#22c55e"/>
+
+  <!-- swing low marker -->
+  <circle cx="430" cy="270" r="7" fill="none" stroke="#a78bfa" stroke-width="2"/>
+  <text x="400" y="295" fill="#a78bfa" font-size="11">Swing Low</text>
+  <text x="382" y="307" fill="#a78bfa" font-size="10">C3 low is lower than</text>
+  <text x="378" y="318" fill="#a78bfa" font-size="10">C1, C2, C4, C5 lows</text>
+
+  <!-- comparison lines -->
+  <line x1="320" y1="190" x2="418" y2="268" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="375" y1="215" x2="418" y2="268" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="485" y1="255" x2="442" y2="268" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
+  <line x1="540" y1="195" x2="442" y2="268" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
+
+  <!-- result -->
+  <rect x="295" y="325" width="280" height="22" rx="4" fill="#1a1a2e"/>
+  <text x="305" y="340" fill="#22c55e" font-size="11">Valid swing low (N=2). More reliable. Fewer false signals.</text>
+
+  <!-- ─── NOT a swing low example ─── -->
+  <text x="620" y="55" fill="#94a3b8" font-size="12" font-weight="bold">Not a Swing Low</text>
+
+  <!-- C1 -->
+  <line x1="610" y1="140" x2="610" y2="200" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="598" y="155" width="24" height="30" rx="2" fill="#ef4444"/>
+  <!-- C2 = candidate -->
+  <line x1="660" y1="175" x2="660" y2="250" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="648" y="190" width="24" height="45" rx="2" fill="#ef4444"/>
+  <!-- C3 = lower low than C2, so C2 is NOT a swing low -->
+  <line x1="710" y1="200" x2="710" y2="270" stroke="#ef4444" stroke-width="1.5"/>
+  <rect x="698" y="215" width="24" height="42" rx="2" fill="#ef4444"/>
+
+  <!-- cross mark -->
+  <circle cx="660" cy="250" r="7" fill="none" stroke="#ef4444" stroke-width="2"/>
+  <text x="652" y="253" fill="#ef4444" font-size="11" font-weight="bold">X</text>
+  <text x="618" y="275" fill="#ef4444" font-size="10">C3 low is LOWER</text>
+  <text x="615" y="287" fill="#ef4444" font-size="10">than C2. Not valid.</text>
+
+  <!-- result -->
+  <rect x="590" y="325" width="155" height="22" rx="4" fill="#1a1a2e"/>
+  <text x="600" y="340" fill="#ef4444" font-size="11">Trend still falling. Skip.</text>
+
+  <!-- bottom rule box -->
+  <rect x="40" y="370" width="680" height="75" rx="6" fill="#1e293b"/>
+  <text x="60" y="390" fill="#e2e8f0" font-size="12" font-weight="bold">The Rule:</text>
+  <text x="60" y="408" fill="#94a3b8" font-size="11">A candle is a SWING LOW if its LOW is lower than the lows of N candles on both its left AND right side.</text>
+  <text x="60" y="424" fill="#94a3b8" font-size="11">N=1 = noisy (picks up many small swings). N=2 or N=3 = cleaner, fewer but stronger signals.</text>
+  <text x="60" y="440" fill="#f59e0b" font-size="11">For fv2: N=2 or N=3 recommended. This becomes a tunable parameter in your G-gate logic.</text>
+</svg>

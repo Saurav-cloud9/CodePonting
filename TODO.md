@@ -2,6 +2,15 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
+# STANDING NOTE (2026-09-07): Saurav wants loop engineering applied to the max
+# across CodePonting — wherever a task genuinely fits the 4-condition test
+# (repeats regularly, mechanically verifiable, token budget absorbs it, agent
+# has repro tools), default to proposing/building a loop rather than leaving
+# it manual. Don't force-fit judgment-call work (research, signal design) —
+# that stays manual per the same framework. P5 (DS3 gap-fill) is the first
+# concrete instance; keep watching for other qualifying candidates as they
+# come up (e.g. recurring data checks, sweep re-runs with an objective gate).
+
 P1  Strategy raw-edge search (Algo_Trading/Framework_V2/strategies/) — ACTIVE
         2026-09-06: monthly_reconciliation.py's 6 new replay engines parity-checked against
         DS3, 2 real bugs found+fixed (one-bar-stale indicators; indicators skipped during

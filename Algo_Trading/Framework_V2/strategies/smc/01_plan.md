@@ -50,6 +50,23 @@ above. MCP/CDP control is worth it for dynamic/interactive tasks, not for
 "does this indicator mark the right candles."
 
 ## Status
-Not started. Files from the abandoned MCP-drawing attempt
-(`liquidity_sweep_logic.py`, `run_analysis.py`, and the HDFC data snapshot)
-were deleted from this folder on 2026-07-14.
+Recovered 2026-09-07 from the bookmarked claude.ai session (see `02_concepts_summary.md`'s
+old TODO, now resolved): full concept detail + entry logic + diagrams in
+`02_concepts_summary.md`, all backtest results in `03_backtest_results.md`, reference
+diagrams in `diagrams/`, and an early illustrative (not production) Python sketch of the
+Liquidity Sweep signal in `reference_liquidity_sweep_signal_illustrative.py`.
+
+Per `03_backtest_results.md`: Liquidity (as "LSS"), FVG, and OB were all already backtested
+on DS3's full 11-year history and **failed the project's ZPF>1.0 viability bar** as
+standalone SHORT signals (best: LSS+VWAP+RSI>54 at ZPF=1.01 but only 411 trades — too thin
+to trust). The one strategy that passed cleanly was unrelated to these three SMC concepts
+(6BCE+VWAP+RSI>54 on a curated 8-stock universe, ZPF=1.12) — not covered by this repo's
+current locked strategies/ variants, worth a look on its own.
+
+Next real decision before more work here: these 3 SMC concepts were tested standalone and
+already look weak (matches this project's own repeated finding that most single filters
+don't clear the bar alone) — the plan's own "Key Principles" section already flags that
+**triple confluence** (Liquidity + FVG + OB in the same zone) is where the real edge is
+expected to concentrate, not any one of them alone. Decide: pursue confluence testing next,
+or treat all 3 standalone results as sufficient evidence to deprioritize this whole
+direction in favor of something else.
