@@ -1,55 +1,84 @@
-# Session Log — 2026-09-06 (fv2 VM session)
+# Session Log — 2026-09-07/08 (fv2 VM session)
 
-## Parity-checked monthly_reconciliation.py against DS3 — found + fixed 2 real bugs
-- Saurav's own idea, following a question about "how confident are we these new replay
-  engines actually match strategies/'s locked signals?" — ran each locked family's exact
-  signal logic (read straight from `strategies/*/sweep_*.py`, unmodified) on DS3 through
-  August, diffed trade-by-trade against `monthly_reconciliation.py`'s saved output.
-- Step 1 first ruled out a data-source explanation: DS3 (synced 2026-09-03) and FRESH
-  (Kite pull, 2026-09-05) agree on raw OHLCV exactly (45,360 bars, zero mismatches), and
-  `update_indicators()`'s formula exactly reproduces DS3's own precomputed ma20/atr14
-  across the full 11-year history.
-- Step 2 found 5 of 6 locked variants had massive trade-set mismatches — only
-  `ma_short_v1` (which reuses `v1_core.process_bar()` directly) matched near-perfectly.
-- **Bug 1**: all 3 new standalone replay functions read ma20/atr14 BEFORE calling
-  `update_indicators()` for the current bar, not after — a one-bar-stale indicator,
-  opposite of `v1_core.process_bar()`'s own (confirmed-correct) ordering. Fixed in all 3.
-  `6bce_v0`/`6bce_v1vwap` reached PERFECT parity immediately after this fix alone.
-- **Bug 2** (ma_short_vwap + ma_long_flip only): the position-guard skip-ahead (`i=k+1`
-  after a trade closes) also skipped calling `update_indicators()` for every bar between
-  entry and exit, desyncing the deque from DS3's continuous (never-skips-a-bar)
-  computation. Fixed by updating indicators for every bar in the exit-scan loop.
-- All 6 variants now show 99.6-100% trade-level parity with DS3. **Pre-fix August numbers
-  reported earlier the same day for 5 of 6 variants were wrong and are superseded.**
+## Recovered prior SMC work from a bookmarked claude.ai session
+- WebFetch couldn't render the share link (JS-based page, only an empty pre-render
+  shell came through) — Saurav copy-pasted the actual content instead: detailed
+  concepts (with locked entry logic + diagrams), a 9-strategy backtest results log,
+  and a zip with 9 reference SVGs + an illustrative (non-production) Python script.
+- Placed into `strategies/smc/`: `02_concepts_summary.md` replaced with the detailed
+  version, `03_backtest_results.md` new (flagged: covers more than SMC — 6BCE variant
+  exploration too — and uses a different SL/TP grid than this project's locked
+  strategies/, not directly comparable number-for-number), `diagrams/`, reference script.
+- Renamed to the zero-padded convention: `plan.md`→`01_plan.md`,
+  `smc_concepts_summary.md`→`02_concepts_summary.md`.
+- Caught and fixed a real gap: of "5 SMC concepts," Inducement is mechanically the same
+  liquidity-grab mechanic as concept #1 — noted explicitly in the file now (4 distinct
+  mechanisms, not 5), kept as its own section since it applies across all 3 zone-based
+  setups, not just Liquidity.
 
-## Added 95% CI columns to the report
-- `ci_low_capm`/`ci_high_capm` (= alpha ± t_critical×SE) added next to
-  `alpha_capm_cumulative`. Directly distinguishes "confidently near-zero" (narrow CI
-  hugging zero) from "inconclusive" (wide CI crossing zero) from "confidently not-zero"
-  (CI clear of zero) — same p<0.05 threshold, very different practical conclusion.
-- Concrete case this caught: `ma_long_flip_v0` (p=0.061, CI=(-62.55,+1.49)) is genuinely
-  inconclusive, not "confidently zero" as it might otherwise read — same fragility class
-  as `6bce_v0`.
+## Built and drew a fresh Liquidity sweep diagram (04_liquidity_sweep_diagram.svg)
+- First attempt had real layout bugs (callout boxes overlapping candles, title
+  colliding with markers) — caught via actually rendering to PNG and looking at it
+  (cairosvg), not just trusting the SVG source. Redesigned with numbered badges + one
+  compact legend instead of five floating paragraph boxes. Clean on the second render.
 
-## Cleanup + naming lock
-- Removed dead `pcap_lookup` code (unused since yesterday's raw-₹ alpha fix).
-- `sl_tp` separator changed `/` → `x` (avoids Excel's date auto-reinterpretation of
-  slash-joined number pairs).
-- Locked naming convention (TODO.md GLOSSARY): `n` = trading days in a CAPM regression,
-  `n_trades` = trade count. `metrics()`'s dict key renamed accordingly.
-- CLAUDE.md: new section — Pcap/Tcap are live-console-display-only, never for computation
-  without Saurav's explicit direction.
+## Full Liquidity 4-variant matrix — all 4 ruled out
+- Two independent axes: which swing extreme triggers the setup (low/high) × entry
+  direction (long/short) = 4 variants. Confirmed this maps exactly onto the flagship
+  ma_short/ma_long family's own touch/flip structure — predicted V1 (contrarian short
+  on swing low) would be strongest (mirrors ma_long_flip, the one flagship variant
+  that got locked) and V3 weakest (mirrors ma_short_flip, decisively ruled out) BEFORE
+  running V2/V3. V1-strongest held exactly (0.823, best of 4); V3-weakest was close but
+  not exact (V0 edged it out at 0.661 vs V3's 0.691) — reported honestly either way.
+- Raw 90-combo sweep results (ZPF): V0=0.661, V1=0.823, V2=0.798, V3=0.691 — all below
+  real viability (1.0). Cross-checked V1 against the recovered session's own "LSS"
+  result (0.808) — close match, validates the fresh engine.
+- V1/V2 cleared the soft-triage gate, got full SL-sweep+alpha rigor at TP=3.0 fixed:
+  genuine interior peaks (V1: SL=4.5, V2: SL=5.0). CAPM alpha overwhelmingly negative
+  at EVERY SL value tested (p from e-29 to e-107) — locked-combo alpha V1=-12.24₹/day,
+  V2=-13.45₹/day, both NIFTY+basket cross-validated, CIs entirely clear of zero.
+- All 4 logged to `smc/nifty.csv`/`basket.csv` (new standard format, backtesting_rules.md
+  §14) — V0/V3 explicitly marked `RULED_OUT` in the alpha columns, not silently dropped.
+- Full write-up: `strategies/smc/04_liquidity_findings.md`.
 
-## Extensive CAPM/statistics Q&A this session (not repeated in full here)
-Covered: t-stat vs t-critical, SE vs raw std vs residual std, CI derivation from the
-t-statistic inequality, "confidently zero" vs "inconclusive" vs "confidently not-zero"
-framework (with worked real-number examples from August's actual 9 sources), leave-one-out
-outlier sensitivity (found `6bce_v0`'s significance flips when its single worst day is
-dropped — fragile result), and why alpha magnitude alone doesn't determine significance
-(SE matters just as much). See session transcript for full derivations if needed again.
+## Recalibrated the viability "ruled out" gate (Saurav's own idea)
+- Question raised: was the documented `ZPF<0.85→ruled out` rule ever actually enforced
+  for the 6 already-locked flagship variants? Checked their raw-round scores directly:
+  3 of 6 (`ma_short_v1`=0.815, `ma_short_v2vwap`=0.834, `ma_long_flip_v0`=0.841) sat
+  BELOW 0.85 and got locked anyway after the full Table 2/3 rigor — the real gate has
+  always been that rigor, never this raw number.
+- Verified the raw→healthy-subset ZPF gap is remarkably consistent (0.083-0.102, mean
+  ~0.09) across all 6 locked variants — used this to calibrate the new gate to 0.75
+  (implies ~0.66 healthy-subset floor, and no filter tested anywhere in this project's
+  history has closed a gap anywhere near the 0.34 needed to reach viability from there).
+- `backtesting_rules.md` §12 reworded: 0.75 is now an explicit soft pre-triage check
+  ("skip the expensive rigor"), not a final "ruled out" verdict like 0.85 was worded.
 
-## RS peer check-ins sent (end of session)
-cplearning, cpfable, mathmode, cpgeneric — all showed idle in ListAgents, messaged for a
-one-line status update. Check for replies before assuming nothing happened elsewhere.
+## Other infrastructure additions
+- `backtesting_rules.md` new §2 warning: flagship's 14:45/14:50 cutoffs are calibrated
+  for its 1-bar signal-to-entry chain specifically — any different-length chain (e.g.
+  Liquidity's 2-bar sweep→confirm→entry) derives its OWN signal cutoff backward from
+  the universal `ENTRY_CUTOFF_TIME=14:50` anchor, never reuses 14:45 verbatim.
+- New `backtesting_rules.md` §14: standard cross-strategy comparison row format (all 20
+  columns defined) — the format `smc/nifty.csv`/`basket.csv` now use, reusable for any
+  future strategy comparison.
+- Created `strategies/smc/nifty.csv`/`basket.csv` (no index prefix — running comparison
+  logs referenced every time a new concept is tested).
 
-Full detail: `PROGRESS_HISTORY.md` 2026-09-06 entry. Next-step priorities: `.remember/handoff.md`.
+## Extensive CAPM/stats Q&A continued from yesterday (brief, not repeated in full)
+Covered: what "§" means, difference between t_alpha (data-derived test statistic) and
+t_critical (sample-size-derived threshold), why the CI derivation follows directly from
+inverting the t-statistic inequality, and confirmed "confidently zero" requires BOTH a
+non-significant p-value AND a narrow CI — a wide CI crossing zero is "inconclusive," not
+"confidently zero," regardless of the p-value.
+
+## Known issue: background-task flakiness
+Multiple `run_in_background` launches for the V2/V3 full sweeps were killed with zero
+system-level evidence (checked dmesg, journalctl, free -h — nothing). Not caused by the
+user, not caused by running two in parallel (a solo background launch also got killed).
+Worked around by running in the foreground with a long timeout instead (auto-moves to
+background on timeout, didn't hit the same issue). Not root-caused — worth retesting
+background launches next session to see if it was transient.
+
+Full detail: `PROGRESS_HISTORY.md` 2026-09-07/08 entry. Next-step priorities:
+`.remember/handoff.md`.

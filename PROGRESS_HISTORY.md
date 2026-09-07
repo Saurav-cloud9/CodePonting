@@ -1306,3 +1306,81 @@ scripts/monthly_reconciliation.py`. Next-step priorities: `.remember/handoff.md`
 
 Next: SMC exploration (Liquidity/FVG/OB), now fully unblocked — the monthly_reconciliation.py
 deploy this whole multi-session thread was building toward is complete and validated.
+
+## 2026-09-07/08 — SMC Liquidity: full 4-variant matrix, all ruled out
+
+### Recovered prior SMC work from a bookmarked claude.ai session
+- Copy-pasted (WebFetch couldn't render the JS-based share link — page only exposed an
+  empty pre-render shell) full concept detail, entry logic, diagrams, and a 9-strategy
+  backtest results log into `strategies/smc/`: `02_concepts_summary.md` replaced with the
+  detailed version, `03_backtest_results.md` new, `diagrams/` (9 SVGs), an illustrative
+  (non-production) reference script. Flagged clearly that the recovered results file
+  covers more than SMC (6BCE variant exploration too) and uses a different SL/TP grid
+  than this project's locked strategies/ — not directly comparable number-for-number.
+- Renamed `smc/plan.md`→`01_plan.md`, `smc_concepts_summary.md`→`02_concepts_summary.md`
+  to match the project's zero-padded numeric-prefix convention.
+- Corrected a real gap in the concepts file: of the 5 "SMC concepts" listed, Inducement
+  is mechanically the same liquidity-grab as concept #1, just applied as a smaller
+  pre-entry trap — kept as its own section (functions across all 3 zone-based setups,
+  not unique to Liquidity) but now explicitly noted, so the file is honest that there
+  are 4 distinct mechanisms, not 5.
+
+### Built and ran the full Liquidity 4-variant matrix fresh against DS3
+- Two independent axes — which swing extreme triggers the setup (low/high) crossed with
+  entry direction (long/short) — generate 4 variants: V0 (swing low+long, intuitive),
+  V1 (swing low+short, contrarian), V2 (swing high+short, "true mirror" per the
+  concept's own "just flip the direction" definition), V3 (swing high+long, contrarian).
+- Confirmed a real structural parallel to the flagship ma_short/ma_long family (same
+  touch-condition × entry-direction 2×2 shape) BEFORE running V2/V3: predicted V1 would
+  be strongest (mirroring ma_long_flip, the flagship's own locked contrarian variant)
+  and V3 weakest (mirroring ma_short_flip, decisively ruled out). V1-strongest held
+  exactly (0.823, best of the 4); V3-weakest was close but not exact (V0 edged it out
+  at 0.661 vs V3's 0.691) — reported honestly rather than forced to fit.
+- Results (raw 90-combo sweep, DS3 full history 2015-02-02 to last month-end):
+  V0=0.661 ZPF, V1=0.823, V2=0.798, V3=0.691 — all four below the actual viability bar
+  (1.0), V0/V3 below even the (that session, newly-lowered) soft-triage gate of 0.75.
+- V1 and V2 (both clearing 0.75) got the full SL-sweep + alpha rigor: held TP=3.0 fixed
+  (both variants' own healthy-subset best), swept SL, found genuine interior peaks
+  (V1: SL=4.5, V2: SL=5.0 — ZPF and NetZPnL both peak together, not edge-of-grid).
+  CAPM alpha at every single SL value tested came back overwhelmingly, decisively
+  NEGATIVE (p-values from e-29 to e-107 — not a borderline case). Locked-combo alpha:
+  V1 = -12.24 ₹/day (NIFTY) / -12.40 (basket), CI entirely below -10 both ways;
+  V2 = -13.45 / -13.66, CI entirely below -9 both ways. Cross-validated against both
+  market factors independently — same conclusion, <2% difference in alpha either way.
+- All 4 variants logged to `smc/nifty.csv`/`smc/basket.csv` in the standard cross-
+  strategy format (backtesting_rules.md §14) — V0/V3 recorded as `RULED_OUT` in the
+  alpha columns (excluded by soft-triage before the expensive CAPM step, not silently
+  dropped from the record).
+- Full findings, all 3 tables per variant, in `strategies/smc/04_liquidity_findings.md`.
+
+### Recalibrated the "ruled out" viability gate (backtesting_rules.md §12)
+- Saurav's own idea: checked whether the documented `ZPF < 0.85 → ruled out` rule was
+  ever actually enforced in practice against the 6 already-locked flagship variants'
+  own raw-round scores. Found 3 of 6 (`ma_short_v1`=0.815, `ma_short_v2vwap`=0.834,
+  `ma_long_flip_v0`=0.841) sat BELOW 0.85 at their raw stage and were locked anyway
+  after the full Table 2/3 treatment — the real gate has always been the SL-sweep +
+  exit-mix + alpha rigor, never this raw number.
+- Also verified the raw→healthy-subset ZPF gap is remarkably consistent across all 6
+  locked variants (0.083-0.102, mean ~0.09) — empirically calibrated the new gate to
+  0.75 (a raw score there implies a healthy-subset score around 0.66, and no filter
+  tested anywhere in this project's history has closed a gap anywhere near the 0.34
+  needed to reach 1.0 from there). Reworded §12 as a soft pre-triage check ("skip the
+  expensive rigor on results this far from viable") rather than a final verdict.
+
+### Infrastructure additions
+- `backtesting_rules.md` new §2 warning: the flagship's 14:45/14:50 touch/entry cutoffs
+  are calibrated for its specific 1-bar signal-to-entry chain — a different-length
+  chain (e.g. Liquidity's 2-bar sweep→confirm→entry) needs its own signal cutoff
+  derived backward from the universal `ENTRY_CUTOFF_TIME=14:50` anchor
+  (`signal_cutoff = entry_cutoff - bars_from_signal_to_entry × 5min`), not the same
+  numbers reused verbatim. Applied directly: Liquidity's sweep cutoff = 14:40.
+- New `backtesting_rules.md` §14: standard cross-strategy comparison row format
+  (all 20 columns defined), matching `monthly_reconciliation.py`'s report shape —
+  the format now used for `smc/nifty.csv`/`smc/basket.csv` and future strategies.
+- Reproducible background-task flakiness this session: multiple `run_in_background`
+  launches were silently killed with zero system-level evidence (no OOM, no crash
+  trace) — worked around by running in the foreground with a long timeout (auto-
+  moves to background on timeout without the same issue) rather than launching
+  detached background jobs directly. Not root-caused; noted for awareness.
+
+Next: FVG (index 05), same 4-variant-matrix discipline as Liquidity, per `01_plan.md`.

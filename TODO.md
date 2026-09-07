@@ -12,24 +12,26 @@
 # come up (e.g. recurring data checks, sweep re-runs with an objective gate).
 
 P1  Strategy raw-edge search (Algo_Trading/Framework_V2/strategies/) — ACTIVE
-        2026-09-06: monthly_reconciliation.py's 6 new replay engines parity-checked against
-        DS3, 2 real bugs found+fixed (one-bar-stale indicators; indicators skipped during
-        position-guard skip-ahead) — now 99.6-100% trade-level parity. 95% CI columns added
-        to the report (distinguishes confidently-zero/inconclusive/confidently-not-zero).
-        August 2026 verdict (post-fix): all 9 sources negative alpha; ma_long_flip_v0 and
-        ma_short_v1 are genuinely inconclusive (wide CI), the other 7 confidently negative.
+        2026-09-07/08: SMC Liquidity concept fully tested — recovered claude.ai session's
+        prior concepts/backtest results into smc/ (02_concepts_summary.md, 03_backtest_
+        results.md), then built+ran the full 4-variant matrix ({swing low,swing high} x
+        {long,short}) fresh against DS3. ALL 4 RULED OUT. V1 (swing low+short, contrarian)
+        and V2 (swing high+short, true mirror) cleared the soft-triage gate and got full
+        alpha treatment: both show confidently, decisively NEGATIVE alpha (p<0.001, CIs
+        entirely clear of zero) — not "no edge," a real negative one, same pattern as the
+        flagship family. Full detail: smc/04_liquidity_findings.md. Also: lowered the
+        backtesting_rules.md §12 "ruled out" gate 0.85->0.75 and reframed as soft pre-
+        triage (found the old 0.85 would have wrongly killed 3 of the 6 locked flagship
+        variants at their own raw-round stage).
         Immediate next steps, in order:
-        1. Resume the SMC rebuild (Liquidity/FVG/OB standalone tests, then as filters on the
-           3 strategy families) — fully unblocked now that the deploy above is validated.
-        2. Resend/manually fix the DS3 data bug (ICICIBANK/ITC/SBIN zero-filled OHLC, 2015) —
-           delegation to cpgeneric expired unapproved; direct Kite Connect API confirmed
-           working (use that, not Kite MCP's historical_data which is broken at the app level).
-        3. Full diff-review of strategies/_archive_pre_strategies_consolidation/ (the 4
-           archived folders) to decide what's safe to permanently delete — separate task,
-           not urgent.
-        4. Live bot core file renaming (ma_rejection_v1_core.py etc.) for naming consistency
-           with strategies/ convention — deferred "to another day," not blocking anything.
-        Full detail: PROGRESS_HISTORY.md 2026-09-06 entry.
+        1. FVG (index 05) — same 4-variant-matrix discipline as Liquidity, next per
+           01_plan.md's ordering.
+        2. Then OB (index 06).
+        3. Resend/manually fix the DS3 data bug (ICICIBANK/ITC/SBIN zero-filled OHLC, 2015) —
+           direct Kite Connect API confirmed working (not Kite MCP's historical_data).
+        4. Full diff-review of strategies/_archive_pre_strategies_consolidation/ — not urgent.
+        5. Live bot core file renaming for naming consistency — deferred "to another day."
+        Full detail: PROGRESS_HISTORY.md 2026-09-07/08 entry.
 
 P2  MemLabs feature screening -> model pipeline — new plan doc: memlabs/53_feature_screening_
         to_model_pipeline.md. Continuation of notebook 35, not a restart.
