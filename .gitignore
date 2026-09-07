@@ -7,6 +7,7 @@ _explore/
 # IDE files
 .idea/
 .vscode/
+*.code-workspace
 
 # Auto-modified by tools (not for commit)
 .obsidian/workspace.json
