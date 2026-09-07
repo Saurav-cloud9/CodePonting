@@ -15,6 +15,11 @@
           CodePonting copy (source of truth) in the same pass
   CCG   = trigger to delegate the current task to Grok — write the instruction
           into CCG_ORCHESTRATION.md (project root) instead of doing it in-session
+  kbu   = "kite bot update" — run ONE-SHOT (no -f follow):
+          `sudo journalctl -u kitebot.service --since today -o cat | tail -n 60`
+          and report current state (latest PnL Summary line + any recent exits/
+          open positions). No persistent Monitor — re-run kbu each time an update
+          is wanted.
 
 ── CROSS-SESSION PEER NAMING ────────────────────────────────────
 
