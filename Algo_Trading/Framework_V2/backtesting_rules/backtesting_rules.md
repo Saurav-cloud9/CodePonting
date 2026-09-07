@@ -250,9 +250,31 @@ Both must be met simultaneously
 
 A strategy is ruled out when:
 ```
-Best ZPF across all 90 combos < 0.85  (no meaningful edge)
-OR  ZPF > 1.0 but only achieved with N < 500 trades (statistically thin)
+ZPF > 1.0 but only achieved with N < 500 trades (statistically thin)
 ```
+
+### Soft pre-triage (not a final verdict) — lowered 0.85→0.75, 2026-09-07
+
+```
+If Best ZPF across all 90 combos < 0.75: skip the full SL-sweep + exit-mix + alpha
+rigor (§9-§11) — not worth the compute on a result this far from viable.
+```
+
+This is a cheap early screen to avoid wasting effort on decisively dead signals, NOT a
+strict "ruled out, stop" rule the way it was previously worded (as `< 0.85`) — checked
+against real data 2026-09-07 and found that **0.85 would have wrongly killed 3 of the 6
+currently-locked variants** (`ma_short_v1`=0.815, `ma_short_v2vwap`=0.834,
+`ma_long_flip_v0`=0.841 — all below 0.85 at the raw-round stage, all locked anyway after
+the full Table 2/3 treatment). The actual pass/fail decision has always been made by the
+SL-sweep + exit-mix + alpha rigor, never by this raw number alone.
+
+0.75 is calibrated from two empirical facts, not picked arbitrarily:
+- The raw→healthy-subset ZPF gap is remarkably consistent across all 6 locked variants:
+  0.083-0.102 (mean ~0.09), regardless of strategy family. A raw score of 0.75 implies a
+  healthy-subset score around ~0.66 — nowhere near viable.
+- No single filter tested anywhere in this project's history (VWAP, RSI, EMA) has closed
+  a gap anywhere near the ~0.34 needed to bring a 0.66 up to 1.0 — typical lift is a few
+  points, not tens of points. Below 0.75, no realistic filter combination rescues it.
 
 ---
 
