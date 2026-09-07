@@ -15,11 +15,14 @@
           CodePonting copy (source of truth) in the same pass
   CCG   = trigger to delegate the current task to Grok — write the instruction
           into CCG_ORCHESTRATION.md (project root) instead of doing it in-session
-  kbu   = "kite bot update" — run ONE-SHOT (no -f follow):
+  kbu   = "kite bot update" — ONE-SHOT, no follow/Monitor. Report current state
+          (latest PnL Summary + recent exits + open positions) from:
           `sudo journalctl -u kitebot.service --since today -o cat | tail -n 60`
-          and report current state (latest PnL Summary line + any recent exits/
-          open positions). No persistent Monitor — re-run kbu each time an update
-          is wanted.
+          A VM crontab also runs scripts/bot_snapshot.sh every :00/:30 during
+          market hours (09:30–15:30 IST, Mon–Fri), appending compact status lines
+          to ~/kite_oracle_papertrading/data/monitoring/snapshots_YYYY-MM-DD.log
+          — independent of any CC session. `tail` that file for the half-hourly
+          history; use journalctl for full live detail.
 
 ── CROSS-SESSION PEER NAMING ────────────────────────────────────
 
