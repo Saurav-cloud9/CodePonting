@@ -249,10 +249,20 @@ Execution rules:
   - CC updates TODO.md (max 5 items, P1 priority first)
   - CC appends to PROGRESS_HISTORY.md (never delete existing entries)
   - CC calls /remember:remember to save state
-  - After all the above steps are done, check README.md's last-commit date
-    (`git log -1 --format=%cd README.md`). If it's been ≥7 days, print one line
-    below the rest of the RS summary: "README hasn't been updated in N days."
-    No action beyond the flag — Saurav decides whether to act on it.
+  - After all the above steps are done, check when README.md's content last
+    genuinely changed — NOT just `git log -1`, which is fooled by repo-wide
+    mechanical commits (line-ending normalization, merges that touch nothing)
+    that reset the date without any real edit (caught this exact case
+    2026-09-08: `git log -1` said 18 days, true answer was 132). Walk commits
+    newest→oldest and take the first whose whitespace-ignoring diff on the
+    file is non-empty:
+      git log --format=%H -- README.md | while read c; do
+        [ -n "$(git diff -w --no-color "$c"^ "$c" -- README.md 2>/dev/null)" ] \
+          && echo "$c" && break
+      done
+    If that commit's date is ≥7 days ago, print one line below the rest of the
+    RS summary: "README hasn't had a genuine content update in N days." No
+    action beyond the flag — Saurav decides whether to act on it.
 
   ### When Saurav types "CCP" (Context Catch-Up / Peek):
   - Read these files in order:
