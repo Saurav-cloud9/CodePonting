@@ -19,18 +19,27 @@ ATR = rolling 14-period mean of TR
 
 ## 2. Entry Rules
 
-> ⚠️ **Strategy-specific, not universal** (clarified 2026-09-07): this whole section —
-> the entry-signal shape AND the specific cutoff times below — is calibrated for fv2's
-> flagship MA-bounce family (ma_short/6bce/ma_long_flip), where the entry bar is always
-> exactly 1 bar after the signal/touch bar. A structurally different strategy (e.g. any
-> SMC concept — Liquidity, FVG, OB — where the chain is signal → confirmation → entry,
-> one bar LONGER than the flagship's) must NOT blindly reuse 14:45/14:50 verbatim: with
-> an extra bar between signal and entry, those same numeric cutoffs would leave less
-> runway before the 15:00 hard EOD (or even push entry past it). Recompute the cutoff
-> for each new strategy from its own signal-to-entry bar count, using the same *reasoning*
-> (leave enough candles of runway before 15:00) rather than the same *numbers*. Sections
-> 3-5, 7, 8, and 12 below (SL/TP sizing, exit logic, position guard, charges, metrics,
-> viability) ARE universal/project-wide and apply to any strategy unchanged.
+> ⚠️ **Only ENTRY_CUTOFF_TIME is universal — the signal-time cutoff is strategy-specific**
+> (clarified 2026-09-07, sharpened same day). `ENTRY_CUTOFF_TIME = 14:50` is a property
+> of the ENTRY bar alone — how much runway a freshly-opened position needs before the
+> 15:00 hard EOD — and that reasoning doesn't depend on how many bars led up to it, so
+> **this stays 14:50 for every strategy, always.**
+>
+> What changes per strategy is the signal-time cutoff (`LAST_TOUCH_TIME` for the
+> flagship, or whatever the analogous "last signal bar" concept is called elsewhere),
+> derived BACKWARD from the fixed entry cutoff:
+> ```
+> signal_cutoff = ENTRY_CUTOFF_TIME - (bars_from_signal_to_entry × 5min)
+> ```
+> Flagship family (ma_short/6bce/ma_long_flip): signal → entry is 1 bar apart →
+> `14:50 - 5min = 14:45`, exactly the locked `LAST_TOUCH_TIME` below. A structurally
+> different strategy (e.g. Liquidity: sweep → confirmation → entry, 2 bars apart) needs
+> its OWN signal cutoff from the same formula — e.g. `14:50 - 10min = 14:40` for the
+> sweep candle — never 14:45 reused verbatim, since that would leave the wrong amount of
+> runway for a chain of a different length. Sections 3-5, 7, 8, and 12 below (SL/TP
+> sizing, exit logic, position guard, charges, metrics, viability) are fully universal/
+> project-wide and apply to any strategy unchanged — only this section's specific times
+> are flagship-calibrated.
 
 - Entry signal bar must have `hour < 15`
 - Entry is always at the **open of the next bar** (i+1), same trading day as the signal bar
