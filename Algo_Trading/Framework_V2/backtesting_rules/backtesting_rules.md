@@ -19,11 +19,25 @@ ATR = rolling 14-period mean of TR
 
 ## 2. Entry Rules
 
+> ⚠️ **Strategy-specific, not universal** (clarified 2026-09-07): this whole section —
+> the entry-signal shape AND the specific cutoff times below — is calibrated for fv2's
+> flagship MA-bounce family (ma_short/6bce/ma_long_flip), where the entry bar is always
+> exactly 1 bar after the signal/touch bar. A structurally different strategy (e.g. any
+> SMC concept — Liquidity, FVG, OB — where the chain is signal → confirmation → entry,
+> one bar LONGER than the flagship's) must NOT blindly reuse 14:45/14:50 verbatim: with
+> an extra bar between signal and entry, those same numeric cutoffs would leave less
+> runway before the 15:00 hard EOD (or even push entry past it). Recompute the cutoff
+> for each new strategy from its own signal-to-entry bar count, using the same *reasoning*
+> (leave enough candles of runway before 15:00) rather than the same *numbers*. Sections
+> 3-5, 7, 8, and 12 below (SL/TP sizing, exit logic, position guard, charges, metrics,
+> viability) ARE universal/project-wide and apply to any strategy unchanged.
+
 - Entry signal bar must have `hour < 15`
 - Entry is always at the **open of the next bar** (i+1), same trading day as the signal bar
 - If `hour[i+1] >= 15` or date changes → signal is skipped entirely
 
-### Touch / Entry cutoff (matches live bot, `ma_rejection_v1_core.py`)
+### Touch / Entry cutoff (flagship MA-bounce family only — see warning above; matches
+### live bot, `ma_rejection_v1_core.py`)
 
 - **LAST_TOUCH_TIME = 14:45** — the touch/signal bar's time must be `<= 14:45`. A touch
   registering at 14:50 or later is not recognized at all, since the resulting entry
@@ -238,6 +252,63 @@ OR  ZPF > 1.0 but only achieved with N < 500 trades (statistically thin)
 - Use inline single-pass per combo (no candidate pre-storage)
 - Position guard: i = k + 1 (resume from exit bar + 1)
 - Exit loop starts at entry bar (k = ei, not ei + 1)
+
+---
+
+## 14. Standard Cross-Strategy Comparison Row Format
+
+*Added 2026-09-07. Distinct from §9's format — §9 is exhaustive detail for evaluating*
+*ONE strategy's own 90-combo sweep; this is a compact ONE-ROW summary per strategy,*
+*for comparing MULTIPLE strategies side by side (e.g. across all 5 SMC concepts as*
+*each gets tested). Column set matches `monthly_reconciliation.py`'s report output*
+*on the live bot VM exactly — reuse that shape, don't invent a new one per strategy.*
+
+```
+source              strategy/variant name (e.g. "LIQUIDITY_V0")
+sl_tp               locked SL/TP combo, "x"-separated (e.g. "4.5x3.0") — never "/"
+                     (a "/"-joined number pair is exactly what Excel/Sheets
+                     auto-reinterprets as a date on open)
+n_trades            total trade count
+pf                  raw profit factor (pre-charge)
+sh_d                raw daily Sharpe, annualised (pre-charge)
+zpf                 Zerodha profit factor (post-charge) — primary viability metric
+zsh_d               Zerodha daily Sharpe, annualised (post-charge)
+net_zpnl            total net zpnl, ₹
+sl_pct / tp_pct     % of trades exiting via SL / TP
+eod_plus_pct        % of trades exiting via EOD, profitable
+eod_minus_pct       % of trades exiting via EOD, unprofitable
+eod_pct             eod_plus_pct + eod_minus_pct combined (mandatory exit-mix check, §9)
+alpha_capm          CAPM alpha, ₹/day — raw daily zpnl regressed against a market
+                     factor's daily % return (NEVER normalize by pcap — see CLAUDE.md's
+                     PCAP/TCAP section). n in this regression = trading DAYS, not
+                     n_trades (see TODO.md's GLOSSARY) — e.g. thousands of trades can
+                     roll up into a much smaller n_days for an 11-year DS3 backtest.
+p_alpha_capm        two-tailed p-value on alpha (H0: alpha=0)
+alpha_capm_cumulative  alpha × n_days — exact by OLS construction (residuals sum to
+                     exactly zero), the true total ₹ attributable to skill over the
+                     period
+ci_low_capm / ci_high_capm  95% confidence interval on alpha (alpha ± t_critical×SE).
+                     Read alongside p_alpha_capm, not instead of it — distinguishes
+                     "confidently near-zero" (narrow CI hugging zero) from
+                     "inconclusive" (wide CI that happens to cross zero) from
+                     "confidently not-zero" (CI entirely clear of zero) — same
+                     p<0.05 threshold, very different practical read (added 2026-09-06
+                     after this exact ambiguity mattered for a real result)
+beta_capm           CAPM beta — the strategy's ₹/day sensitivity to the market
+                     factor's 1% move (NOT a normalized/dimensionless stock-style beta)
+se_alpha_capm       standard error of alpha — feeds both p_alpha_capm and the CI
+t_alpha_capm        alpha / se_alpha_capm
+```
+
+3-decimal fixed-width string formatting on `zpf` and every `*_capm` column
+(`round()` alone drops trailing zeros — format as `f'{x:.3f}'` explicitly).
+
+Run against BOTH NIFTY50 and the 30-stock equal-weighted basket as separate market
+factors (two output files) — cross-validates that a finding isn't a market-factor
+artifact, not two independent claims. For SMC/new-strategy backtests, log results into
+`strategies/smc/basket.csv` and `strategies/smc/nifty.csv` (no numeric index — these
+are running comparison logs referenced every time a new concept is tested, not a
+single strategy's own numbered pipeline output).
 
 ---
 
