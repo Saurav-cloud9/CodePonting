@@ -249,6 +249,10 @@ Execution rules:
   - CC updates TODO.md (max 5 items, P1 priority first)
   - CC appends to PROGRESS_HISTORY.md (never delete existing entries)
   - CC calls /remember:remember to save state
+  - After all the above steps are done, check README.md's last-commit date
+    (`git log -1 --format=%cd README.md`). If it's been ≥7 days, print one line
+    below the rest of the RS summary: "README hasn't been updated in N days."
+    No action beyond the flag — Saurav decides whether to act on it.
 
   ### When Saurav types "CCP" (Context Catch-Up / Peek):
   - Read these files in order:
