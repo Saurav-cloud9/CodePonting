@@ -54,7 +54,9 @@ Recovered 2026-09-07 from the bookmarked claude.ai session (see `02_concepts_sum
 old TODO, now resolved): full concept detail + entry logic + diagrams in
 `02_concepts_summary.md`, all backtest results in `03_backtest_results.md`, reference
 diagrams in `diagrams/`, and an early illustrative (not production) Python sketch of the
-Liquidity Sweep signal in `reference_liquidity_sweep_signal_illustrative.py`.
+Liquidity Sweep signal in `04_liquidity_sweep_signal_illustrative.py` — index 04 reserved
+for Liquidity-concept work going forward (FVG/OB/BOS will each get their own index block
+similarly once work on them starts).
 
 Per `03_backtest_results.md`: Liquidity (as "LSS"), FVG, and OB were all already backtested
 on DS3's full 11-year history and **failed the project's ZPF>1.0 viability bar** as

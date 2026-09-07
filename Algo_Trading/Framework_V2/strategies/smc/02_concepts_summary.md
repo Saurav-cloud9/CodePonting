@@ -5,7 +5,7 @@
 > replacing this file's earlier, shorter summary. Actual backtest results for these 3
 > concepts (Liquidity/FVG/OB) live in `03_backtest_results.md`, reference diagrams in
 > `diagrams/`, an early illustrative (not production) script in
-> `reference_liquidity_sweep_signal_illustrative.py`.
+> `04_liquidity_sweep_signal_illustrative.py` (index 04 = Liquidity's reserved block).
 
 ---
 
@@ -515,6 +515,12 @@ For fv2 long entries:
 ---
 
 ## 5. Inducement
+
+> **Mechanically, this is the same liquidity-grab/sweep mechanic as Concept #1 (Liquidity)
+> above** — just applied as a smaller pre-entry trap rather than the primary reversal
+> signal. Kept as its own section because it functions as a general timing filter across
+> all three zone-based setups (Liquidity, FVG, OB), not something unique to Liquidity's own
+> entry logic — so of the 5 concepts listed, there are really 4 distinct mechanisms.
 
 ### Definition
 A small deliberate liquidity grab just before the real move, designed to trap early entries before smart money commits to the direction.
