@@ -53,6 +53,27 @@ P4  Test weak Pearson-r signal(s) through actual RR/SL-TP exits (not yet started
         the right ATR-based SL/TP (this project's actual convention) — genuinely untested axis,
         separate from model/feature choice.
 
+P5  DS3 monthly gap-fill automation — new, not yet started (2026-09-06)
+        Sparked by a "loop engineering" discussion (X/LinkedIn post) — good-fit candidate per
+        the 4-condition test (repeats monthly, mechanically verifiable, no judgment call).
+        No prior recurring process exists — CCG/Grok did July+Aug fills as one-off manual
+        delegations (Grok subscription now paused). Plan drafted, not yet built:
+        1. New script (not the old append_ds3_2026_gap.py, which only appends pre-staged JSON
+           from manual Kite MCP calls) — fetch directly via KiteConnect SDK using the bot's
+           existing auto-refreshing token (same auth as monthly_reconciliation.py), auto-
+           detect last date per symbol, append (never overwrite), recompute ma20/atr14/
+           atr14_wilder for new rows only. Same for NIFTY50.parquet.
+        2. Objective gate: per-symbol continuous coverage to month-end, no NaN gaps outside
+           warmup, row count sanity vs NSE holiday calendar. Fail loudly, not silently.
+        3. Schedule via plain crontab (~07:00 IST on the 1st) — well before
+           monthly_reconciliation.py's 09:30 IST run. Note: recon does NOT read DS3 files
+           directly (independent KiteConnect fetch) — running DS3 first is good discipline
+           for consistency, not a hard blocking dependency.
+        4. Log each run (rows added, date range, gate pass/fail) to a dedicated file; reuse
+           the bot's existing ntfy alert channel on gate failure.
+        Saurav has follow-up questions on how monthly_reconciliation.py itself works before
+        proceeding — resume there next session.
+
 # ── PARKED / FUTURE ───────────────────────────────────────────
 F1  Single-stock trade dump (TATAMOTORS) — verify SHORT calculations
 F2  Nifty Futures — Beluga signal on Nifty (post HMA Bounce investigation)
@@ -76,10 +97,12 @@ F11 StatQuest (Josh Starmer, YouTube) — standing reference source, explore ove
         feature selection). First video logged: regime_model/statquest/roc_auc.md.
 
 # ── GLOSSARY ───────────────────────────────────────────────────
-n        = trade count (matches every report's own "n" column, e.g. monthly_recon_*.csv —
-           metrics()'s n=len(trades_df)). Never repurpose this symbol for anything else.
-n_days   = number of trading days feeding a CAPM/alpha regression (daily-aggregated zpnl
-           vs daily market return) — a completely different count from n above (e.g. 1014
-           trades roll up into n_days=21 for FRESH_6BCE_V0's August 2026 regression).
-           Locked 2026-09-06 after n/trade-count vs n/day-count caused real confusion
-           mid-derivation-walkthrough.
+n        = number of trading days feeding a CAPM/alpha regression (daily-aggregated zpnl
+           vs daily market return) — matches the clean "df = n-2" derivation notation.
+           capm()'s own n variable already meant this correctly; no code change needed there.
+n_trades = trade count (matches every report's own column, e.g. monthly_recon_*.csv —
+           metrics()'s n_trades=len(trades_df)). A completely different count from n above
+           (e.g. 1014 trades roll up into n=21 days for FRESH_6BCE_V0's August 2026
+           regression). Flipped 2026-09-06 (was n=trades/n_days=days) after the original
+           pairing caused real confusion mid-derivation-walkthrough; metrics()'s dict key
+           renamed n -> n_trades to match.
