@@ -253,28 +253,20 @@ A strategy is ruled out when:
 ZPF > 1.0 but only achieved with N < 500 trades (statistically thin)
 ```
 
-### Soft pre-triage (not a final verdict) — lowered 0.85→0.75, 2026-09-07
+### No automated pre-filter — removed 2026-09-08 (was 0.85, briefly 0.75)
 
-```
-If Best ZPF across all 90 combos < 0.75: skip the full SL-sweep + exit-mix + alpha
-rigor (§9-§11) — not worth the compute on a result this far from viable.
-```
-
-This is a cheap early screen to avoid wasting effort on decisively dead signals, NOT a
-strict "ruled out, stop" rule the way it was previously worded (as `< 0.85`) — checked
-against real data 2026-09-07 and found that **0.85 would have wrongly killed 3 of the 6
-currently-locked variants** (`ma_short_v1`=0.815, `ma_short_v2vwap`=0.834,
-`ma_long_flip_v0`=0.841 — all below 0.85 at the raw-round stage, all locked anyway after
-the full Table 2/3 treatment). The actual pass/fail decision has always been made by the
-SL-sweep + exit-mix + alpha rigor, never by this raw number alone.
-
-0.75 is calibrated from two empirical facts, not picked arbitrarily:
-- The raw→healthy-subset ZPF gap is remarkably consistent across all 6 locked variants:
-  0.083-0.102 (mean ~0.09), regardless of strategy family. A raw score of 0.75 implies a
-  healthy-subset score around ~0.66 — nowhere near viable.
-- No single filter tested anywhere in this project's history (VWAP, RSI, EMA) has closed
-  a gap anywhere near the ~0.34 needed to bring a 0.66 up to 1.0 — typical lift is a few
-  points, not tens of points. Below 0.75, no realistic filter combination rescues it.
+A numeric pre-triage gate was tried at both 0.85 and 0.75 and removed entirely — during
+this project's current exploratory phase (building intuition for the range of ZPF/alpha
+outcomes across many untested signal shapes, not yet locking anything for paper trading),
+a human eyeball on the raw numbers is enough to judge "not worth locking in" without an
+automated rule skipping the full rigor. Compute Table 2/3 (and alpha) for every combo/
+variant regardless of its raw-round ZPF — never substitute a `RULED_OUT` placeholder for
+an actual computed value, since seeing the genuine number (however weak) is exactly the
+data this phase exists to build intuition from. This may be reinstated later once the
+project moves from exploration to actually selecting candidates for paper trading, but
+should be recalibrated fresh against whatever's locked at that time, not reused from this
+entry — the 0.85→0.75 history above already showed a fixed number silently drifts out of
+sync with the actual population of variants being tested.
 
 ---
 
