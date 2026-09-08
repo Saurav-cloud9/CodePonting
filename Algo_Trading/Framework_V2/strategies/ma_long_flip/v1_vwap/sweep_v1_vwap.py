@@ -77,6 +77,8 @@ def run_combo(arrays, sl_m, tp_m):
             if ei >= n or date[ei] != date[i] or time_[ei] > ENTRY_CUTOFF_TIME:
                 i += 1; continue
             entry = open_[ei]; atr = atr14[i]
+            if np.isnan(entry):  # DS3 data gap on the entry bar (e.g. INFY 2015-04-24)
+                i += 1; continue
             sl = entry + sl_m * atr   # SHORT: stop above
             tp = entry - tp_m * atr   # SHORT: target below
             signal_date = date[i]

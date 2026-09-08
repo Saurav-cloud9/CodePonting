@@ -134,6 +134,8 @@ def run_combo(stocks, sl_m, tp_m):
                 i += 1; continue
 
             entry_px = open_[ei]
+            if np.isnan(entry_px):  # DS3 data gap on the entry bar (e.g. INFY 2015-04-24)
+                i += 1; continue
             sig_atr = atr[i]  # ATR from the sweep (signal) candle, not the entry candle
             sl = entry_px - sl_m * sig_atr   # LONG: stop below
             tp = entry_px + tp_m * sig_atr   # LONG: target above

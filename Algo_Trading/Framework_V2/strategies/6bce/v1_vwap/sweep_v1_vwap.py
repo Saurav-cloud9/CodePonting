@@ -114,6 +114,9 @@ def run_combo(stocks, sl_m, tp_m):
                 continue
             # enter SHORT
             entry_px   = open_[ei]
+            if np.isnan(entry_px):  # DS3 data gap on the entry bar (e.g. INFY 2015-04-24)
+                i += 1
+                continue
             sl         = entry_px + sl_m  * atr[i]
             tp        = entry_px - tp_m * atr[i]
             trade_date = date[i]
