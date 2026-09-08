@@ -335,6 +335,36 @@ single strategy's own numbered pipeline output).
 
 ---
 
+## 15. NaN-Safe Aggregation — Mandatory (added 2026-09-08)
+
+DS3 has known, real per-stock/per-day data gaps (e.g. ICICIBANK/ITC/SBIN zero-filled
+OHLC in 2015, DIVISLAB un-split-adjusted, and INFY — 2015-04-24, only the 09:15 bar is
+valid, the remaining 74 bars that day are entirely NaN across OHLCV). A signal can
+legitimately form on the last valid bar before a gap, then land its ENTRY on the first
+NaN bar of the gap — giving `entry_px = NaN` for that one trade, discovered 2026-09-08
+via `6bce_v0`/`6bce_v1vwap` on this exact INFY date.
+
+**The danger is silent, not loud**: a single NaN trade doesn't crash anything — it
+silently poisons any aggregate computed with a NaN-propagating operation. Confirmed
+which stats are vulnerable and which aren't:
+- **Not vulnerable** (skip NaN by construction, already safe): ZPF/PF — computed via
+  sign-filtered sums (`pnl[pnl>0].sum()`, `pnl[pnl<0].sum()`; NaN fails both comparisons
+  so is naturally excluded). Daily-aggregated Sh(D)/ZSh(D)/alpha/beta — `pandas`
+  `.groupby().sum()` defaults to `skipna=True`, silently drops NaN within a group.
+- **Vulnerable** (raw numpy `.sum()`/`.mean()` on the full trade array, no sign filter,
+  no groupby): `net_zpnl` specifically — a single NaN trade among 100,000+ silently
+  makes the whole total `NaN`. Caught this way in `smc/master_nifty.csv` /
+  `master_basket.csv` — `net_zpnl` came back blank for exactly the 2 variants that
+  happened to touch the INFY gap.
+
+**Rule**: any NEW aggregate stat computed directly over a raw trade-level pnl/zpnl
+array (not sign-filtered, not through a pandas groupby) MUST use `np.nansum`/
+`np.nanmean` etc., never bare `.sum()`/`.mean()`. Additionally, log the NaN count
+whenever computing metrics (`np.isnan(pnl_arr).sum()`) — a nonzero count is real
+signal that a new DS3 gap was just hit, not noise to suppress silently.
+
+---
+
 ## ARCHIVED — Kotak Neo Charges (NPF)
 
 *Kept for reference. Not currently in use — broker is Zerodha.*
