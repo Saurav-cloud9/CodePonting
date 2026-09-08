@@ -1,0 +1,138 @@
+<svg viewBox="0 0 980 660" xmlns="http://www.w3.org/2000/svg" font-family="monospace">
+  <!-- Background -->
+  <rect width="980" height="660" fill="#0f172a"/>
+  <text x="20" y="28" fill="#e2e8f0" font-size="16" font-weight="bold">Liquidity Sweep — V1: SHORT Setup (Contrarian, same trigger as V0)</text>
+  <text x="20" y="45" fill="#64748b" font-size="10.5">Built fresh 2026-09-08. Conditions 1-4 are IDENTICAL to V0 — only condition 5 flips to SHORT, betting the bullish-looking reversal fails.</text>
+
+  <!-- Phase background bands -->
+  <rect x="55"  y="65" width="320" height="345" rx="6" fill="#a78bfa" opacity="0.045"/>
+  <rect x="555" y="65" width="360" height="345" rx="6" fill="#ef4444" opacity="0.045"/>
+  <text x="215" y="82" fill="#94a3b8" font-size="11.5" font-weight="bold" text-anchor="middle">PHASE 1 — SWING LOW (N=2 fractal, same as V0)</text>
+  <text x="735" y="82" fill="#94a3b8" font-size="11.5" font-weight="bold" text-anchor="middle">PHASE 2 — SWEEP, CONFIRM, SHORT ENTRY</text>
+
+  <!-- Price gridlines -->
+  <g stroke="#1e293b" stroke-width="1">
+    <line x1="40" y1="105" x2="920" y2="105"/>
+    <line x1="40" y1="165" x2="920" y2="165"/>
+    <line x1="40" y1="225" x2="920" y2="225"/>
+    <line x1="40" y1="285" x2="920" y2="285"/>
+    <line x1="40" y1="345" x2="920" y2="345"/>
+  </g>
+  <g fill="#475569" font-size="10" text-anchor="end">
+    <text x="34" y="109">108</text>
+    <text x="34" y="169">104</text>
+    <text x="34" y="229">100</text>
+    <text x="34" y="289">96</text>
+    <text x="34" y="349">92</text>
+  </g>
+
+  <!-- ── C1..C5: swing low formation — IDENTICAL price data to V0 ── -->
+  <line x1="90" y1="125" x2="90" y2="190" stroke="#ef4444" stroke-width="1.8"/>
+  <rect x="76" y="145" width="28" height="35" fill="#ef4444" rx="2"/>
+
+  <line x1="150" y1="155" x2="150" y2="220" stroke="#ef4444" stroke-width="1.8"/>
+  <rect x="136" y="170" width="28" height="40" fill="#ef4444" rx="2"/>
+
+  <!-- C3: the swing low (lowest of all 5) -->
+  <line x1="210" y1="180" x2="210" y2="260" stroke="#ef4444" stroke-width="1.8"/>
+  <rect x="196" y="200" width="28" height="40" fill="#ef4444" rx="2"/>
+
+  <line x1="270" y1="165" x2="270" y2="235" stroke="#22c55e" stroke-width="1.8"/>
+  <rect x="256" y="180" width="28" height="35" fill="#22c55e" rx="2"/>
+
+  <!-- C5 = bar i+2, swing low confirmed here -->
+  <line x1="330" y1="135" x2="330" y2="210" stroke="#22c55e" stroke-width="1.8"/>
+  <rect x="316" y="150" width="28" height="35" fill="#22c55e" rx="2"/>
+
+  <!-- Candle labels directly under each one -->
+  <g fill="#e2e8f0" font-size="10.5" text-anchor="middle">
+    <text x="90"  y="405">C1</text>
+    <text x="150" y="405">C2</text>
+    <text x="210" y="405">C3</text>
+    <text x="270" y="405">C4</text>
+    <text x="330" y="405">C5 (i+2)</text>
+  </g>
+
+  <!-- Badge ① at the swing low -->
+  <circle cx="210" cy="260" r="12" fill="#1e1535" stroke="#a78bfa" stroke-width="1.8"/>
+  <text x="210" y="264" fill="#a78bfa" font-size="12" font-weight="bold" text-anchor="middle">1</text>
+
+  <!-- swing_low_level dashed line — spans from C3 across to entry zone -->
+  <line x1="210" y1="260" x2="820" y2="260" stroke="#a78bfa" stroke-width="1.6" stroke-dasharray="8,5"/>
+  <text x="825" y="264" fill="#a78bfa" font-size="10">swing_low_level</text>
+
+  <!-- Badge ② — distance / time-skip indicator -->
+  <line x1="345" y1="260" x2="555" y2="260" stroke="#475569" stroke-width="1.2" stroke-dasharray="2,6"/>
+  <circle cx="450" cy="230" r="12" fill="#1a1a2e" stroke="#f59e0b" stroke-width="1.8"/>
+  <text x="450" y="234" fill="#f59e0b" font-size="12" font-weight="bold" text-anchor="middle">2</text>
+  <text x="450" y="212" fill="#94a3b8" font-size="9.5" text-anchor="middle">&#8804;50 bars</text>
+
+  <!-- ── Sweep candle: wick pierces well BELOW swing_low_level, closes ABOVE it —
+       SAME price action as V0 (this is the visible "bullish reversal" everyone sees) ── -->
+  <line x1="600" y1="195" x2="600" y2="320" stroke="#eab308" stroke-width="2.6"/>
+  <rect x="586" y="205" width="28" height="28" fill="#22c55e" rx="2"/>
+  <text x="600" y="405" fill="#eab308" font-size="10.5" text-anchor="middle" font-weight="bold">SWEEP</text>
+
+  <!-- Badge ③ near the pierce point, offset clear of the wick -->
+  <circle cx="645" cy="300" r="12" fill="#1a1a2e" stroke="#eab308" stroke-width="1.8"/>
+  <text x="645" y="304" fill="#eab308" font-size="12" font-weight="bold" text-anchor="middle">3</text>
+  <line x1="608" y1="300" x2="633" y2="300" stroke="#eab308" stroke-width="1" stroke-dasharray="2,3"/>
+
+  <!-- Confirmation candle — clearly above the line, same as V0 -->
+  <line x1="660" y1="150" x2="660" y2="205" stroke="#22c55e" stroke-width="1.8"/>
+  <rect x="646" y="160" width="28" height="30" fill="#22c55e" rx="2"/>
+  <text x="660" y="405" fill="#22c55e" font-size="10.5" text-anchor="middle" font-weight="bold">CONFIRM</text>
+  <circle cx="660" cy="128" r="12" fill="#1a1a2e" stroke="#22c55e" stroke-width="1.8"/>
+  <text x="660" y="132" fill="#22c55e" font-size="12" font-weight="bold" text-anchor="middle">4</text>
+
+  <!-- Entry candle — SAME open price as V0 (still the next bar's open), but now
+       marked as a SHORT (red ring, downward triangle) — the contrarian bet -->
+  <line x1="720" y1="115" x2="720" y2="170" stroke="#22c55e" stroke-width="1.8"/>
+  <rect x="706" y="125" width="28" height="30" fill="#22c55e" rx="2"/>
+  <circle cx="720" cy="140" r="24" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <polygon points="756,128 748,142 764,142" fill="#ef4444"/>
+  <text x="768" y="405" fill="#ef4444" font-size="10.5" text-anchor="start" font-weight="bold">SHORT ENTRY</text>
+  <circle cx="760" cy="112" r="12" fill="#1a1a2e" stroke="#ef4444" stroke-width="1.8"/>
+  <text x="760" y="116" fill="#ef4444" font-size="12" font-weight="bold" text-anchor="middle">5</text>
+
+  <!-- Hoped-for continuation — RED/declining, the OPPOSITE of what the visible
+       bullish-looking pattern suggests (V0's continuation goes up from here) -->
+  <line x1="795" y1="145" x2="795" y2="195" stroke="#ef4444" stroke-width="1.6"/>
+  <rect x="781" y="155" width="28" height="30" fill="#ef4444" rx="2" opacity="0.7"/>
+  <line x1="855" y1="175" x2="855" y2="220" stroke="#ef4444" stroke-width="1.6"/>
+  <rect x="841" y="185" width="28" height="28" fill="#ef4444" rx="2" opacity="0.55"/>
+  <text x="870" y="200" fill="#ef4444" font-size="9" font-style="italic" text-anchor="middle">hoped-for</text>
+  <text x="870" y="211" fill="#ef4444" font-size="9" font-style="italic" text-anchor="middle">direction</text>
+
+  <!-- ── Legend / condition key ── -->
+  <rect x="20" y="430" width="940" height="180" rx="8" fill="#1e293b"/>
+  <text x="35" y="452" fill="#e2e8f0" font-size="12" font-weight="bold">Locked Entry Logic — 5 Conditions (1-4 identical to V0, only 5 flips)</text>
+
+  <g font-size="11" fill="#cbd5e1">
+    <circle cx="42" cy="474" r="10" fill="#1e1535" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="42" y="478" fill="#a78bfa" font-size="10.5" font-weight="bold" text-anchor="middle">1</text>
+    <text x="62" y="478">Swing Low — N=2 fractal: low[i] &lt; lows of 2 bars each side. Confirmed once bar i+2 closes.</text>
+
+    <circle cx="42" cy="498" r="10" fill="#1a1a2e" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="42" y="502" fill="#f59e0b" font-size="10.5" font-weight="bold" text-anchor="middle">2</text>
+    <text x="62" y="502">Distance — the sweep candle must appear within 50 bars of the confirmed swing low.</text>
+
+    <circle cx="42" cy="522" r="10" fill="#1a1a2e" stroke="#eab308" stroke-width="1.5"/>
+    <text x="42" y="526" fill="#eab308" font-size="10.5" font-weight="bold" text-anchor="middle">3</text>
+    <text x="62" y="526">Sweep Candle — wick dips BELOW swing_low_level, but the candle CLOSES back ABOVE it.</text>
+
+    <circle cx="42" cy="546" r="10" fill="#1a1a2e" stroke="#22c55e" stroke-width="1.5"/>
+    <text x="42" y="550" fill="#22c55e" font-size="10.5" font-weight="bold" text-anchor="middle">4</text>
+    <text x="62" y="550">Confirmation — the very next candle after the sweep must ALSO close above swing_low_level.</text>
+
+    <circle cx="42" cy="570" r="10" fill="#1a1a2e" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="42" y="574" fill="#ef4444" font-size="10.5" font-weight="bold" text-anchor="middle">5</text>
+    <text x="62" y="574">Entry — go SHORT (contrarian) at the OPEN of the candle after confirmation — betting the visible bullish reversal fails.</text>
+  </g>
+
+  <line x1="35" y1="588" x2="945" y2="588" stroke="#334155" stroke-width="1"/>
+  <text x="35" y="603" fill="#ef4444" font-size="10">■ Red = bearish candle / SHORT marker</text>
+  <text x="270" y="603" fill="#22c55e" font-size="10">■ Green = bullish candle (unchanged from V0)</text>
+  <text x="560" y="603" fill="#a78bfa" font-size="10">— Purple dashed = swing_low_level</text>
+  <text x="800" y="603" fill="#94a3b8" font-size="10">Ref: 02_concepts_summary.md §1</text>
+</svg>
