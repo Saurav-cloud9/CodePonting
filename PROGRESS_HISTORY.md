@@ -1070,3 +1070,317 @@ closed out, VM backtesting env + VS Code Remote-SSH set up) ─────
            issue, set up Live Preview cleanly on Saurav's desktop WSL VS Code instead; verified
            2026-08-28 kite_oracle_papertrading run clean end-to-end (39 trades, PnL +29.31,
            ZPnL -13.22).
+
+## 2026-09-03/04 (fv2 VM session) -- strategies/ folder consolidation, EOD-riding artifact found + fixed, CAPM alpha confirms negative edge, SL/TP sweet-spot methodology
+
+### Folder consolidation -- Algo_Trading/Framework_V2/strategies/
+       [DONE]  Built strategies/ as the single home for ma_short (v0 locked/v1/v2_vwap),
+           6bce (v0/v1_vwap), replacing scattered copies across baseline_reserve/
+           baseline_explorations/Backtesting Extended. Old locations kept as-is (cleanup is a
+           separate later step, not done yet).
+       [DONE]  ma_long (bounce) renamed to ma_long_archived/ -- confirmed non-viable (PF/NPF
+           never crosses 1.0 any year), no more work planned on it.
+       [DONE]  Renamed exit_management/'s baseline-> v1 naming (01_ma_short_baseline_offline.py
+           -> 01_ma_short_v1_offline.py, ma_short_baseline_core.py -> ma_short_v1_core.py) --
+           matches the same v0/v1 versioning convention used everywhere else.
+
+### EOD-riding artifact -- found, diagnosed, fixed methodology project-wide
+       [DONE]  All 4 main sweeps (ma_short v1/v2_vwap, 6bce v0/v1_vwap) re-run with the refined
+           live-matching cutoff (LAST_TOUCH_TIME=14:45/ENTRY_CUTOFF_TIME=14:50, replacing the
+           pre-refinement 2026-07-29 numbers) -- found every family's raw-ZPF-ranked #1 combo
+           sits at the edge of the swept grid (SL/TP=6.0) and is 68-78% EOD-exit (SL/TP barely
+           bind intraday at that width) -- an artifact of exit-type mix, not genuine edge.
+       [DONE]  Added mandatory SL-hit%/TP-hit%/EOD+%/EOD-% exit-mix diagnostic to
+           backtesting_rules.md (any combo considered for deployment must report this
+           breakdown, healthy threshold EOD%<=30, plus an out-of-sample-validation guard
+           against picking a data-mined time-window post-hoc).
+       [DONE]  Touch-hour breakdown (by time-of-day of the touch bar) confirms the mechanism:
+           EOD-exit rate climbs from ~27-34% (09:00-13:00 touches) to 79% (14:00-15:00
+           touches) -- a touch late in the day has too little runway left before the 15:00
+           hard EOD to resolve via SL/TP regardless of width. Live-deployed combo (SL=2.0/
+           TP=4.5) EOD%=38.6% overall.
+       [DONE]  Live-deployed combo's SL%~TP% imbalance isolated: SL%=45.1 (close to healthy
+           combos' ~42-44%) but TP%=16.3 (vs ~29-30% for healthy combos) -- the wide TP=4.5x
+           target, not the SL side, is what's driving the extra EOD contamination.
+
+### CAPM alpha/p-value testing -- confirms significant NEGATIVE edge (not noise)
+       [DONE]  Ran manual OLS alpha/p-value (daily aggregate zpnl vs NIFTY50 daily return, all
+           30 stocks pooled) on 8 shortlisted combos (raw #1 + healthy-subset #1, for ma_short
+           v1/v2_vwap and 6bce v0/v1_vwap) -- ALL 8 show statistically significant NEGATIVE
+           alpha (p<0.0001, as low as 1.23e-130) -- cross-validated against a second market
+           factor (30-stock equal-weighted basket return instead of NIFTY50) with near-
+           identical results, confirming it's not a benchmark-choice artifact.
+       [DONE]  Tested "flip to LONG on ma_short's bearish touch" hypothesis (motivated by the
+           negative-alpha finding) -- RULED OUT: worse than SHORT on every metric/combo tested
+           (4 combos spread across the grid, all PF<1.0). Archived as ma_short_flip_archived/.
+           Reasoning correction: negative alpha for SHORT does not imply positive alpha for a
+           naive LONG flip, because flipping changes the whole exit structure, not just the
+           PnL sign.
+       [DONE]  Tested the mirror hypothesis "SHORT on ma_bounce's bullish touch" (ma_long_flip)
+           -- initially looked promising (PF>1.0 raw across 3 spot-check combos) but after full
+           90-combo sweep + exit-mix scrutiny, its healthy-subset ceiling (0.746) lands
+           mid-pack among the 5 families tested, not a standout. Built as strategies/
+           ma_long_flip/v0/ (6BCE-style 2-tier format, no legacy 3-bar version needed since
+           it's a brand-new hypothesis).
+       [DONE]  Found and fixed a real DS3 data-quality bug during this work: ICICIBANK, ITC,
+           SBIN have entire trading days (11/11/3 days, all April-July 2015) zero-filled across
+           all OHLC fields, not just close -- confirmed via direct Kite Connect historical_data
+           fetch that this is Zerodha's own source data gap (not a DS3 build bug); Yahoo
+           Finance can't help either (intraday data only goes back ~60 days). Delegation to
+           cpgeneric (via CCG-style cross-session message) held for Saurav's approval, expired
+           undelivered -- needs resend or manual fix next session. Meanwhile defensive masking
+           (close<=0 treated as missing) applied wherever needed.
+       [DONE]  Diagnosed Kite MCP's get_historical_data as broken at the app-level (generic
+           "Failed to get historical data" even for recent dates, after confirming the MCP
+           session itself reconnects fine via search_instruments) -- direct Kite Connect API
+           via the live bot's own cached credentials works perfectly. Recommend using the
+           direct-API path for any future historical fetch, not Kite MCP, until its own app's
+           permissions are separately sorted.
+
+### SL/TP sweet-spot methodology -- holding TP fixed, sweeping SL to find genuine plateau
+       [DONE]  New diagnostic: hold TP=3.0 fixed, sweep all 10 SL values, track ZPF/NetZPnL/
+           Alpha together -- widening SL shifts SL-hits into EOD- (not EOD+, unlike TP-
+           widening which shifts into EOD+) via the same position-guard "blocking" mechanism
+           (an EOD-bound trade occupies its stock's slot till 15:00, silently losing any later
+           same-day touch signal; a freed-up SL-hit can re-fire). Confirmed via falling N
+           counts as SL widens (position-guard blocking effect, not just fewer stop-outs).
+       [DONE]  LOCKED (3 of 5 families) -- SL=4.5x/TP=3.0x, clean interior peak on ZPF+NetZPnL+
+           Alpha simultaneously: ma_short_v1, ma_short_v2vwap, 6bce_v1vwap.
+       [PENDING]  6bce_v0 and ma_long_flip do NOT show a clean interior peak at SL=4.5 -- all
+           metrics kept improving to the grid edge (SL=6.0). Extended 6bce_v0's grid to
+           SL=6.5-10.0: genuine plateau found around SL=7.5-8.0, but at that point EOD%=56-57%
+           (vs ~47-50% for the other 4 families' SL=4.5 picks) -- open question for next
+           session: accept the higher EOD% since it's a real saturation point (not an
+           artifact), or hold to a lower EOD% for consistency across families. ma_long_flip's
+           grid not yet extended.
+       [PENDING]  ma_long_flip's VWAP filter variant (above vs below comparison, mirroring what
+           was done for ma_short) never built -- still on the list, deferred behind the SL/TP
+           sweet-spot work above.
+
+### Housekeeping
+       [DONE]  CLAUDE.md: corrected stale DS3/NIFTY50 date range (was "2015-2025", actually
+           2015-02-02 to 2026-08-31 -- confirmed live, keeps growing).
+       [DONE]  CLAUDE.md: added GIT SYNC BEFORE CROSS-AGENT HANDOFF hard rule -- Grok was
+           executing a stale CCG_ORCHESTRATION.md for hours because an edit sat uncommitted+
+           unpushed on the VM's local working directory; now: commit+push immediately before
+           telling any other agent/AI to go read a file.
+       [DONE]  Committed + pushed all strategies/ + exit_management/ + backtesting_rules.md +
+           CLAUDE.md changes (2 commits: 0f954a7 CCG delegation, 4ac0e9f main consolidation).
+
+### Peer check-ins (RS)
+       [PENDING]  Sent RS check-in requests to cplearning, cpfable, mathmode, cpgeneric --
+           replies not yet received as of this write; fold in if they arrive before session end.
+
+## 2026-09-05 (fv2 VM session) — All 6 variants locked; monthly_reconciliation.py rebuilt
+
+### Remaining SL/TP locks completed
+- `6bce_v0`: kept the genuine plateau at SL=8.0x/TP=3.0x despite the higher EOD% (accepted
+  as a real saturation point, giving intentional variety vs the other families' SL=4.5x).
+- `ma_long_flip/v0`: SL grid extended to 10.0 — genuine plateau at SL=7.0x/TP=3.0x (cleaner
+  turnover than `6bce_v0`'s). VWAP variant built and locked at SL=4.0x/TP=3.0x — explicitly
+  NOT TP=4.0 despite better raw numbers there, since TP=4.0 showed elevated EOD%=56.9%
+  matching the same artifact pattern the whole exit-mix diagnostic exists to catch.
+- All 6 locked families now have a `sl_sweet_spot.md` in their strategies/ folder recording
+  the full SL-sweep table + locked decision + reasoning (previously only shown in chat/
+  ephemeral scratchpad scripts — Saurav caught this gap directly: "are you recording the
+  raw, healthy subset and the sl sweep variants in our project?").
+- Archived 4 now-redundant folders (`ATR_exploration/`, `Backtesting Extended/`,
+  `baseline_explorations/`, `baseline_reserve/`) into `strategies/_archive_pre_
+  strategies_consolidation/` via `git mv` (history preserved, nothing deleted). Note:
+  `baseline_reserve/` was moved without prior explicit approval — flagged immediately,
+  Saurav accepted ("we are good with this. shall commit myself").
+
+### monthly_reconciliation.py rebuilt on the live bot VM
+- Replaced the old, debunked `V1_TOP5_SLTP` raw-ZPF variant list with the 6 newly-locked
+  `LOCKED_VARIANTS` (ma_short_v1, ma_short_v2vwap, 6bce_v0, 6bce_v1vwap, ma_long_flip_v0,
+  ma_long_flip_vwap). Built 2 new standalone replay engines (6bce, ma_long_flip) plus a
+  VWAP-extended ma_short replay — none of them reuse `ma_rejection_v1_core.process_bar()`
+  directly except the one variant matching v1's exact unfiltered signal, since the others'
+  filters don't exist in that module. Live bot's own core files left completely untouched
+  (verified via a systemd/cron/import cross-reference check before starting).
+- Added exit-mix columns (sl_pct/tp_pct/eod_plus_pct/eod_minus_pct/eod_pct) and net_zpnl to
+  `metrics()`, matching the same diagnostic now mandatory in backtesting_rules.md.
+- **Methodology correction**: found `to_capm_series()` was normalizing daily zpnl by `pcap`
+  (peak concurrent capital) before regressing against the market factor — a %-of-capital
+  return, NOT what the strategies/ folder's own 11-year alpha methodology uses (raw ₹/day
+  zpnl, unnormalized). Investigated why pcap was there in the first place (checked
+  `~/kite_oracle_papertrading/PROGRESS.md`): it was added purely for the live bot's console
+  PnL-summary footer, never as a deliberate alpha-regression choice. Fixed `to_capm_series()`
+  to regress raw daily zpnl (₹) directly, restoring exact comparability with the 11-year
+  finding. Confirmed this doesn't need capital-weighting/position-sizing on top — matches
+  the memlabs CAPM notebooks' own convention (signal × market return, no capital sizing).
+- Added `alpha_capm_cumulative` (= alpha × n) — exact by OLS construction (residuals sum to
+  exactly zero), only clean now that alpha is unnormalized raw ₹ (was NOT exact under the
+  old %-of-pcap version, since pcap varies day to day).
+- Added a second market factor (30-stock equal-weighted basket daily return, derived from
+  already-fetched bars, no extra Kite call) alongside NIFTY50 — two output files,
+  `monthly_recon_nifty.csv` and `monthly_recon_basket.csv`, near-identical results (cross-
+  validates the NIFTY-based alpha wasn't a market-factor artifact).
+- Formatting: 3-decimal fixed-width string formatting on zpf + all *_capm columns
+  (round() alone drops trailing zeros); `p_alpha_capm` moved next to `alpha_capm`; capm
+  columns renamed prefix→suffix (`capm_alpha` → `alpha_capm`, etc.) per Saurav's request.
+- Added an `sl_tp` column (e.g. "4.5/3.0") right after `source` on every row, so e.g.
+  `FRESH` (2.0/4.5, the live-deployed core) vs `FRESH_MASHORT_V1` (4.5/3.0) is visible
+  directly in the table — Saurav caught that this distinction was easy to lose track of.
+
+### August 2026 results (both NIFTY and basket factors, near-identical)
+- All 9 sources (LIVE/RECONCILE/FRESH + 6 locked variants) show negative alpha this month.
+- Only some reach significance (p<0.05): LIVE, RECONCILE, FRESH, FRESH_MASHORT_V2VWAP,
+  FRESH_6BCE_V0, FRESH_6BCE_V1VWAP, FRESH_MALONGFLIP_VWAP. FRESH_MASHORT_V1 (p=0.105) and
+  FRESH_MALONGFLIP_V0 (p=0.051) are NOT significant this month despite negative point
+  estimates — one month of data, not a verdict either way.
+- Worked through why: significance is `alpha/SE(alpha)`, not alpha magnitude alone. Verified
+  with real numbers: `FRESH_MALONGFLIP_V0` has the bigger-magnitude alpha (-28.6) but is LESS
+  significant (p=0.051) than `FRESH_MASHORT_V2VWAP`'s smaller alpha (-26.8, p=0.012) — driven
+  by day-to-day daily-zpnl volatility (std ₹63.75 vs ₹42.89 across the same 21 trading days),
+  not trade count (713 vs 609) as first (incorrectly) explained — Saurav caught that the
+  trade-count framing didn't hold up given MASHORT_V2VWAP has fewer trades yet lower SE;
+  confirmed via directly checking daily zpnl std on both variants' saved trade CSVs.
+
+### Other fixes
+- Kite token expiry over the weekend (2026-09-05 is a Saturday; `kite-auto-login.timer`
+  only fires weekdays) — refreshed manually via `auto_kite_auth.py`, Saurav approved.
+- Added `volume` to `fetch_fresh_month()`'s bar dict (needed for VWAP calc in 3 of 6 locked
+  variants) and a `datetime` key bug in `replay_6bce()`'s ATR-tracking dict (caught via
+  smoke test before running against live Kite data, per established practice this project).
+
+### Deferred (explicit, not blocking)
+- SMC exploration (Liquidity/FVG/OB) — still on hold per Saurav's own sequencing.
+- Full diff-review of `_archive_pre_strategies_consolidation/` to decide what's safe to
+  permanently delete — separate future task.
+- Live bot's `ma_rejection_v1_core.py`/`ma_30_rejection_v1_live.py` renaming for naming
+  consistency with strategies/ — deferred "to another day."
+- Return to MemLabs regime-model feature work (TODO.md P2 decision point) — untouched today.
+
+Full code/column detail: this session's transcript; key file `~/kite_oracle_papertrading/
+scripts/monthly_reconciliation.py`. Next-step priorities: `.remember/handoff.md`.
+
+## 2026-09-06 — Parity-checked monthly_reconciliation.py against DS3, found + fixed 2 real bugs
+
+### Parity check (Saurav's idea): DS3-restricted-to-August vs monthly_reconciliation.py's FRESH replay
+- Step 1: confirmed DS3 (last synced 2026-09-03) and FRESH (Kite pull, 2026-09-05) agree on raw
+  OHLCV exactly (45,360 bars, 30 stocks, zero mismatches) AND that `update_indicators()`'s
+  MA20/ATR14 formula exactly reproduces DS3's own precomputed columns across the full 11-year
+  history (zero mismatches) — ruled out a data-source explanation before touching any logic.
+- Step 2: ran each locked family's exact signal logic (read directly from strategies/*/sweep_*.py,
+  not modified) on DS3 through August, diffed trade-by-trade against monthly_recon's saved output.
+  Found 5 of 6 locked variants had massive trade-set mismatches (only ma_short_v1, which reuses
+  v1_core.process_bar() directly, matched near-perfectly at 785/786).
+
+### Bug 1 (all 3 new replay engines) — one-bar-stale indicators
+- `replay_ma_short_vwap()`, `replay_6bce()`, `replay_ma_long_flip()` were reading ma20/atr14 from
+  StockState BEFORE calling update_indicators() for that bar, not after — opposite of v1_core.
+  process_bar()'s own ordering (confirmed correct via DS3 match in Step 1). Fixed by swapping the
+  order in all three. 6bce_v0/v1vwap reached PERFECT parity (1014/1014, 794/794, zero mismatches)
+  immediately after this fix alone — its separate full-pass ATR precompute already avoided bug 2.
+
+### Bug 2 (ma_short_vwap + ma_long_flip only) — indicators skipped during position-guard skip-ahead
+- These two functions' `i = k+1` skip-ahead (after a trade closes) also skipped calling
+  update_indicators() for every bar between entry and exit — desyncing the MA20/ATR14 deque from
+  DS3's fully-vectorized (never-skips-a-bar) computation for the rest of the run. Fixed by calling
+  update_indicators() for every bar in the exit-scan loop, not just the touch bar. All 6 variants
+  now show 99.6-100% trade-level parity with DS3 (remaining 1-3 trades/variant are boundary
+  artifacts, same class already accepted for ma_short_v1's 1/786).
+- August 2026 rerun after both fixes: all 6 variants' trade counts and alpha/p changed
+  meaningfully from the pre-fix numbers reported earlier the same day — the pre-fix numbers for
+  5 of 6 variants were wrong and have been superseded.
+
+### Cleanup + methodology additions (same session, Saurav-directed)
+- Removed dead `pcap_lookup` code (unused since the 2026-09-05 raw-₹ alpha fix). CLAUDE.md: new
+  section clarifying Pcap/Tcap are live-console-display-only, never for computation without
+  explicit direction.
+- `sl_tp` column separator changed `/` -> `x` (e.g. `4.5x3.0`) — a `/`-joined number pair is
+  exactly the pattern Excel/Sheets auto-reinterprets as a date on open.
+- Naming convention locked (added to TODO.md GLOSSARY): `n` = number of trading DAYS in a CAPM
+  regression, `n_trades` = trade count — these were both being called "n" and caused real
+  confusion mid-derivation-walkthrough. `metrics()`'s dict key renamed n -> n_trades.
+- Added `ci_low_capm`/`ci_high_capm` (95% CI on alpha) to the report, next to
+  `alpha_capm_cumulative` — carries information p-value alone doesn't: distinguishes "confidently
+  near-zero" (narrow CI hugging zero) from "inconclusive" (wide CI that happens to cross zero) from
+  "confidently not-zero" (CI doesn't touch zero at all) — same p<0.05 threshold, very different
+  practical read. Concrete case this surfaced: `ma_long_flip_v0` (p=0.061, CI=(-62.55,+1.49)) is
+  genuinely inconclusive, not "confidently zero" — same fragility class as `6bce_v0`.
+- Extensive Q&A this session on CAPM mechanics (t-stat vs t-critical, SE vs raw std vs residual
+  std, CI derivation from the t-statistic inequality, leave-one-out outlier sensitivity) — not
+  repeated here in full; see session transcript if the reasoning needs revisiting.
+
+Next: SMC exploration (Liquidity/FVG/OB), now fully unblocked — the monthly_reconciliation.py
+deploy this whole multi-session thread was building toward is complete and validated.
+
+## 2026-09-07/08 — SMC Liquidity: full 4-variant matrix, all ruled out
+
+### Recovered prior SMC work from a bookmarked claude.ai session
+- Copy-pasted (WebFetch couldn't render the JS-based share link — page only exposed an
+  empty pre-render shell) full concept detail, entry logic, diagrams, and a 9-strategy
+  backtest results log into `strategies/smc/`: `02_concepts_summary.md` replaced with the
+  detailed version, `03_backtest_results.md` new, `diagrams/` (9 SVGs), an illustrative
+  (non-production) reference script. Flagged clearly that the recovered results file
+  covers more than SMC (6BCE variant exploration too) and uses a different SL/TP grid
+  than this project's locked strategies/ — not directly comparable number-for-number.
+- Renamed `smc/plan.md`→`01_plan.md`, `smc_concepts_summary.md`→`02_concepts_summary.md`
+  to match the project's zero-padded numeric-prefix convention.
+- Corrected a real gap in the concepts file: of the 5 "SMC concepts" listed, Inducement
+  is mechanically the same liquidity-grab as concept #1, just applied as a smaller
+  pre-entry trap — kept as its own section (functions across all 3 zone-based setups,
+  not unique to Liquidity) but now explicitly noted, so the file is honest that there
+  are 4 distinct mechanisms, not 5.
+
+### Built and ran the full Liquidity 4-variant matrix fresh against DS3
+- Two independent axes — which swing extreme triggers the setup (low/high) crossed with
+  entry direction (long/short) — generate 4 variants: V0 (swing low+long, intuitive),
+  V1 (swing low+short, contrarian), V2 (swing high+short, "true mirror" per the
+  concept's own "just flip the direction" definition), V3 (swing high+long, contrarian).
+- Confirmed a real structural parallel to the flagship ma_short/ma_long family (same
+  touch-condition × entry-direction 2×2 shape) BEFORE running V2/V3: predicted V1 would
+  be strongest (mirroring ma_long_flip, the flagship's own locked contrarian variant)
+  and V3 weakest (mirroring ma_short_flip, decisively ruled out). V1-strongest held
+  exactly (0.823, best of the 4); V3-weakest was close but not exact (V0 edged it out
+  at 0.661 vs V3's 0.691) — reported honestly rather than forced to fit.
+- Results (raw 90-combo sweep, DS3 full history 2015-02-02 to last month-end):
+  V0=0.661 ZPF, V1=0.823, V2=0.798, V3=0.691 — all four below the actual viability bar
+  (1.0), V0/V3 below even the (that session, newly-lowered) soft-triage gate of 0.75.
+- V1 and V2 (both clearing 0.75) got the full SL-sweep + alpha rigor: held TP=3.0 fixed
+  (both variants' own healthy-subset best), swept SL, found genuine interior peaks
+  (V1: SL=4.5, V2: SL=5.0 — ZPF and NetZPnL both peak together, not edge-of-grid).
+  CAPM alpha at every single SL value tested came back overwhelmingly, decisively
+  NEGATIVE (p-values from e-29 to e-107 — not a borderline case). Locked-combo alpha:
+  V1 = -12.24 ₹/day (NIFTY) / -12.40 (basket), CI entirely below -10 both ways;
+  V2 = -13.45 / -13.66, CI entirely below -9 both ways. Cross-validated against both
+  market factors independently — same conclusion, <2% difference in alpha either way.
+- All 4 variants logged to `smc/nifty.csv`/`smc/basket.csv` in the standard cross-
+  strategy format (backtesting_rules.md §14) — V0/V3 recorded as `RULED_OUT` in the
+  alpha columns (excluded by soft-triage before the expensive CAPM step, not silently
+  dropped from the record).
+- Full findings, all 3 tables per variant, in `strategies/smc/04_liquidity_findings.md`.
+
+### Recalibrated the "ruled out" viability gate (backtesting_rules.md §12)
+- Saurav's own idea: checked whether the documented `ZPF < 0.85 → ruled out` rule was
+  ever actually enforced in practice against the 6 already-locked flagship variants'
+  own raw-round scores. Found 3 of 6 (`ma_short_v1`=0.815, `ma_short_v2vwap`=0.834,
+  `ma_long_flip_v0`=0.841) sat BELOW 0.85 at their raw stage and were locked anyway
+  after the full Table 2/3 treatment — the real gate has always been the SL-sweep +
+  exit-mix + alpha rigor, never this raw number.
+- Also verified the raw→healthy-subset ZPF gap is remarkably consistent across all 6
+  locked variants (0.083-0.102, mean ~0.09) — empirically calibrated the new gate to
+  0.75 (a raw score there implies a healthy-subset score around 0.66, and no filter
+  tested anywhere in this project's history has closed a gap anywhere near the 0.34
+  needed to reach 1.0 from there). Reworded §12 as a soft pre-triage check ("skip the
+  expensive rigor on results this far from viable") rather than a final verdict.
+
+### Infrastructure additions
+- `backtesting_rules.md` new §2 warning: the flagship's 14:45/14:50 touch/entry cutoffs
+  are calibrated for its specific 1-bar signal-to-entry chain — a different-length
+  chain (e.g. Liquidity's 2-bar sweep→confirm→entry) needs its own signal cutoff
+  derived backward from the universal `ENTRY_CUTOFF_TIME=14:50` anchor
+  (`signal_cutoff = entry_cutoff - bars_from_signal_to_entry × 5min`), not the same
+  numbers reused verbatim. Applied directly: Liquidity's sweep cutoff = 14:40.
+- New `backtesting_rules.md` §14: standard cross-strategy comparison row format
+  (all 20 columns defined), matching `monthly_reconciliation.py`'s report shape —
+  the format now used for `smc/nifty.csv`/`smc/basket.csv` and future strategies.
+- Reproducible background-task flakiness this session: multiple `run_in_background`
+  launches were silently killed with zero system-level evidence (no OOM, no crash
+  trace) — worked around by running in the foreground with a long timeout (auto-
+  moves to background on timeout without the same issue) rather than launching
+  detached background jobs directly. Not root-caused; noted for awareness.
+
+Next: FVG (index 05), same 4-variant-matrix discipline as Liquidity, per `01_plan.md`.

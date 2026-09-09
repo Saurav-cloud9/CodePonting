@@ -1,73 +1,75 @@
-# Handoff Note — 2026-09-01 (math-mode VM session)
+# Handoff Note — 2026-09-07/08 (fv2 VM session)
 
-## Current State — Math-mode/vector-geometry teaching thread (COMPLETE for now)
+## Current State — SMC Liquidity concept fully tested, all 4 variants ruled out
 
-- Alpha/beta CAPM derivation (Steps 0-14) was already complete going into this session (see
-  prior handoff). This session extended the *conceptual* side: the vector/orthogonal-projection
-  interpretation of the normal equations (`52_mathmode_normal_equations_projection_interactive.
-  html`), covering spanning vectors, degrees of freedom (ambient-space vs plane dimension),
-  OLS-as-projection equivalence, Gaussian-vs-normal terminology, i.i.d. Gaussian assumption
-  breakdown, CLT's role, and OLS-vs-SGDRegressor's relationship (same shape, same convex minimum
-  for squared-error loss, but SGD generalizes to losses OLS has no closed form for).
-- Full detail: `.remember/today.md` (this session) + `memlabs/50d_full_recap_seed.md` +
-  `memlabs/52_mathmode_session_handoff.md` (prior sessions).
-- Thread is functionally complete — any further work here is optional/exploratory, on Saurav's
-  request for a specific concept, not a continuation of unfinished derivation work.
+Recovered the prior Liquidity/FVG/OB concept work and backtest results from a bookmarked
+claude.ai session into `strategies/smc/` (`02_concepts_summary.md` replaced with the
+detailed version, `03_backtest_results.md` new, `diagrams/`, a reference script). Then
+built and ran a fresh 4-variant matrix for Liquidity against DS3 (full history, 2015-02-02
+to last month-end): {swing low, swing high} × {long, short}.
 
-## Current State — POWERGRID Model C eta0 selection-bias question (RESOLVED/CLOSED)
+**Result: all 4 ruled out.** V0 (swing low+long)=0.661 ZPF, V1 (swing low+short,
+contrarian)=0.823, V2 (swing high+short, true mirror)=0.798, V3 (swing high+long,
+contrarian)=0.691 — all below actual viability (1.0). V1 and V2 cleared the (newly
+lowered) soft-triage gate of 0.75 and got the full SL-sweep+alpha rigor: both show
+**confidently, decisively NEGATIVE alpha** (p<0.001, CIs entirely clear of zero, at
+every single SL value tested, not just the locked combo) — a real negative edge, not
+just "not there yet." Full tables: `strategies/smc/04_liquidity_findings.md`.
 
-- Saurav flagged eta0=2.0 (used throughout the alpha/beta test) was chosen purely by best-of-9
-  raw cumulative return — a real selection-bias risk. fv2 confirmed the sweep context (9 values
-  tested, 0.001-5.0, only 2/9 net-positive) and argued the best-of-9 already failing significance
-  means the rest have no realistic path to significance either.
-- Confirmatory run added as Part 3 in `52_alpha_beta_concept_and_powergrid.ipynb`: eta0=5.0
-  (second-best, +0.201 raw return) → **alpha=-0.000033, p=0.9134** — even more decisively
-  non-significant than eta0=2.0's p=0.39. Confirms fv2's reasoning. **This question is closed.**
+**Confirmed a real structural parallel** to the flagship ma_short/ma_long_flip family
+(same touch-condition × entry-direction 2×2 shape): V1 (contrarian short on the
+bullish-looking swing-low setup) is the strongest of Liquidity's 4 variants — exactly
+mirroring why `ma_long_flip` was the one flagship variant that got locked.
 
-## Current State — Feature separability checks (Model B two-feature, Model C single-feature)
+**Also recalibrated `backtesting_rules.md` §12's viability gate**: lowered `ZPF<0.85 →
+ruled out` to `ZPF<0.75 → skip the full rigor` (soft pre-triage, not a final verdict).
+Found the old 0.85 would have wrongly killed 3 of the 6 currently-locked flagship
+variants at their own raw-round stage (`ma_short_v1`=0.815, `ma_short_v2vwap`=0.834,
+`ma_long_flip_v0`=0.841 — all below 0.85, all locked anyway).
 
-- Built direction-only visualizations for both models confirming **no separating power** in the
-  features tested so far:
-  - Model B (NIFTY50, lag_1+ma_lag_1): `32_model_b_actual_direction_only.py`/html,
-    `32_model_b_actual_direction_quadrant.py`/png. Corr~0.03 each, shapeless 2D scatter.
-  - Model C (POWERGRID, lag_1 only): `50e_powergrid_lag1_direction_only.py`/png. Corr=-0.047,
-    50.9% sign-match (coin flip).
-- Verified via a dummy XOR/interaction-effect toy example
-  (`52_mathmode_xor_interaction_quadrant_example.py`/png) that Model B's near-zero individual
-  correlations aren't hiding a real joint/interaction pattern — genuinely no signal at all, not
-  just a linearly-undetectable one.
+All 4 Liquidity variants logged to `strategies/smc/nifty.csv`/`basket.csv` in the new
+standard cross-strategy format (`backtesting_rules.md` §14) — V0/V3 recorded as
+`RULED_OUT` in the alpha columns rather than silently dropped.
 
-## Current State — MemLabs Pearson's r feature screening (PRIMARY, continues via new #53 doc)
+## Immediate next steps (in order)
 
-- **New**: `53_feature_screening_to_model_pipeline.md` created — full chronology from #35 recap
-  through to a final alpha/p-value verdict:
-  1. Recap #35 (`35_pearson_r_feature_screening.ipynb`) end-to-end, checking for mistakes.
-  2. Continue screening: gap-size (`log(open_today/close_yesterday)`) vs intraday-move.
-  3. Select 1-2 candidates (meaningfully better than RSI's r≈0.08).
-  4. Step 2.5 (if 2 features): XOR/interaction check via 2D scatter, same recipe as Model B's.
-  5. Step 3 (if 2 features): revisit `51_least_squares_3d.md` for plane-fit intuition before
-     interpreting the real model's R²/SSE.
-  6. Build Model B/C with selected feature(s).
-  7. Full alpha/beta derivation → residual diagnostics → SE → t-stat → p-value → verdict,
-     mirroring #52's now-validated pipeline.
-- **This is a continuation of #35, not a restart** — #35's existing RSI/Volume results stay
-  where they are; #53 is the plan for carrying the *next* candidate all the way through.
-- **Next action**: Step 0 of #53 — recap #35 for correctness before screening gap-size.
+1. **FVG (index 05)** — same 4-variant-matrix discipline as Liquidity (build the 4
+   combinations, smoke test, full 90-combo sweep each, soft-triage at 0.75, full rigor
+   for whichever qualify). Follow `01_plan.md`'s ordering.
+2. Then **OB (index 06)**.
+3. DS3 data bug (ICICIBANK/ITC/SBIN zero-filled OHLC, 2015) — still unresolved, use
+   direct Kite Connect API, not Kite MCP's broken `get_historical_data`.
+4. Diff-review `strategies/_archive_pre_strategies_consolidation/` — low priority.
+5. Live bot core file renaming — deferred "to another day," not blocking anything.
 
-## Housekeeping / Tooling
+## Key methodology locked this session (apply going forward)
 
-- VS Code Remote-SSH (VM) HTML preview workflow clarified: Live Preview extension (embedded,
-  JS-capable webview) is correct; "Open in Integrated Browser" (VS Code's newer built-in
-  feature) is confirmed local-machine-only, not available over Remote-SSH at all.
-  `workbench.editorAssociations` set to default `.html` → Live Preview. Multi-file-open handled
-  via split editor groups (preview-tab reuse is per-group) or the Browser panel's own tabs.
-- cpgeneric (peer) separately found: VM tunnel's Live Preview hardcodes 127.0.0.1 (breaks over a
-  remote tunnel, needs manual tunnel-URL+path workaround); set up Live Preview cleanly on
-  Saurav's desktop WSL VS Code instead (works with no tunnel involved).
-- cplearning (peer): rerouted from ML module to Data Structures & Algorithms (2026-08-28, next
-  Codedex ML lesson not yet unlocked); resumes once released.
+- **Soft pre-triage gate is now 0.75, not 0.85** — a raw-round ZPF below this isn't
+  worth the full SL-sweep+alpha rigor (extrapolated healthy-subset score would still be
+  ~0.66, and no filter in this project's history has closed a gap that wide). This is a
+  screen to save compute, NOT a final ruled-out verdict — the real decision has always
+  been the Table 2/3 rigor.
+- **Entry-cutoff formula, not fixed numbers**: `ENTRY_CUTOFF_TIME=14:50` is universal
+  (property of the entry bar's own runway to EOD); the signal-time cutoff is derived
+  backward per strategy: `signal_cutoff = 14:50 - (bars_from_signal_to_entry × 5min)`.
+  Never reuse the flagship's 14:45 verbatim for a structurally different signal chain.
+- **4-variant matrix discipline for any new SMC concept**: {which structural extreme
+  triggers it} × {entry direction} — build and test all 4 combinations before declaring
+  a concept dead or alive, following the same parallel-prediction-then-check approach
+  used for Liquidity (predict from the flagship's own touch/flip pattern, then verify).
+- **Standard cross-strategy comparison format is `backtesting_rules.md` §14** — reuse
+  this exact column set (matches `monthly_reconciliation.py`'s report shape) for any
+  future strategy comparison log, logging RULED_OUT variants explicitly rather than
+  omitting them from the record.
 
-## Known Issues
+## Known issues / open threads
 
-- None new beyond what's documented above. Prior known issues (TODO.md glossary SL/TP note,
-  ma_30_rejection_v1.py's missing EOD entry-skip) still carried over, unchanged.
+- **Background-task flakiness this session**: multiple `run_in_background` launches
+  were silently killed with zero system-level evidence (no OOM, no crash trace in
+  dmesg/journalctl). Workaround used: run in the foreground with a long timeout — it
+  auto-moves to background on timeout without hitting the same issue. Not root-caused;
+  worth watching for again next session, and worth trying background launches again to
+  see if it was transient.
+- TODO.md P2 (MemLabs #53 feature-screening decision point) — still untouched.
+- Kite token needs manual weekend refresh — not relevant this session (no monthly_recon
+  work done), but will resurface whenever that thread picks back up on a weekend.

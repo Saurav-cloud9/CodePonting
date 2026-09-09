@@ -1,195 +1,92 @@
 # CodePonting — Algorithmic Trading System
 
-MA Bounce strategy research and development for NSE F&O stocks.
+Quantitative research and live paper-trading system for NSE F&O equities, built with Claude Code as an agentic execution layer.
 
 ## Status
 
 | Framework | Status | Notes |
 |-----------|--------|-------|
 | Framework_V0 | ⛔ Archived | Legacy bot v0.1–v1 |
-| Framework_V1 | ❌ Closed (2026-03-25) | Signal insufficient, charges 3.4× raw profit |
-| Framework_V1_Sandbox | ❌ Closed | BQS + DT/RF exhausted, no viable filter |
-| **Framework_V2** | ✅ **Active** | Signal redesign, Gap 1 done, raw edge target |
+| Framework_V1 | ❌ Closed (2026-03-25) | Signal insufficient — charges 3.4× raw profit at scale |
+| Framework_V1_Sandbox | ❌ Closed | BQS + DT/RF experiments exhausted, no viable filter found |
+| **Framework_V2** | ✅ **Active** | 6 strategy variants deployed to the live paper-trading bot for monitoring |
 
-**Active Work:** fv2 signal redesign — TATAMOTORS 5-min, Gap 1 implemented (rising slope filter).  
-Gap 1 result: CAGR -172% → -2.07%, MDD -169% → -17.88%, PF 0.77 → 0.95  
-Next: improve raw edge from PF 0.95 → >1.01
+**Market:** NSE F&O equities (India) — 30-stock universe (29 DS3 + BAJFINANCE)
+**Brokers:** Kotak Neo (primary) · Zerodha Kite (paper-trading bot, live)
 
-**Market:** NSE F&O stocks  
-**Trading Hours:** 9:30 AM - 3:00 PM IST
+## What's Actually Running
 
-## fv2 Signal Design (Active)
+A daily **paper-trading bot** (`kite_oracle_papertrading/`, deployed on an Oracle Cloud VM) trades the fv2 strategy variants live against real market data via the Zerodha Kite API — not backtested, actually executing during market hours every trading day, while results are monitored before anything is treated as final.
 
-True MA bounce — 12 params across a 3-gate temporal evaluation system:
+- **Lifecycle:** auto-login (systemd timer, 08:55 IST) → warm-up → live trading (09:15–15:30 IST) → EOD tick-exit square-off → auto-stop
+- **Hardened for unattended operation:** systemd auto-restart on crash/reboot, crash-safe position recovery, ntfy push alerts to desktop/phone on failure
+- **Reconciliation:** daily settled-trade recon (weekday cron) + monthly full reconciliation (1st of month) against official Kite bars, with 95% confidence-interval alpha/beta reporting (distinguishes "confidently near-zero" edge from "genuinely inconclusive")
 
-| Gate | Params | What it checks |
-|------|--------|---------------|
-| G1 — Pre-touch (#01–#04) | slope_threshold, slope_offset, candles_above, pullback_bars | Trend context + approach direction |
-| G2 — Touch & bounce (#05–#10) | shoot_depth, touch_body_pct, wick_defence_ratio, bounce_vr_abs, bounce_vr_rel, same_candle_tb | Price interaction with MA at touch + bounce confirmation |
-| G3 — Post-bounce (#11–#12) | follow-through params | Price behaviour after bounce |
+## fv2 Strategy Families (Tracked & Monitored)
 
-No cascade logic — all 12 params always evaluated regardless of gate result.
+Six SL/TP-tuned variants, each swept and deployed into the live bot's monthly reconciliation report — being monitored, not yet finalized:
 
-Structural gaps being addressed:
-- Gap 1 ✅ Trend context — rising slope filter applied
-- Gap 2 ✅ Approach direction — candles_above (G1)
-- Gap 3 🔄 Pullback quality — shoot_depth, touch_body_pct, wick_defence_ratio (G2, under review)
-- Gap 4 🔄 Volume signature — bounce_vr_abs/rel (G2, under review)
-- Gap 5 🔄 Follow-through confirmation (G3, under review)
+| Variant | SL / TP | Notes |
+|---|---|---|
+| `ma_short_v1` | 4.5 / 3.0 | MA-rejection SHORT, baseline |
+| `ma_short_v2_vwap` | 4.5 / 3.0 | VWAP-filtered variant |
+| `6bce_v0` | 8.0 / 3.0 | |
+| `6bce_v1_vwap` | 4.5 / 3.0 | VWAP-filtered variant |
+| `ma_long_flip_v0` | 7.0 / 3.0 | Flagged inconclusive (wide 95% CI) — not confidently zero |
+| `ma_long_flip_vwap` | 4.0 / 3.0 | |
 
-## fv1 Signal (Closed — reference only)
+**Recent finding (2026-09-04):** a systematic EOD-riding artifact was found inflating every strategy family's top-ranked SL/TP combo — wide SL/TP barely binds intraday, so trades were riding to the EOD square-off regardless of signal quality, not reflecting genuine directional edge. Now a mandatory diagnostic (`backtesting_rules.md`: SL%/TP%/EOD+%/EOD-% breakdown) before trusting any ranked combo.
 
-1. Price touches MA20 (low ≤ MA20) — proximity detector, not true bounce
-2. Volume confirmation: 1.2× average
-3. ATR-based SL (SL=A), 1.8R target
-4. Verdict: 28,085 trades/4yr, charges killed every filter variant
+**v1 clean-touch SHORT** (earlier config, cross-validated array backtest + offline engine): SL=2.0×/TP=4.5× → PF=1.135, Sharpe=2.358, 110,641 trades across DS3's full 11-year history.
 
-## Top Performing Stocks (48-Month Validation)
+## Data
 
-Based on TRUE bounce backtest (Jan 2022 - Dec 2025):
+- **DS3** — 30 stocks, 5-minute OHLCV, 2015–2025 (11 years), with `ma20`/`atr14` precomputed. Primary dataset for all current research.
+- **NIFTY50 daily** — same 11-year coverage, used as the market-return benchmark for alpha/beta CAPM analysis.
 
-| Rank | Stock | Consistency | Notes |
-|------|-------|-------------|-------|
-| 1 | TATAMOTORS | 52.1% | Most consistent performer |
-| 2 | POWERGRID | 47.9% | Emerging champion |
-| 3 | VEDL | 45.8% | High volatility advantage |
-| 4 | ONGC | 41.7% | Reliable support respector |
-| 5 | BHARTIARTL | 41.7% | Telecom sector leader |
+## Research Track (MemLabs)
 
-## Features
+A parallel statistical-rigor thread (`Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/`) — CAPM alpha/beta derivations, Pearson-r feature screening, walk-forward validation — used to stress-test whether any candidate signal survives formal significance testing before it's trusted. Repeated finding: several candidate edges (regime filters, online-learning models, raw feature signals) do **not** survive — a deliberately skeptical check on the live strategies above, not itself a source of new signals.
 
-### Signal Detection
-- TRUE bounce validation (not proximity)
-- Volume confirmation (1.2x average threshold)
-- 15-minute bounce window
-- Enhanced signal logging (10+ metrics per trade)
+## fv1 (Closed — historical reference)
 
-### Risk Management
-- Maximum 5 concurrent positions
-- ₹10,000 capital cap per trade
-- Automated stop-loss at 0.5%
-- End-of-day square-off at 3:00 PM
+Proximity-based MA20 touch detector (not a true bounce): 28,085 trades over 4 years, transaction charges exceeded raw profit under every filter variant tested. Frozen as a learning record; do not modify or build on it.
 
-### Logging & Analytics
-- 22-column CSV trade logs
-- Real-time dashboard with live P&L
-- Signal details capture (touch/bounce candles, volume ratios, MA20 distance)
-- Daily and master log files
+## Project Structure (current)
 
-### Infrastructure
-- Upstox v3 API integration
-- Dynamic position sizing with user approval
-- Color-coded Rich console interface
-- Audio alerts for signal detection
-
-## Installation
-```bash
-# Clone repository
-git clone https://github.com/yourusername/CodePonting.git
-cd CodePonting
-
-# Install dependencies
-pip install requests python-dotenv rich --break-system-packages
-
-# Configure environment
-cp .env.example .env
-# Add your Upstox API credentials to .env
-```
-
-## Configuration
-
-Edit bot configuration in code (lines 125-135):
-```python
-TARGET_PCT = 0.015          # 1.5% target
-STOP_LOSS_PCT = 0.005       # 0.5% stop loss
-BOUNCE_THRESHOLD_PCT = 0.5  # Within 0.5% of MA20
-MA_PERIOD = 20              # MA20 only
-MAX_CAPITAL_PER_ORDER = 10000  # ₹10k max per order
-MAX_POSITIONS = 5           # Max 5 concurrent positions
-EOD_EXIT_TIME = "15:00"     # 3:00 PM square-off
-```
-
-## Usage
-
-### Generate Access Token
-```bash
-python get_access_token.py
-# Copy token to .env file
-```
-
-### Run Live Bot
-```bash
-python ma_bounce_bot_v1_3_PRODUCTION.py
-```
-
-### Monitor Mode (Paper Trading)
-Set `MONITOR_ONLY = True` in code for signal-only mode without live orders.
-
-## Project Structure
 ```
 CodePonting/
-├── ma_bounce_bot_v1_3_PRODUCTION.py    # Main bot
-├── get_access_token.py                  # Token generator
-├── .env                                 # API credentials
-├── Docs/                                # Documentation
-│   ├── strategy_core_v1.md             # Strategy logic
-│   ├── day1_validation_jan12.md        # Live testing notes
-│   └── fixes_needed_v1.1.md            # Improvement roadmap
-├── logs/                                # Trade logs
-│   ├── bot_activity_YYYYMMDD.log       # Daily activity
-│   ├── trades_log_YYYYMMDD.csv         # Daily trades
-│   └── trades_log_master.csv           # All-time trades
-└── README.md                            # This file
+├── Algo_Trading/
+│   ├── Framework_V2/
+│   │   ├── data/historical/intraday_5min_DS3/   # 30-stock 5-min dataset, 2015–2025
+│   │   ├── data/historical/daily/NIFTY50.parquet
+│   │   ├── scripts/trials/regime_model/memlabs/ # MemLabs research (alpha/beta, feature screening)
+│   │   ├── strategies/                          # 6 tracked SL/TP variants (see table above)
+│   │   └── backtesting_rules.md                 # EOD-exit logic, ATR SL/TP convention, NPF formula
+│   └── kite_oracle_live_trading/                # Live-trading infra, gated on paper validation
+├── PROGRESS.md / PROGRESS_HISTORY.md / TODO.md  # Session continuity (see CLAUDE.md)
+├── CLAUDE.md                                     # Behavioral instructions for Claude Code
+└── CCG_ORCHESTRATION.md                          # Task delegation log (Claude Code ↔ Grok)
 ```
 
-## fv2 Roadmap
+The live paper-trading bot itself (`kite_oracle_papertrading/`) runs outside this repo, on the same Oracle Cloud VM — kept separate from research code by design.
 
-### Signal Review (active)
-- [x] 3-gate system locked (G1/G2/G3, 12 params, no cascade)
-- [x] 22 signals reviewed — POWERGRID (9) + HDFCBANK (2) + TATAMOTORS (11)
-- [ ] Target 30–50 signals before drawing param conclusions
-- [ ] H5 — master combined tuner (coarse grid → 4-condition filter)
+## Roadmap
 
-### Scale
-- [ ] Expand TATAMOTORS signal to all 29 DS3 stocks
-- [ ] Aggregate view across universe
-
-### Future
-- [ ] Paper trading once PF > 1.1 confirmed OOS
-- [ ] Live trading via Upstox adapter
-
-## Backtesting Results
-
-**48-Month Validation (Jan 2022 - Dec 2025)**
-- Total stocks tested: 30 F&O stocks
-- Total iterations: 1,440 (48 months × 30 stocks)
-- Execution time: 2.5 hours
-- Data source: Upstox v3 API (5-minute candles)
-
-**Key Findings:**
-- TRUE bounce logic (touch + bounce) outperforms proximity detection
-- "No Filter" configuration wins 94% of Top 10 appearances
-- 1.5% target optimal balance (vs 0.5% or 1.0%)
-- Bear markets show higher efficiency per trade than bull markets
+- [x] fv2 signal designed and 6 SL/TP variants deployed for monitoring
+- [x] Deployed to live paper-trading bot with daily + monthly reconciliation
+- [x] Systematic EOD-riding artifact found and fixed
+- [ ] MemLabs research track — ongoing significance testing of candidate features/regimes
+- [ ] Sustained clean paper-trading track record before considering real capital
+- [ ] Live trading via Zerodha Kite, gated on paper-trading validation
 
 ## Risk Disclosure
 
-**This is an automated trading system. Past performance does not guarantee future results.**
-
-- Maximum loss per trade: 0.5% (stop loss)
-- Average holding period: 2-4 hours
-- Win rate: 40-55% (varies by stock and market conditions)
-- Recommended capital: Minimum ₹50,000 for proper risk management
-
-**Always test in monitor mode before deploying live capital.**
+**This is a research and paper-trading system. Nothing here constitutes financial advice, and no live capital is currently at risk under Framework_V2.** Framework_V1 was closed specifically because a promising-looking backtest failed to survive real transaction costs — a reminder that a good raw signal is not the same as a profitable one.
 
 ## Contributing
 
-Contributions welcome! Areas of focus:
-- Signal quality improvements
-- Regime detection filters
-- Performance optimization
-- Documentation enhancements
+Solo project — not currently seeking external contributions.
 
 ## License
 
@@ -197,10 +94,10 @@ Open Source — Research & Educational purposes
 
 ## Author
 
-**Saurav (CodePonting)**  
-Quant | Algorithmic Trader | Python Developer | Strategy Researcher
+**Saurav (CodePonting)**
+Quant Developer | Quantitative Systematic Trader | Strategy Researcher | Trading Infrastructure Engineer
 
-*Built in Dehradun with Claude AI assistance*
+*Built with Claude Code as an agentic development and research partner.*
 
 ---
 

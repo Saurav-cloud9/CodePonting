@@ -2,7 +2,38 @@
 # Max 5 items at any time. Always prioritized P1→P5.
 # ─────────────────────────────────────────────────────────────
 
-P1  MemLabs feature screening -> model pipeline — new plan doc: memlabs/53_feature_screening_
+# STANDING NOTE (2026-09-07): Saurav wants loop engineering applied to the max
+# across CodePonting — wherever a task genuinely fits the 4-condition test
+# (repeats regularly, mechanically verifiable, token budget absorbs it, agent
+# has repro tools), default to proposing/building a loop rather than leaving
+# it manual. Don't force-fit judgment-call work (research, signal design) —
+# that stays manual per the same framework. P5 (DS3 gap-fill) is the first
+# concrete instance; keep watching for other qualifying candidates as they
+# come up (e.g. recurring data checks, sweep re-runs with an objective gate).
+
+P1  Strategy raw-edge search (Algo_Trading/Framework_V2/strategies/) — ACTIVE
+        2026-09-07/08: SMC Liquidity concept fully tested — recovered claude.ai session's
+        prior concepts/backtest results into smc/ (02_concepts_summary.md, 03_backtest_
+        results.md), then built+ran the full 4-variant matrix ({swing low,swing high} x
+        {long,short}) fresh against DS3. ALL 4 RULED OUT. V1 (swing low+short, contrarian)
+        and V2 (swing high+short, true mirror) cleared the soft-triage gate and got full
+        alpha treatment: both show confidently, decisively NEGATIVE alpha (p<0.001, CIs
+        entirely clear of zero) — not "no edge," a real negative one, same pattern as the
+        flagship family. Full detail: smc/04_liquidity_findings.md. Also: lowered the
+        backtesting_rules.md §12 "ruled out" gate 0.85->0.75 and reframed as soft pre-
+        triage (found the old 0.85 would have wrongly killed 3 of the 6 locked flagship
+        variants at their own raw-round stage).
+        Immediate next steps, in order:
+        1. FVG (index 05) — same 4-variant-matrix discipline as Liquidity, next per
+           01_plan.md's ordering.
+        2. Then OB (index 06).
+        3. Resend/manually fix the DS3 data bug (ICICIBANK/ITC/SBIN zero-filled OHLC, 2015) —
+           direct Kite Connect API confirmed working (not Kite MCP's historical_data).
+        4. Full diff-review of strategies/_archive_pre_strategies_consolidation/ — not urgent.
+        5. Live bot core file renaming for naming consistency — deferred "to another day."
+        Full detail: PROGRESS_HISTORY.md 2026-09-07/08 entry.
+
+P2  MemLabs feature screening -> model pipeline — new plan doc: memlabs/53_feature_screening_
         to_model_pipeline.md. Continuation of notebook 35, not a restart.
         2026-08-16: RSI period sweep (7/9/14/21/28) done — no period beats 14 meaningfully.
         Volume (TATAMOTORS) screened — weakest candidate yet, log transform didn't help. Two
@@ -20,21 +51,39 @@ P1  MemLabs feature screening -> model pipeline — new plan doc: memlabs/53_fea
         session: redirect #53's target to the strategy's own outcomes, or run both as separate
         parallel threads.
 
-P2  Kite bot (market hours only) — running live daily, resume next market session
+P3  Kite bot (market hours only) — running live daily, resume next market session
         2026-07-28 progress: 3 real mid-session restarts (09:51/10:14/10:35) with open
         positions live - all successful, fully validates the weekend's catch-up/discard fix.
         Saurav validating live trades + weekly recon with VM CC directly (not this session).
         Older items still open: MA20/ATR14+touch-eval logging not yet added; ATR14 divergence
         question.
 
-P3  Test weak Pearson-r signal(s) through actual RR/SL-TP exits (not yet started)
+P4  Test weak Pearson-r signal(s) through actual RR/SL-TP exits (not yet started)
         Raised 2026-08-16: everything tested so far (Model C, naive baseline) captures the full
         day's raw return with no exit structure. A sub-50% hit rate can still be profitable with
         the right ATR-based SL/TP (this project's actual convention) — genuinely untested axis,
         separate from model/feature choice.
 
-P4  August 2026 DS3 gap-fill — once the month closes, same CCG pattern as the July fill just
-        completed (all 30 stocks + NIFTY50 daily).
+P5  DS3 monthly gap-fill automation — new, not yet started (2026-09-06)
+        Sparked by a "loop engineering" discussion (X/LinkedIn post) — good-fit candidate per
+        the 4-condition test (repeats monthly, mechanically verifiable, no judgment call).
+        No prior recurring process exists — CCG/Grok did July+Aug fills as one-off manual
+        delegations (Grok subscription now paused). Plan drafted, not yet built:
+        1. New script (not the old append_ds3_2026_gap.py, which only appends pre-staged JSON
+           from manual Kite MCP calls) — fetch directly via KiteConnect SDK using the bot's
+           existing auto-refreshing token (same auth as monthly_reconciliation.py), auto-
+           detect last date per symbol, append (never overwrite), recompute ma20/atr14/
+           atr14_wilder for new rows only. Same for NIFTY50.parquet.
+        2. Objective gate: per-symbol continuous coverage to month-end, no NaN gaps outside
+           warmup, row count sanity vs NSE holiday calendar. Fail loudly, not silently.
+        3. Schedule via plain crontab (~07:00 IST on the 1st) — well before
+           monthly_reconciliation.py's 09:30 IST run. Note: recon does NOT read DS3 files
+           directly (independent KiteConnect fetch) — running DS3 first is good discipline
+           for consistency, not a hard blocking dependency.
+        4. Log each run (rows added, date range, gate pass/fail) to a dedicated file; reuse
+           the bot's existing ntfy alert channel on gate failure.
+        Saurav has follow-up questions on how monthly_reconciliation.py itself works before
+        proceeding — resume there next session.
 
 # ── PARKED / FUTURE ───────────────────────────────────────────
 F1  Single-stock trade dump (TATAMOTORS) — verify SHORT calculations
@@ -57,3 +106,14 @@ F10 Model C 3D time-evolution visualization (parked 2026-08-31) — lag_1 vs tic
 F11 StatQuest (Josh Starmer, YouTube) — standing reference source, explore over time. Covers
         most core ML/stats topics this project touches (regression, classification, trees,
         feature selection). First video logged: regime_model/statquest/roc_auc.md.
+
+# ── GLOSSARY ───────────────────────────────────────────────────
+n        = number of trading days feeding a CAPM/alpha regression (daily-aggregated zpnl
+           vs daily market return) — matches the clean "df = n-2" derivation notation.
+           capm()'s own n variable already meant this correctly; no code change needed there.
+n_trades = trade count (matches every report's own column, e.g. monthly_recon_*.csv —
+           metrics()'s n_trades=len(trades_df)). A completely different count from n above
+           (e.g. 1014 trades roll up into n=21 days for FRESH_6BCE_V0's August 2026
+           regression). Flipped 2026-09-06 (was n=trades/n_days=days) after the original
+           pairing caused real confusion mid-derivation-walkthrough; metrics()'s dict key
+           renamed n -> n_trades to match.

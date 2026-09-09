@@ -15,6 +15,10 @@
           CodePonting copy (source of truth) in the same pass
   CCG   = trigger to delegate the current task to Grok — write the instruction
           into CCG_ORCHESTRATION.md (project root) instead of doing it in-session
+  kbu   = "kite bot update" — ONE-SHOT, no follow/Monitor. Report current state
+          (latest PnL Summary + recent exits + open positions) from:
+          `sudo journalctl -u kitebot.service --since today -o cat | tail -n 60`
+          Re-run kbu each time an update is wanted; no auto-polling.
 
 ── CROSS-SESSION PEER NAMING ────────────────────────────────────
 
@@ -32,6 +36,23 @@
 
   If ambiguous (new session, unclear which is which), send an identity-check message
   and let the peer self-report its role before addressing it further.
+
+── GIT SYNC BEFORE CROSS-AGENT HANDOFF ──────────────────────────
+
+  HARD RULE: whenever CC edits a file that a DIFFERENT agent/AI will read to pick up
+  instructions or context — CCG_ORCHESTRATION.md for Grok being the concrete case that
+  surfaced this (2026-09-04: Grok was executing a stale Aug 8 version of the file for
+  hours because the edit sat uncommitted+unpushed on the VM's local working directory)
+  — commit AND push that edit immediately, before telling anyone to go read it. Do not
+  wait for a natural batch/checkpoint. This applies whenever the other agent reads the
+  file through a separate clone or the repo's remote rather than this exact working
+  directory — true for Grok, and for any other local/external AI or tool that consumes
+  a CodePonting file as its instruction source, not just Grok specifically.
+
+  Why: a local edit is invisible to anything that isn't this exact checkout. The
+  instruction-writer (CC) can see its own edit immediately and has no signal that the
+  reader (Grok) is working from stale content — the mismatch is silent until someone
+  notices the reader's output doesn't match what was actually asked.
 
 ── RESPONSE FORMATTING ──────────────────────────────────────────
 
@@ -86,6 +107,19 @@
   python3/pip. The system python3 is an OS dependency (apt, unattended-upgrades,
   etc.) and kite_bot_env is itself built on top of it, not independent of it —
   never remove or modify the system interpreter.
+
+── PCAP/TCAP — DISPLAY-ONLY, NOT FOR COMPUTATION ──────────────────
+
+  Pcap (peak concurrent capital) and Tcap (total capital committed that day) are
+  metrics on the live bot's own console PnL-summary footer only — added purely
+  for Saurav's live monitoring readability, never as a deliberate methodology
+  choice for any alpha/regression/backtest computation (confirmed 2026-09-05 via
+  kite_oracle_papertrading/PROGRESS.md's original entry). Harmless to keep
+  showing on the live console. Do NOT feed pcap/tcap into any alpha regression,
+  normalization, or other serious computation unless Saurav explicitly directs
+  it for that specific case — `monthly_reconciliation.py`'s CAPM alpha was
+  found doing exactly this by incidental reuse and was fixed to use raw ₹/day
+  zpnl instead (matches strategies/'s 11-year methodology).
 
 ── VOICE BRIDGE ─────────────────────────────────────────────────
 
@@ -215,6 +249,20 @@ Execution rules:
   - CC updates TODO.md (max 5 items, P1 priority first)
   - CC appends to PROGRESS_HISTORY.md (never delete existing entries)
   - CC calls /remember:remember to save state
+  - After all the above steps are done, check when README.md's content last
+    genuinely changed — NOT just `git log -1`, which is fooled by repo-wide
+    mechanical commits (line-ending normalization, merges that touch nothing)
+    that reset the date without any real edit (caught this exact case
+    2026-09-08: `git log -1` said 18 days, true answer was 132). Walk commits
+    newest→oldest and take the first whose whitespace-ignoring diff on the
+    file is non-empty:
+      git log --format=%H -- README.md | while read c; do
+        [ -n "$(git diff -w --no-color "$c"^ "$c" -- README.md 2>/dev/null)" ] \
+          && echo "$c" && break
+      done
+    If that commit's date is ≥7 days ago, print one line below the rest of the
+    RS summary: "README hasn't had a genuine content update in N days." No
+    action beyond the flag — Saurav decides whether to act on it.
 
   ### When Saurav types "CCP" (Context Catch-Up / Peek):
   - Read these files in order:
@@ -323,9 +371,11 @@ PRIMARY (fv2)      : Framework_V2/data/historical/csv/intraday_5min/
 
 PRIMARY (fv2 DS3)  : Framework_V2/data/historical/intraday_5min_DS3/
   DS3 dataset        Parquet format, 30 stocks, ma20/atr14 precomputed
-                     Coverage: 2015–2025 (11 years)
+                     Coverage: 2015-02-02 → 2026-08-31 (confirmed 2026-09-04 — extends
+                     well past the original 11-year/2025 build; keeps growing as new
+                     months are fetched, verify actual max date before assuming it's stale)
                      Daily NIFTY50: Framework_V2/data/historical/daily/NIFTY50.parquet
-                     (2015-02-02 → 2025-12-31, matches DS3 stock coverage —
+                     (2015-02-02 → 2026-08-31, matches DS3 stock coverage —
                      Kite MCP 2016-2025 + Yahoo Finance ^NSEI gap-fill for 2015)
                      ⚠️  ALL sandbox scripts must use DS3. Not intraday_5min.
 

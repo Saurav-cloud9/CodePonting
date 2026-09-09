@@ -1,7 +1,7 @@
 """
-MA Rejection v1 (SHORT) — baseline offline engine, exit_management #01.
+MA Rejection v1 (SHORT) — offline engine, exit_management #01.
 Structurally shaped like the live engine: one bar at a time, explicit per-stock
-state (ma_short_baseline_core.py, a copy of the live bot's ma_rejection_v1_core.py),
+state (ma_short_v1_core.py, a copy of the live bot's ma_rejection_v1_core.py),
 all 30 stocks processed in strict chronological order (not stock-by-stock). This is
 the unmodified reference — every future exit-management variant here gets compared
 against its PF/Sharpe.
@@ -12,35 +12,56 @@ import glob
 import numpy as np
 import pandas as pd
 
-from ma_short_baseline_core import StockState, process_bar
+from ma_short_v1_core import StockState, process_bar
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR  = os.path.normpath(os.path.join(_THIS_DIR, '..', '..', '..', 'data', 'historical', 'intraday_5min_DS3'))
-TRADE_LOG = os.path.join(_THIS_DIR, '01_ma_short_baseline_trades.csv')
+TRADE_LOG = os.path.join(_THIS_DIR, '01_ma_short_v1_trades.csv')
 
 
-def load(f):
+def load_arrays(f):
+    """Per-stock plain numpy arrays (known-good memory pattern from
+    baseline_explorations/baseline_reserve_lock/sl_tp_sweep_baseline_short.py) —
+    never concatenated into one giant DataFrame, never .to_dict('records')."""
     df = pd.read_parquet(f, columns=['datetime', 'open', 'high', 'low', 'close'])
     df['datetime'] = pd.to_datetime(df['datetime'])
     if df['datetime'].dt.tz is not None:
         df['datetime'] = df['datetime'].apply(lambda x: x.replace(tzinfo=None))
     for col in ['open', 'high', 'low', 'close']:
         df[col] = pd.to_numeric(df[col], errors='coerce')
-    df['date'] = df['datetime'].dt.date
-    df['hour'] = df['datetime'].dt.hour
-    df['symbol'] = os.path.basename(f).replace('.parquet', '')
-    return df
+    return {
+        'datetime': df['datetime'].values, 'open': df['open'].values,
+        'high': df['high'].values, 'low': df['low'].values, 'close': df['close'].values,
+        'date': df['datetime'].dt.date.values, 'hour': df['datetime'].dt.hour.values,
+        'n': len(df),
+    }
 
 
 files = sorted(glob.glob(os.path.join(DATA_DIR, '*.parquet')))
 print(f'Loading {len(files)} stocks...')
-all_bars = pd.concat([load(f) for f in files], ignore_index=True)
-all_bars.sort_values(['datetime', 'symbol'], inplace=True, kind='mergesort')
-print(f'Loaded {len(all_bars):,} bars. Replaying in chronological order...')
+symbols = [os.path.basename(f).replace('.parquet', '') for f in files]
+stock_arrays = [load_arrays(f) for f in files]
 
+# Lightweight (datetime, stock_idx, row_idx) index only — no OHLC duplication —
+# to replay all 30 stocks in strict global chronological order (matches the live
+# engine), same stable-sort tie-break as the original (mergesort on datetime,
+# ties broken by stock order == symbol order, since files are pre-sorted by name).
+total_n = sum(a['n'] for a in stock_arrays)
+print(f'Loaded {total_n:,} bars. Building chronological index...')
+all_dt = np.concatenate([a['datetime'] for a in stock_arrays])
+stock_idx = np.concatenate([np.full(a['n'], si, dtype=np.int32) for si, a in enumerate(stock_arrays)])
+row_idx = np.concatenate([np.arange(a['n'], dtype=np.int64) for a in stock_arrays])
+order = np.argsort(all_dt, kind='mergesort')
+del all_dt  # only the sort order is needed past this point
+
+print('Replaying in chronological order...')
 states = {}
 trades = []
-for symbol, bar in zip(all_bars['symbol'].values, all_bars.to_dict('records')):
+for si, ri in zip(stock_idx[order], row_idx[order]):
+    symbol = symbols[si]
+    arr = stock_arrays[si]
+    bar = {'datetime': pd.Timestamp(arr['datetime'][ri]), 'open': arr['open'][ri], 'high': arr['high'][ri],
+           'low': arr['low'][ri], 'close': arr['close'][ri], 'date': arr['date'][ri], 'hour': arr['hour'][ri]}
     state = states.setdefault(symbol, StockState())
     process_bar(symbol, bar, state, trades)
 

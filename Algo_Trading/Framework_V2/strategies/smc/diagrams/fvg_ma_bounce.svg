@@ -1,0 +1,56 @@
+<svg viewBox="0 0 660 420" xmlns="http://www.w3.org/2000/svg" font-family="monospace">
+  <rect width="660" height="420" fill="#0f172a"/>
+  <text x="20" y="26" fill="#e2e8f0" font-size="15" font-weight="bold">Fair Value Gap (FVG) — formation + retest near MA20</text>
+
+  <!-- price axis -->
+  <text x="10" y="100" fill="#64748b" font-size="11">112</text>
+  <text x="10" y="225" fill="#64748b" font-size="11">106</text>
+  <text x="10" y="320" fill="#64748b" font-size="11">100</text>
+  <line x1="32" y1="95" x2="630" y2="95" stroke="#1e293b"/>
+  <line x1="32" y1="220" x2="630" y2="220" stroke="#1e293b"/>
+  <line x1="32" y1="315" x2="630" y2="315" stroke="#1e293b"/>
+
+  <!-- FVG zone (104-107) -->
+  <rect x="32" y="207.2" width="598" height="43.2" fill="#6366f1" opacity="0.22"/>
+  <text x="440" y="245" fill="#a5b4fc" font-size="12">FVG zone (104–107, unfilled imbalance)</text>
+
+  <!-- MA20 -->
+  <polyline fill="none" stroke="#f59e0b" stroke-width="2.5"
+    points="70,336.8 140,322.4 210,293.6 280,264.8 350,243.2 420,236 490,228.8 560,221.6" />
+  <text x="565" y="225" fill="#f59e0b" font-size="12">MA20</text>
+
+  <!-- candles -->
+  <g stroke-width="1.5">
+    <!-- 1 bullish: leaves the gap's TOP boundary at high=104 -->
+    <line x1="70" y1="250.4" x2="70" y2="322.4" stroke="#22c55e"/><rect x="58" y="264.8" width="24" height="43.2" fill="#22c55e"/>
+    <!-- 2 displacement candle (big bullish move, skips through 104-107) -->
+    <line x1="140" y1="135.2" x2="140" y2="279.2" stroke="#22c55e"/><rect x="128" y="149.6" width="24" height="115.2" fill="#22c55e"/>
+    <!-- 3 bullish: low=107 sets the gap's BOTTOM boundary -->
+    <line x1="210" y1="92" x2="210" y2="207.2" stroke="#22c55e"/><rect x="198" y="120.8" width="24" height="28.8" fill="#22c55e"/>
+    <!-- 4 bearish: pullback starts -->
+    <line x1="280" y1="106.4" x2="280" y2="192.8" stroke="#ef4444"/><rect x="268" y="120.8" width="24" height="57.6" fill="#ef4444"/>
+    <!-- 5 bearish: drops into the FVG zone -->
+    <line x1="350" y1="164" x2="350" y2="236" stroke="#ef4444"/><rect x="338" y="178.4" width="24" height="43.2" fill="#ef4444"/>
+    <!-- 6 bullish: wicks to FVG bottom + MA20, rejects -->
+    <line x1="420" y1="178.4" x2="420" y2="250.4" stroke="#eab308" stroke-width="2.5"/><rect x="408" y="192.8" width="24" height="28.8" fill="#22c55e"/>
+    <!-- 7 bullish: confirms hold, breaks back up -->
+    <line x1="490" y1="120.8" x2="490" y2="207.2" stroke="#22c55e"/><rect x="478" y="135.2" width="24" height="57.6" fill="#22c55e"/>
+    <!-- 8 bullish: continuation -->
+    <line x1="560" y1="77.6" x2="560" y2="149.6" stroke="#22c55e"/><rect x="548" y="92" width="24" height="43.2" fill="#22c55e"/>
+  </g>
+
+  <text x="100" y="60" fill="#94a3b8" font-size="12">#1 leaves top of gap (high=104)</text>
+  <line x1="100" y1="65" x2="78" y2="255" stroke="#94a3b8" stroke-width="1"/>
+
+  <text x="200" y="40" fill="#94a3b8" font-size="12">#2 displacement candle skips the zone</text>
+  <line x1="220" y1="45" x2="148" y2="200" stroke="#94a3b8" stroke-width="1"/>
+
+  <text x="350" y="60" fill="#94a3b8" font-size="12">#3 leaves bottom of gap (low=107)</text>
+  <line x1="370" y1="65" x2="218" y2="115" stroke="#94a3b8" stroke-width="1"/>
+
+  <circle cx="420" cy="250.4" r="9" fill="none" stroke="#eab308" stroke-width="2"/>
+  <text x="435" y="280" fill="#eab308" font-size="12">#6: price returns, fills FVG +</text>
+  <text x="435" y="295" fill="#eab308" font-size="12">tags MA20 → rejects → bounces</text>
+
+  <text x="20" y="405" fill="#64748b" font-size="11">Synthetic illustration — not live DS3/POWERGRID data</text>
+</svg>

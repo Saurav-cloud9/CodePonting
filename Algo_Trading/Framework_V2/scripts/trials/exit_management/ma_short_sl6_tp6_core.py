@@ -1,10 +1,12 @@
 """
-MA Rejection v1 (SHORT) — shared core logic, exit_management baseline.
-Unmodified copy of the live bot's ma_rejection_v1_core.py (synced 2026-09-02).
+MA Rejection v1 (SHORT) — SL=6.0/TP=6.0 variant, exit_management #02.
+Branched from ma_short_v1_core.py (itself an unmodified copy of the live bot's
+ma_rejection_v1_core.py, synced 2026-09-02) — only SL_MULT/TP_MULT changed below,
+everything else identical to v1. See ma_short_v1_core.py for the
+canonical/unmodified reference; this is NOT that file.
 Data-source agnostic: both the offline engine (DS3 replay) and the live engine
 (KiteTicker) feed bars into process_bar(). Nothing here knows or cares where a
-bar came from. This file is the baseline every exit-management variant in this
-folder branches from.
+bar came from.
 """
 from collections import deque
 from datetime import time as _time

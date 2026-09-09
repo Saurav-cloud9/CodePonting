@@ -19,11 +19,34 @@ ATR = rolling 14-period mean of TR
 
 ## 2. Entry Rules
 
+> ⚠️ **Only ENTRY_CUTOFF_TIME is universal — the signal-time cutoff is strategy-specific**
+> (clarified 2026-09-07, sharpened same day). `ENTRY_CUTOFF_TIME = 14:50` is a property
+> of the ENTRY bar alone — how much runway a freshly-opened position needs before the
+> 15:00 hard EOD — and that reasoning doesn't depend on how many bars led up to it, so
+> **this stays 14:50 for every strategy, always.**
+>
+> What changes per strategy is the signal-time cutoff (`LAST_TOUCH_TIME` for the
+> flagship, or whatever the analogous "last signal bar" concept is called elsewhere),
+> derived BACKWARD from the fixed entry cutoff:
+> ```
+> signal_cutoff = ENTRY_CUTOFF_TIME - (bars_from_signal_to_entry × 5min)
+> ```
+> Flagship family (ma_short/6bce/ma_long_flip): signal → entry is 1 bar apart →
+> `14:50 - 5min = 14:45`, exactly the locked `LAST_TOUCH_TIME` below. A structurally
+> different strategy (e.g. Liquidity: sweep → confirmation → entry, 2 bars apart) needs
+> its OWN signal cutoff from the same formula — e.g. `14:50 - 10min = 14:40` for the
+> sweep candle — never 14:45 reused verbatim, since that would leave the wrong amount of
+> runway for a chain of a different length. Sections 3-5, 7, 8, and 12 below (SL/TP
+> sizing, exit logic, position guard, charges, metrics, viability) are fully universal/
+> project-wide and apply to any strategy unchanged — only this section's specific times
+> are flagship-calibrated.
+
 - Entry signal bar must have `hour < 15`
 - Entry is always at the **open of the next bar** (i+1), same trading day as the signal bar
 - If `hour[i+1] >= 15` or date changes → signal is skipped entirely
 
-### Touch / Entry cutoff (matches live bot, `ma_rejection_v1_core.py`)
+### Touch / Entry cutoff (flagship MA-bounce family only — see warning above; matches
+### live bot, `ma_rejection_v1_core.py`)
 
 - **LAST_TOUCH_TIME = 14:45** — the touch/signal bar's time must be `<= 14:45`. A touch
   registering at 14:50 or later is not recognized at all, since the resulting entry
@@ -160,6 +183,28 @@ Every backtest result must include:
 - All 90 SL/TP combos with N, PF, ZPF, Sh(D), ZSh(D)
 - Highlight best ZPF and best ZSh(D) combo
 
+**Exit-mix / touch-hour breakdown (mandatory, added 2026-09-04):**
+- For any combo being seriously considered (not every one of the 90 — at minimum
+  the best-by-ZPF combo, and any combo proposed for live/paper deployment),
+  bucket trades by touch-bar hour (09-10, 10-11, ..., 14-15) and report per
+  bucket: N, EOD%, SL%, TP%, PF, ZPF, Net ZPnL.
+- Why: raw overall ZPF alone can hide a combo that only "works" by riding most
+  trades to EOD close (SL/TP too wide to bind intraday, changing the exit-type
+  mix rather than reflecting genuine directional edge) — found 2026-09-04 when
+  every family's raw-ZPF-ranked #1 combo landed at the edge of the swept SL/TP
+  grid. A combo whose top-line ZPF looks fine but whose per-hour breakdown
+  shows EOD% climbing sharply late in the day (e.g. >60-70% in the 14-15
+  bucket) is suspect even if its blended number looks acceptable.
+- This diagnostic does not replace the SL/TP health check in §11/§12 — it
+  supplements ZPF-based ranking with a second, orthogonal lens (when in the
+  day the edge actually shows up, not just whether it exists in aggregate).
+- Any newly proposed time-of-day-restricted variant (e.g. trading only the
+  best-looking hour window) must be validated out-of-sample (derive the
+  window on one time split, confirm it holds on a held-out split) before
+  being treated as a real candidate — picking the best-looking window from
+  the same data used to evaluate it is the same selection-bias trap as
+  cherry-picking a single significant variant from a multi-variant sweep.
+
 ---
 
 ## 10. Iteration Methodology
@@ -205,9 +250,23 @@ Both must be met simultaneously
 
 A strategy is ruled out when:
 ```
-Best ZPF across all 90 combos < 0.85  (no meaningful edge)
-OR  ZPF > 1.0 but only achieved with N < 500 trades (statistically thin)
+ZPF > 1.0 but only achieved with N < 500 trades (statistically thin)
 ```
+
+### No automated pre-filter — removed 2026-09-08 (was 0.85, briefly 0.75)
+
+A numeric pre-triage gate was tried at both 0.85 and 0.75 and removed entirely — during
+this project's current exploratory phase (building intuition for the range of ZPF/alpha
+outcomes across many untested signal shapes, not yet locking anything for paper trading),
+a human eyeball on the raw numbers is enough to judge "not worth locking in" without an
+automated rule skipping the full rigor. Compute Table 2/3 (and alpha) for every combo/
+variant regardless of its raw-round ZPF — never substitute a `RULED_OUT` placeholder for
+an actual computed value, since seeing the genuine number (however weak) is exactly the
+data this phase exists to build intuition from. This may be reinstated later once the
+project moves from exploration to actually selecting candidates for paper trading, but
+should be recalibrated fresh against whatever's locked at that time, not reused from this
+entry — the 0.85→0.75 history above already showed a fixed number silently drifts out of
+sync with the actual population of variants being tested.
 
 ---
 
@@ -216,6 +275,93 @@ OR  ZPF > 1.0 but only achieved with N < 500 trades (statistically thin)
 - Use inline single-pass per combo (no candidate pre-storage)
 - Position guard: i = k + 1 (resume from exit bar + 1)
 - Exit loop starts at entry bar (k = ei, not ei + 1)
+
+---
+
+## 14. Standard Cross-Strategy Comparison Row Format
+
+*Added 2026-09-07. Distinct from §9's format — §9 is exhaustive detail for evaluating*
+*ONE strategy's own 90-combo sweep; this is a compact ONE-ROW summary per strategy,*
+*for comparing MULTIPLE strategies side by side (e.g. across all 5 SMC concepts as*
+*each gets tested). Column set matches `monthly_reconciliation.py`'s report output*
+*on the live bot VM exactly — reuse that shape, don't invent a new one per strategy.*
+
+```
+source              strategy/variant name (e.g. "LIQUIDITY_V0")
+sl_tp               locked SL/TP combo, "x"-separated (e.g. "4.5x3.0") — never "/"
+                     (a "/"-joined number pair is exactly what Excel/Sheets
+                     auto-reinterprets as a date on open)
+n_trades            total trade count
+pf                  raw profit factor (pre-charge)
+sh_d                raw daily Sharpe, annualised (pre-charge)
+zpf                 Zerodha profit factor (post-charge) — primary viability metric
+zsh_d               Zerodha daily Sharpe, annualised (post-charge)
+net_zpnl            total net zpnl, ₹
+sl_pct / tp_pct     % of trades exiting via SL / TP
+eod_plus_pct        % of trades exiting via EOD, profitable
+eod_minus_pct       % of trades exiting via EOD, unprofitable
+eod_pct             eod_plus_pct + eod_minus_pct combined (mandatory exit-mix check, §9)
+alpha_capm          CAPM alpha, ₹/day — raw daily zpnl regressed against a market
+                     factor's daily % return (NEVER normalize by pcap — see CLAUDE.md's
+                     PCAP/TCAP section). n in this regression = trading DAYS, not
+                     n_trades (see TODO.md's GLOSSARY) — e.g. thousands of trades can
+                     roll up into a much smaller n_days for an 11-year DS3 backtest.
+p_alpha_capm        two-tailed p-value on alpha (H0: alpha=0)
+alpha_capm_cumulative  alpha × n_days — exact by OLS construction (residuals sum to
+                     exactly zero), the true total ₹ attributable to skill over the
+                     period
+ci_low_capm / ci_high_capm  95% confidence interval on alpha (alpha ± t_critical×SE).
+                     Read alongside p_alpha_capm, not instead of it — distinguishes
+                     "confidently near-zero" (narrow CI hugging zero) from
+                     "inconclusive" (wide CI that happens to cross zero) from
+                     "confidently not-zero" (CI entirely clear of zero) — same
+                     p<0.05 threshold, very different practical read (added 2026-09-06
+                     after this exact ambiguity mattered for a real result)
+beta_capm           CAPM beta — the strategy's ₹/day sensitivity to the market
+                     factor's 1% move (NOT a normalized/dimensionless stock-style beta)
+se_alpha_capm       standard error of alpha — feeds both p_alpha_capm and the CI
+t_alpha_capm        alpha / se_alpha_capm
+```
+
+3-decimal fixed-width string formatting on `zpf` and every `*_capm` column
+(`round()` alone drops trailing zeros — format as `f'{x:.3f}'` explicitly).
+
+Run against BOTH NIFTY50 and the 30-stock equal-weighted basket as separate market
+factors (two output files) — cross-validates that a finding isn't a market-factor
+artifact, not two independent claims. For SMC/new-strategy backtests, log results into
+`strategies/smc/basket.csv` and `strategies/smc/nifty.csv` (no numeric index — these
+are running comparison logs referenced every time a new concept is tested, not a
+single strategy's own numbered pipeline output).
+
+---
+
+## 15. NaN-Safe Aggregation — Mandatory (added 2026-09-08)
+
+DS3 has known, real per-stock/per-day data gaps (e.g. ICICIBANK/ITC/SBIN zero-filled
+OHLC in 2015, DIVISLAB un-split-adjusted, and INFY — 2015-04-24, only the 09:15 bar is
+valid, the remaining 74 bars that day are entirely NaN across OHLCV). A signal can
+legitimately form on the last valid bar before a gap, then land its ENTRY on the first
+NaN bar of the gap — giving `entry_px = NaN` for that one trade, discovered 2026-09-08
+via `6bce_v0`/`6bce_v1vwap` on this exact INFY date.
+
+**The danger is silent, not loud**: a single NaN trade doesn't crash anything — it
+silently poisons any aggregate computed with a NaN-propagating operation. Confirmed
+which stats are vulnerable and which aren't:
+- **Not vulnerable** (skip NaN by construction, already safe): ZPF/PF — computed via
+  sign-filtered sums (`pnl[pnl>0].sum()`, `pnl[pnl<0].sum()`; NaN fails both comparisons
+  so is naturally excluded). Daily-aggregated Sh(D)/ZSh(D)/alpha/beta — `pandas`
+  `.groupby().sum()` defaults to `skipna=True`, silently drops NaN within a group.
+- **Vulnerable** (raw numpy `.sum()`/`.mean()` on the full trade array, no sign filter,
+  no groupby): `net_zpnl` specifically — a single NaN trade among 100,000+ silently
+  makes the whole total `NaN`. Caught this way in `smc/master_nifty.csv` /
+  `master_basket.csv` — `net_zpnl` came back blank for exactly the 2 variants that
+  happened to touch the INFY gap.
+
+**Rule**: any NEW aggregate stat computed directly over a raw trade-level pnl/zpnl
+array (not sign-filtered, not through a pandas groupby) MUST use `np.nansum`/
+`np.nanmean` etc., never bare `.sum()`/`.mean()`. Additionally, log the NaN count
+whenever computing metrics (`np.isnan(pnl_arr).sum()`) — a nonzero count is real
+signal that a new DS3 gap was just hit, not noise to suppress silently.
 
 ---
 
