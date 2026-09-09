@@ -2472,3 +2472,4 @@ C:\Users\Saurav\AppData\Local\Temp\claude\c--Users-Saurav-CodePonting\e9e1dc13-5
 /home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/53_feature_screening_to_model_pipeline.md
 /home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/53_feature_screening_to_model_pipeline.md
 /home/ubuntu/CodePonting/Algo_Trading/Framework_V2/scripts/trials/regime_model/memlabs/53_feature_screening_to_model_pipeline.md
+C:\Users\Saurav\CodePonting\.mcp.json
