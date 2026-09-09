@@ -4,26 +4,29 @@
 # ─────────────────────────────────────────────────────────────
 
 ── RECENT (last 5 steps) ────────────────────────────────────
-1. SMC Liquidity concept fully tested — recovered prior concepts/results from a bookmarked
+1. Created strategies/flagship/ (SMC-style numbered flat-file convention), seeded with
+   copies of all 6 locked flagship variants (indices 02-07, originals untouched) + new
+   canonical naming: the tested 6bce family is now labeled 6BCEH (High-triggered) to
+   disambiguate from its untested 6BCEL (Low-triggered) sibling. Fixed the FRESH_6BCE_*
+   labels to FRESH_6BCEHSHORT_* across all smc/ master + flagship_fullds3 CSVs.
+2. Built + ran the 3 remaining 6-Bar-Close-Extreme variants (indices 08-10):
+   6BCEL-Short, 6BCEH-Long, 6BCEL-Long. ALL 3 RULED OUT — same decisive-negative-alpha
+   pattern as Liquidity V0-V3 (CIs entirely clear of zero). Notably, the priority-#1
+   hypothesis (6BCEL-Short benefiting from the project's structural short-bias finding)
+   did NOT pan out — confirms the short-bias finding doesn't generalize to "any short
+   entry works." Only the originally-locked 6BCEH-Short clears the bar in this family.
+   Full detail + CAPM rows: flagship/01_plan.md, flagship/master_nifty.csv & basket.csv.
+3. SMC Liquidity concept fully tested — recovered prior concepts/results from a bookmarked
    claude.ai session into smc/, then built + ran a fresh 4-variant matrix ({swing low,swing
-   high} x {long,short}) against DS3. ALL 4 RULED OUT. The 2 that cleared soft-triage (V1
-   contrarian-short, V2 true-mirror-short) both show confidently, decisively NEGATIVE alpha
-   (p<0.001, CIs entirely clear of zero) — a real negative edge, not just absence of one,
-   same pattern as the flagship family. Full detail: smc/04_liquidity_findings.md.
-2. Confirmed a real structural parallel to the flagship's ma_short/ma_long_flip touch/flip
-   pattern: Liquidity's V1 (contrarian short on the bullish-looking swing-low setup) is the
-   strongest of its 4 variants, mirroring exactly why ma_long_flip was the one flagship
-   variant that got locked.
-3. Lowered backtesting_rules.md §12's "ruled out" gate 0.85→0.75, reframed as a soft
-   pre-triage check rather than a final verdict — found the old 0.85 would have wrongly
-   killed 3 of the 6 currently-locked flagship variants at their own raw-round stage.
-4. Parity-checked monthly_reconciliation.py's 6 replay engines against DS3, fixed 2 real
+   high} x {long,short}) against DS3. ALL 4 RULED OUT, same negative-alpha pattern. Full
+   detail: smc/04_liquidity_findings.md.
+4. Lowered backtesting_rules.md §12's "ruled out" gate 0.85→0.75→then removed entirely
+   (replaced with: compute Table 2/3 + alpha for every combo regardless of raw-round ZPF,
+   no RULED_OUT placeholders) — found the old gates would have wrongly excluded real,
+   already-locked flagship variants.
+5. Parity-checked monthly_reconciliation.py's 6 replay engines against DS3, fixed 2 real
    bugs (one-bar-stale indicators; indicators skipped during position-guard skip-ahead) —
-   now 99.6-100% parity. Added 95% CI columns to the report (confidently-zero vs
-   inconclusive vs confidently-not-zero — info the p-value alone doesn't carry).
-5. All 6 flagship strategies/ variants remain locked (ma_short_v1/v2vwap, 6bce_v0/v1vwap,
-   ma_long_flip_v0/vwap), each with an sl_sweet_spot.md recording its sweep — unchanged
-   this session, referenced throughout as the comparison baseline for SMC work.
+   now 99.6-100% parity. Added 95% CI columns to the report.
 
 ── MILESTONES (5 most important) ────────────────────────────
 1. v1 clean-touch SHORT locked: SL=2.0x/TP=4.5x → PF=1.135 Sharpe=2.358 (110,641 trades, DS3 11yr) — cross-validated (array backtest + offline engine + Grok)

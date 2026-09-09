@@ -268,6 +268,55 @@ should be recalibrated fresh against whatever's locked at that time, not reused 
 entry — the 0.85→0.75 history above already showed a fixed number silently drifts out of
 sync with the actual population of variants being tested.
 
+### Screening Tiers — not every variant gets full treatment (added 2026-09-09)
+
+"Compute Table 2/3 for every combo" above means: no *automated* gate silently skips a
+variant. It does NOT mean every variant that ever appears in a comparison CSV has
+actually been through Table 2/3 — in practice, the full workup is only worth doing for a
+variant whose raw round already looks good enough to plausibly survive it. A variant with
+a decisively bad raw ZPF gets a lighter pass: it's already a clear no, and no amount of
+SL-sweep interior-peak-hunting on precedent (§12 above shows grid extension buys ~0.006
+ZPF at best) is going to flip that. Two distinct tiers exist across this project's master
+CSVs today — recorded per-row via the `screen_tier` column (§14):
+
+```
+FULL_RIGOR   Table 1 (raw 90-combo sweep) → Table 2 (healthy-subset filter, EOD%<=30)
+             → Table 3 (SL-sweep at fixed TP, confirming a genuine interior/plateau peak
+             — not a grid-edge artifact, per each variant's own sl_sweet_spot.md) → CAPM
+             alpha computed AT THE CONFIRMED COMBO. Required before a variant can be
+             locked/deployed. Applied to: all 6 currently-locked flagship variants, and
+             Liquidity V1/V2 (the 2 that cleared soft-triage — see
+             smc/04_liquidity_findings.md).
+
+RAW_SCREEN   Table 1 only (Table 2 may be computed/printed but isn't used to pick a
+             combo) → a single CAPM alpha computed at the raw-best-ZPF combo, which is
+             often edge-of-grid and explicitly reported as such. Sufficient to rule a
+             variant OUT with confidence when the result is decisively bad (CI clear of
+             zero) — NOT a sufficient basis to lock/deploy a variant that looks
+             promising, since no interior-peak has been confirmed. Applied to: Liquidity
+             V0/V3, and flagship 08/09/10 (all four ruled out at this tier).
+
+REFERENCE    Not evaluated via this framework at all — a long-standing fixed comparison
+             point that predates it. Applied to: FRESH_FULLDS3_BASELINE only.
+```
+
+**Caveat — tiers measure SL/TP-grid rigor only, not filter potential.** A `RAW_SCREEN`
+(or even `FULL_RIGOR`) verdict rules out a signal at its best raw SL/TP combo — it says
+nothing about that signal + a filter (VWAP/RSI/EMA/daily-bias — historically a much
+bigger lever than grid-tuning, e.g. `6BCE+VWAP+RSI>54` jumped ZPF by +0.2-0.25 vs
+grid-tuning's ~0.01). Don't read a `RAW_SCREEN` row as permanently dead on that axis —
+this applies especially to a variant whose raw ZPF is decent (not one already struggling
+to clear ~0.8 after the full 90-combo sweep), which is a more plausible filter candidate.
+
+Known documentation gap: `ma_long_flip/v1_vwap` (locked SL=4.0/TP=3.0, live in
+monthly_reconciliation.py) has no `sl_sweet_spot.md` of its own, unlike its 5 sibling
+locked variants — its VWAP-direction decision was justified by reuse of
+`ma_short/v2_vwap/vwap_decision.md` (a different strategy's 3-combo check), not a
+dedicated Table 3 pass. The raw data for this variant, at TP=3.0 fixed, does show a real
+plateau (ZPF 0.817-0.821 across SL=4.0-6.0, not still climbing) consistent with a genuine
+locked pick — tagged `FULL_RIGOR` on that basis — but the formal write-up should be
+backfilled to match its siblings.
+
 ---
 
 ## 13. Position Guard — Implementation Standard
@@ -321,6 +370,10 @@ beta_capm           CAPM beta — the strategy's ₹/day sensitivity to the mark
                      factor's 1% move (NOT a normalized/dimensionless stock-style beta)
 se_alpha_capm       standard error of alpha — feeds both p_alpha_capm and the CI
 t_alpha_capm        alpha / se_alpha_capm
+screen_tier         FULL_RIGOR / RAW_SCREEN / REFERENCE — which of §12's Screening
+                     Tiers this row's combo and alpha were computed under. Read this
+                     before trusting a row as a candidate: RAW_SCREEN is only strong
+                     enough to rule a variant OUT, not to lock it.
 ```
 
 3-decimal fixed-width string formatting on `zpf` and every `*_capm` column

@@ -1384,3 +1384,84 @@ deploy this whole multi-session thread was building toward is complete and valid
   detached background jobs directly. Not root-caused; noted for awareness.
 
 Next: FVG (index 05), same 4-variant-matrix discipline as Liquidity, per `01_plan.md`.
+
+## 2026-09-09 — flagship/ folder created, 6BCEH/6BCEL naming fixed, 3 new variants ruled out
+
+### Naming correction (canonical, from claude.ai review)
+- The originally-tested/locked "6bce" strategy is one of 4 members of a 6-Bar-Close-
+  Extreme family: two triggers (close = highest vs lowest of last 6 bars) x two entry
+  directions (LONG/SHORT). Relabeled: `6BCEH` = High-triggered (the tested one, now
+  `6BCEH-Short`), `6BCEL` = Low-triggered (the untested sibling family). Original
+  `strategies/6bce/` folder left untouched (no rename, no edits) per Saurav's explicit
+  instruction — only the naming used in comparison CSVs and the new `flagship/` copies
+  was corrected (`FRESH_6BCE_V0`→`FRESH_6BCEHSHORT_V0` etc., across smc/master_nifty.csv,
+  master_basket.csv, flagship_fullds3_nifty.csv, flagship_fullds3_basket.csv).
+
+### strategies/flagship/ folder
+- New folder using SMC's numbered flat-file convention, populated per Saurav's explicit
+  plan: 01=plan.md (new), 02-07=copies of the 6 already-locked flagship variants (ma_short
+  v1/v2vwap, 6BCEH-Short v0/v1vwap, ma_long_flip v0/vwap) with matching `_exit_breakdown.csv`
+  siblings, 08-10=new work. Original per-family folders (`ma_short/`, `6bce/`,
+  `ma_long_flip/`) remain the untouched working source-of-truth — nothing there was moved
+  or edited, copies only.
+- New `flagship/master_nifty.csv` / `master_basket.csv`, seeded from the existing 7-row
+  fresh-full-DS3 comparison (baseline + 6 locked variants), now the home for future
+  flagship-family rows going forward (smc/'s own master files keep their existing rows —
+  Liquidity's 4 variants — unchanged).
+
+### 3 new variants built and tested (08/09/10), all ruled out
+Per claude.ai's priority ranking, built the 3 untested members of the 6BCE family with
+full rigor (90-combo SL/TP sweep, NaN-entry guard from the start, exit-mix diagnostic,
+CAPM alpha both NIFTY- and basket-regressed):
+- `08_6bcel_short.py` — 6BCEL-Short (breakdown continuation, genuine short bet, priority
+  #1 on the hypothesis it'd benefit from this project's repeated structural short-bias
+  finding): best ZPF=0.835 @ SL=6.0/TP=6.0 (edge-of-grid), alpha=-12.970 ₹/day, CI=[-16.60,
+  -9.34] — confidently negative, ruled out. **The short-bias hypothesis did NOT generalize
+  here** — being a short entry alone wasn't enough; the specific reversal-from-high trigger
+  that IS locked (6BCEH-Short) remains the only working member of this family.
+- `09_6bceh_long.py` — 6BCEH-Long (breakout continuation): ZPF=0.710 @ SL=6.0/TP=6.0,
+  alpha=-33.475, CI=[-37.00,-29.95] — worst of the 3, decisively ruled out.
+- `10_6bcel_long.py` — 6BCEL-Long (reversal/bounce from low): ZPF=0.739 @ SL=6.0/TP=6.0,
+  alpha=-29.058, CI=[-32.71,-25.40] — decisively ruled out, as expected (matches every
+  other reversal-flavored LONG setup tested this project).
+All 3 built on the exact 6BCEH-Short template (Type-B pattern: `load_stocks()`/
+`run_combo(stocks, sl, tp)`), only the touch condition (max/min) and, for 09/10, the
+entry direction (LONG mechanics + a new `zerodha_charge` LONG variant — STT on exit,
+stamp duty on entry, mirroring the existing SHORT formula's leg assignment) changed. 0
+NaN-entry trades dropped across all 3 (guard present from the start, unlike the original
+6bce scripts which needed a later patch). Full detail + reasoning: `flagship/01_plan.md`.
+
+### Infrastructure note
+- Both the harness's own `run_in_background`-promoted foreground job and an explicit
+  `run_in_background: true` polling loop were killed mid-run this session with no
+  system-level evidence (same unexplained flakiness noted 2026-09-07/08) — worked around
+  by launching the actual sweep processes via `nohup ... & disown` directly in a plain
+  Bash call (survives), then using the `Monitor` tool (not `run_in_background`) to poll
+  process liveness + log completion markers for the wait/notify step. This combination
+  (nohup+disown to launch, Monitor to watch) held up cleanly for all 3 parallel sweeps —
+  worth defaulting to this pattern over `run_in_background` for future long-running work.
+
+Next: FVG (index 05 in smc/), same 4-variant-matrix discipline as Liquidity, per
+`smc/01_plan.md`.
+
+## 2026-09-09 (cont.) — Screening Tiers formalized + `screen_tier` column added
+
+Saurav caught that the master CSVs mixed variants tested with very different levels of
+rigor (full Table1→2→3 vs a single raw-best alpha) with no way to tell which was which.
+Defined 3 tiers in `backtesting_rules.md` §12 and added a `screen_tier` column (§14) to
+all 4 master files (`smc/master_nifty.csv`, `smc/master_basket.csv`,
+`flagship/master_nifty.csv`, `flagship/master_basket.csv`):
+- `FULL_RIGOR` — Table 1→2→3 (confirmed interior/plateau peak) → alpha at the locked
+  combo. Required before a variant can be locked/deployed. 8 rows (6 flagship + Liquidity
+  V1/V2, which cleared soft-triage).
+- `RAW_SCREEN` — Table 1 only → alpha at the raw-best (often edge-of-grid) combo.
+  Sufficient to rule OUT, not sufficient to lock. 5 rows (Liquidity V0/V3, flagship 08/09/10).
+- `REFERENCE` — not evaluated via this framework (FRESH_FULLDS3_BASELINE only).
+
+Side finding while verifying tier assignments: `ma_long_flip/v1_vwap` (currently locked
+and live in monthly_reconciliation.py) has no `sl_sweet_spot.md` of its own, unlike its 5
+sibling locked variants — its VWAP-direction choice reused `ma_short/v2_vwap`'s decision
+doc instead of a dedicated check. The raw data does show a genuine plateau at its locked
+combo (TP=3.0 fixed, ZPF flat 0.817-0.821 across SL=4.0-6.0), so tagged `FULL_RIGOR` on
+that basis, but the formal write-up should be backfilled — flagged in `backtesting_rules.md`
+§12 as a known documentation gap, not acted on further this session.

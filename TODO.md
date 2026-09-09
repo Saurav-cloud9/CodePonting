@@ -12,26 +12,32 @@
 # come up (e.g. recurring data checks, sweep re-runs with an objective gate).
 
 P1  Strategy raw-edge search (Algo_Trading/Framework_V2/strategies/) — ACTIVE
+        2026-09-09: strategies/flagship/ created (SMC-style numbered files, 01-07 = plan +
+        6 locked copies, originals untouched). Built+ran the 3 untested 6-Bar-Close-Extreme
+        siblings (08 6BCEL-Short, 09 6BCEH-Long, 10 6BCEL-Long) — ALL 3 RULED OUT, decisive
+        negative alpha (CIs clear of zero), same pattern as Liquidity. Fixed 6bce naming to
+        6BCEH across master CSVs (disambiguates from the new 6BCEL family). Also formalized
+        Screening Tiers (FULL_RIGOR/RAW_SCREEN/REFERENCE, backtesting_rules.md §12) + added
+        `screen_tier` column to all 4 master CSVs — makes explicit that only raw-promising
+        variants get the deep Table 3 treatment. Decided against a Table 3 follow-up on
+        6BCEL-Short (its RAW_SCREEN ZPF already sits below the locked 6BCEH-Short's FULL_RIGOR
+        ZPF) — 6BCE family closed out. Full detail: flagship/01_plan.md, master_nifty.csv/
+        master_basket.csv (both smc/ and flagship/).
         2026-09-07/08: SMC Liquidity concept fully tested — recovered claude.ai session's
-        prior concepts/backtest results into smc/ (02_concepts_summary.md, 03_backtest_
-        results.md), then built+ran the full 4-variant matrix ({swing low,swing high} x
-        {long,short}) fresh against DS3. ALL 4 RULED OUT. V1 (swing low+short, contrarian)
-        and V2 (swing high+short, true mirror) cleared the soft-triage gate and got full
-        alpha treatment: both show confidently, decisively NEGATIVE alpha (p<0.001, CIs
-        entirely clear of zero) — not "no edge," a real negative one, same pattern as the
-        flagship family. Full detail: smc/04_liquidity_findings.md. Also: lowered the
-        backtesting_rules.md §12 "ruled out" gate 0.85->0.75 and reframed as soft pre-
-        triage (found the old 0.85 would have wrongly killed 3 of the 6 locked flagship
-        variants at their own raw-round stage).
+        prior concepts/backtest results into smc/, then built+ran the full 4-variant matrix
+        ({swing low,swing high} x {long,short}) fresh against DS3. ALL 4 RULED OUT, same
+        decisive-negative-alpha pattern. Full detail: smc/04_liquidity_findings.md. Also:
+        removed backtesting_rules.md §12's "ruled out" gate entirely (0.85->0.75->removed) —
+        compute Table 2/3 + alpha for every combo now, no RULED_OUT placeholders.
         Immediate next steps, in order:
-        1. FVG (index 05) — same 4-variant-matrix discipline as Liquidity, next per
-           01_plan.md's ordering.
+        1. FVG (index 05 in smc/) — same 4-variant-matrix discipline as Liquidity, next per
+           smc/01_plan.md's ordering.
         2. Then OB (index 06).
         3. Resend/manually fix the DS3 data bug (ICICIBANK/ITC/SBIN zero-filled OHLC, 2015) —
            direct Kite Connect API confirmed working (not Kite MCP's historical_data).
         4. Full diff-review of strategies/_archive_pre_strategies_consolidation/ — not urgent.
         5. Live bot core file renaming for naming consistency — deferred "to another day."
-        Full detail: PROGRESS_HISTORY.md 2026-09-07/08 entry.
+        Full detail: PROGRESS_HISTORY.md 2026-09-07/08/09 entries.
 
 P2  MemLabs feature screening -> model pipeline — new plan doc: memlabs/53_feature_screening_
         to_model_pipeline.md. Continuation of notebook 35, not a restart.
@@ -108,6 +114,15 @@ F11 StatQuest (Josh Starmer, YouTube) — standing reference source, explore ove
         feature selection). First video logged: regime_model/statquest/roc_auc.md.
 
 # ── GLOSSARY ───────────────────────────────────────────────────
+6BCEH    = 6-Bar Close Extreme HIGH (close[i] == max of last 6 closes). 6BCEH-Short
+           (reversal-from-high fade) is the originally-tested/locked variant, formerly
+           just called "6bce" — relabeled 2026-09-09 once its untested LOW-triggered
+           sibling (6BCEL) surfaced, to avoid ambiguity. 6BCEH-Long untested, ruled out
+           2026-09-09 (flagship/09).
+6BCEL    = 6-Bar Close Extreme LOW (close[i] == min of last 6 closes) — the other half
+           of the 6BCE family. Both 6BCEL-Short (breakdown continuation) and 6BCEL-Long
+           (reversal/bounce) ruled out 2026-09-09 (flagship/08, /10).
+
 n        = number of trading days feeding a CAPM/alpha regression (daily-aggregated zpnl
            vs daily market return) — matches the clean "df = n-2" derivation notation.
            capm()'s own n variable already meant this correctly; no code change needed there.
