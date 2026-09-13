@@ -1,0 +1,2 @@
+- **2023-01-27** ADANIPORTS — Adani-Hindenburg report crash, real market event (confirmed 2026-09-13)
+- **2020-03-26** INDUSINDBK — COVID crash volatility, 2 days outside my known_events window; NSE confirms no real corp action — ratio-match was coincidental (confirmed 2026-09-13)

@@ -19,6 +19,12 @@
           (latest PnL Summary + recent exits + open positions) from:
           `sudo journalctl -u kitebot.service --since today -o cat | tail -n 60`
           Re-run kbu each time an update is wanted; no auto-polling.
+  cpdc  = "CodePonting Data Check" — scope the conversation to DS3 data-integrity
+          review (Algo_Trading/Framework_V2/scripts/ds3_monthly_check.py). ONE-SHOT:
+          read ds3_integrity/known_issues.json's pending_category2 and
+          pending_unexplained_jump lists and summarize what's awaiting Saurav's
+          review (symbol/date/type). Re-run cpdc each time; no auto-polling.
+          Resolve items via: `ds3_monthly_check.py --mark SYMBOL DATE real|baddata`.
 
 ── CROSS-SESSION PEER NAMING ────────────────────────────────────
 
