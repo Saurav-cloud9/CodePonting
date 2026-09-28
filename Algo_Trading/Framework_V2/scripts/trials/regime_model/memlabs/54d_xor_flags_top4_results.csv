@@ -1,0 +1,7 @@
+pair,r,n_xor_true,clears_own_95,clears_own_99,clears_max6_95,clears_max6_99
+dispersion XOR gap_pct,-0.0334,1108,False,False,False,False
+dispersion XOR india_vix_level,-0.0032,847,False,False,False,False
+dispersion XOR volume_surge,-0.044,904,True,False,False,False
+gap_pct XOR india_vix_level,0.0007,1093,False,False,False,False
+gap_pct XOR volume_surge,0.0192,1176,False,False,False,False
+india_vix_level XOR volume_surge,-0.0035,1163,False,False,False,False

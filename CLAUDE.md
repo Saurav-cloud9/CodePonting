@@ -18,6 +18,13 @@
   kbu   = "kite bot update" — ONE-SHOT, no follow/Monitor. Report current state
           (latest PnL Summary + recent exits + open positions) from:
           `sudo journalctl -u kitebot.service --since today -o cat | tail -n 60`
+          ALSO report restart/watchdog activity for today, checked separately
+          (the tail above may not show it): count of "Started kitebot.service"
+          events today (>1 means a restart happened) and any "silently stalled"
+          / "Exiting so systemd" watchdog-trigger lines —
+          `sudo journalctl -u kitebot.service --since today -o cat | grep "Started kitebot.service\|silently stalled\|Exiting so systemd"`
+          State plainly whether the session ran clean (1 start, no watchdog
+          triggers) or had restarts, and why if known.
           Re-run kbu each time an update is wanted; no auto-polling.
   cpdc  = "CodePonting Data Check" — scope the conversation to DS3 data-integrity
           review (Algo_Trading/Framework_V2/scripts/ds3_monthly_check.py). ONE-SHOT:
@@ -37,8 +44,19 @@
   auto-name is currently running them:
     fv2       = the main/general CodePonting session (fv2 signal work, CCP, MemLabs
                 research, most tasks)
-    math mode = a session strictly scoped to the alpha/beta CAPM math-teaching thread
-                only — NOT "memlab". MemLabs research itself stays in fv2.
+    math mode = a session scoped to math/stats concept teaching via formula-level
+                derivation — the alpha/beta CAPM thread, StatQuest or similar
+                video-based walkthroughs, and similar formula-heavy topics. Still
+                NOT "memlab" — applied research (testing these concepts against
+                real strategy data) stays in fv2; math mode builds the underlying
+                intuition, not the research itself.
+                StatQuest notes convention (2026-09-18): saved to
+                Algo_Trading/Framework_V2/scripts/trials/regime_model/statquest/,
+                globally sequenced like memlabs (01_, 02_, 03_...), with letter
+                suffixes for multi-file topics (02b_, 02c_...) — same pattern as
+                memlabs' own numbering, not per-topic restart. roc_auc.md (the
+                first entry, pre-dating this convention) stays unrenamed; real
+                sequencing starts at 02_ for the next new topic.
 
   If ambiguous (new session, unclear which is which), send an identity-check message
   and let the peer self-report its role before addressing it further.

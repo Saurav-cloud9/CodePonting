@@ -1,75 +1,56 @@
-# Handoff Note — 2026-09-07/08 (fv2 VM session)
+# Handoff Note — 2026-09-16 (fv2 VM session)
 
-## Current State — SMC Liquidity concept fully tested, all 4 variants ruled out
+## Current State — memlabs #54: dispersion lead RULED OUT, notebook needs a correction pass
 
-Recovered the prior Liquidity/FVG/OB concept work and backtest results from a bookmarked
-claude.ai session into `strategies/smc/` (`02_concepts_summary.md` replaced with the
-detailed version, `03_backtest_results.md` new, `diagrams/`, a reference script). Then
-built and ran a fresh 4-variant matrix for Liquidity against DS3 (full history, 2015-02-02
-to last month-end): {swing low, swing high} × {long, short}.
+Since the last handoff (2026-09-13), the session was almost entirely a long, meticulous
+Q&A walkthrough of `#54`'s statistics (r, ACF1, null-calibration, multiple-testing) —
+Saurav verifying every mechanic before allowing more action items. Two real pieces of
+work got done along the way:
 
-**Result: all 4 ruled out.** V0 (swing low+long)=0.661 ZPF, V1 (swing low+short,
-contrarian)=0.823, V2 (swing high+short, true mirror)=0.798, V3 (swing high+long,
-contrarian)=0.691 — all below actual viability (1.0). V1 and V2 cleared the (newly
-lowered) soft-triage gate of 0.75 and got the full SL-sweep+alpha rigor: both show
-**confidently, decisively NEGATIVE alpha** (p<0.001, CIs entirely clear of zero, at
-every single SL value tested, not just the locked combo) — a real negative edge, not
-just "not there yet." Full tables: `strategies/smc/04_liquidity_findings.md`.
+1. **`54c_oos_dispersion_gate.py`** (new) — out-of-sample test of Fable's "Q5 dispersion
+   gate" finding from last session (chronological 70/30 split, cutoff chosen on TRAIN
+   only, 2015-02-04—2023-04-11 vs 2023-04-12—2026-08-31). RESULT: FAILS. Own-period
+   quintile tables show TRAIN's real best bucket is Q4 (ZPF 1.157), not Q5 (0.994, flat);
+   TEST period has every quintile under 1.0, with Q5 (highest dispersion) one of the
+   WORST buckets (0.813) — a full reversal. Dispersion's one concrete deployable form is
+   ruled out — no `54d` build off this pair.
+2. **`54c_10feature_screen.py`** (new) — full 10-candidate r-vs-daily_zpnl comparison,
+   prompted by Saurav catching that the notebook's §3 "combined null" only ever
+   corrected for 2 of the 10 built candidates (never confirmed that was the true count of
+   "looks" taken). Surprise: `gap_pct` (r=-0.0625) edges out dispersion (0.0573) as the
+   single strongest of all 10 — previously unscreened, no theory check done yet. Under
+   max-of-10 iid null (ceil95=0.0555, ceil99=0.0676) both still clear 95th, not 99th —
+   the under-correction concern didn't flip the verdict, but hasn't been combined with
+   the circular-shift fix yet (stricter still).
 
-**Confirmed a real structural parallel** to the flagship ma_short/ma_long_flip family
-(same touch-condition × entry-direction 2×2 shape): V1 (contrarian short on the
-bullish-looking swing-low setup) is the strongest of Liquidity's 4 variants — exactly
-mirroring why `ma_long_flip` was the one flagship variant that got locked.
+`54c_screen.ipynb` itself was **NOT edited this session** — only diagnosed. Full resume
+spec written into `54_6bceh_short_vwap_rsi_baseline.md` §3, under "RESUME HERE".
 
-**Also recalibrated `backtesting_rules.md` §12's viability gate**: lowered `ZPF<0.85 →
-ruled out` to `ZPF<0.75 → skip the full rigor` (soft pre-triage, not a final verdict).
-Found the old 0.85 would have wrongly killed 3 of the 6 currently-locked flagship
-variants at their own raw-round stage (`ma_short_v1`=0.815, `ma_short_v2vwap`=0.834,
-`ma_long_flip_v0`=0.841 — all below 0.85, all locked anyway).
+## Next (in order, from the baseline doc's "RESUME HERE")
 
-All 4 Liquidity variants logged to `strategies/smc/nifty.csv`/`basket.csv` in the new
-standard cross-strategy format (`backtesting_rules.md` §14) — V0/V3 recorded as
-`RULED_OUT` in the alpha columns rather than silently dropped.
+1. Edit `54c_screen.ipynb`: make circular-shift the primary null (§2/§3, keep iid as
+   secondary reference); widen §3 from max-of-2 to max-of-10 (don't delete the section —
+   the concept is correct, only the scope was wrong); rewrite §6's verdict to the final
+   combined read — dispersion borderline-real by r (clears 95th under both fixes, never
+   99th) but its deployable form (Q5 gate) failed OOS — net verdict RULED OUT.
+2. Screen `gap_pct` properly: its own null-calibration (iid + circular-shift), a theory
+   check (does an overnight gap have a plausible mechanism, or is it closer to trend —
+   dead on weak-form efficiency — than to dispersion?), then an OOS gate test if it
+   survives both, before any enthusiasm.
+3. Build `volume_surge` (definition locked, not yet built): today's volume ÷ that
+   stock's own trailing 20-day average, basket-averaged across 30 stocks, shifted 1 day.
+4. `54c.4` interaction/XOR check (trend x dispersion) — still worth running once for the
+   learning-value confirmation, low priority given trend is already dead two ways over
+   (fails every r/null test; weak-form efficiency argues against it having any
+   information at all, linear or not).
 
-## Immediate next steps (in order)
+## Context
 
-1. **FVG (index 05)** — same 4-variant-matrix discipline as Liquidity (build the 4
-   combinations, smoke test, full 90-combo sweep each, soft-triage at 0.75, full rigor
-   for whichever qualify). Follow `01_plan.md`'s ordering.
-2. Then **OB (index 06)**.
-3. DS3 data bug (ICICIBANK/ITC/SBIN zero-filled OHLC, 2015) — still unresolved, use
-   direct Kite Connect API, not Kite MCP's broken `get_historical_data`.
-4. Diff-review `strategies/_archive_pre_strategies_consolidation/` — low priority.
-5. Live bot core file renaming — deferred "to another day," not blocking anything.
-
-## Key methodology locked this session (apply going forward)
-
-- **Soft pre-triage gate is now 0.75, not 0.85** — a raw-round ZPF below this isn't
-  worth the full SL-sweep+alpha rigor (extrapolated healthy-subset score would still be
-  ~0.66, and no filter in this project's history has closed a gap that wide). This is a
-  screen to save compute, NOT a final ruled-out verdict — the real decision has always
-  been the Table 2/3 rigor.
-- **Entry-cutoff formula, not fixed numbers**: `ENTRY_CUTOFF_TIME=14:50` is universal
-  (property of the entry bar's own runway to EOD); the signal-time cutoff is derived
-  backward per strategy: `signal_cutoff = 14:50 - (bars_from_signal_to_entry × 5min)`.
-  Never reuse the flagship's 14:45 verbatim for a structurally different signal chain.
-- **4-variant matrix discipline for any new SMC concept**: {which structural extreme
-  triggers it} × {entry direction} — build and test all 4 combinations before declaring
-  a concept dead or alive, following the same parallel-prediction-then-check approach
-  used for Liquidity (predict from the flagship's own touch/flip pattern, then verify).
-- **Standard cross-strategy comparison format is `backtesting_rules.md` §14** — reuse
-  this exact column set (matches `monthly_reconciliation.py`'s report shape) for any
-  future strategy comparison log, logging RULED_OUT variants explicitly rather than
-  omitting them from the record.
-
-## Known issues / open threads
-
-- **Background-task flakiness this session**: multiple `run_in_background` launches
-  were silently killed with zero system-level evidence (no OOM, no crash trace in
-  dmesg/journalctl). Workaround used: run in the foreground with a long timeout — it
-  auto-moves to background on timeout without hitting the same issue. Not root-caused;
-  worth watching for again next session, and worth trying background launches again to
-  see if it was transient.
-- TODO.md P2 (MemLabs #53 feature-screening decision point) — still untouched.
-- Kite token needs manual weekend refresh — not relevant this session (no monthly_recon
-  work done), but will resurface whenever that thread picks back up on a weekend.
+Saurav is meticulously verifying every #54 stats mechanic before allowing more action
+items — this session was ~90% Q&A (ACF1 vs r, multiple-testing/coin-flip analogy, weak-
+form efficiency scope, XOR/interaction theory, theory-first vs. search-then-validate
+feature engineering) and ~10% new computation. Expect the same pace next session —
+don't rush past a concept check to get to code. `cpfable` (codeponting-35) is Saurav's
+own separate quant-finance consultation thread, not something to act on unprompted.
+README hasn't had a genuine content update in 8 days (last: 2026-09-08) — flagged, no
+action taken.

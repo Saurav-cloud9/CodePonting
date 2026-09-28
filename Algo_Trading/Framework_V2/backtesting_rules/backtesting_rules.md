@@ -418,6 +418,50 @@ signal that a new DS3 gap was just hit, not noise to suppress silently.
 
 ---
 
+## 16. Basket Market-Factor Index Must Be Sorted — Mandatory (added 2026-09-12)
+
+Discovered 2026-09-12 while building `memlabs/54c_regime_features.py`: the standard
+pattern used ALL SESSION to build the 30-stock basket daily-return series —
+```python
+basket_rows = [df.groupby('date')['close'].last() for df in <30 stocks>]
+basket_df = pd.concat(basket_rows, axis=1).mask(lambda d: d <= 0)
+basket_daily = basket_df.pct_change().mean(axis=1, skipna=True)   # BROKEN
+```
+— never sorts the resulting index. `pd.concat(dict_of_series, axis=1)` unions each
+stock's own `date`-object index (not a proper `DatetimeIndex` — `.dt.date` produces
+plain Python `datetime.date`), and if even one stock's calendar diverges from another's
+anywhere in the 11-year history, the union's row order silently drifts out of
+chronological order (confirmed 2026-09-12: **2,802 of 2,868 rows (97.7%) were out of
+order**). `pct_change()`/`shift()` operate by row *position*, not by matching dates —
+on an unsorted index this computes "returns" between rows that aren't actually
+chronologically adjacent, producing nonsense (confirmed daily basket return std=3.41%,
+range [-95%,+51%] on the broken construction vs a realistic std=1.20%, range
+[-13%,+7%] once fixed).
+
+**Impact assessed and bounded**: recomputed all 14 basket-regressed rows across
+`smc/master_basket.csv` and `flagship/master_basket.csv` with the fix. 13 of 14 kept
+their existing decisively-negative verdict (large-magnitude alpha is robust to this
+noise). Exactly one — `FLAGSHIP_6BCEH_SHORT_VWAP_RSI60`, which sat right at the
+significance boundary — flipped from "borderline significant negative" (p=0.039) to
+"not significant" (p=0.201), now agreeing with its own NIFTY-regressed read. No
+strategy backtest, ZPF/PF/net_zpnl/exit-mix number, or NIFTY-regressed alpha is
+affected — NIFTY's own construction has always called `.sort_values('date')`
+explicitly; only the basket path was missing the equivalent. `FRESH_FULLDS3_BASELINE`
+not yet recomputed (its engine lives in the archived live-bot core, a stateful
+bar-by-bar module needing its own DS3-replay driver — deferred as a separate,
+careful follow-up, tracked in TODO).
+
+**Rule**: immediately after `pd.concat(...)` when building ANY multi-stock wide
+frame keyed by `.dt.date`, call `.sort_index()` before any `pct_change()`, `.shift()`,
+`.rolling()`, or `.diff()` — the underlying `object`-dtype date index is never
+guaranteed sorted by `concat` alone. Prefer converting to a proper `pd.DatetimeIndex`
+first (`pd.to_datetime`) so `.sort_index()` sorts chronologically, not lexicographically
+on date-object identity. This applies to the basket CAPM factor and to any regime/
+cross-sectional feature built the same way (e.g. `54c`'s `basket_trend_Nd`,
+`dispersion`, `breadth`).
+
+---
+
 ## ARCHIVED — Kotak Neo Charges (NPF)
 
 *Kept for reference. Not currently in use — broker is Zerodha.*

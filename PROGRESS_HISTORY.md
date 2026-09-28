@@ -1465,3 +1465,379 @@ doc instead of a dedicated check. The raw data does show a genuine plateau at it
 combo (TP=3.0 fixed, ZPF flat 0.817-0.821 across SL=4.0-6.0), so tagged `FULL_RIGOR` on
 that basis, but the formal write-up should be backfilled — flagged in `backtesting_rules.md`
 §12 as a known documentation gap, not acted on further this session.
+
+## 2026-09-10 — flagship/11 (6BCEH-Short+VWAP+RSI), beta-drag intuition, memlabs #54 plan
+
+### flagship/11_6bceh_short_vwap_rsi.py — the one lead from the recovered claude.ai session
+Reproduced "6BCE+VWAP+RSI>54" (the only strategy in smc/03_backtest_results.md that ever
+crossed ZPF>1.0 with a real trade count — but only on an 8-stock curated universe) fresh
+on the FULL 30-stock DS3, this project's own 10x9 grid, charges, cutoffs, NaN guard.
+Two-step process:
+- Step A: RSI-threshold sweep (50-80 step 2) at the locked VWAP-only combo (SL=4.5/TP=3.0).
+  Best threshold on our data/infra is RSI>60 (ZPF=0.872), NOT RSI>54 (which gives 0.816).
+- Step B: full 90-combo SL/TP re-sweep at RSI>60. Raw-best ZPF=0.927 (SL=4.5/TP=6.0,
+  edge-of-grid, EOD%=66.2 SUSPECT); healthy-subset best ZPF=0.899 (SL=1.5/TP~4.5-5.0,
+  EOD%~27-29, but SL sits at the grid floor).
+- Does NOT reproduce the recovered doc's own 30-stock claim (0.9975) — the grid/cutoff/
+  charge differences already flagged don't survive this project's rigor. Still fails
+  viability (need ZPF>1.0).
+- **BUT — first variant this session with alpha ≈ 0, not confidently-negative.**
+  NIFTY-regressed: alpha +0.031, CI [-0.92, 0.98], p=0.948, beta -9.281. Basket-regressed
+  (the more appropriate benchmark — it's the actual traded universe, equal-weighted):
+  alpha -0.397, CI [-1.38, 0.58], p=0.427, beta -3.243. Both CIs cross zero — "confidently
+  near-zero, leaning very slightly negative under basket", vs every other row's decisively-
+  negative CI.
+- Logged as FLAGSHIP_6BCEH_SHORT_VWAP_RSI60 (sl_tp 4.5x6.0, RAW_SCREEN) in all 4 master
+  CSVs (smc/ + flagship/, nifty + basket). 0 NaN-entry trades dropped.
+- Runtime note: ~87 min for the 106 combos (16 RSI + 90 SL/TP) — slower than the 08-10
+  sweeps because of the extra per-bar VWAP+RSI checks and the groupby-based VWAP compute
+  in load_stocks(). Launched via nohup+disown, watched via Monitor (the run_in_background
+  route was killed twice mid-run, same unexplained flakiness as 09-07/08 — nohup+disown
+  + Monitor is now the working pattern).
+
+### Beta-drag decomposition (long Q&A thread, intuition-building)
+The CAPM identity `net_zpnl = alpha_cumulative + beta × Σ(daily market returns)` holds
+exactly (OLS residuals sum to zero). For FLAGSHIP_6BCEH_SHORT_VWAP_RSI60 (NIFTY):
+-2274.14 = +80.31 + (-9.281 × 253.68). Key points established:
+- Σx = 253.68% is the cumulative market drift (sum of ~2700 daily NIFTY % returns over
+  2015-2026). Beta is the plain regression slope (-9.281), NOT cumulative — it's the
+  market returns that accumulate on that side.
+- This variant's loss is entirely beta drag (short-biased strategy fighting NIFTY's
+  upward drift), not negative skill — alpha's contribution is +80, essentially zero.
+- Per typical trading day, beta contributes only ~-0.86 ₹ (swamped by trade-specific
+  P&L); it's the accumulation over thousands of days that builds the -2354 drag.
+- Split of effort: optimize ALPHA via signal/filter/exit work (decided every trade);
+  address BETA DRAG structurally via (a) regime filter — stay flat in strong uptrends so
+  the summed drag over trading days shrinks, or (b) a matched long hedge leg / short NIFTY
+  futures to cancel beta outright.
+- Regime filter doesn't lower the beta coefficient — it lowers which days you're exposed.
+- A regime filter changes the trade stream, so BOTH alpha and beta get re-measured after
+  adding it — nothing is "locked".
+- The short-bias finding this session is stronger than it looks: shorts beat longs on raw
+  ZPF DESPITE carrying the beta headwind, while longs lose WITH the tailwind helping — so
+  the short signals carry more genuine skill than raw ZPF suggests.
+
+### Decisions this session
+- Long hedge leg / beta neutralization → PARKED (TODO F13 + memory
+  project_long_hedge_leg_parked.md). Flag for testing when a short variant has genuinely
+  positive alpha but beta drag still sinks net_zpnl, OR at the F&O scaling phase. Not the
+  first lever — it drags in the long leg's own negative alpha on this universe.
+- Basket is the more appropriate primary benchmark for these strategies (it's the actual
+  traded universe, equal-weighted to match position sizing) — NIFTY stays as the §14
+  cross-check.
+- MemLabs #53: leave FROZEN at its current state (Step 0 done). Its value is the
+  methodology (Pearson screening + null-intuition / 5k-t-stat noise ruler), not its
+  raw-price-prediction target. Start a fresh #54 instead.
+- MemLabs #54 (not yet created): clean-scoped regime-filter pipeline, target = 
+  FLAGSHIP_6BCEH_SHORT_VWAP_RSI60's own per-trade win/loss (or PnL) outcomes. Research
+  notebook in memlabs/; winning filter folds back into a strategies/flagship/ script and
+  gets re-swept for the final alpha/beta. This answers TODO P2's parked "redirect #53 or
+  run both" decision — redirect (as #54).
+
+### Near-term queue
+1. Table 3 full-rigor pass on FLAGSHIP_6BCEH_SHORT_VWAP_RSI60 (extend SL grid downward,
+   find where ZPF + net_zpnl + alpha peak together, lock a defensible interior combo,
+   recompute CAPM on basket + NIFTY, re-tag FULL_RIGOR). Must precede #54.
+2. Spin up memlabs/54_... regime-filter pipeline.
+3. (still queued, lower priority) FVG (smc/ index 05), then OB (index 06).
+
+## 2026-09-10 (cont.) — Table 3 on 6BCEH-Short+VWAP+RSI → locked SL=1.5/TP=4.5 FULL_RIGOR
+
+memlabs #54 series started (flat `54_*` files, no subfolder):
+- `54_6bceh_short_vwap_rsi_baseline.md` — variant fully consolidated + loss decomposition +
+  series roadmap.
+- `54b_table3_sl_sweep.py` + `54b_table3_sl_sweep_results.csv` — Table 3 SL-sweep
+  [1.0…4.0] × TP {3.0, 4.5, 5.0}, RSI>60 fixed, tracking ZPF + net_zpnl + basket alpha +
+  EOD% together.
+
+**SL=1.5 confirmed a genuine interior peak** — tighter (1.25, 1.0) degrades net_zpnl,
+alpha AND ZPF across every TP; resolves the Table 2 "best combo pinned to grid floor"
+concern. ZPF's nominal max is SL=2.0 (0.902 vs 1.5's 0.899 — rounding-error gap) but SL=2.0
+fails the EOD gate (33.8%). **Locked: SL=1.5 / TP=4.5** (best net_zpnl of the whole grid,
+EOD% 26.7 healthy, SL<TP "cut-losers" geometry). Re-tagged `FULL_RIGOR` in all 4 master
+CSVs (`smc/` + `flagship/`, nifty + basket), sl_tp 4.5x6.0 → 1.5x4.5, full stat row
+recomputed.
+
+**The alpha story changed under proper rigor** — the earlier "loss is entirely beta drag,
+not skill" read was based on the RAW_SCREEN edge-of-grid combo (4.5×6.0, EOD%=66) where
+EOD-riding dampened daily variance and pushed alpha to ≈0. At the honest FULL_RIGOR combo
+(SL=1.5/TP=4.5, n=14,270):
+- basket alpha **-0.674**, CI [-1.314, -0.035], p=0.039 (just barely CI-clear-of-zero)
+- NIFTY alpha **-0.461**, CI [-1.089, +0.167], p=0.150 (crosses zero, not significant)
+- The two benchmarks straddle the significance line → **borderline verdict** per §14, not
+  a clean one. α is small and negative-ish; can't pin down sub-zero vs at-zero.
+- Loss decomposition: under basket (primary), negative alpha is the *larger* driver
+  (~71%, -1,723 of -2,436), beta drag secondary (~29%). Under NIFTY it's ~48/52.
+- Still by far the mildest alpha of any variant (every other row: -6 to -33). Remains the
+  best #54 starting line — but "already breakeven, just fix beta" was too rosy; the regime
+  filter now has a genuine (if small, borderline) negative-alpha gap to close plus a
+  secondary beta component.
+
+Also on the methodology: noted that `SL>TP` locked combos (the 6 flagship variants) reflect
+a "survive by avoiding losses" profile = weak underlying edge, whereas `SL<TP` with clean
+resolution (this variant) is the healthier profile you actually want in a paper/live
+candidate. Worth folding into backtesting_rules as a selection note later.
+
+## 2026-09-12 — Basket market-factor sort bug found + fixed (session-wide, all basket alphas)
+
+### The bug
+While building `memlabs/54c_regime_features.py` (regime-feature screening for
+`FLAGSHIP_6BCEH_SHORT_VWAP_RSI60`), found `basket_trend_10d`/`dispersion` producing
+implausible values (max +450%, min -93%, vs a realistic ±10-30% range). Root-caused
+after a real investigative chase (first wrongly suspected a fresh DS3 data bug on
+BAJFINANCE, disproved by checking its own-calendar 10-day return = a normal +0.86%):
+the actual cause is that `pd.concat(dict_of_per-stock_series, axis=1)` — the pattern
+used ALL SESSION to build the 30-stock basket daily series — never sorts its resulting
+index. `.dt.date` produces plain Python `date` objects (not a proper `DatetimeIndex`),
+and concat's union of 30 such indices drifts out of chronological order the moment any
+stock's calendar diverges from another's anywhere in 11 years. Confirmed: **2,802 of
+2,868 rows (97.7%) were out of order**. `pct_change()` operates by row position, so on
+an unsorted index it silently compares chronologically-unrelated rows — producing the
+nonsense values (broken basket daily-return std=3.41%, range [-95%,+51%]; fixed
+std=1.20%, range [-13%,+7%] — the fixed number is realistic, comparable to NIFTY's own
+volatility).
+
+Separately confirmed (via a full-history scan of all 30 stocks' own single-day returns
+>20%, unaffected by the concat bug) that DS3's actual prices are largely clean: the 27
+hits found are almost all genuine market events (March 2020 COVID crash across several
+financials, the Oct 2017 PSU-bank recapitalization rally, the June 2024 election-result
+crash) — only DIVISLAB's two already-documented un-split-adjusted days
+(2016-12-23, 2017-03-21) are confirmed real DS3 defects, nothing new.
+
+### Impact, measured not assumed
+`basket_daily` (built the same broken way) is the market factor for EVERY
+basket-regressed alpha/beta computation this whole session. NIFTY-regressed numbers are
+NOT affected — every script's NIFTY construction already called `.sort_values('date')`
+explicitly; only the basket path was missing the equivalent. Recomputed all 14
+basket-regressed rows in `smc/master_basket.csv` and `flagship/master_basket.csv` with
+the fix:
+- 13 of 14 kept their decisively-negative verdict (p=0.000 before and after) — large-
+  magnitude alpha (-5.8 to -34.5 ₹/day) is robust to this scale of noise.
+- Exactly one — `FLAGSHIP_6BCEH_SHORT_VWAP_RSI60`, sitting right at the significance
+  boundary — flipped: basket alpha -0.674 (p=0.039, "borderline negative") →
+  **-0.408 (p=0.201, "not significant")**, now agreeing with its own NIFTY-regressed
+  read (-0.461, p=0.150) instead of contradicting it. The "borderline, benchmarks
+  disagree" framing reported earlier today was itself an artifact of this bug — the
+  corrected, honest read is a clean "confidently near-zero" on both benchmarks.
+- No strategy backtest, ZPF/PF/net_zpnl/exit-mix number needed re-running — the bug
+  lives entirely in the market-factor construction, never touched by any actual
+  strategy engine.
+- `FRESH_FULLDS3_BASELINE` NOT yet recomputed — its engine lives in the archived
+  live-bot core (`kite_oracle_papertrading_archive/scripts/ma_rejection_v1_core.py`), a
+  stateful bar-by-bar module needing its own DS3-replay driver, not the vectorized
+  sweep pattern used everywhere else. Deferred as a separate, careful follow-up.
+
+### Fix
+Added `backtesting_rules.md` §16 (mandatory): `.sort_index()` immediately after any
+`pd.concat()` building a multi-stock wide frame keyed by `.dt.date`, before any
+`pct_change`/`shift`/`rolling`/`diff`. Fixed in `54c_regime_features.py` (both the
+basket daily close/return frame and the basket intraday pseudo-index) and re-ran —
+`basket_trend_10d` std dropped 18.2→3.9, max 450.9%→27.7%. `dispersion`'s NaN count in
+the trade-log join rose 19→467 — a correctness improvement, not a regression: the fix
+now correctly propagates NaN where a stock genuinely lacks a prior-day value, instead
+of the old bug fabricating a wrong non-NaN number from a misaligned row.
+
+### Delegation
+Also delegated a recurring, automated DS3 data-integrity monitor to `codeponting-2d`
+(cpgeneric session) — prompted by this discovery re-surfacing the still-unfixed
+DIVISLAB/ICICIBANK/ITC/SBIN DS3 defects (TODO P1 #4, tracked since 2026-09-07/08,
+never actually fixed). Confirmed with cpgeneric: KiteConnect's API has no corporate-
+actions/splits endpoint at all, so the design uses an algorithmic ratio-heuristic
+(flag price-jump ratios matching common split/bonus ratios — 2:1, 5:1, 10:1, 3:2 — as
+"suspected unadjusted split," kept distinct from genuine zero/negative-OHLC defects and
+from allowlisted real market-wide event dates) — endorsed, with a suggestion to also
+check NSE's own public corporate-action bhavcopy archives as a possible ground-truth
+source before relying on the heuristic alone. Scheduled for 2 AM IST, merged with (or
+alongside) the existing P5 gap-fill automation plan.
+
+## 2026-09-12 (cont.) — FRESH_FULLDS3_BASELINE recomputed too; §16 fix now fully complete
+
+Saurav correctly caught that the "needs its own DS3-replay driver" deferral was wrong —
+the driver already exists (`kite_oracle_papertrading_archive/scripts/
+ma_30_rejection_v1_offline.py`), reading DS3 from the exact same
+`Framework_V2/data/historical/intraday_5min_DS3` every other script uses (the live bot
+has no separate DS3 of its own). Only needed adjusting the script's hardcoded Windows
+paths for this VM. Ran it (`StockState`/`process_bar` from `ma_rejection_v1_core.py`,
+bar-by-bar chronological replay across all 30 stocks) — reproduced the stored baseline
+almost exactly (ZPF=0.762 exact match, net_zpnl within ₹0.49, NIFTY alpha=-15.608 exact
+match to `master_nifty.csv`), confirming the driver is faithful. Recomputed its basket
+alpha with the fixed (sorted) basket_daily: **-16.269 → -15.174**, CI [-17.16,-13.19],
+p=0.000 — decisively negative before and after, verdict unchanged. Updated in both
+`smc/master_basket.csv` and `flagship/master_basket.csv`.
+
+All 15 basket-regressed rows across both master files are now recomputed with the §16
+fix — no deferred items remain from the 2026-09-12 basket-sort bug.
+
+## 2026-09-13 — India VIX fetch delegated to codeponting-2d — DONE
+
+Delegated (not urgent, non-blocking): fetch India VIX daily history via Kite Connect.
+**Completed same day** by codeponting-2d:
+Framework_V2/data/historical/daily/INDIA_VIX.parquet — 2,880 rows, 2015-02-02 to
+2026-09-11, schema matches NIFTY50.parquet exactly (instrument_token 264969). Kite's
+own coverage reached cleanly back to 2015-02-02 — no Yahoo Finance gap-fill needed
+(unlike NIFTY50, which did need one). Day-coverage cross-checked vs NIFTY50.parquet:
+99.6%+ match, remaining diffs explainable (NIFTY50.parquet not yet refreshed past
+2026-08-31; 3 plausible one-off special-session dates in 2015). Kept as its own file,
+not merged into NIFTY50.parquet, per the one-file-per-instrument convention.
+Motivation: fills the "no India VIX" gap noted in 54_...baseline.md's Tier-2 regime
+feature candidates — not needed for the current 54c.3 screen (NIFTY trend + basket
+dispersion), just infrastructure prep for a possible future feature. Side note:
+codeponting-2d needed a manual Kite re-login mid-task (weekend token expiry),
+Saurav-approved, kitebot.service untouched.
+
+## 2026-09-13 — #54 roadmap detailed in full, 28/29 precedent analyzed, paused for methodology discussion
+
+### `54_...baseline.md` §3 roadmap rewritten with full sub-step detail
+Was previously one compressed paragraph for "54c…". Broken into `54c.1` (build-trade-log,
+DONE), `54c.2` (regime-features, DONE), `54c.3` (null-calibration + real screen,
+combined into one notebook — NEXT), `54c.4` (interaction/XOR check, conditional, later),
+`54d` (fold into entry logic, later). Stale pre-§16-fix alpha numbers in the roadmap
+block also corrected to match the current values.
+
+### Analyzed the 2026-08 `28`/`29` regime-gating precedent in depth
+User pulled up `28_regime_gate_30stock_sweep.py`/`29_..._flipped.py` (an earlier
+memlabs attempt at gating real fv2 strategies — `ma_rejection_v1_core` SHORT +
+`ma_30_bounce_v1` LONG — by a per-stock lag-based price-return regression, Model
+A/MA-alone/Model B). Built and reviewed a regular-vs-flipped comparison table
+(COMBINED-gated net_zpnl: regular ≈ -24,255 to -24,817 vs flipped ≈ -23,567 to
+-24,691 — nearly identical across all 3 models), confirming the documented conclusion
+("flipped performs statistically the same as regular — evidence of noise, not real
+signal") was genuinely tested (`29_..._flipped.py` exists with saved results), not just
+asserted.
+
+Concluded, with reasoning, that `#54` is better-motivated than 28/29 rather than a
+repeat of the same failed idea:
+- 28/29 tried to predict a stock's own raw return from its own lag_1 — weak-form market
+  efficiency says short lag-based return autocorrelation is close to zero; a strong,
+  hard-to-defend claim. `#54` classifies the market's *regime* (a slower-moving,
+  persistent state) rather than forecasting a specific return — a weaker, more
+  defensible claim (regimes persist even though daily returns don't).
+- 28/29's feature was self-referential (a stock's own price history); `#54`'s features
+  are market-wide (NIFTY/basket) and directly target the CONFIRMED beta-drag mechanism
+  (the `beta × Σx` term), not a speculative pattern.
+- 28/29 gated an already confidently-negative-alpha baseline; `#54` is applied to the
+  one variant, of ~15 tested, sitting at near-zero alpha instead.
+- 28/29's validation (train/test split + flipped-sign control) was genuinely solid;
+  `#54` plans a fuller version of the same idea (5k-shuffle null-calibration, explicit
+  degrees-of-freedom cap, defined escalation rule).
+Re-running 28/29 on the now-current (8-months-fresher) DS3, or building an equivalent
+table for Model C, were both considered and explicitly declined as low-value — 28/29's
+null result is decisive enough that 3% more data won't flip it, and Model C already
+failed independently at the more fundamental price-prediction task on its own terms
+(POWERGRID `50/50b/50c`), so wiring it into a gate wouldn't be expected to differ.
+
+### India VIX gap filled (delegated + completed same day)
+Delegated to `codeponting-2d`: fetch India VIX daily history via Kite Connect, matching
+`NIFTY50.parquet`'s exact schema/convention, kept as its own separate file (not merged
+into NIFTY50 — one-file-per-instrument is this project's standing convention).
+**Completed same day**: `Framework_V2/data/historical/daily/INDIA_VIX.parquet`, 2,880
+rows, 2015-02-02 to 2026-09-11, instrument_token 264969. Kite's own coverage reached
+cleanly back to 2015-02-02 (no Yahoo Finance fallback needed, unlike NIFTY50). Not
+currently used — the chosen `54c` screening pair (NIFTY trend 10d + basket dispersion)
+doesn't need it — but fills a previously-noted Tier-2 gap for a future feature.
+
+### Paused before `54c.3`, deliberately
+Saurav flagged the **per-trade vs per-day unit-of-analysis** question as worth a proper
+discussion before any notebook code gets written: multiple trades can share one day's
+regime-feature value (same day, different stocks) — correlating raw per-trade zpnl
+against a daily feature risks pseudo-replication (inflated apparent sample size, since
+same-day trades aren't independent draws with respect to that feature). Proposed
+default (not yet agreed): aggregate to daily zpnl/win-rate first, matching how every
+CAPM alpha regression this project has ever run. To be settled first thing next session
+before `54c.3` (the null-calibration + real-screen notebook) gets built.
+
+### Peer coordination
+`codeponting-35` (cpfable) was working from stale 2026-09-07/08 context (unaware of the
+6BCE family closure or `#54`). On being corrected, briefly proposed picking up `#54c+`
+itself — would have conflicted with the pause above. Told it to stand down explicitly;
+it agreed and will check in with Saurav directly instead. `codeponting-a2` (math mode)
+and `codeponting-aa` (cplearning) confirmed idle/unrelated, nothing to fold in.
+
+## 2026-09-15 — #54c.3 screen built + run; Fable second opinion verified; null-calibration correction
+
+### 54c.3 notebook built and executed (`memlabs/54c_screen.ipynb`)
+Settled the per-trade-vs-per-day question with Saurav: aggregate to one row per trading
+day (daily_zpnl = sum of that day's trades; binary target = net-profitable-day flag,
+NOT a win-rate fraction, which would itself be continuous). Pearson r as a screening
+diagnostic only — no fitted regression, no y_hat. Null-calibration reported two ways,
+individual-per-feature (primary) then combined max-of-2 (stricter robustness check),
+after Saurav correctly pushed back that a combined ceiling makes per-feature rows hard
+to read. Results on 2,488 trading days: NIFTY trend 10d = null on both targets
+(r=0.032, under every ceiling, sign mildly opposite to beta-drag theory). Dispersion vs
+daily_zpnl = the one real signal (r=0.0565, positive: more idiosyncratic days = better
+for this short). Neither feature works on the binary target. Long Q&A thread clarifying
+r vs regression, empirical vs textbook p (2×P(T>|t|), df=n-2), why 5k shuffles, and
+that the 99th-percentile estimate wobbles between runs (tail of only ~50 values).
+
+### Fable (codeponting-35) consulted at Saurav's request — two findings, both verified
+Saurav is running a separate quant-finance thread with the cpfable session (credits to
+use before the 19th); fv2 stays the main session. Fable's independent take agreed on
+the substance and sharpened the headline: the binding constraint is feature SNR
+(R^2 ~ 0.3%), not model form — vol is predictable, direction isn't, which is exactly
+why dispersion survived and trend didn't. Two concrete read-only findings, both
+reproduced exactly by fv2 on the 54c data:
+1. **The notebook's iid-shuffle null was too lenient.** dispersion has acf1=0.417 (the
+   target daily_zpnl does not: acf1=0.018), so a persistent feature can spuriously
+   correlate with an iid-shuffled target. Under a circular-shift null (preserves the
+   feature's persistence, breaks only the alignment): dispersion still clears the 95th
+   percentile but NOT the 99th, empirical p ~0.020 (vs 0.006 under iid). Still
+   borderline-real, honestly weaker. Circular-shift should become the primary null.
+2. **First ZPF>1.0 slice ever seen.** Trade-level ZPF bucketed by lagged-dispersion
+   quintile: Q1 0.848 / Q2 0.845 / Q3 0.799 / Q4 0.929 / **Q5 1.033** (Q5 = dispersion
+   > 1.997, 2,894 trades / 498 days, net zpnl +171 — the only positive bucket). Shape is
+   flat-to-worse across Q1-Q3 then rising — a threshold-type relationship, which favors
+   a threshold gate over a linear model. IN-SAMPLE: cutoff chosen on the same data it's
+   scored on; 1.033 is marginal. A lead, not a result.
+Fable touched no #54 files; only added HMM/GARCH/SNR to the TODO glossary.
+
+### Next (proposed to Saurav, not yet actioned)
+- Make circular-shift the primary null in 54c_screen.ipynb; correct the verdict text
+  (the "clears 99th" claim only holds under the lenient iid null).
+- Test the Q5 gate out-of-sample before any 54d build: choose the dispersion cutoff on
+  the first ~70% of trading days, evaluate ZPF on the held-out last ~30%.
+
+## 2026-09-16 — memlabs #54: dispersion Q5 gate ruled out (OOS failure) + 10-feature screen
+Session continued right where 09-13 paused, resolved the per-trade-vs-per-day question
+(agreed: aggregate to daily zpnl + binary profitable-day flag), then walked through a
+long stats-literacy Q&A before returning to action items:
+- Verified (independently reproduced) Fable's two 09-13 findings: (a) iid-shuffle null
+  too lenient for autocorrelated dispersion (acf1=0.417) — circular-shift null correct,
+  clears 95th not 99th, p~0.02; (b) the Q5 lagged-dispersion quintile ZPF>1.0 slice was
+  in-sample only.
+- Built `54c_oos_dispersion_gate.py`: chronological 70/30 split (train 2015-02-04—
+  2023-04-11, test 2023-04-12—2026-08-31), Q5 cutoff chosen on TRAIN only. Own-period
+  quintile tables: TRAIN's real best bucket is Q4 (ZPF 1.157), not Q5 (0.994, flat);
+  TEST shows every quintile under 1.0, Q5 (highest dispersion) is one of the WORST
+  (0.813) — full reversal. RULED OUT — no `54d` build from this pair.
+- Built `54c_10feature_screen.py`: full 10-candidate r-vs-daily_zpnl comparison, since
+  the notebook's §3 max-of-2 combined-null correction was never confirmed right-sized
+  (only 2 of 10 built candidates had ever actually been "looked at" with a real r).
+  Found `gap_pct` (r=-0.0625) marginally edges out dispersion (0.0573) as the single
+  strongest of all 10 — previously unscreened, no theory check or OOS test done yet.
+  Under max-of-10 iid null (ceil95=0.0555, ceil99=0.0676) both clear 95th, neither
+  clears 99th — under-correction concern didn't flip the verdict, but not yet combined
+  with the circular-shift fix (stricter still, not run).
+- Locked a `volume_surge` feature definition for a future round (not yet built): today's
+  volume ÷ that stock's own trailing 20-day average, basket-averaged across the 30
+  stocks, shifted 1 day (no lookahead) — matches the dispersion/breadth construction
+  pattern; raw volume rejected as non-stationary over an 11-year sample.
+- Long Q&A thread (see .remember/today.md for full list): ACF1 vs r as separate
+  necessary-vs-sufficient properties, verified numerically that NIFTY's own single-day
+  return has acf1=-0.025 (near zero, as weak-form efficiency predicts) while its 10-day
+  trend built from the same data has acf1=0.905 (mechanical overlap artifact, not
+  genuine persistence); worked a 5-day toy example contrasting iid shuffle (destroys all
+  structure) vs circular shift (preserves it, breaks only alignment); N! vs N-1 possible
+  shuffles; multiple-testing correction explained via a coin-flip analogy; weak-form
+  efficiency's actual scope (directional/first-moment only — explains why dispersion/
+  volatility/volume aren't exceptions to it, just outside its domain); XOR/interaction
+  theory correctly distinguished from a mistaken "r must clear some floor" generalization
+  (the textbook XOR case has both individual r's at exactly zero); theory-first vs.
+  search-then-validate feature engineering (grid-searching transformations without a
+  held-out test set is an undisclosed, bigger multiple-testing problem).
+`54c_screen.ipynb` NOT edited this session — diagnosed only. Exact resume steps written
+into `54_6bceh_short_vwap_rsi_baseline.md` §3 "RESUME HERE": (1) notebook correction
+pass (circular-shift primary, max-of-10 scope, honest final verdict), (2) screen
+gap_pct properly, (3) build+screen volume_surge, (4) 54c.4 interaction check (low
+priority). RS run at session end; all 4 peer sessions idle, no updates folded in.
+README flagged: 8 days since last genuine content change (2026-09-08) — informational
+only, no action taken.
