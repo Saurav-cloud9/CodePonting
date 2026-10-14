@@ -122,15 +122,17 @@
 
   CodePonting is also cloned onto the same Oracle Cloud VM that runs
   kite_oracle_papertrading — as its own separate folder (~/CodePonting), never
-  touching the bot's live/paper trading folders. Shares the bot's existing venv
-  (kite_bot_env) rather than a dedicated one; VM is now the primary CodePonting
+  touching the bot's live/paper trading folders. Has its own research venv
+  (~/codeponting_env, created 2026-10-14, versions pinned to match kite_bot_env
+  at creation; Jupyter kernel "CodePonting (research)"); VM is now the primary CodePonting
   workspace, desktop/laptop are secondary (see the git sync-discipline hooks
   under .claude/hooks/git_sync_check_*.sh).
 
-  HARD RULE: always use kite_bot_env for any Python work on the VM — never bare
-  python3/pip. The system python3 is an OS dependency (apt, unattended-upgrades,
-  etc.) and kite_bot_env is itself built on top of it, not independent of it —
-  never remove or modify the system interpreter.
+  HARD RULE: research/offline CodePonting Python work uses ~/codeponting_env.
+  kite_bot_env belongs to the live bot only — never install/upgrade packages in
+  it for research. Never use bare python3/pip. The system python3 is an OS
+  dependency (apt, unattended-upgrades, etc.) and both venvs are built on top of
+  it, not independent of it — never remove or modify the system interpreter.
 
 ── PCAP/TCAP — DISPLAY-ONLY, NOT FOR COMPUTATION ──────────────────
 
